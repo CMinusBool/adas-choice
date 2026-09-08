@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#121013">
+  <meta name="description" content="Ada 的雙人遊戲精選：Operation: Tango、Lovers in a Dangerous Spacetime 和 Heavenly Bodies。一起解謎，一起冒險。">
+  <title>Ada's choice — 今晚，一起玩。</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#games" data-i18n="skip">跳至遊戲</a>
+  <div class="page-shell" id="top">
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="Ada's choice，回到頂端" data-i18n-aria="home">
+        <span>Ada's choice<span class="wordmark-dot">.</span></span>
+        <svg class="brand-heart" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27S3 19.4 3 10.8C3 3.7 12 2 16 8c4-6 13-4.3 13 2.8C29 19.4 16 27 16 27Z"/><path class="heart-shine" d="M7.5 10.5c0-2 1.2-3.2 3-3.2"/></svg>
+      </a>
+      <div class="header-actions">
+        <button class="language-toggle" id="language-toggle" type="button" lang="en" aria-label="Switch to English" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z"/></svg>
+          <span id="language-label">English</span>
+        </button>
+        <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false" aria-label="暫停動畫" hidden>
+          <svg class="pause-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg>
+          <svg class="play-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg>
+          <span id="motion-label">暫停動畫</span>
+        </button>
+      </div>
+    </header>
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span><span data-i18n="eyebrow">三款精選・兩個玩家</span></p>
+        <h1 id="page-title"><span data-i18n="titleStart">今晚，</span><span class="title-accent" data-i18n="titleAccent">一起玩。</span><svg class="title-spark" viewBox="0 0 32 40" aria-hidden="true"><path d="M16 0c0 14-3 20-16 20 13 0 16 6 16 20 0-14 3-20 16-20C19 20 16 14 16 0Z"/></svg></h1>
+        <p class="intro-description" data-i18n="intro">一起解謎、分享操控，在手忙腳亂時接住彼此。</p>
+      </section>
+      <section class="games" id="games" aria-label="合作遊戲精選" data-i18n-aria="gamesLabel">
+        <article class="game-wrap" data-game="tango">
+          <a class="game-card tango" href="https://store.steampowered.com/app/1335790/Operation_Tango/" target="_blank" rel="noopener noreferrer" aria-labelledby="tango-title" aria-describedby="tango-action">
+            <div class="card-media">
+              <div class="scene-backdrop" style="background-image:url('assets/operation-tango.webp')" aria-hidden="true"></div>
+              <div class="scene-frame">
+                <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/operation-tango.webp"><img class="game-art" src="assets/operation-tango.gif" data-animated="assets/operation-tango.gif" data-still="assets/operation-tango.webp" width="480" height="480" alt="戴著眼鏡的棕髮男生負責駭客工作，黑髮女生破解保安系統，兩人一起慶祝成功。" data-i18n-alt="tangoAlt" fetchpriority="high"></picture>
+                <div class="scene-sprite" data-sheet="assets/operation-tango-sprite.webp" aria-hidden="true" hidden></div>
+              </div>
+              <div class="image-shade" aria-hidden="true"></div>
+              <div class="media-topline"><span class="rank">01<span aria-hidden="true"> / 03</span></span><span class="category" data-i18n="tangoCategory">默契滿分</span></div>
+              <span class="scene-caption"><span class="caption-dot" aria-hidden="true"></span><span data-i18n="tangoCaption">你來入侵，我來潛入。</span></span>
+            </div>
+            <div class="card-copy">
+              <div class="pick-line"><span class="pick-label" data-i18n="tangoPick">首選推薦</span><span class="player-count" data-i18n="tangoPlayers">2 位玩家</span></div>
+              <h2 id="tango-title">Operation: Tango</h2>
+              <div class="game-details">
+                <p class="game-description" data-i18n="tangoDescription">一位特務，一位駭客。兩個畫面，各自握有不同線索。把話說清楚、抓準時機，就是你們一起解開謎題的關鍵。</p>
+                <div class="why-pick"><span class="detail-label" data-i18n="why">為什麼選它</span><p data-i18n="tangoWhy">巧妙的機制、互補的角色，還有那句一起喊出的「解開了！」。</p></div>
+              </div>
+              <div class="setup"><span class="detail-label" data-i18n="setup">開玩前準備</span><p data-i18n="tangoSetup">線上合作・兩台裝置＋麥克風</p><p class="setup-note" data-i18n="tangoSetupNote">一份遊戲＋免費 Friend Pass</p></div>
+              <div class="card-action" id="tango-action"><span><span data-i18n="steam">在 Steam 上看看</span><span class="sr-only" data-i18n="newTab">（在新分頁開啟）</span></span><span class="action-arrow" aria-hidden="true">↗</span></div>
+            </div>
+          </a>
+          <div class="particle-field" aria-hidden="true"></div>
+        </article>
+        <article class="game-wrap" data-game="lovers">
+          <a class="game-card lovers" href="https://store.steampowered.com/app/252110/Lovers_in_a_Dangerous_Spacetime/" target="_blank" rel="noopener noreferrer" aria-labelledby="lovers-title" aria-describedby="lovers-action">
+            <div class="card-media">
+              <div class="scene-backdrop" style="background-image:url('assets/lovers-in-a-dangerous-spacetime.webp')" aria-hidden="true"></div>
+              <div class="scene-frame">
+                <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/lovers-in-a-dangerous-spacetime.webp"><img class="game-art" src="assets/lovers-in-a-dangerous-spacetime.gif" data-animated="assets/lovers-in-a-dangerous-spacetime.gif" data-still="assets/lovers-in-a-dangerous-spacetime.webp" width="480" height="480" alt="黑髮女生掌舵，戴眼鏡的棕髮男生操作護盾，兩人在粉紅太空船裡擋下隕石。" data-i18n-alt="loversAlt"></picture>
+                <div class="scene-sprite" data-sheet="assets/lovers-in-a-dangerous-spacetime-sprite.webp" aria-hidden="true" hidden></div>
+              </div>
+              <div class="image-shade" aria-hidden="true"></div>
+              <div class="media-topline"><span class="rank">02<span aria-hidden="true"> / 03</span></span><span class="category" data-i18n="loversCategory">一艘船，兩人忙</span></div>
+              <span class="scene-caption"><span class="caption-dot" aria-hidden="true"></span><span data-i18n="loversCaption">我掌舵，你救場。</span></span>
+            </div>
+            <div class="card-copy">
+              <div class="pick-line"><span class="pick-label" data-i18n="loversPick">戰術默契首選</span><span class="player-count" data-i18n="loversPlayers">2–4 位玩家</span></div>
+              <h2 id="lovers-title">Lovers in a<br>Dangerous Spacetime</h2>
+              <div class="game-details">
+                <p class="game-description" data-i18n="loversDescription">一起分工駕駛、護盾和武器。大聲提醒彼此、在控制台之間奔跑，想辦法讓這艘小小太空船平安回家。</p>
+                <div class="why-pick"><span class="detail-label" data-i18n="why">為什麼選它</span><p data-i18n="loversWhy">有你喜歡的戰術與防守，也有繽紛又可愛的混亂。隨時都值得再玩一場。</p></div>
+              </div>
+              <div class="setup"><span class="detail-label" data-i18n="setup">開玩前準備</span><p data-i18n="couchSetup">同機合作・Remote Play Together</p><p class="setup-note" data-i18n="loversSetupNote">一台電腦，就能一起出發</p></div>
+              <div class="card-action" id="lovers-action"><span><span data-i18n="steam">在 Steam 上看看</span><span class="sr-only" data-i18n="newTab">（在新分頁開啟）</span></span><span class="action-arrow" aria-hidden="true">↗</span></div>
+            </div>
+          </a>
+          <div class="particle-field" aria-hidden="true"></div>
+        </article>
+        <article class="game-wrap" data-game="heavenly">
+          <a class="game-card heavenly" href="https://store.steampowered.com/app/1138850/Heavenly_Bodies/" target="_blank" rel="noopener noreferrer" aria-labelledby="heavenly-title" aria-describedby="heavenly-action">
+            <div class="card-media">
+              <div class="scene-backdrop" style="background-image:url('assets/heavenly-bodies.webp')" aria-hidden="true"></div>
+              <div class="scene-frame">
+                <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/heavenly-bodies.webp"><img class="game-art" src="assets/heavenly-bodies.gif" data-animated="assets/heavenly-bodies.gif" data-still="assets/heavenly-bodies.webp" width="480" height="480" alt="黑髮女太空人抓著扶手和隊友的靴子，戴眼鏡的棕髮男生伸手去拿漂浮的扳手，兩人笑得很開心。" data-i18n-alt="heavenlyAlt" loading="lazy"></picture>
+                <div class="scene-sprite" data-sheet="assets/heavenly-bodies-sprite.webp" aria-hidden="true" hidden></div>
+              </div>
+              <div class="image-shade" aria-hidden="true"></div>
+              <div class="media-topline"><span class="rank">03<span aria-hidden="true"> / 03</span></span><span class="category" data-i18n="heavenlyCategory">抓緊彼此</span></div>
+              <span class="scene-caption"><span class="caption-dot" aria-hidden="true"></span><span data-i18n="heavenlyCaption">你的後背，還有靴子，都交給我。</span></span>
+            </div>
+            <div class="card-copy">
+              <div class="pick-line"><span class="pick-label" data-i18n="heavenlyPick">一起笑翻首選</span><span class="player-count" data-i18n="heavenlyPlayers">雙人合作</span></div>
+              <h2 id="heavenly-title">Heavenly Bodies</h2>
+              <div class="game-details">
+                <p class="game-description" data-i18n="heavenlyDescription">沒有重力，連小修理都變成雙人大工程。拉住隊友、遞個工具，再一起笑看最簡單的任務如何徹底失控。</p>
+                <div class="why-pick"><span class="detail-label" data-i18n="why">為什麼選它</span><p data-i18n="heavenlyWhy">物理解謎，加上令人笑翻的失誤。一起接受笨手笨腳，就是最好玩的部分。</p></div>
+              </div>
+              <div class="setup"><span class="detail-label" data-i18n="setup">開玩前準備</span><p data-i18n="couchSetup">同機合作・Remote Play Together</p><p class="setup-note" data-i18n="heavenlySetupNote">很推薦兩人都使用控制器</p></div>
+              <div class="card-action" id="heavenly-action"><span><span data-i18n="steam">在 Steam 上看看</span><span class="sr-only" data-i18n="newTab">（在新分頁開啟）</span></span><span class="action-arrow" aria-hidden="true">↗</span></div>
+            </div>
+          </a>
+          <div class="particle-field" aria-hidden="true"></div>
+        </article>
+      </section>
+    </main>
+    <footer class="site-footer"><span><span class="footer-heart" aria-hidden="true">♡</span> <span data-i18n="footer">最好的升級，就是有你一起。</span></span><span data-i18n="artNote">原創合作冒險插畫・2026 年 9 月</span></footer>
+  </div>
+</body>
+</html>
+
