@@ -203,7 +203,7 @@
     if (next && !active) games.style.minHeight = games.getBoundingClientRect().height + 'px';
     active = next;
     if (active) games.dataset.active = active.dataset.game;
-    else { delete games.dataset.active; games.style.removeProperty('min-height'); }
+    else delete games.dataset.active;
     for (const item of wraps) {
       item.classList.toggle('is-active', item === active);
       item.classList.toggle('is-muted', Boolean(active && item !== active));
@@ -220,7 +220,15 @@
     pointerCard = null;
     keyboardCard = null;
     selectCard(null);
+    games.style.removeProperty('min-height');
   }
+
+  // Keep the deck steady while the narrower panels regain their full copy.
+  games.addEventListener('transitionend', event => {
+    if (event.target === games && event.propertyName === 'grid-template-columns' && !active) {
+      games.style.removeProperty('min-height');
+    }
+  });
 
   function tick(now) {
     frameRequest = 0;
