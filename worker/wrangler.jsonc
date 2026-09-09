@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "adas-choice-invitations",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "vars": { "ALLOWED_ORIGINS": "https://cminusbool.github.io" },
+  "ratelimits": [
+    { "name": "REQUEST_LIMITER", "namespace_id": "52430117", "simple": { "limit": 10, "period": 60 } }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "DELIVERY_GATE", "class_name": "DeliveryGate" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DeliveryGate"] }]
+}

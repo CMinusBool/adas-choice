@@ -7,6 +7,11 @@
       skip: '跳至遊戲', home: "Ada's choice，回到頂端", gamesLabel: '合作遊戲精選',
       eyebrow: '三款精選・兩個玩家', titleStart: '今晚，', titleAccent: '一起玩。', intro: '一起解謎、分享操控，在手忙腳亂時接住彼此。',
       pause: '暫停動畫', play: '播放動畫', why: '為什麼選它', setup: '開玩前準備', steam: '在 Steam 上看看', newTab: '（在新分頁開啟）',
+      invite: '想跟你一起玩這個～', checkout: '去 Steam 看看', close: '關閉', dialogEyebrow: '一個小小的邀請', dialogTitle: '一起出發，好嗎？',
+      consent: '我同意將這款遊戲的選擇、IP 位址、大約所在國家，以及基本裝置／瀏覽器資訊寄給網站主人。',
+      privacyNote: '這些資訊也會產生一組請求識別碼，並不代表能辨識你的真實身分。不會收集你的姓名或電子郵件。',
+      sending: '正在送出小小的邀請…', sent: '邀請已送出，期待一起玩 ♡', unavailable: '暫時無法寄送邀請，還是可以先去 Steam 看看。',
+      sendError: '邀請暫時無法送出，請稍後再試。', rateLimited: '邀請送得有點快，請稍等一下再試。', verifyError: '請重新完成安全驗證，再送出邀請。', checking: '正在做個小小的安全驗證…',
       tangoCategory: '默契滿分', tangoCaption: '你來入侵，我來潛入。', tangoPick: '首選推薦', tangoPlayers: '2 位玩家',
       tangoDescription: '一位特務，一位駭客。兩個畫面，各自握有不同線索。把話說清楚、抓準時機，就是你們一起解開謎題的關鍵。',
       tangoWhy: '巧妙的機制、互補的角色，還有那句一起喊出的「解開了！」。', tangoSetup: '線上合作・兩台裝置＋麥克風', tangoSetupNote: '一份遊戲＋免費 Friend Pass',
@@ -26,6 +31,11 @@
       skip: 'Skip to the games', home: "Ada's choice, back to top", gamesLabel: 'The co-op game picks',
       eyebrow: 'THREE PICKS. TWO PLAYERS.', titleStart: 'Your next', titleAccent: 'co-op night.', intro: 'Crack the puzzle. Share the controls. Catch each other when things go sideways.',
       pause: 'Pause motion', play: 'Play motion', why: 'WHY IT FITS', setup: 'THE SETUP', steam: 'Open on Steam', newTab: ' in a new tab',
+      invite: 'I want to play this with u~', checkout: 'Checkout on Steam', close: 'Close', dialogEyebrow: 'A LITTLE INVITATION', dialogTitle: 'A co-op date, maybe?',
+      consent: 'I agree to share this game choice, my IP address, approximate country, and basic device/browser details with the page owner by email.',
+      privacyNote: 'These details also create a request fingerprint, which is not a unique identity. Your name and email address are not collected.',
+      sending: 'Sending a little invitation…', sent: 'Invitation sent. Here’s to playing together ♡', unavailable: 'Invitations are unavailable right now. You can still check the game on Steam.',
+      sendError: 'The invitation couldn’t be sent. Please try again later.', rateLimited: 'A few too many invitations. Please wait a little before trying again.', verifyError: 'Please complete a fresh security check and try again.', checking: 'One quick safety check…',
       tangoCategory: 'The perfect partnership', tangoCaption: 'YOU HACK. I SNEAK.', tangoPick: 'BEST OVERALL', tangoPlayers: '2 players',
       tangoDescription: 'One agent. One hacker. Different clues on each screen. Talking through a problem and timing your moves together is the puzzle.',
       tangoWhy: 'Clever systems, complementary roles, and that shared “we cracked it” moment.', tangoSetup: 'Online · Two devices + microphones', tangoSetupNote: 'One copy + free Friend Pass',
@@ -47,6 +57,13 @@
   const wraps = [...document.querySelectorAll('.game-wrap')];
   const motionToggle = document.getElementById('motion-toggle');
   const languageToggle = document.getElementById('language-toggle');
+  const dialog = document.getElementById('game-dialog');
+  const inviteForm = document.getElementById('invite-form');
+  const consent = document.getElementById('invite-consent');
+  const sendButton = document.getElementById('send-invite');
+  const status = document.getElementById('invite-status');
+  const config = window.ADA_CONFIG || {};
+  const notificationsReady = /^https:\/\/[a-z0-9.-]+\.workers\.dev\/invite$/.test(config.inviteEndpoint || '') && /^[A-Za-z0-9_-]{10,100}$/.test(config.turnstileSiteKey || '');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
   const wideLayout = matchMedia('(min-width: 1080px)');
@@ -54,11 +71,22 @@
   let paused = reducedMotion.matches;
   let userMotionOverride = false;
   let active = null;
+  let scrolledCard = null;
+  let scrollFrame = 0;
   let pointerCard = null;
   let keyboardCard = null;
   let frameRequest = 0;
   let lastTick = 0;
   let lastEmission = 0;
+  let dialogGame = null;
+  let dialogRun = 0;
+  let sending = false;
+  let sent = false;
+  let submissionId = '';
+  let turnstileToken = '';
+  let turnstileWidget = null;
+  let turnstileLoad = null;
+  const gameNames = { tango: 'Operation: Tango', lovers: 'Lovers in a Dangerous Spacetime', heavenly: 'Heavenly Bodies' };
   const frameDurations = [600, 250, 250, 300, 300, 350, 400, 500, 300, 250, 250, 350];
   const players = wraps.map(wrap => ({ wrap, image: wrap.querySelector('.game-art'), source: wrap.querySelector('source'), sprite: wrap.querySelector('.scene-sprite'), ready: false, visible: true, frame: 0, elapsed: 0 }));
 
@@ -90,8 +118,11 @@
   }
 
   function shouldPlay(player) {
-    return !paused && !document.hidden && player.visible && (!active || active === player.wrap);
+    const selected = scrollDriven() ? scrolledCard : active;
+    return !paused && !document.hidden && !dialog.open && player.visible && (scrollDriven() ? selected === player.wrap : !selected || selected === player.wrap);
   }
+
+  function scrollDriven() { return !wideLayout.matches || !finePointer.matches; }
 
   function syncPlayers() {
     for (const player of players) {
@@ -145,9 +176,10 @@
   };
 
   function emitParticle(wrap) {
-    if (paused || reducedMotion.matches || !finePointer.matches || !wideLayout.matches || document.hidden) return;
+    if (paused || reducedMotion.matches || document.hidden || dialog.open) return;
+    const narrow = scrollDriven();
     const field = wrap.querySelector('.particle-field');
-    if (field.childElementCount >= 24) return;
+    if (field.childElementCount >= (narrow ? 12 : 24)) return;
     const theme = themes[wrap.dataset.game];
     const kind = theme.shapes[Math.floor(Math.random() * theme.shapes.length)];
     const particle = document.createElement('span');
@@ -163,7 +195,18 @@
     const side = Math.floor(Math.random() * 4);
     const distance = 40 + Math.random() * 75;
     let x, y, dx, dy;
-    if (side < 2) {
+    if (narrow) {
+      const bounds = wrap.getBoundingClientRect();
+      const top = Math.max(18, 18 - bounds.top);
+      const bottom = Math.min(height - 18, window.innerHeight - bounds.top - 18);
+      if (bottom <= top) return;
+      const fromRight = side % 2;
+      x = fromRight ? width - 4 : 4;
+      y = top + Math.random() * (bottom - top);
+      // Drift inward from the visible edges so phone margins don't clip the effect.
+      dx = (fromRight ? -1 : 1) * (24 + Math.random() * 34);
+      dy = -30 - Math.random() * 65;
+    } else if (side < 2) {
       x = side ? width : 0;
       y = 20 + Math.random() * (height - 40);
       dx = distance * (side ? 1 : -1);
@@ -198,7 +241,7 @@
   }
 
   function selectCard(wrap) {
-    const next = wideLayout.matches ? wrap : null;
+    const next = !scrollDriven() ? wrap : null;
     if (next === active) return;
     if (next && !active) games.style.minHeight = games.getBoundingClientRect().height + 'px';
     active = next;
@@ -223,6 +266,32 @@
     games.style.removeProperty('min-height');
   }
 
+  function updateScrollCard() {
+    scrollFrame = 0;
+    let next = null;
+    let mostVisible = 80;
+    if (scrollDriven()) {
+      for (const wrap of wraps) {
+        const rect = wrap.getBoundingClientRect();
+        const visible = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+        if (visible > mostVisible) { next = wrap; mostVisible = visible; }
+      }
+    }
+    if (next === scrolledCard) return;
+    scrolledCard = next;
+    for (const wrap of wraps) wrap.classList.toggle('is-scroll-active', wrap === next);
+    clearParticles();
+    if (next) for (let i = 0; i < 6; i++) emitParticle(next);
+    lastEmission = performance.now();
+    syncPlayers();
+  }
+
+  function scheduleScrollUpdate() {
+    if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScrollCard);
+  }
+
+  function updateLayout() { clearSelection(); updateScrollCard(); }
+
   // Keep the deck steady while the narrower panels regain their full copy.
   games.addEventListener('transitionend', event => {
     if (event.target === games && event.propertyName === 'grid-template-columns' && !active) {
@@ -243,12 +312,14 @@
         paintFrame(player);
       }
     }
-    if (active && now - lastEmission > 180) { emitParticle(active); lastEmission = now; }
+    const particleCard = scrollDriven() ? scrolledCard : active;
+    if (particleCard && !dialog.open && now - lastEmission > (scrollDriven() ? 380 : 180)) { emitParticle(particleCard); lastEmission = now; }
     startClock();
   }
 
   function startClock() {
-    const needsClock = !paused && !document.hidden && (players.some(p => p.ready && shouldPlay(p)) || Boolean(active));
+    const particleCard = scrollDriven() ? scrolledCard : active;
+    const needsClock = !paused && !document.hidden && !dialog.open && (players.some(p => p.ready && shouldPlay(p)) || Boolean(particleCard));
     if (needsClock && !frameRequest) frameRequest = requestAnimationFrame(tick);
     if (!needsClock) { cancelAnimationFrame(frameRequest); frameRequest = 0; lastTick = 0; }
   }
@@ -262,12 +333,19 @@
 
   for (const wrap of wraps) {
     wrap.addEventListener('pointerenter', event => {
-      if (!finePointer.matches || event.pointerType === 'touch') return;
+      if (scrollDriven() || event.pointerType === 'touch') return;
       pointerCard = wrap;
       selectCard(wrap);
     });
     wrap.addEventListener('pointerleave', () => { pointerCard = null; selectCard(keyboardCard); });
     const card = wrap.querySelector('.game-card');
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-haspopup', 'dialog');
+    card.setAttribute('aria-controls', 'game-dialog');
+    card.addEventListener('click', event => { event.preventDefault(); openGame(wrap); });
+    card.addEventListener('keydown', event => {
+      if (event.key === ' ') { event.preventDefault(); openGame(wrap); }
+    });
     card.addEventListener('focus', () => {
       if (card.matches(':focus-visible')) { keyboardCard = wrap; selectCard(wrap); }
     });
@@ -281,6 +359,7 @@
         player.visible = entry.isIntersecting;
       }
       syncPlayers();
+      scheduleScrollUpdate();
     }, { rootMargin: '80px', threshold: 0 });
     players.forEach(player => observer.observe(player.wrap));
   }
@@ -288,6 +367,7 @@
   languageToggle.hidden = false;
   motionToggle.hidden = false;
   setLanguage(language);
+  updateScrollCard();
   applyMotion();
   languageToggle.addEventListener('click', () => setLanguage(language === 'en' ? 'zh-Hant' : 'en'));
   motionToggle.addEventListener('click', () => { userMotionOverride = true; paused = !paused; applyMotion(); });
@@ -295,9 +375,125 @@
     if (!userMotionOverride) paused = reducedMotion.matches;
     applyMotion();
   });
-  wideLayout.addEventListener('change', clearSelection);
-  finePointer.addEventListener('change', clearSelection);
-  document.addEventListener('visibilitychange', () => { clearParticles(); lastTick = 0; syncPlayers(); });
-  window.addEventListener('resize', () => { if (active) clearSelection(); }, { passive: true });
+  wideLayout.addEventListener('change', updateLayout);
+  finePointer.addEventListener('change', updateLayout);
+  document.addEventListener('visibilitychange', () => { clearParticles(); lastTick = 0; updateScrollCard(); syncPlayers(); });
+  window.addEventListener('resize', updateLayout, { passive: true });
+  window.addEventListener('scroll', scheduleScrollUpdate, { passive: true });
+
+  function setStatus(key, error = false) {
+    status.textContent = key ? copy[language][key] : '';
+    status.dataset.state = error ? 'error' : 'ok';
+  }
+
+  function updateSendButton() {
+    sendButton.disabled = !notificationsReady || !consent.checked || !turnstileToken || sending || sent;
+    document.getElementById('send-label').textContent = copy[language][sending ? 'sending' : 'invite'];
+  }
+
+  function openGame(wrap) {
+    dialogRun++;
+    dialogGame = wrap.dataset.game;
+    submissionId = crypto.randomUUID();
+    sending = false;
+    sent = false;
+    consent.checked = false;
+    consent.disabled = !notificationsReady;
+    document.getElementById('invite-website').value = '';
+    document.getElementById('dialog-game').textContent = gameNames[dialogGame];
+    document.getElementById('dialog-poster').src = wrap.querySelector('.game-art').dataset.still;
+    document.getElementById('dialog-steam').href = wrap.querySelector('.game-card').href;
+    removeChallenge();
+    setStatus(notificationsReady ? '' : 'unavailable');
+    updateSendButton();
+    dialog.showModal();
+    root.classList.add('dialog-open');
+    clearParticles();
+    syncPlayers();
+  }
+
+  function loadTurnstile() {
+    if (window.turnstile) return Promise.resolve(window.turnstile);
+    if (turnstileLoad) return turnstileLoad;
+    turnstileLoad = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.onload = () => window.turnstile ? resolve(window.turnstile) : reject(new Error('Unavailable'));
+      script.onerror = () => { script.remove(); turnstileLoad = null; reject(new Error('Unavailable')); };
+      document.head.append(script);
+    });
+    return turnstileLoad;
+  }
+
+  function removeChallenge() {
+    if (turnstileWidget !== null && window.turnstile) window.turnstile.remove(turnstileWidget);
+    turnstileWidget = null;
+    turnstileToken = '';
+  }
+
+  async function prepareChallenge() {
+    removeChallenge();
+    updateSendButton();
+    if (!consent.checked || !notificationsReady || !dialog.open) return;
+    const run = dialogRun;
+    setStatus('checking');
+    try {
+      const api = await loadTurnstile();
+      if (run !== dialogRun || !consent.checked || !dialog.open) return;
+      turnstileWidget = api.render('#turnstile-widget', {
+        sitekey: config.turnstileSiteKey, action: 'play-invite', theme: 'dark', size: 'flexible', language: language === 'en' ? 'en' : 'zh-tw',
+        callback: token => { if (run === dialogRun && consent.checked) { turnstileToken = token; setStatus(''); updateSendButton(); } },
+        'expired-callback': () => { turnstileToken = ''; updateSendButton(); setStatus('verifyError', true); },
+        'error-callback': () => { turnstileToken = ''; updateSendButton(); setStatus('verifyError', true); }
+      });
+    } catch (_) { if (run === dialogRun) setStatus('verifyError', true); }
+  }
+
+  consent.addEventListener('change', prepareChallenge);
+  document.getElementById('dialog-close').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', event => {
+    if (event.target !== dialog) return;
+    const rect = dialog.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+  });
+  dialog.addEventListener('close', () => {
+    dialogRun++;
+    removeChallenge();
+    root.classList.remove('dialog-open');
+    updateScrollCard();
+    syncPlayers();
+  });
+
+  inviteForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (sendButton.disabled || !dialogGame || !consent.checked || !turnstileToken) return;
+    const run = dialogRun;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    sending = true;
+    updateSendButton();
+    setStatus('sending');
+    try {
+      const response = await fetch(config.inviteEndpoint, {
+        method: 'POST', mode: 'cors', credentials: 'omit', cache: 'no-store', signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game: dialogGame, action: 'play-together', consent: true, requestId: submissionId, turnstileToken, website: document.getElementById('invite-website').value })
+      });
+      const result = await response.json();
+      if (run !== dialogRun) return;
+      if (!response.ok || result.ok !== true) {
+        setStatus(response.status === 429 ? 'rateLimited' : response.status === 403 ? 'verifyError' : 'sendError', true);
+        turnstileToken = '';
+        if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
+      } else { sent = true; setStatus('sent'); removeChallenge(); }
+    } catch (_) {
+      if (run === dialogRun) {
+        setStatus('sendError', true);
+        turnstileToken = '';
+        if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
+      }
+    } finally { clearTimeout(timeout); if (run === dialogRun) { sending = false; updateSendButton(); } }
+  });
 })();
 

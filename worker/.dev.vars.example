@@ -1,0 +1,6 @@
+# Copy to .dev.vars for local development only. Never commit actual values.
+RESEND_API_KEY=
+TURNSTILE_SECRET_KEY=
+FINGERPRINT_SECRET=
+NOTIFY_TO=
+NOTIFY_FROM=
