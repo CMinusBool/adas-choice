@@ -30,7 +30,8 @@ resolves every local URL it references. `npm run typecheck` alone is the fast in
 
 ## Layout
 
-- `index.html` — the first-paint markup, and the only Vite entry.
+- `index.html` — the first-paint markup. Its `/src/main.ts` script tag is the only URL on the
+  page the bundler rewrites; every other URL there is passed through untouched.
 - `src/main.ts` — the DOM layer: it reads the world model and paints. Deliberately untested.
 - `src/world/` — the world model: pure TypeScript, no DOM and no browser APIs. This is the one
   seam, and the only thing tested.
