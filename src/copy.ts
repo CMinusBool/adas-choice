@@ -34,7 +34,11 @@ const zhHant = {
   heavenlyDescription: '沒有重力，連小修理都變成雙人大工程。拉住隊友、遞個工具，再一起笑看最簡單的任務如何徹底失控。',
   heavenlyWhy: '物理解謎，加上令人笑翻的失誤。一起接受笨手笨腳，就是最好玩的部分。', heavenlySetupNote: '很推薦兩人都使用控制器',
   heavenlyAlt: '黑髮女太空人抓著扶手和隊友的靴子，戴眼鏡的棕髮男生伸手去拿漂浮的扳手，兩人笑得很開心。',
-  footer: '最好的升級，就是有你一起。', artNote: '原創合作冒險插畫・2026 年 9 月'
+  footer: '最好的升級，就是有你一起。', artNote: '原創合作冒險插畫・2026 年 9 月',
+  // 06: audio
+  mute: '關閉聲音', unmute: '開啟聲音',
+  musicSourceStart: '播放房間音樂', musicSourceStop: '停止房間音樂', placeholder: '暫代'
+  // end 06
 };
 
 /** Every piece of copy on the page. Both dictionaries carry the same keys. */
@@ -68,6 +72,10 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     heavenlyDescription: 'Zero gravity turns a simple repair into a two-person operation. Anchor your teammate, pass a tool, and laugh when the smallest job goes spectacularly sideways.',
     heavenlyWhy: 'Physical puzzles and very funny failures. Best when you both embrace the deliberately awkward movement.', heavenlySetupNote: 'Controllers strongly recommended',
     heavenlyAlt: 'A black-haired astronaut holds a rail and her taller teammate’s boot as he reaches for a floating wrench. His brown hair and browline glasses are visible through his visor; both laugh.',
-    footer: 'Good company is the best upgrade.', artNote: 'Original cartoon scenes · September 2026'
+    footer: 'Good company is the best upgrade.', artNote: 'Original cartoon scenes · September 2026',
+    // 06: audio
+    mute: 'Mute sound', unmute: 'Unmute sound',
+    musicSourceStart: "Play the Room's music", musicSourceStop: "Stop the Room's music", placeholder: 'placeholder'
+    // end 06
   }
 };

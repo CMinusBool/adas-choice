@@ -236,3 +236,37 @@ html.dialog-open { overflow: hidden; }
 }
 .motion-off .choice-dialog { animation: none; }
 
+/* 06: audio — the header sound control and the Rooms' Music Source placeholders.
+   One appended block, and the control repeats the toggle styling rather than
+   joining the selector lists above, so this ticket adds lines instead of editing
+   the ones another ticket is landing beside. */
+.sound-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 100px; font-size: .875rem; line-height: 1.2; background: transparent; color: var(--muted); cursor: pointer; transition: border-color .25s, background .25s, color .25s; }
+.sound-toggle:hover { background: #35232e; border-color: var(--pink); }
+.sound-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.sound-toggle .sound-off-icon, .sound-toggle[aria-pressed="true"] .sound-on-icon { display: none; }
+.sound-toggle[aria-pressed="true"] .sound-off-icon { display: block; }
+.sound-toggle[aria-pressed="true"] { color: var(--pink); }
+
+/* A Music Source is a Prop in the Room, so it is dashed and tagged for as long
+   as it is a placeholder standing in for one. The design tickets replace it. */
+.music-source-row { margin-top: 1.6rem; }
+.music-source { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; padding: .5rem .9rem; border: 1px dashed var(--line); border-radius: 100px; background: transparent; color: var(--muted); font-size: .875rem; line-height: 1.2; cursor: pointer; transition: border-color .25s, color .25s; }
+.music-source:hover, .music-source:focus-visible { border-color: var(--pink); color: var(--ink); }
+.music-source[aria-pressed="true"] { border-style: solid; border-color: var(--pink); color: var(--ink); }
+.music-note { color: var(--pink); font-size: 1.05rem; line-height: 1; }
+.placeholder-tag { padding: .1rem .4rem; border-radius: 6px; background: #2a2230; color: var(--quiet); font-size: .6875rem; letter-spacing: .04em; }
+.motion-off .sound-toggle, .motion-off .music-source { transition: none; }
+
+@media (max-width: 540px) {
+  /* Three controls beside the wordmark now: the sound control keeps its icon
+     and gives up its words, exactly as the motion control does at this width. */
+  .sound-toggle { width: 44px; padding: 0; }
+  #sound-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .music-source-row { margin-top: 1.3rem; }
+}
+@media (max-width: 359px) {
+  /* Where the language toggle gives up its icon, the sound control gives up the
+     room around its own, so the header still fits on one line. */
+  .sound-toggle { width: 38px; }
+}
+

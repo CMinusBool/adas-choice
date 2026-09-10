@@ -2,6 +2,7 @@ import { mountGameRoom } from './dom/game-room';
 import { mountLanguage, readStoredLanguage } from './dom/language';
 import { mountMotion, prefersReducedMotion } from './dom/motion';
 import { mountRooms } from './dom/rooms';
+import { mountSound } from './dom/sound'; // 06: audio
 import type { Mount, Painter } from './dom/painter';
 import { advance, createWorld, type World, type WorldEvent } from './world';
 
@@ -29,6 +30,10 @@ function dispatch(event: WorldEvent) {
 }
 
 const mounts: Mount[] = [mountLanguage, mountMotion, mountRooms, mountGameRoom];
+// 06: audio — appended rather than folded into the list above so that this
+// ticket and 05 land beside each other; either may be folded back in later.
+mounts.push(mountSound);
+// end 06
 // Filled as each painter mounts, so an event arriving mid-mount paints only
 // what is already standing instead of reaching for a painter that is not there.
 const painters: Painter[] = [];
