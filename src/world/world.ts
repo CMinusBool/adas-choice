@@ -1,6 +1,24 @@
+// 07: actors
+import {
+  DEFAULT_SEED,
+  actorViewsIn,
+  createActors,
+  findActorView,
+  seededRandom,
+  sendActor,
+  settleActors,
+  tickActors,
+  type ActorId,
+  type ActorView,
+  type ActorsSlice,
+  type CycleId,
+  type RandomSource,
+} from './actors';
 import { resolveLanguage, toggleLanguage, type Language } from './language';
 import { createMotion, toggleMotion, withReducedMotion, type MotionSlice } from './motion';
 import { parseRoute, type RoomId } from './rooms';
+// 07: actors
+import type { Point } from './stage';
 
 /**
  * How the visitor is moving between Rooms right now.
@@ -31,6 +49,8 @@ export interface World {
   readonly language: Language;
   readonly motion: MotionSlice;
   readonly rooms: RoomsSlice;
+  // 07: actors
+  readonly actors: ActorsSlice;
 }
 
 /** What the DOM layer knows at start-up that the model cannot ask for itself. */
@@ -41,6 +61,10 @@ export interface WorldInputs {
   readonly storedLanguage: string | null | undefined;
   /** Whether the visitor's system asks for reduced motion. */
   readonly reducedMotion: boolean;
+  // 07: actors — where the Cast's own decisions get their dice. The DOM layer
+  // seeds this from the clock; a test seeds it with a number and gets the same
+  // apartment twice. Left out, the world is the same on every visit.
+  readonly random?: RandomSource;
 }
 
 /**
@@ -54,7 +78,15 @@ export type WorldEvent =
   | { readonly type: 'room-transition-finished' }
   | { readonly type: 'motion-toggled' }
   | { readonly type: 'reduced-motion-changed'; readonly reducedMotion: boolean }
-  | { readonly type: 'language-toggled' };
+  | { readonly type: 'language-toggled' }
+  // 07: actors — `now` is how time reaches the model; it never asks for it.
+  | { readonly type: 'actor-tick'; readonly now: number }
+  | {
+      readonly type: 'actor-sent';
+      readonly actor: ActorId;
+      readonly goal: Point;
+      readonly cycle?: Extract<CycleId, 'walk' | 'run'>;
+    };
 
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
@@ -62,6 +94,8 @@ export function createWorld(inputs: WorldInputs): World {
     language: resolveLanguage(inputs.storedLanguage),
     motion: createMotion(inputs.reducedMotion),
     rooms: { current: parseRoute(inputs.hash), leaving: null, transition: 'settled' },
+    // 07: actors
+    actors: createActors(inputs.random ?? seededRandom(DEFAULT_SEED)),
   };
 }
 
@@ -87,14 +121,30 @@ export function advance(world: World, event: WorldEvent): World {
       return { ...world, rooms: { current: world.rooms.current, leaving: null, transition: 'settled' } };
     }
     case 'motion-toggled': {
-      return { ...world, motion: toggleMotion(world.motion) };
+      // 07: actors — a walk in progress ends at its destination rather than
+      // freezing halfway across the floor.
+      const motion = toggleMotion(world.motion);
+      const actors = motion.paused ? settleActors(world.actors) : world.actors;
+      return { ...world, motion, actors };
     }
     case 'reduced-motion-changed': {
       const motion = withReducedMotion(world.motion, event.reducedMotion);
-      return motion === world.motion ? world : { ...world, motion };
+      if (motion === world.motion) return world;
+      // 07: actors
+      return { ...world, motion, actors: motion.paused ? settleActors(world.actors) : world.actors };
     }
     case 'language-toggled': {
       return { ...world, language: toggleLanguage(world.language) };
+    }
+    // 07: actors
+    case 'actor-tick': {
+      const actors = tickActors(world.actors, event.now, motionIsOn(world));
+      return actors === world.actors ? world : { ...world, actors };
+    }
+    // 07: actors
+    case 'actor-sent': {
+      const actors = sendActor(world.actors, event.actor, event.goal, event.cycle ?? 'walk', motionIsOn(world));
+      return actors === world.actors ? world : { ...world, actors };
     }
   }
 }
@@ -117,4 +167,21 @@ export function isCurrentRoom(world: World, room: RoomId): boolean {
  */
 export function isRoomPainted(world: World, room: RoomId): boolean {
   return world.rooms.current === room || world.rooms.leaving === room;
+}
+
+// 07: actors
+/** Every Actor standing in this Room, as much as the DOM layer needs to paint. */
+export function actorsIn(world: World, room: RoomId): readonly ActorView[] {
+  return actorViewsIn(world.actors, room);
+}
+
+// 07: actors
+/**
+ * One Actor, or `null` if the apartment has not placed them yet.
+ *
+ * The Cast arrives Room by Room, so asking after a Cat before the Rooms they
+ * roam exist is a fair question with a plain answer rather than a crash.
+ */
+export function actorView(world: World, actor: ActorId): ActorView | null {
+  return findActorView(world.actors, actor);
 }
