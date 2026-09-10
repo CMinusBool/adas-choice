@@ -14,7 +14,7 @@ GitHub Pages hosts the page. A separate Cloudflare Worker sends the invitation e
    - `NOTIFY_TO`: your private destination email address.
    - `NOTIFY_FROM`: one bare, permitted sender email address. Sender/recipient values may not contain display names or multiple addresses.
 5. Run `npm test`, `npm run check`, then `npm run deploy`. The SQLite-backed Durable Object is provisioned by the included migration. Check the current provider terms and account limits before enabling paid services; this project does not enable paid subscriptions.
-6. In the root `site-config.js`, set `inviteEndpoint` to the actual deployed HTTPS `workers.dev` URL plus `/invite`, and `turnstileSiteKey` to the widget's public site key. These two values are public; none of the secrets above belong in that file.
+6. In `public/site-config.js`, set `inviteEndpoint` to the actual deployed HTTPS `workers.dev` URL plus `/invite`, and `turnstileSiteKey` to the widget's public site key. These two values are public; none of the secrets above belong in that file.
 7. Commit and push the public configuration. GitHub Actions rebuilds and publishes the page. Use the real dialog to send an invitation and confirm its arrival in your inbox.
 
 `wrangler.jsonc` accepts only `https://cminusbool.github.io` as the web origin. If the page later uses a custom hostname, update the origin allowlist, Turnstile hostname restrictions, and the page Content Security Policy accordingly. Do not add wildcard or `null` origins.

@@ -4,7 +4,7 @@ The public GitHub Pages site contains no recipient email address or private emai
 
 ## Email and device information
 
-The recipient, sender, email API key, bot-verification secret and HMAC secret are Cloudflare Worker secrets. They must never be added to `site-config.js`, a GitHub Actions variable, source files, or a commit. Local `.dev.vars` and `.env` files are ignored. The build copies only explicitly allowed page files and artwork into `dist/`; the backend, documentation and configuration examples are excluded from the website artifact.
+The recipient, sender, email API key, bot-verification secret and HMAC secret are Cloudflare Worker secrets. They must never be added to `public/site-config.js`, a GitHub Actions variable, source files, or a commit. Local `.dev.vars` and `.env` files are ignored. The build puts only the bundled page and the contents of `public/` into `dist/`; the backend, documentation and configuration examples are excluded from the website artifact.
 
 Before submitting, a visitor must agree to share the selected game, their request IP, approximate country and basic device/browser details. Cloudflare supplies the IP and country. The server reduces the untrusted User-Agent to fixed device, operating-system and browser labels. Raw User-Agent strings are not emailed. No canvas, audio, font, local-network, location-permission or cross-site fingerprinting is used.
 
