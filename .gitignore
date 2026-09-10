@@ -1,5 +1,6 @@
 dist/
 node_modules/
+.scratch/
 *.tar.gz
 .env
 .env.*
