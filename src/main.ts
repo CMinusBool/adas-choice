@@ -1,5 +1,7 @@
 import { mountGameRoom } from './dom/game-room';
 import { mountLanguage, readStoredLanguage } from './dom/language';
+// 05: loading
+import { mountLoading } from './dom/loading';
 import { mountMotion, prefersReducedMotion } from './dom/motion';
 import { mountRooms } from './dom/rooms';
 import type { Mount, Painter } from './dom/painter';
@@ -28,7 +30,12 @@ function dispatch(event: WorldEvent) {
   render();
 }
 
-const mounts: Mount[] = [mountLanguage, mountMotion, mountRooms, mountGameRoom];
+const mounts: Mount[] = [
+  // 05: loading — first in the list, so that on the paint where the apartment
+  // opens the shell is out of `inert` before the Room router moves focus into it.
+  mountLoading,
+  mountLanguage, mountMotion, mountRooms, mountGameRoom,
+];
 // Filled as each painter mounts, so an event arriving mid-mount paints only
 // what is already standing instead of reaching for a painter that is not there.
 const painters: Painter[] = [];

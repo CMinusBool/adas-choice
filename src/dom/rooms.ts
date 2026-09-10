@@ -1,4 +1,4 @@
-import { ROOM_IDS, isCanonicalHash, isCurrentRoom, isRoomPainted, parseRoute, roomHash, type RoomId, type World } from '../world';
+import { ROOM_IDS, isCanonicalHash, isCurrentRoom, isInteractive, isRoomPainted, parseRoute, roomHash, type RoomId, type World } from '../world';
 import { byId, type Dispatch, type Painter } from './painter';
 
 /** Longer than the entering Room's animation, short enough not to strand it. */
@@ -35,9 +35,16 @@ export const mountRooms = (dispatch: Dispatch): Painter => {
   let current: RoomId | null = null;
   let settling = 0;
   let stopWaiting: (() => void) | null = null;
+  // 05: loading
+  let opened = false;
 
   return (world: World) => {
     const { transition } = world.rooms;
+    // 05: loading — the apartment opening is an arrival too: the loading screen
+    // held focus while the shell was inert, so the Room the visitor is standing
+    // in has to take it once the screen goes.
+    const opening = isInteractive(world) && !opened;
+    opened ||= opening;
     for (const room of ROOM_IDS) {
       const element = elements.get(room)!;
       const entered = isCurrentRoom(world, room);
@@ -50,7 +57,7 @@ export const mountRooms = (dispatch: Dispatch): Painter => {
       element.hidden = !isRoomPainted(world, room);
     }
 
-    if (current !== world.rooms.current) {
+    if (current !== world.rooms.current || opening) {
       const arriving = current !== null;
       current = world.rooms.current;
       if (arriving) {

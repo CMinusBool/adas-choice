@@ -35,8 +35,8 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   page the bundler rewrites; every other URL there is passed through untouched.
 - `src/main.ts` — the DOM layer's composition root: it builds the world once, mounts the painters
   in `src/dom/` and re-runs them on every change. Deliberately untested.
-- `src/dom/` — one painter per slice of the world (`language`, `motion`, `rooms`, `game-room`),
-  each a `Mount` that wires its listeners once and returns a `Painter`. A new slice is a new file
+- `src/dom/` — one painter per slice of the world (`language`, `motion`, `rooms`, `game-room`,
+  `loading`), each a `Mount` that wires its listeners once and returns a `Painter`. A new slice is a new file
   plus one entry in `src/main.ts`'s `mounts` list, not a branch inside an existing painter.
   `src/dom/painter.ts` holds that contract and `byId`.
 - `src/copy.ts` — both copy dictionaries, typed against each other.
@@ -66,6 +66,11 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   rewritten with `location.replace`, so junk never lands in history.
 - **Motion is opt-outable.** Respect `prefers-reduced-motion`; keep explicit playback available;
   stop animating offscreen scenes and background tabs.
+- **The apartment waits for its artwork.** Nothing is reachable until every declared asset has
+  loaded behind the loading screen. The list is read off the built page — the `data-still`,
+  `data-animated` and `data-sheet` attributes and the `<img src>`s inside `#apartment` — so
+  furnishing a Room preloads it, with no second list to maintain. An asset the markup cannot
+  name (audio) goes in `ASSETS_OUTSIDE_MARKUP` in `src/dom/loading.ts`.
 - **Scene assets travel as a set**: GIF, still poster, and 4x3 sprite sheet (480x480 frames,
   12 frames, 4.1s loop) are replaced together.
 - **Relative paths only** — the site has to work from a repository subpath, which is why Vite's

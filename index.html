@@ -16,7 +16,17 @@
 <body>
   <a class="skip-link" href="#apartment" data-i18n="skip">跳至內容</a>
   <!-- Mounting point for anything that covers the apartment, starting with the loading screen. -->
-  <div class="overlay-slot" id="overlay-slot"></div>
+  <div class="overlay-slot" id="overlay-slot">
+    <!-- 05: loading — markup rather than script, so the first paint is the loading screen itself. -->
+    <div class="loading-screen" id="loading-screen" tabindex="-1">
+      <p class="loading-title" id="loading-title" data-i18n="loadingTitle">正在整理公寓⋯</p>
+      <div class="loading-track" id="loading-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="載入進度" data-i18n-aria="loadingProgress">
+        <span class="loading-fill" id="loading-fill"></span>
+      </div>
+      <p class="loading-percent" id="loading-percent" aria-hidden="true">0%</p>
+      <p class="loading-note" data-i18n="loadingNote">畫都掛上牆之後，門就會打開。</p>
+    </div>
+  </div>
   <div class="page-shell">
     <header class="site-header">
       <a class="wordmark" href="#/entryway" aria-label="Ada's choice，回到玄關" data-i18n-aria="home">

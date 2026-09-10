@@ -1,4 +1,6 @@
 import { resolveLanguage, toggleLanguage, type Language } from './language';
+// 05: loading
+import { createLoading, declareAssets, everythingSettled, progressOf, settleAsset, type AssetOutcome, type LoadingSlice } from './loading';
 import { createMotion, toggleMotion, withReducedMotion, type MotionSlice } from './motion';
 import { parseRoute, type RoomId } from './rooms';
 
@@ -31,6 +33,8 @@ export interface World {
   readonly language: Language;
   readonly motion: MotionSlice;
   readonly rooms: RoomsSlice;
+  // 05: loading
+  readonly loading: LoadingSlice;
 }
 
 /** What the DOM layer knows at start-up that the model cannot ask for itself. */
@@ -54,7 +58,10 @@ export type WorldEvent =
   | { readonly type: 'room-transition-finished' }
   | { readonly type: 'motion-toggled' }
   | { readonly type: 'reduced-motion-changed'; readonly reducedMotion: boolean }
-  | { readonly type: 'language-toggled' };
+  | { readonly type: 'language-toggled' }
+  // 05: loading — what there is to preload, and each asset as it arrives.
+  | { readonly type: 'assets-declared'; readonly urls: readonly string[] }
+  | { readonly type: 'asset-settled'; readonly url: string; readonly outcome: AssetOutcome };
 
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
@@ -62,6 +69,8 @@ export function createWorld(inputs: WorldInputs): World {
     language: resolveLanguage(inputs.storedLanguage),
     motion: createMotion(inputs.reducedMotion),
     rooms: { current: parseRoute(inputs.hash), leaving: null, transition: 'settled' },
+    // 05: loading
+    loading: createLoading(),
   };
 }
 
@@ -96,7 +105,33 @@ export function advance(world: World, event: WorldEvent): World {
     case 'language-toggled': {
       return { ...world, language: toggleLanguage(world.language) };
     }
+    // 05: loading — both report rather than decide, and both can be a report the
+    // model has nothing to do with: an asset declared twice, or settling twice.
+    case 'assets-declared': {
+      const loading = declareAssets(world.loading, event.urls);
+      return loading === world.loading ? world : { ...world, loading };
+    }
+    case 'asset-settled': {
+      const loading = settleAsset(world.loading, event.url, event.outcome);
+      return loading === world.loading ? world : { ...world, loading };
+    }
   }
+}
+
+// 05: loading
+/**
+ * Is the apartment ready for the visitor?
+ *
+ * False until every declared asset has settled, which is what holds the loading
+ * screen up and keeps the apartment behind it out of reach.
+ */
+export function isInteractive(world: World): boolean {
+  return everythingSettled(world.loading);
+}
+
+/** How far the preload has got, from 0 to 1, for the indicator to paint. */
+export function loadingProgress(world: World): number {
+  return progressOf(world.loading);
 }
 
 /** Is the apartment allowed to move? */

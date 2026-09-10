@@ -14,5 +14,10 @@ export { ENTRYWAY, ROOM_IDS, isCanonicalHash, parseRoute, roomHash } from './roo
 
 export type { MotionSlice } from './motion';
 
+// 05: loading
+export type { AssetOutcome, LoadingSlice } from './loading';
+
 export type { RoomsSlice, TransitionKind, World, WorldEvent, WorldInputs } from './world';
 export { advance, createWorld, isCurrentRoom, isRoomPainted, motionIsOn } from './world';
+// 05: loading
+export { isInteractive, loadingProgress } from './world';
