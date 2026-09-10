@@ -1,0 +1,16 @@
+{
+  // The world model's DOM-free rule, made mechanical.
+  //
+  // `src/world/` is checked a second time with no DOM library and no ambient
+  // types at all, so `document`, `window`, `location`, `history`,
+  // `localStorage`, `matchMedia`, `requestAnimationFrame` and the timers are
+  // simply not declared here. A model that reaches for one fails
+  // `npm run typecheck` and `npm run build` — for this ticket and every later
+  // one. Time and preferences enter the model as parameters instead.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": []
+  },
+  "include": ["src/world"]
+}
