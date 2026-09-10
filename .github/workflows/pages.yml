@@ -22,12 +22,14 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24'
-      - name: Check JavaScript
-        run: node --check script.js
+      - name: Install the build toolchain
+        run: npm ci
+      - name: Test the world model
+        run: npm test
       - name: Test notification protections
         run: node --test worker/test/*.test.mjs
-      - name: Build public files only
-        run: node scripts/build.mjs
+      - name: Typecheck, bundle and check the built page
+        run: npm run build
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
