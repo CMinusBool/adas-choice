@@ -23,18 +23,29 @@ node --test worker/test/*.test.mjs
 npm run build
 ```
 
-`npm test` is Vitest over `src/**/*.test.ts`. `npm run build` is the acceptance run: it typechecks
-with `tsc --noEmit`, bundles into `dist/`, then `scripts/assert-built-page.mjs` fails unless the
+`npm test` is Vitest over `src/**/*.test.ts`. `npm run build` is the acceptance run: it runs
+`npm run typecheck`, bundles into `dist/`, then `scripts/assert-built-page.mjs` fails unless the
 built page still carries the Traditional Chinese default (`lang="zh-Hant"`), ships `.nojekyll`, and
-resolves every local URL it references. `npm run typecheck` alone is the fast inner-loop check.
+resolves every local URL it references. `npm run typecheck` alone is the fast inner-loop check; it
+is two passes — the whole project, then `src/world/` again under `tsconfig.world.json`.
 
 ## Layout
 
 - `index.html` — the first-paint markup. Its `/src/main.ts` script tag is the only URL on the
   page the bundler rewrites; every other URL there is passed through untouched.
-- `src/main.ts` — the DOM layer: it reads the world model and paints. Deliberately untested.
+- `src/main.ts` — the DOM layer's composition root: it builds the world once, mounts the painters
+  in `src/dom/` and re-runs them on every change. Deliberately untested.
+- `src/dom/` — one painter per slice of the world (`language`, `motion`, `rooms`, `game-room`),
+  each a `Mount` that wires its listeners once and returns a `Painter`. A new slice is a new file
+  plus one entry in `src/main.ts`'s `mounts` list, not a branch inside an existing painter.
+  `src/dom/painter.ts` holds that contract and `byId`.
+- `src/copy.ts` — both copy dictionaries, typed against each other.
 - `src/world/` — the world model: pure TypeScript, no DOM and no browser APIs. This is the one
-  seam, and the only thing tested.
+  seam, and the only thing tested. `src/world/index.ts` is its whole public surface; the DOM layer
+  imports from `./world`, never from a file inside it. `tsconfig.world.json` typechecks the
+  directory a second time with `lib: ["ES2022"]` and `types: []`, so a `document`, `window`,
+  `localStorage`, `matchMedia` or timer reference in the model fails `npm run typecheck` and
+  `npm run build`. Time and preferences enter as parameters the DOM layer feeds in.
 - `public/` — copied to the output root verbatim, so a file here keeps its URL. `assets/`,
   `.nojekyll` and `site-config.js` live here because the bundler cannot see their URLs: it rewrites
   neither the `data-animated` / `data-still` / `data-sheet` attributes that `src/main.ts` turns
@@ -46,9 +57,13 @@ resolves every local URL it references. `npm run typecheck` alone is the fast in
 
 ## Conventions
 
-- **Both languages, always.** Copy lives twice: the dictionaries in `src/main.ts` and the
+- **Both languages, always.** Copy lives twice: the dictionaries in `src/copy.ts` and the
   Traditional Chinese first-paint markup in `index.html`. Change one, change the other in the same
   commit. Traditional Chinese is the default; English is the toggle.
+- **Routing is the browser's.** Four Rooms at `#/entryway`, `#/games`, `#/cinema`, `#/activities`;
+  a Room id is its route's path word. Doors are ordinary `<a href="#/cinema">` links, so the back
+  button works without a history stack. Never `pushState` (ADR 0001). An unreadable hash is
+  rewritten with `location.replace`, so junk never lands in history.
 - **Motion is opt-outable.** Respect `prefers-reduced-motion`; keep explicit playback available;
   stop animating offscreen scenes and background tabs.
 - **Scene assets travel as a set**: GIF, still poster, and 4x3 sprite sheet (480x480 frames,

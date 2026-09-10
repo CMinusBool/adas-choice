@@ -32,6 +32,29 @@ button svg { flex-shrink: 0; }
 .motion-toggle .play-icon { display: none; }
 .motion-off .motion-toggle .pause-icon { display: none; }
 .motion-off .motion-toggle .play-icon { display: block; }
+
+/* One Room is in the flow at a time; the Room being left is lifted out of it so
+   the entering Room does not wait for it, and put back by `hidden` once its
+   animation ends. The model decides whether that animation runs at all. */
+.apartment { position: relative; }
+.room { display: block; }
+.room.is-leaving { position: absolute; inset: 0 0 auto; width: 100%; pointer-events: none; animation: room-leave .32s ease-in both; }
+.room.is-entering { animation: room-enter .45s cubic-bezier(.22,.75,.2,1) both; }
+@keyframes room-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes room-leave { from { opacity: 1; } to { opacity: 0; transform: translateY(-12px); } }
+.room-title { margin: 0 0 1.1rem; font-size: clamp(2.3rem, 4vw, 3.4rem); line-height: 1.2; font-weight: 740; letter-spacing: -.05em; }
+.room-title:focus { outline: none; }
+.room-lede { max-width: 46ch; margin: 0; color: var(--muted); font-size: 1.0625rem; line-height: 1.8; }
+#room-entryway, #room-cinema, #room-activities { padding: 2.8rem 0 2.6rem; }
+.room-exit { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; margin-top: 1.6rem; color: var(--muted); text-decoration: none; font-size: .9375rem; }
+.room-exit:hover { color: var(--pink); }
+.exit-arrow { color: var(--pink); }
+.doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 2.4rem; }
+.door { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 96px; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); text-decoration: none; font-size: 1.25rem; font-weight: 650; transition: border-color .3s, background .3s, transform .3s; }
+.door:hover, .door:focus-visible { border-color: var(--pink); background: #2a1f27; transform: translateY(-3px); }
+.door-arrow { color: var(--pink); font-size: 1.4rem; }
+.motion-off .door { transition: none; }
+
 .intro { padding: 2.8rem 0 2.6rem; }
 .eyebrow { display: flex; align-items: center; gap: .7rem; margin: 0 0 1rem; color: var(--pink); font-size: .8125rem; letter-spacing: .16em; font-weight: 600; }
 .eyebrow-line { width: 23px; height: 1px; background: currentColor; }
@@ -114,7 +137,9 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
 @media (max-width: 1079px) {
   .page-shell { width: min(680px, calc(100% - 48px)); }
   .site-header { min-height: 88px; }
-  .intro { padding: 2.4rem 0 2rem; }
+  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.4rem 0 2rem; }
+  .room-title { font-size: clamp(2.2rem, 6vw, 3rem); }
+  .doors { grid-template-columns: 1fr; gap: 14px; margin-top: 2rem; }
   h1 { font-size: clamp(2.6rem, 6.4vw, 3.8rem); }
   .games { grid-template-columns: 1fr; gap: 28px; --scene-size: min(680px, calc(100vw - 48px)); }
   .card-copy { padding: 1.6rem 1.6rem 0; }
@@ -134,7 +159,10 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
   .language-toggle svg { width: 16px; }
   .motion-toggle { width: 44px; padding: 0; }
   #motion-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .intro { padding: 2.1rem 0 1.9rem; }
+  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.1rem 0 1.9rem; }
+  .room-title { font-size: clamp(1.9rem, 8vw, 2.6rem); margin-bottom: .9rem; }
+  .room-lede { font-size: 1rem; line-height: 1.85; max-width: 33ch; }
+  .door { min-height: 84px; padding: 1rem 1.2rem; font-size: 1.125rem; border-radius: 18px; }
   .eyebrow { font-size: .75rem; letter-spacing: .12em; margin-bottom: .85rem; }
   h1 { font-size: clamp(2.15rem, 8.5vw, 2.9rem); line-height: 1.3; margin-bottom: .8rem; }
   html[lang="en"] h1 { max-width: 390px; column-gap: .2em; }
