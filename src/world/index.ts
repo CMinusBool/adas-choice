@@ -16,3 +16,8 @@ export type { MotionSlice } from './motion';
 
 export type { RoomsSlice, TransitionKind, World, WorldEvent, WorldInputs } from './world';
 export { advance, createWorld, isCurrentRoom, isRoomPainted, motionIsOn } from './world';
+
+// 06: audio
+export type { AudioSlice, AudioTier } from './audio';
+export { isAudible, isMusicSourceOn, isRoomMusicAudible, soundIsOn } from './world';
+// end 06
