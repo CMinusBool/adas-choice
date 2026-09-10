@@ -1,7 +1,7 @@
 import { ROOM_IDS, isCanonicalHash, isCurrentRoom, isRoomPainted, parseRoute, roomHash, type RoomId, type World } from '../world';
 import { byId, type Dispatch, type Painter } from './painter';
 
-/** Long enough for the leaving Room's animation, short enough not to strand it. */
+/** Longer than the entering Room's animation, short enough not to strand it. */
 const TRANSITION_GUARD_MS = 1200;
 
 /**
@@ -54,7 +54,9 @@ export const mountRooms = (dispatch: Dispatch): Painter => {
       const arriving = current !== null;
       current = world.rooms.current;
       if (arriving) {
-        titleOf(current).focus();
+        // The door that was just used is inside a Room now hidden, so focus has
+        // to go somewhere: the heading of the Room the visitor walked into.
+        titleOf(current).focus({ preventScroll: true });
         scrollTo({ top: 0 });
       }
     }
