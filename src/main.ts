@@ -1,3 +1,4 @@
+import { mountActors } from './dom/actors'; // 07: actors
 import { mountGameRoom } from './dom/game-room';
 import { mountLanguage, readStoredLanguage } from './dom/language';
 import { mountMotion, prefersReducedMotion } from './dom/motion';
@@ -28,7 +29,10 @@ function dispatch(event: WorldEvent) {
   render();
 }
 
-const mounts: Mount[] = [mountLanguage, mountMotion, mountRooms, mountGameRoom];
+const mounts: Mount[] = [
+  mountLanguage, mountMotion, mountRooms, mountGameRoom,
+  mountActors, // 07: actors — the Cast stands on top of whatever the Room laid down.
+];
 // Filled as each painter mounts, so an event arriving mid-mount paints only
 // what is already standing instead of reaching for a painter that is not there.
 const painters: Painter[] = [];

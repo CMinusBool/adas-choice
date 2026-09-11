@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  ROOM_IDS,
   STAGE_HEIGHT,
   STAGE_WIDTH,
   actorView,
@@ -180,6 +181,32 @@ describe('staying on the floor', () => {
     const arrived = runUntil(sent, world => !boy(world).moving);
     expect(isWalkable('entryway', boy(arrived).at)).toBe(true);
     expect(boy(arrived).at).not.toEqual(offTheFloor);
+  });
+});
+
+describe('the floor every Room stands on', () => {
+  /**
+   * Every Room's walkable area has to lie inside its own stage.
+   *
+   * The DOM layer paints an Actor by taking its position as a fraction of the
+   * 1600 x 900 stage, so a Room whose floor ran off the stage would put an
+   * Actor outside the Room it is standing in. Three of the four floors are
+   * placeholders until each Room's design pass replaces them, which is exactly
+   * when this is worth having.
+   */
+  it('never lets a Room be walkable outside its stage', () => {
+    for (const room of ROOM_IDS) {
+      let inside = 0;
+      for (let x = -200; x <= STAGE_WIDTH + 200; x += 20) {
+        for (let y = -200; y <= STAGE_HEIGHT + 200; y += 20) {
+          const offStage = x < 0 || x > STAGE_WIDTH || y < 0 || y > STAGE_HEIGHT;
+          if (offStage) expect(isWalkable(room, { x, y })).toBe(false);
+          else if (isWalkable(room, { x, y })) inside++;
+        }
+      }
+      // And a Room with no floor at all would strand anyone sent to it.
+      expect(inside).toBeGreaterThan(0);
+    }
   });
 });
 

@@ -236,3 +236,15 @@ html.dialog-open { overflow: hidden; }
 }
 .motion-off .choice-dialog { animation: none; }
 
+/* 07: actors — the stage each Room lays its Cast out on, and the Cast itself.
+   The stage is deliberately bare: it is a 16:9 canvas of 1600 x 900 units and
+   nothing else until each Room's design pass furnishes it. */
+.stage { position: relative; width: 100%; max-width: 64rem; margin: 2.2rem auto 0; aspect-ratio: 16 / 9; pointer-events: none; background: linear-gradient(to bottom, transparent 62%, #f589b40a); }
+/* The Cast waits in here until the model puts an Actor in a Room, so a parked
+   Actor needs no state of its own: the container is what hides it. */
+.cast { display: none; }
+/* `left` and `top` are the Actor's feet in stage units turned into percentages
+   of the stage, and the translate lifts the sprite so its feet land there. */
+.actor { position: absolute; transform: translate(-50%, -100%) scaleX(var(--flip, 1)); transform-origin: bottom center; }
+.actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
+

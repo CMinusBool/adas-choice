@@ -44,6 +44,8 @@
           <a class="door" href="#/cinema"><span class="door-name" data-i18n="doorCinema">放映室</span><span class="door-arrow" aria-hidden="true">→</span></a>
           <a class="door" href="#/activities"><span class="door-name" data-i18n="doorActivities">活動室</span><span class="door-arrow" aria-hidden="true">→</span></a>
         </nav>
+        <!-- 07: actors — the Room's stage, a 16:9 canvas of 1600 x 900 units the Cast walks on. -->
+        <div class="stage" data-stage="entryway" aria-hidden="true"></div>
       </section>
       <section class="room" id="room-games" data-room="games" aria-labelledby="page-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
@@ -129,17 +131,53 @@
             <div class="particle-field" aria-hidden="true"></div>
           </article>
         </section>
+        <!-- 07: actors -->
+        <div class="stage" data-stage="games" aria-hidden="true"></div>
       </section>
       <section class="room" id="room-cinema" data-room="cinema" aria-labelledby="cinema-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
         <h1 class="room-title" id="cinema-title" data-room-title tabindex="-1" data-i18n="cinemaTitle">放映室</h1>
         <p class="room-lede" data-i18n="cinemaSoon">布幕掛好了，放映機還在等第一卷膠卷。</p>
+        <!-- 07: actors -->
+        <div class="stage" data-stage="cinema" aria-hidden="true"></div>
       </section>
       <section class="room" id="room-activities" data-room="activities" aria-labelledby="activities-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
         <h1 class="room-title" id="activities-title" data-room-title tabindex="-1" data-i18n="activitiesTitle">活動室</h1>
         <p class="room-lede" data-i18n="activitiesSoon">桌上空著，等著擺上今晚要一起做的事。</p>
+        <!-- 07: actors -->
+        <div class="stage" data-stage="activities" aria-hidden="true"></div>
       </section>
+      <!--
+        07: actors — the Cast's artwork, declared rather than built in TypeScript.
+
+        `src/dom/actors.ts` moves each Actor into the stage of whatever Room the
+        world model says it is standing in, and parks it back here when the model
+        has not placed it. Declaring every sheet as a `data-sheet` inside
+        `#apartment` is also what gets it preloaded and what lets
+        `scripts/assert-built-page.mjs` prove it ships: a sheet URL built in
+        TypeScript would be invisible to both.
+
+        Every sheet below is a placeholder — one neutral standing frame cut out
+        of a Character Sheet, not a Cycle. See `public/assets/actors/manifest.json`
+        and CLAUDE.md's "Cycle assets travel as a set".
+      -->
+      <div class="cast" id="cast" aria-hidden="true" hidden>
+        <div class="actor" data-actor="boy" data-height="360">
+          <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/boy-walk-right.png"></div>
+        </div>
+        <div class="actor" data-actor="girl" data-height="328">
+          <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/girl-walk-right.png"></div>
+        </div>
+        <div class="actor" data-actor="mica" data-height="132">
+          <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mica-walk-left.png"></div>
+          <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mica-walk-right.png"></div>
+        </div>
+        <div class="actor" data-actor="mira" data-height="132">
+          <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mira-walk-left.png"></div>
+          <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mira-walk-right.png"></div>
+        </div>
+      </div>
     </main>
     <footer class="site-footer"><span><span class="footer-heart" aria-hidden="true">♡</span> <span data-i18n="footer">最好的升級，就是有你一起。</span></span><span data-i18n="artNote">原創合作冒險插畫・2026 年 9 月</span></footer>
   </div>
