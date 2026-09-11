@@ -4,6 +4,7 @@ import { mountLanguage, readStoredLanguage } from './dom/language';
 import { mountLoading } from './dom/loading';
 import { mountMotion, prefersReducedMotion } from './dom/motion';
 import { mountRooms } from './dom/rooms';
+import { mountSound } from './dom/sound'; // 06: audio
 import type { Mount, Painter } from './dom/painter';
 import { advance, createWorld, type World, type WorldEvent } from './world';
 
@@ -35,6 +36,7 @@ const mounts: Mount[] = [
   // opens the shell is out of `inert` before the Room router moves focus into it.
   mountLoading,
   mountLanguage, mountMotion, mountRooms, mountGameRoom,
+  mountSound, // 06: audio
 ];
 // Filled as each painter mounts, so an event arriving mid-mount paints only
 // what is already standing instead of reaching for a painter that is not there.

@@ -36,7 +36,11 @@ const zhHant = {
   heavenlyAlt: '黑髮女太空人抓著扶手和隊友的靴子，戴眼鏡的棕髮男生伸手去拿漂浮的扳手，兩人笑得很開心。',
   footer: '最好的升級，就是有你一起。', artNote: '原創合作冒險插畫・2026 年 9 月',
   // 05: loading
-  loadingTitle: '正在整理公寓⋯', loadingProgress: '載入進度', loadingNote: '畫都掛上牆之後，門就會打開。'
+  loadingTitle: '正在整理公寓⋯', loadingProgress: '載入進度', loadingNote: '畫都掛上牆之後，門就會打開。',
+  // 06: audio
+  mute: '關閉聲音', unmute: '開啟聲音',
+  musicSourceStart: '播放房間音樂', musicSourceStop: '停止房間音樂', placeholder: '暫代'
+  // end 06
 };
 
 /** Every piece of copy on the page. Both dictionaries carry the same keys. */
@@ -72,6 +76,10 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     heavenlyAlt: 'A black-haired astronaut holds a rail and her taller teammate’s boot as he reaches for a floating wrench. His brown hair and browline glasses are visible through his visor; both laugh.',
     footer: 'Good company is the best upgrade.', artNote: 'Original cartoon scenes · September 2026',
     // 05: loading
-    loadingTitle: 'Tidying the apartment…', loadingProgress: 'Loading progress', loadingNote: 'The door opens once every picture is on the wall.'
+    loadingTitle: 'Tidying the apartment…', loadingProgress: 'Loading progress', loadingNote: 'The door opens once every picture is on the wall.',
+    // 06: audio
+    mute: 'Mute sound', unmute: 'Unmute sound',
+    musicSourceStart: "Play the Room's music", musicSourceStop: "Stop the Room's music", placeholder: 'placeholder'
+    // end 06
   }
 };

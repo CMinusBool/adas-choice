@@ -21,3 +21,8 @@ export type { RoomsSlice, TransitionKind, World, WorldEvent, WorldInputs } from 
 export { advance, createWorld, isCurrentRoom, isRoomPainted, motionIsOn } from './world';
 // 05: loading
 export { isInteractive, loadingProgress } from './world';
+
+// 06: audio
+export type { AudioSlice, AudioTier } from './audio';
+export { isAudible, isMusicSourceOn, isRoomMusicAudible, soundIsOn } from './world';
+// end 06

@@ -43,12 +43,28 @@
           <svg class="play-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg>
           <span id="motion-label">暫停動畫</span>
         </button>
+        <!-- 06: audio — one control for all three tiers, beside motion and language. -->
+        <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false" aria-label="關閉聲音" hidden>
+          <svg class="sound-on-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 7.8h2.7L9.8 4.8v10.4L6.2 12.2H3.5Z"/><path d="M12.8 7.5a3.5 3.5 0 0 1 0 5"/><path d="M15.2 5.2a6.8 6.8 0 0 1 0 9.6"/></svg>
+          <svg class="sound-off-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 7.8h2.7L9.8 4.8v10.4L6.2 12.2H3.5Z"/><path d="m13 8 4 4m0-4-4 4"/></svg>
+          <span id="sound-label">關閉聲音</span>
+        </button>
+        <!-- end 06 -->
       </div>
     </header>
     <main class="apartment" id="apartment">
       <section class="room" id="room-entryway" data-room="entryway" aria-labelledby="entryway-title">
         <h1 class="room-title" id="entryway-title" data-room-title tabindex="-1" data-i18n="entrywayTitle">玄關</h1>
         <p class="room-lede" data-i18n="entrywayLede">外套先掛著。三扇門通往其他房間，想去哪一間都可以。</p>
+        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
+        <div class="music-source-row">
+          <button class="music-source" type="button" data-music-source="entryway" aria-pressed="false" hidden>
+            <span class="music-note" aria-hidden="true">♪</span>
+            <span data-music-source-label>播放房間音樂</span>
+            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
+          </button>
+        </div>
+        <!-- end 06 -->
         <nav class="doors" aria-label="通往其他房間的門" data-i18n-aria="doorsLabel">
           <a class="door" href="#/games"><span class="door-name" data-i18n="doorGames">遊戲室</span><span class="door-arrow" aria-hidden="true">→</span></a>
           <a class="door" href="#/cinema"><span class="door-name" data-i18n="doorCinema">放映室</span><span class="door-arrow" aria-hidden="true">→</span></a>
@@ -57,6 +73,15 @@
       </section>
       <section class="room" id="room-games" data-room="games" aria-labelledby="page-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
+        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
+        <div class="music-source-row">
+          <button class="music-source" type="button" data-music-source="games" aria-pressed="false" hidden>
+            <span class="music-note" aria-hidden="true">♪</span>
+            <span data-music-source-label>播放房間音樂</span>
+            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
+          </button>
+        </div>
+        <!-- end 06 -->
         <section class="intro" aria-labelledby="page-title">
           <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span><span data-i18n="eyebrow">三款精選・兩個玩家</span></p>
           <h1 id="page-title" data-room-title tabindex="-1"><span data-i18n="titleStart">今晚，</span><span class="title-accent" data-i18n="titleAccent">一起玩。</span><svg class="title-spark" viewBox="0 0 32 40" aria-hidden="true"><path d="M16 0c0 14-3 20-16 20 13 0 16 6 16 20 0-14 3-20 16-20C19 20 16 14 16 0Z"/></svg></h1>
@@ -144,11 +169,30 @@
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
         <h1 class="room-title" id="cinema-title" data-room-title tabindex="-1" data-i18n="cinemaTitle">放映室</h1>
         <p class="room-lede" data-i18n="cinemaSoon">布幕掛好了，放映機還在等第一卷膠卷。</p>
+        <!-- 06: audio — this Room's Music Source. Ticket 20 gives the projector its
+             own two affordances; until then the Cinema Room has this placeholder too. -->
+        <div class="music-source-row">
+          <button class="music-source" type="button" data-music-source="cinema" aria-pressed="false" hidden>
+            <span class="music-note" aria-hidden="true">♪</span>
+            <span data-music-source-label>播放房間音樂</span>
+            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
+          </button>
+        </div>
+        <!-- end 06 -->
       </section>
       <section class="room" id="room-activities" data-room="activities" aria-labelledby="activities-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
         <h1 class="room-title" id="activities-title" data-room-title tabindex="-1" data-i18n="activitiesTitle">活動室</h1>
         <p class="room-lede" data-i18n="activitiesSoon">桌上空著，等著擺上今晚要一起做的事。</p>
+        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
+        <div class="music-source-row">
+          <button class="music-source" type="button" data-music-source="activities" aria-pressed="false" hidden>
+            <span class="music-note" aria-hidden="true">♪</span>
+            <span data-music-source-label>播放房間音樂</span>
+            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
+          </button>
+        </div>
+        <!-- end 06 -->
       </section>
     </main>
     <footer class="site-footer"><span><span class="footer-heart" aria-hidden="true">♡</span> <span data-i18n="footer">最好的升級，就是有你一起。</span></span><span data-i18n="artNote">原創合作冒險插畫・2026 年 9 月</span></footer>
