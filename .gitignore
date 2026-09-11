@@ -1,6 +1,9 @@
 dist/
 node_modules/
 .scratch/
+# Source artwork: the Character Sheets are the identity source for every Actor,
+# and they are megabytes each. Runtime assets are cut from them into public/.
+art/
 *.tar.gz
 .env
 .env.*

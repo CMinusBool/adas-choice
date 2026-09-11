@@ -1,219 +1,257 @@
-<!doctype html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#121013">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.workers.dev https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'none'; form-action 'none'">
-  <meta name="description" content="Ada 的雙人遊戲精選：Operation: Tango、Lovers in a Dangerous Spacetime 和 Heavenly Bodies。一起解謎，一起冒險。">
-  <title>Ada's choice — 今晚，一起玩。</title>
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
-  <script src="site-config.js" defer></script>
-  <script src="/src/main.ts" type="module"></script>
-</head>
-<body>
-  <a class="skip-link" href="#apartment" data-i18n="skip">跳至內容</a>
-  <!-- Mounting point for anything that covers the apartment, starting with the loading screen. -->
-  <div class="overlay-slot" id="overlay-slot">
-    <!-- 05: loading — markup rather than script, so the first paint is the loading screen itself. -->
-    <div class="loading-screen" id="loading-screen" tabindex="-1">
-      <p class="loading-title" id="loading-title" data-i18n="loadingTitle">正在整理公寓⋯</p>
-      <div class="loading-track" id="loading-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="載入進度" data-i18n-aria="loadingProgress">
-        <span class="loading-fill" id="loading-fill"></span>
-      </div>
-      <p class="loading-percent" id="loading-percent" aria-hidden="true">0%</p>
-      <p class="loading-note" data-i18n="loadingNote">畫都掛上牆之後，門就會打開。</p>
-    </div>
-  </div>
-  <div class="page-shell">
-    <header class="site-header">
-      <a class="wordmark" href="#/entryway" aria-label="Ada's choice，回到玄關" data-i18n-aria="home">
-        <span>Ada's choice<span class="wordmark-dot">.</span></span>
-        <svg class="brand-heart" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27S3 19.4 3 10.8C3 3.7 12 2 16 8c4-6 13-4.3 13 2.8C29 19.4 16 27 16 27Z"/><path class="heart-shine" d="M7.5 10.5c0-2 1.2-3.2 3-3.2"/></svg>
-      </a>
-      <div class="header-actions">
-        <button class="language-toggle" id="language-toggle" type="button" lang="en" aria-label="Switch to English" hidden>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z"/></svg>
-          <span id="language-label">English</span>
-        </button>
-        <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false" aria-label="暫停動畫" hidden>
-          <svg class="pause-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg>
-          <svg class="play-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg>
-          <span id="motion-label">暫停動畫</span>
-        </button>
-        <!-- 06: audio — one control for all three tiers, beside motion and language. -->
-        <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false" aria-label="關閉聲音" hidden>
-          <svg class="sound-on-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 7.8h2.7L9.8 4.8v10.4L6.2 12.2H3.5Z"/><path d="M12.8 7.5a3.5 3.5 0 0 1 0 5"/><path d="M15.2 5.2a6.8 6.8 0 0 1 0 9.6"/></svg>
-          <svg class="sound-off-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 7.8h2.7L9.8 4.8v10.4L6.2 12.2H3.5Z"/><path d="m13 8 4 4m0-4-4 4"/></svg>
-          <span id="sound-label">關閉聲音</span>
-        </button>
-        <!-- end 06 -->
-      </div>
-    </header>
-    <main class="apartment" id="apartment">
-      <section class="room" id="room-entryway" data-room="entryway" aria-labelledby="entryway-title">
-        <h1 class="room-title" id="entryway-title" data-room-title tabindex="-1" data-i18n="entrywayTitle">玄關</h1>
-        <p class="room-lede" data-i18n="entrywayLede">外套先掛著。三扇門通往其他房間，想去哪一間都可以。</p>
-        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
-        <div class="music-source-row">
-          <button class="music-source" type="button" data-music-source="entryway" aria-pressed="false" hidden>
-            <span class="music-note" aria-hidden="true">♪</span>
-            <span data-music-source-label>播放房間音樂</span>
-            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
-          </button>
-        </div>
-        <!-- end 06 -->
-        <nav class="doors" aria-label="通往其他房間的門" data-i18n-aria="doorsLabel">
-          <a class="door" href="#/games"><span class="door-name" data-i18n="doorGames">遊戲室</span><span class="door-arrow" aria-hidden="true">→</span></a>
-          <a class="door" href="#/cinema"><span class="door-name" data-i18n="doorCinema">放映室</span><span class="door-arrow" aria-hidden="true">→</span></a>
-          <a class="door" href="#/activities"><span class="door-name" data-i18n="doorActivities">活動室</span><span class="door-arrow" aria-hidden="true">→</span></a>
-        </nav>
-      </section>
-      <section class="room" id="room-games" data-room="games" aria-labelledby="page-title" hidden>
-        <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
-        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
-        <div class="music-source-row">
-          <button class="music-source" type="button" data-music-source="games" aria-pressed="false" hidden>
-            <span class="music-note" aria-hidden="true">♪</span>
-            <span data-music-source-label>播放房間音樂</span>
-            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
-          </button>
-        </div>
-        <!-- end 06 -->
-        <section class="intro" aria-labelledby="page-title">
-          <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span><span data-i18n="eyebrow">三款精選・兩個玩家</span></p>
-          <h1 id="page-title" data-room-title tabindex="-1"><span data-i18n="titleStart">今晚，</span><span class="title-accent" data-i18n="titleAccent">一起玩。</span><svg class="title-spark" viewBox="0 0 32 40" aria-hidden="true"><path d="M16 0c0 14-3 20-16 20 13 0 16 6 16 20 0-14 3-20 16-20C19 20 16 14 16 0Z"/></svg></h1>
-          <p class="intro-description" data-i18n="intro">一起解謎、分享操控，在手忙腳亂時接住彼此。</p>
-        </section>
-        <section class="games" id="games" aria-label="合作遊戲精選" data-i18n-aria="gamesLabel">
-          <article class="game-wrap" data-game="tango">
-            <a class="game-card tango" href="https://store.steampowered.com/app/1335790/Operation_Tango/" target="_blank" rel="noopener noreferrer" aria-labelledby="tango-title" aria-describedby="tango-action">
-              <div class="card-media">
-                <div class="scene-backdrop" style="background-image:url('assets/operation-tango.webp')" aria-hidden="true"></div>
-                <div class="scene-frame">
-                  <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/operation-tango.webp"><img class="game-art" src="assets/operation-tango.gif" data-animated="assets/operation-tango.gif" data-still="assets/operation-tango.webp" width="480" height="480" alt="戴著眼鏡的棕髮男生負責駭客工作，黑髮女生破解保安系統，兩人一起慶祝成功。" data-i18n-alt="tangoAlt" fetchpriority="high"></picture>
-                  <div class="scene-sprite" data-sheet="assets/operation-tango-sprite.webp" aria-hidden="true" hidden></div>
-                </div>
-                <div class="image-shade" aria-hidden="true"></div>
-                <div class="media-topline"><span class="category" data-i18n="tangoCategory">默契滿分</span></div>
-                <span class="scene-caption"><span class="caption-dot" aria-hidden="true"></span><span data-i18n="tangoCaption">你來入侵，我來潛入。</span></span>
-              </div>
-              <div class="card-copy">
-                <div class="pick-line"><span class="pick-label" data-i18n="tangoPick">首選推薦</span><span class="player-count" data-i18n="tangoPlayers">2 位玩家</span></div>
-                <h2 id="tango-title">Operation: Tango</h2>
-                <div class="game-details">
-                  <p class="game-description" data-i18n="tangoDescription">一位特務，一位駭客。兩個畫面，各自握有不同線索。把話說清楚、抓準時機，就是你們一起解開謎題的關鍵。</p>
-                  <div class="why-pick"><span class="detail-label" data-i18n="why">為什麼選它</span><p data-i18n="tangoWhy">巧妙的機制、互補的角色，還有那句一起喊出的「解開了！」。</p></div>
-                </div>
-                <div class="setup"><span class="detail-label" data-i18n="setup">開玩前準備</span><p data-i18n="tangoSetup">線上合作・兩台裝置＋麥克風</p><p class="setup-note" data-i18n="tangoSetupNote">一份遊戲＋免費 Friend Pass</p></div>
-                <div class="card-action" id="tango-action"><span data-i18n="invite">想跟你一起玩這個～</span><span class="action-heart" aria-hidden="true">♡</span></div>
-              </div>
-            </a>
-            <div class="particle-field" aria-hidden="true"></div>
-          </article>
-          <article class="game-wrap" data-game="lovers">
-            <a class="game-card lovers" href="https://store.steampowered.com/app/252110/Lovers_in_a_Dangerous_Spacetime/" target="_blank" rel="noopener noreferrer" aria-labelledby="lovers-title" aria-describedby="lovers-action">
-              <div class="card-media">
-                <div class="scene-backdrop" style="background-image:url('assets/lovers-in-a-dangerous-spacetime.webp')" aria-hidden="true"></div>
-                <div class="scene-frame">
-                  <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/lovers-in-a-dangerous-spacetime.webp"><img class="game-art" src="assets/lovers-in-a-dangerous-spacetime.gif" data-animated="assets/lovers-in-a-dangerous-spacetime.gif" data-still="assets/lovers-in-a-dangerous-spacetime.webp" width="480" height="480" alt="黑髮女生掌舵，戴眼鏡的棕髮男生操作護盾，兩人在粉紅太空船裡擋下隕石。" data-i18n-alt="loversAlt"></picture>
-                  <div class="scene-sprite" data-sheet="assets/lovers-in-a-dangerous-spacetime-sprite.webp" aria-hidden="true" hidden></div>
-                </div>
-                <div class="image-shade" aria-hidden="true"></div>
-                <div class="media-topline"><span class="category" data-i18n="loversCategory">一艘船，兩人忙</span></div>
-                <span class="scene-caption"><span class="caption-dot" aria-hidden="true"></span><span data-i18n="loversCaption">我掌舵，你救場。</span></span>
-              </div>
-              <div class="card-copy">
-                <div class="pick-line"><span class="pick-label" data-i18n="loversPick">戰術默契首選</span><span class="player-count" data-i18n="loversPlayers">2–4 位玩家</span></div>
-                <h2 id="lovers-title">Lovers in a<br>Dangerous Spacetime</h2>
-                <div class="game-details">
-                  <p class="game-description" data-i18n="loversDescription">一起分工駕駛、護盾和武器。大聲提醒彼此、在控制台之間奔跑，想辦法讓這艘小小太空船平安回家。</p>
-                  <div class="why-pick"><span class="detail-label" data-i18n="why">為什麼選它</span><p data-i18n="loversWhy">有你喜歡的戰術與防守，也有繽紛又可愛的混亂。隨時都值得再玩一場。</p></div>
-                </div>
-                <div class="setup"><span class="detail-label" data-i18n="setup">開玩前準備</span><p data-i18n="couchSetup">同機合作・Remote Play Together</p><p class="setup-note" data-i18n="loversSetupNote">一台電腦，就能一起出發</p></div>
-                <div class="card-action" id="lovers-action"><span data-i18n="invite">想跟你一起玩這個～</span><span class="action-heart" aria-hidden="true">♡</span></div>
-              </div>
-            </a>
-            <div class="particle-field" aria-hidden="true"></div>
-          </article>
-          <article class="game-wrap" data-game="heavenly">
-            <a class="game-card heavenly" href="https://store.steampowered.com/app/1138850/Heavenly_Bodies/" target="_blank" rel="noopener noreferrer" aria-labelledby="heavenly-title" aria-describedby="heavenly-action">
-              <div class="card-media">
-                <div class="scene-backdrop" style="background-image:url('assets/heavenly-bodies.webp')" aria-hidden="true"></div>
-                <div class="scene-frame">
-                  <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/heavenly-bodies.webp"><img class="game-art" src="assets/heavenly-bodies.gif" data-animated="assets/heavenly-bodies.gif" data-still="assets/heavenly-bodies.webp" width="480" height="480" alt="黑髮女太空人抓著扶手和隊友的靴子，戴眼鏡的棕髮男生伸手去拿漂浮的扳手，兩人笑得很開心。" data-i18n-alt="heavenlyAlt" loading="lazy"></picture>
-                  <div class="scene-sprite" data-sheet="assets/heavenly-bodies-sprite.webp" aria-hidden="true" hidden></div>
-                </div>
-                <div class="image-shade" aria-hidden="true"></div>
-                <div class="media-topline"><span class="category" data-i18n="heavenlyCategory">抓緊彼此</span></div>
-                <span class="scene-caption"><span class="caption-dot" aria-hidden="true"></span><span data-i18n="heavenlyCaption">你的後背，還有靴子，都交給我。</span></span>
-              </div>
-              <div class="card-copy">
-                <div class="pick-line"><span class="pick-label" data-i18n="heavenlyPick">一起笑翻首選</span><span class="player-count" data-i18n="heavenlyPlayers">雙人合作</span></div>
-                <h2 id="heavenly-title">Heavenly Bodies</h2>
-                <div class="game-details">
-                  <p class="game-description" data-i18n="heavenlyDescription">沒有重力，連小修理都變成雙人大工程。拉住隊友、遞個工具，再一起笑看最簡單的任務如何徹底失控。</p>
-                  <div class="why-pick"><span class="detail-label" data-i18n="why">為什麼選它</span><p data-i18n="heavenlyWhy">物理解謎，加上令人笑翻的失誤。一起接受笨手笨腳，就是最好玩的部分。</p></div>
-                </div>
-                <div class="setup"><span class="detail-label" data-i18n="setup">開玩前準備</span><p data-i18n="couchSetup">同機合作・Remote Play Together</p><p class="setup-note" data-i18n="heavenlySetupNote">很推薦兩人都使用控制器</p></div>
-                <div class="card-action" id="heavenly-action"><span data-i18n="invite">想跟你一起玩這個～</span><span class="action-heart" aria-hidden="true">♡</span></div>
-              </div>
-            </a>
-            <div class="particle-field" aria-hidden="true"></div>
-          </article>
-        </section>
-      </section>
-      <section class="room" id="room-cinema" data-room="cinema" aria-labelledby="cinema-title" hidden>
-        <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
-        <h1 class="room-title" id="cinema-title" data-room-title tabindex="-1" data-i18n="cinemaTitle">放映室</h1>
-        <p class="room-lede" data-i18n="cinemaSoon">布幕掛好了，放映機還在等第一卷膠卷。</p>
-        <!-- 06: audio — this Room's Music Source. Ticket 20 gives the projector its
-             own two affordances; until then the Cinema Room has this placeholder too. -->
-        <div class="music-source-row">
-          <button class="music-source" type="button" data-music-source="cinema" aria-pressed="false" hidden>
-            <span class="music-note" aria-hidden="true">♪</span>
-            <span data-music-source-label>播放房間音樂</span>
-            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
-          </button>
-        </div>
-        <!-- end 06 -->
-      </section>
-      <section class="room" id="room-activities" data-room="activities" aria-labelledby="activities-title" hidden>
-        <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
-        <h1 class="room-title" id="activities-title" data-room-title tabindex="-1" data-i18n="activitiesTitle">活動室</h1>
-        <p class="room-lede" data-i18n="activitiesSoon">桌上空著，等著擺上今晚要一起做的事。</p>
-        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
-        <div class="music-source-row">
-          <button class="music-source" type="button" data-music-source="activities" aria-pressed="false" hidden>
-            <span class="music-note" aria-hidden="true">♪</span>
-            <span data-music-source-label>播放房間音樂</span>
-            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
-          </button>
-        </div>
-        <!-- end 06 -->
-      </section>
-    </main>
-    <footer class="site-footer"><span><span class="footer-heart" aria-hidden="true">♡</span> <span data-i18n="footer">最好的升級，就是有你一起。</span></span><span data-i18n="artNote">原創合作冒險插畫・2026 年 9 月</span></footer>
-  </div>
-  <dialog class="choice-dialog" id="game-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-game">
-    <button class="dialog-close" id="dialog-close" type="button" aria-label="關閉" data-i18n-aria="close">×</button>
-    <div class="dialog-art"><img id="dialog-poster" src="assets/lovers-in-a-dangerous-spacetime.webp" alt="" width="112" height="112"><span aria-hidden="true">♡</span></div>
-    <p class="dialog-eyebrow" data-i18n="dialogEyebrow">一個小小的邀請</p>
-    <h2 class="dialog-title" id="dialog-title" data-i18n="dialogTitle">一起出發，好嗎？</h2>
-    <p class="dialog-game" id="dialog-game"></p>
-    <div class="dialog-options">
-      <a class="dialog-steam" id="dialog-steam" href="https://store.steampowered.com/" target="_blank" rel="noopener noreferrer"><span data-i18n="checkout">去 Steam 看看</span><span aria-hidden="true">↗</span></a>
-      <form id="invite-form">
-        <label class="privacy-consent"><input id="invite-consent" type="checkbox" required><span data-i18n="consent">我同意將這款遊戲的選擇、IP 位址、大約所在國家，以及基本裝置／瀏覽器資訊寄給網站主人。</span></label>
-        <p class="privacy-note" data-i18n="privacyNote">這些資訊也會產生一組請求識別碼，並不代表能辨識你的真實身分。不會收集你的姓名或電子郵件。</p>
-        <div class="honey-field" aria-hidden="true"><label>Website<input id="invite-website" name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
-        <div id="turnstile-widget" class="turnstile-widget"></div>
-        <button class="dialog-invite" id="send-invite" type="submit" disabled><span aria-hidden="true">♡</span><span id="send-label" data-i18n="invite">想跟你一起玩這個～</span></button>
-      </form>
-    </div>
-    <p class="invite-status" id="invite-status" role="status" aria-live="polite"></p>
-  </dialog>
-</body>
-</html>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#121013">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.workers.dev https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="Ada 的雙人遊戲精選：Operation: Tango、Lovers in a Dangerous Spacetime 和 Heavenly Bodies。一起解謎，一起冒險。">
+  <title>Ada's choice — 今晚，一起玩。</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="site-config.js" defer></script>
+  <script src="/src/main.ts" type="module"></script>
+</head>
+<body>
+  <a class="skip-link" href="#apartment" data-i18n="skip">跳至內容</a>
+  <!-- Mounting point for anything that covers the apartment, starting with the loading screen. -->
+  <div class="overlay-slot" id="overlay-slot">
+    <!-- 05: loading — markup rather than script, so the first paint is the loading screen itself. -->
+    <div class="loading-screen" id="loading-screen" tabindex="-1">
+      <p class="loading-title" id="loading-title" data-i18n="loadingTitle">正在整理公寓⋯</p>
+      <div class="loading-track" id="loading-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="載入進度" data-i18n-aria="loadingProgress">
+        <span class="loading-fill" id="loading-fill"></span>
+      </div>
+      <p class="loading-percent" id="loading-percent" aria-hidden="true">0%</p>
+      <p class="loading-note" data-i18n="loadingNote">畫都掛上牆之後，門就會打開。</p>
+    </div>
+  </div>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="wordmark" href="#/entryway" aria-label="Ada's choice，回到玄關" data-i18n-aria="home">
+        <span>Ada's choice<span class="wordmark-dot">.</span></span>
+        <svg class="brand-heart" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27S3 19.4 3 10.8C3 3.7 12 2 16 8c4-6 13-4.3 13 2.8C29 19.4 16 27 16 27Z"/><path class="heart-shine" d="M7.5 10.5c0-2 1.2-3.2 3-3.2"/></svg>
+      </a>
+      <div class="header-actions">
+        <button class="language-toggle" id="language-toggle" type="button" lang="en" aria-label="Switch to English" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z"/></svg>
+          <span id="language-label">English</span>
+        </button>
+        <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false" aria-label="暫停動畫" hidden>
+          <svg class="pause-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5v10M13 5v10"/></svg>
+          <svg class="play-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 9 6-9 6Z"/></svg>
+          <span id="motion-label">暫停動畫</span>
+        </button>
+        <!-- 06: audio — one control for all three tiers, beside motion and language. -->
+        <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false" aria-label="關閉聲音" hidden>
+          <svg class="sound-on-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 7.8h2.7L9.8 4.8v10.4L6.2 12.2H3.5Z"/><path d="M12.8 7.5a3.5 3.5 0 0 1 0 5"/><path d="M15.2 5.2a6.8 6.8 0 0 1 0 9.6"/></svg>
+          <svg class="sound-off-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 7.8h2.7L9.8 4.8v10.4L6.2 12.2H3.5Z"/><path d="m13 8 4 4m0-4-4 4"/></svg>
+          <span id="sound-label">關閉聲音</span>
+        </button>
+        <!-- end 06 -->
+      </div>
+    </header>
+    <main class="apartment" id="apartment">
+      <section class="room" id="room-entryway" data-room="entryway" aria-labelledby="entryway-title">
+        <h1 class="room-title" id="entryway-title" data-room-title tabindex="-1" data-i18n="entrywayTitle">玄關</h1>
+        <p class="room-lede" data-i18n="entrywayLede">外套先掛著。三扇門通往其他房間，想去哪一間都可以。</p>
+        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
+        <div class="music-source-row">
+          <button class="music-source" type="button" data-music-source="entryway" aria-pressed="false" hidden>
+            <span class="music-note" aria-hidden="true">♪</span>
+            <span data-music-source-label>播放房間音樂</span>
+            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
+          </button>
+        </div>
+        <!-- end 06 -->
+        <nav class="doors" aria-label="通往其他房間的門" data-i18n-aria="doorsLabel">
+          <a class="door" href="#/games"><span class="door-name" data-i18n="doorGames">遊戲室</span><span class="door-arrow" aria-hidden="true">→</span></a>
+          <a class="door" href="#/cinema"><span class="door-name" data-i18n="doorCinema">放映室</span><span class="door-arrow" aria-hidden="true">→</span></a>
+          <a class="door" href="#/activities"><span class="door-name" data-i18n="doorActivities">活動室</span><span class="door-arrow" aria-hidden="true">→</span></a>
+        </nav>
+        <!-- 07: actors — the Room's stage, a 16:9 canvas of 1600 x 900 units the Cast walks on. -->
+        <div class="stage" data-stage="entryway" aria-hidden="true"></div>
+      </section>
+      <section class="room" id="room-games" data-room="games" aria-labelledby="page-title" hidden>
+        <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
+        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
+        <div class="music-source-row">
+          <button class="music-source" type="button" data-music-source="games" aria-pressed="false" hidden>
+            <span class="music-note" aria-hidden="true">♪</span>
+            <span data-music-source-label>播放房間音樂</span>
+            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
+          </button>
+        </div>
+        <!-- end 06 -->
+        <section class="intro" aria-labelledby="page-title">
+          <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span><span data-i18n="eyebrow">三款精選・兩個玩家</span></p>
+          <h1 id="page-title" data-room-title tabindex="-1"><span data-i18n="titleStart">今晚，</span><span class="title-accent" data-i18n="titleAccent">一起玩。</span><svg class="title-spark" viewBox="0 0 32 40" aria-hidden="true"><path d="M16 0c0 14-3 20-16 20 13 0 16 6 16 20 0-14 3-20 16-20C19 20 16 14 16 0Z"/></svg></h1>
+          <p class="intro-description" data-i18n="intro">一起解謎、分享操控，在手忙腳亂時接住彼此。</p>
+        </section>
+        <section class="games" id="games" aria-label="合作遊戲精選" data-i18n-aria="gamesLabel">
+          <article class="game-wrap" data-game="tango">
+            <a class="game-card tango" href="https://store.steampowered.com/app/1335790/Operation_Tango/" target="_blank" rel="noopener noreferrer" aria-labelledby="tango-title" aria-describedby="tango-action">
+              <div class="card-media">
+                <div class="scene-backdrop" style="background-image:url('assets/operation-tango.webp')" aria-hidden="true"></div>
+                <div class="scene-frame">
+                  <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/operation-tango.webp"><img class="game-art" src="assets/operation-tango.gif" data-animated="assets/operation-tango.gif" data-still="assets/operation-tango.webp" width="480" height="480" alt="戴著眼鏡的棕髮男生負責駭客工作，黑髮女生破解保安系統，兩人一起慶祝成功。" data-i18n-alt="tangoAlt" fetchpriority="high"></picture>
+                  <div class="scene-sprite" data-sheet="assets/operation-tango-sprite.webp" aria-hidden="true" hidden></div>
+                </div>
+                <div class="image-shade" aria-hidden="true"></div>
+                <div class="media-topline"><span class="category" data-i18n="tangoCategory">默契滿分</span></div>
+                <span class="scene-caption"><span class="caption-dot" aria-hidden="true"></span><span data-i18n="tangoCaption">你來入侵，我來潛入。</span></span>
+              </div>
+              <div class="card-copy">
+                <div class="pick-line"><span class="pick-label" data-i18n="tangoPick">首選推薦</span><span class="player-count" data-i18n="tangoPlayers">2 位玩家</span></div>
+                <h2 id="tango-title">Operation: Tango</h2>
+                <div class="game-details">
+                  <p class="game-description" data-i18n="tangoDescription">一位特務，一位駭客。兩個畫面，各自握有不同線索。把話說清楚、抓準時機，就是你們一起解開謎題的關鍵。</p>
+                  <div class="why-pick"><span class="detail-label" data-i18n="why">為什麼選它</span><p data-i18n="tangoWhy">巧妙的機制、互補的角色，還有那句一起喊出的「解開了！」。</p></div>
+                </div>
+                <div class="setup"><span class="detail-label" data-i18n="setup">開玩前準備</span><p data-i18n="tangoSetup">線上合作・兩台裝置＋麥克風</p><p class="setup-note" data-i18n="tangoSetupNote">一份遊戲＋免費 Friend Pass</p></div>
+                <div class="card-action" id="tango-action"><span data-i18n="invite">想跟你一起玩這個～</span><span class="action-heart" aria-hidden="true">♡</span></div>
+              </div>
+            </a>
+            <div class="particle-field" aria-hidden="true"></div>
+          </article>
+          <article class="game-wrap" data-game="lovers">
+            <a class="game-card lovers" href="https://store.steampowered.com/app/252110/Lovers_in_a_Dangerous_Spacetime/" target="_blank" rel="noopener noreferrer" aria-labelledby="lovers-title" aria-describedby="lovers-action">
+              <div class="card-media">
+                <div class="scene-backdrop" style="background-image:url('assets/lovers-in-a-dangerous-spacetime.webp')" aria-hidden="true"></div>
+                <div class="scene-frame">
+                  <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/lovers-in-a-dangerous-spacetime.webp"><img class="game-art" src="assets/lovers-in-a-dangerous-spacetime.gif" data-animated="assets/lovers-in-a-dangerous-spacetime.gif" data-still="assets/lovers-in-a-dangerous-spacetime.webp" width="480" height="480" alt="黑髮女生掌舵，戴眼鏡的棕髮男生操作護盾，兩人在粉紅太空船裡擋下隕石。" data-i18n-alt="loversAlt"></picture>
+                  <div class="scene-sprite" data-sheet="assets/lovers-in-a-dangerous-spacetime-sprite.webp" aria-hidden="true" hidden></div>
+                </div>
+                <div class="image-shade" aria-hidden="true"></div>
+                <div class="media-topline"><span class="category" data-i18n="loversCategory">一艘船，兩人忙</span></div>
+                <span class="scene-caption"><span class="caption-dot" aria-hidden="true"></span><span data-i18n="loversCaption">我掌舵，你救場。</span></span>
+              </div>
+              <div class="card-copy">
+                <div class="pick-line"><span class="pick-label" data-i18n="loversPick">戰術默契首選</span><span class="player-count" data-i18n="loversPlayers">2–4 位玩家</span></div>
+                <h2 id="lovers-title">Lovers in a<br>Dangerous Spacetime</h2>
+                <div class="game-details">
+                  <p class="game-description" data-i18n="loversDescription">一起分工駕駛、護盾和武器。大聲提醒彼此、在控制台之間奔跑，想辦法讓這艘小小太空船平安回家。</p>
+                  <div class="why-pick"><span class="detail-label" data-i18n="why">為什麼選它</span><p data-i18n="loversWhy">有你喜歡的戰術與防守，也有繽紛又可愛的混亂。隨時都值得再玩一場。</p></div>
+                </div>
+                <div class="setup"><span class="detail-label" data-i18n="setup">開玩前準備</span><p data-i18n="couchSetup">同機合作・Remote Play Together</p><p class="setup-note" data-i18n="loversSetupNote">一台電腦，就能一起出發</p></div>
+                <div class="card-action" id="lovers-action"><span data-i18n="invite">想跟你一起玩這個～</span><span class="action-heart" aria-hidden="true">♡</span></div>
+              </div>
+            </a>
+            <div class="particle-field" aria-hidden="true"></div>
+          </article>
+          <article class="game-wrap" data-game="heavenly">
+            <a class="game-card heavenly" href="https://store.steampowered.com/app/1138850/Heavenly_Bodies/" target="_blank" rel="noopener noreferrer" aria-labelledby="heavenly-title" aria-describedby="heavenly-action">
+              <div class="card-media">
+                <div class="scene-backdrop" style="background-image:url('assets/heavenly-bodies.webp')" aria-hidden="true"></div>
+                <div class="scene-frame">
+                  <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/heavenly-bodies.webp"><img class="game-art" src="assets/heavenly-bodies.gif" data-animated="assets/heavenly-bodies.gif" data-still="assets/heavenly-bodies.webp" width="480" height="480" alt="黑髮女太空人抓著扶手和隊友的靴子，戴眼鏡的棕髮男生伸手去拿漂浮的扳手，兩人笑得很開心。" data-i18n-alt="heavenlyAlt" loading="lazy"></picture>
+                  <div class="scene-sprite" data-sheet="assets/heavenly-bodies-sprite.webp" aria-hidden="true" hidden></div>
+                </div>
+                <div class="image-shade" aria-hidden="true"></div>
+                <div class="media-topline"><span class="category" data-i18n="heavenlyCategory">抓緊彼此</span></div>
+                <span class="scene-caption"><span class="caption-dot" aria-hidden="true"></span><span data-i18n="heavenlyCaption">你的後背，還有靴子，都交給我。</span></span>
+              </div>
+              <div class="card-copy">
+                <div class="pick-line"><span class="pick-label" data-i18n="heavenlyPick">一起笑翻首選</span><span class="player-count" data-i18n="heavenlyPlayers">雙人合作</span></div>
+                <h2 id="heavenly-title">Heavenly Bodies</h2>
+                <div class="game-details">
+                  <p class="game-description" data-i18n="heavenlyDescription">沒有重力，連小修理都變成雙人大工程。拉住隊友、遞個工具，再一起笑看最簡單的任務如何徹底失控。</p>
+                  <div class="why-pick"><span class="detail-label" data-i18n="why">為什麼選它</span><p data-i18n="heavenlyWhy">物理解謎，加上令人笑翻的失誤。一起接受笨手笨腳，就是最好玩的部分。</p></div>
+                </div>
+                <div class="setup"><span class="detail-label" data-i18n="setup">開玩前準備</span><p data-i18n="couchSetup">同機合作・Remote Play Together</p><p class="setup-note" data-i18n="heavenlySetupNote">很推薦兩人都使用控制器</p></div>
+                <div class="card-action" id="heavenly-action"><span data-i18n="invite">想跟你一起玩這個～</span><span class="action-heart" aria-hidden="true">♡</span></div>
+              </div>
+            </a>
+            <div class="particle-field" aria-hidden="true"></div>
+          </article>
+        </section>
+        <!-- 07: actors -->
+        <div class="stage" data-stage="games" aria-hidden="true"></div>
+      </section>
+      <section class="room" id="room-cinema" data-room="cinema" aria-labelledby="cinema-title" hidden>
+        <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
+        <h1 class="room-title" id="cinema-title" data-room-title tabindex="-1" data-i18n="cinemaTitle">放映室</h1>
+        <p class="room-lede" data-i18n="cinemaSoon">布幕掛好了，放映機還在等第一卷膠卷。</p>
+        <!-- 06: audio — this Room's Music Source. Ticket 20 gives the projector its
+             own two affordances; until then the Cinema Room has this placeholder too. -->
+        <div class="music-source-row">
+          <button class="music-source" type="button" data-music-source="cinema" aria-pressed="false" hidden>
+            <span class="music-note" aria-hidden="true">♪</span>
+            <span data-music-source-label>播放房間音樂</span>
+            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
+          </button>
+        </div>
+        <!-- end 06 -->
+        <!-- 07: actors -->
+        <div class="stage" data-stage="cinema" aria-hidden="true"></div>
+      </section>
+      <section class="room" id="room-activities" data-room="activities" aria-labelledby="activities-title" hidden>
+        <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
+        <h1 class="room-title" id="activities-title" data-room-title tabindex="-1" data-i18n="activitiesTitle">活動室</h1>
+        <p class="room-lede" data-i18n="activitiesSoon">桌上空著，等著擺上今晚要一起做的事。</p>
+        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
+        <div class="music-source-row">
+          <button class="music-source" type="button" data-music-source="activities" aria-pressed="false" hidden>
+            <span class="music-note" aria-hidden="true">♪</span>
+            <span data-music-source-label>播放房間音樂</span>
+            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
+          </button>
+        </div>
+        <!-- end 06 -->
+        <!-- 07: actors -->
+        <div class="stage" data-stage="activities" aria-hidden="true"></div>
+      </section>
+      <!--
+        07: actors — the Cast's artwork, declared rather than built in TypeScript.
+
+        `src/dom/actors.ts` moves each Actor into the stage of whatever Room the
+        world model says it is standing in, and parks it back here when the model
+        has not placed it. Declaring every sheet as a `data-sheet` inside
+        `#apartment` is also what gets it preloaded and what lets
+        `scripts/assert-built-page.mjs` prove it ships: a sheet URL built in
+        TypeScript would be invisible to both.
+
+        Every sheet below is a placeholder — one neutral standing frame cut out
+        of a Character Sheet, not a Cycle. See `public/assets/actors/manifest.json`
+        and CLAUDE.md's "Cycle assets travel as a set".
+      -->
+      <div class="cast" id="cast" aria-hidden="true" hidden>
+        <div class="actor" data-actor="boy" data-height="360">
+          <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/boy-walk-right.png"></div>
+        </div>
+        <div class="actor" data-actor="girl" data-height="328">
+          <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/girl-walk-right.png"></div>
+        </div>
+        <div class="actor" data-actor="mica" data-height="132">
+          <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mica-walk-left.png"></div>
+          <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mica-walk-right.png"></div>
+        </div>
+        <div class="actor" data-actor="mira" data-height="132">
+          <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mira-walk-left.png"></div>
+          <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mira-walk-right.png"></div>
+        </div>
+      </div>
+    </main>
+    <footer class="site-footer"><span><span class="footer-heart" aria-hidden="true">♡</span> <span data-i18n="footer">最好的升級，就是有你一起。</span></span><span data-i18n="artNote">原創合作冒險插畫・2026 年 9 月</span></footer>
+  </div>
+  <dialog class="choice-dialog" id="game-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-game">
+    <button class="dialog-close" id="dialog-close" type="button" aria-label="關閉" data-i18n-aria="close">×</button>
+    <div class="dialog-art"><img id="dialog-poster" src="assets/lovers-in-a-dangerous-spacetime.webp" alt="" width="112" height="112"><span aria-hidden="true">♡</span></div>
+    <p class="dialog-eyebrow" data-i18n="dialogEyebrow">一個小小的邀請</p>
+    <h2 class="dialog-title" id="dialog-title" data-i18n="dialogTitle">一起出發，好嗎？</h2>
+    <p class="dialog-game" id="dialog-game"></p>
+    <div class="dialog-options">
+      <a class="dialog-steam" id="dialog-steam" href="https://store.steampowered.com/" target="_blank" rel="noopener noreferrer"><span data-i18n="checkout">去 Steam 看看</span><span aria-hidden="true">↗</span></a>
+      <form id="invite-form">
+        <label class="privacy-consent"><input id="invite-consent" type="checkbox" required><span data-i18n="consent">我同意將這款遊戲的選擇、IP 位址、大約所在國家，以及基本裝置／瀏覽器資訊寄給網站主人。</span></label>
+        <p class="privacy-note" data-i18n="privacyNote">這些資訊也會產生一組請求識別碼，並不代表能辨識你的真實身分。不會收集你的姓名或電子郵件。</p>
+        <div class="honey-field" aria-hidden="true"><label>Website<input id="invite-website" name="website" type="text" tabindex="-1" autocomplete="off"></label></div>
+        <div id="turnstile-widget" class="turnstile-widget"></div>
+        <button class="dialog-invite" id="send-invite" type="submit" disabled><span aria-hidden="true">♡</span><span id="send-label" data-i18n="invite">想跟你一起玩這個～</span></button>
+      </form>
+    </div>
+    <p class="invite-status" id="invite-status" role="status" aria-live="polite"></p>
+  </dialog>
+</body>
+</html>

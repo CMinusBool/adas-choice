@@ -1,287 +1,299 @@
-@charset "UTF-8";
-:root {
-  color-scheme: dark;
-  --bg: #121013; --surface: #1c191d; --ink: #f6f0f3; --muted: #b9adb6;
-  --quiet: #998d97; --line: #373038; --pink: #f5a3c5; --pink-bright: #ff78b0;
-  font-family: "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-  font-synthesis: none; font-size: 16px; line-height: 1.6;
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
-body { margin: 0; background: radial-gradient(ellipse at 82% 0, #49233725, transparent 43%), var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; overflow-x: clip; }
-button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-button { font: inherit; }
-a { color: inherit; }
-button svg { flex-shrink: 0; }
-::selection { background: var(--pink); color: var(--bg); }
-[hidden] { display: none !important; }
-.page-shell { width: min(1440px, calc(100% - 96px)); margin-inline: auto; }
-.site-header { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; min-height: 102px; border-bottom: 1px solid var(--line); }
-.wordmark { display: inline-flex; align-items: center; gap: .7rem; min-height: 44px; text-decoration: none; font-weight: 750; letter-spacing: -.065em; font-size: 1.55rem; white-space: nowrap; }
-.wordmark-dot { color: var(--pink); }
-.brand-heart { width: 28px; height: 32px; fill: var(--pink); overflow: visible; transform-origin: 50% 60%; }
-.heart-shine { fill: none; stroke: #fff4fa; stroke-width: 1.7; stroke-linecap: round; }
-.wordmark:hover .brand-heart, .wordmark:focus-visible .brand-heart { animation: heartbeat 1.15s ease-in-out infinite; }
-@keyframes heartbeat { 0%,45%,100% { transform: scale(1) rotate(-7deg); } 14% { transform: scale(1.16) rotate(-7deg); } 28% { transform: scale(1.04) rotate(-7deg); } 36% { transform: scale(1.1) rotate(-7deg); } }
-.header-actions { display: flex; align-items: center; gap: .65rem; }
-.language-toggle, .motion-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 100px; font-size: .875rem; line-height: 1.2; background: #211b21; color: var(--ink); cursor: pointer; transition: border-color .25s, background .25s; }
-.language-toggle:hover, .motion-toggle:hover { background: #35232e; border-color: var(--pink); }
-.language-toggle svg, .motion-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.language-toggle svg { color: var(--pink); }
-.motion-toggle { background: transparent; color: var(--muted); }
-.motion-toggle .play-icon { display: none; }
-.motion-off .motion-toggle .pause-icon { display: none; }
-.motion-off .motion-toggle .play-icon { display: block; }
-
-/* One Room is in the flow at a time; the Room being left is lifted out of it so
-   the entering Room does not wait for it, and put back by `hidden` once its
-   animation ends. The model decides whether that animation runs at all. */
-.apartment { position: relative; }
-.room { display: block; }
-.room.is-leaving { position: absolute; inset: 0 0 auto; width: 100%; pointer-events: none; animation: room-leave .32s ease-in both; }
-.room.is-entering { animation: room-enter .45s cubic-bezier(.22,.75,.2,1) both; }
-@keyframes room-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-@keyframes room-leave { from { opacity: 1; } to { opacity: 0; transform: translateY(-12px); } }
-.room-title { margin: 0 0 1.1rem; font-size: clamp(2.3rem, 4vw, 3.4rem); line-height: 1.2; font-weight: 740; letter-spacing: -.05em; }
-.room-title:focus { outline: none; }
-.room-lede { max-width: 46ch; margin: 0; color: var(--muted); font-size: 1.0625rem; line-height: 1.8; }
-#room-entryway, #room-cinema, #room-activities { padding: 2.8rem 0 2.6rem; }
-.room-exit { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; margin-top: 1.6rem; color: var(--muted); text-decoration: none; font-size: .9375rem; }
-.room-exit:hover { color: var(--pink); }
-.exit-arrow { color: var(--pink); }
-.doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 2.4rem; }
-.door { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 96px; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); text-decoration: none; font-size: 1.25rem; font-weight: 650; transition: border-color .3s, background .3s, transform .3s; }
-.door:hover, .door:focus-visible { border-color: var(--pink); background: #2a1f27; transform: translateY(-3px); }
-.door-arrow { color: var(--pink); font-size: 1.4rem; }
-.motion-off .door { transition: none; }
-
-.intro { padding: 2.8rem 0 2.6rem; }
-.eyebrow { display: flex; align-items: center; gap: .7rem; margin: 0 0 1rem; color: var(--pink); font-size: .8125rem; letter-spacing: .16em; font-weight: 600; }
-.eyebrow-line { width: 23px; height: 1px; background: currentColor; }
-h1 { display: flex; align-items: baseline; flex-wrap: wrap; margin: 0 0 1.15rem; font-size: clamp(2.7rem, 4.5vw, 4.25rem); line-height: 1.2; font-weight: 740; letter-spacing: -.06em; }
-html[lang="en"] h1 { column-gap: .22em; }
-html[lang="zh-Hant"] h1 { letter-spacing: -.035em; }
-.title-accent { color: var(--pink); }
-.title-spark { width: .4em; height: .55em; margin-left: .27em; fill: var(--pink); align-self: center; }
-.intro-description { color: var(--muted); margin: 0; font-size: 1.0625rem; line-height: 1.8; }
-
-/* A shared media height keeps horizontal expansion from cropping vertically. */
-.games { --scene-size: clamp(310px, 29vw, 410px); display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap: 20px; align-items: stretch; transition: grid-template-columns .75s cubic-bezier(.22,.75,.2,1); }
-.game-wrap { position: relative; display: flex; min-width: 0; container-type: inline-size; container-name: card; }
-.game-wrap.is-active { z-index: 3; }
-.game-card { display: flex; flex-direction: column; position: relative; width: 100%; min-width: 0; text-decoration: none; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); transition: filter 1.15s ease, border-color .5s, box-shadow .5s; isolation: isolate; }
-.tango { --accent: #f2aacd; }
-.lovers { --accent: #ff93c2; }
-.heavenly { --accent: #edb6d7; }
-.game-wrap.is-active .game-card { border-color: var(--pink); box-shadow: 0 12px 45px #0004, 0 0 25px #fb80b50d; }
-.card-media { height: var(--scene-size); width: 100%; position: relative; flex-shrink: 0; background: #292029; border-radius: 19px 19px 0 0; overflow: hidden; isolation: isolate; }
-.scene-backdrop { position: absolute; inset: -25px; background-position: center; background-size: cover; filter: blur(18px) brightness(.65); transform: scale(1.12); opacity: .8; }
-.scene-frame { position: absolute; left: 50%; top: 50%; width: var(--scene-size); height: var(--scene-size); transform: translate(-50%, -50%); }
-.scene-frame picture, .game-art { display: block; width: 100%; height: 100%; }
-.game-art { object-fit: cover; }
-.scene-sprite { position: absolute; inset: 0; background-size: 400% 300%; background-repeat: no-repeat; }
-.scene-frame.has-sprite .game-art { opacity: 0; }
-.image-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, #14101970, transparent 26%, transparent 68%, #151017c4); }
-.media-topline { position: absolute; inset: 1rem 1rem auto; display: flex; justify-content: flex-end; align-items: center; gap: .5rem; }
-.category { border: 1px solid #ffffff38; background: #17121c9c; backdrop-filter: blur(12px); border-radius: 100px; color: #fff5fa; }
-.category { padding: .4rem .7rem; font-size: .8125rem; line-height: 1.6; }
-.scene-caption { position: absolute; left: 1.2rem; right: 1.2rem; bottom: 1.15rem; display: flex; align-items: center; gap: .5rem; color: #fff5fa; font-size: .8125rem; letter-spacing: .055em; text-shadow: 0 1px 8px #000; }
-.caption-dot { flex: 0 0 5px; height: 5px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 8px #ff87b7b3; }
-.card-copy { display: flex; flex-direction: column; flex: 1; padding: 1.5rem 1.4rem 0; min-width: 0; }
-.pick-line { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem .6rem; margin-bottom: .8rem; }
-.pick-label { color: var(--accent); font-size: .875rem; font-weight: 650; letter-spacing: .04em; }
-.player-count { font-size: .875rem; color: var(--muted); white-space: nowrap; }
-h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 690; line-height: 1.22; letter-spacing: -.035em; min-height: 2.44em; overflow-wrap: break-word; }
-.game-details { max-height: 650px; opacity: 1; transition: opacity .3s ease, max-height .65s ease; }
-.game-description { margin: 0 0 1.3rem; font-size: 1rem; line-height: 1.75; color: #d0c6ce; }
-.why-pick { padding-top: 1.05rem; border-top: 1px solid var(--line); }
-.detail-label { display: block; color: var(--quiet); font-weight: 650; font-size: .875rem; letter-spacing: .06em; margin-bottom: .4rem; }
-.why-pick p { font-size: 1rem; line-height: 1.75; margin: 0; color: #c4b8c1; }
-.setup { margin-top: auto; padding: 1.25rem 0; }
-.setup p { margin: 0; font-size: .875rem; line-height: 1.75; overflow-wrap: anywhere; color: #e1d6de; }
-.setup p.setup-note { color: var(--muted); font-size: .875rem; margin-top: .15rem; }
-.card-action { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem 0; border-top: 1px solid var(--line); color: var(--accent); font-weight: 600; font-size: .9375rem; }
-.action-heart { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; font-size: 1.75rem; line-height: 1; font-weight: 400; transition: transform .3s; }
-.game-card:hover .action-heart, .game-card:focus-visible .action-heart { transform: scale(1.18) rotate(-9deg); }
-.particle-field { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.game-particle { position: absolute; display: block; pointer-events: none; will-change: transform, opacity; filter: drop-shadow(0 0 5px currentColor); }
-.game-particle svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.game-particle.bit { font-family: monospace; font-weight: 700; font-size: 16px; line-height: 1; }
-.site-footer { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding: 1.6rem 0 2rem; border-top: 1px solid var(--line); font-size: .8125rem; color: var(--quiet); }
-.site-footer > span:first-child { color: var(--muted); }
-.footer-heart { font-size: 1.2rem; color: var(--pink); vertical-align: -.06em; padding-right: .2rem; }
-:focus-visible { outline: 2px solid var(--pink); outline-offset: 5px; }
-.skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 20; padding: .7rem 1rem; border-radius: 8px; background: var(--pink); color: var(--bg); transform: translateY(-200%); }
-.skip-link:focus { transform: translateY(0); }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-@media (min-width: 1080px) {
-  .games[data-active="tango"] { grid-template-columns: minmax(0,1.5fr) minmax(0,.75fr) minmax(0,.75fr); }
-  .games[data-active="lovers"] { grid-template-columns: minmax(0,.75fr) minmax(0,1.5fr) minmax(0,.75fr); }
-  .games[data-active="heavenly"] { grid-template-columns: minmax(0,.75fr) minmax(0,.75fr) minmax(0,1.5fr); }
-  .game-wrap.is-muted .game-card { filter: grayscale(1) brightness(.82); }
-  .game-wrap.is-muted .game-details { max-height: 0; opacity: 0; overflow: hidden; }
-  .game-wrap.is-muted .category { opacity: 0; }
-  .game-wrap.is-muted .scene-caption { opacity: .4; }
-  .category, .scene-caption { transition: opacity .5s; }
-}
-@container card (max-width: 300px) {
-  .card-copy { padding-inline: 1.1rem; }
-  h2 { font-size: 1.5rem; }
-  .pick-line { flex-direction: column; }
-}
-@media (max-width: 1199px) and (min-width: 1080px) {
-  .page-shell { width: calc(100% - 64px); }
-  .games { gap: 16px; }
-  .card-copy { padding-inline: 1.1rem; }
-}
-@media (max-width: 1079px) {
-  .page-shell { width: min(680px, calc(100% - 48px)); }
-  .site-header { min-height: 88px; }
-  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.4rem 0 2rem; }
-  .room-title { font-size: clamp(2.2rem, 6vw, 3rem); }
-  .doors { grid-template-columns: 1fr; gap: 14px; margin-top: 2rem; }
-  h1 { font-size: clamp(2.6rem, 6.4vw, 3.8rem); }
-  .games { grid-template-columns: 1fr; gap: 28px; --scene-size: min(680px, calc(100vw - 48px)); }
-  .card-copy { padding: 1.6rem 1.6rem 0; }
-  h2 { min-height: auto; font-size: 1.9rem; }
-  .game-description, .why-pick p { font-size: 1rem; }
-  .pick-label, .player-count, .category { font-size: .875rem; }
-  .setup p { font-size: .9375rem; }
-  .site-footer { flex-wrap: wrap; gap: .4rem; margin-top: 2rem; }
-}
-@media (max-width: 540px) {
-  .page-shell { width: auto; margin-left: max(20px, env(safe-area-inset-left)); margin-right: max(20px, env(safe-area-inset-right)); }
-  .site-header { min-height: 82px; padding-top: env(safe-area-inset-top); gap: .7rem; }
-  .wordmark { font-size: 1.25rem; letter-spacing: -.065em; gap: .35rem; }
-  .brand-heart { width: 23px; height: 27px; }
-  .header-actions { gap: .45rem; }
-  .language-toggle { padding-inline: .75rem; font-size: .8125rem; gap: .35rem; }
-  .language-toggle svg { width: 16px; }
-  .motion-toggle { width: 44px; padding: 0; }
-  #motion-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.1rem 0 1.9rem; }
-  .room-title { font-size: clamp(1.9rem, 8vw, 2.6rem); margin-bottom: .9rem; }
-  .room-lede { font-size: 1rem; line-height: 1.85; max-width: 33ch; }
-  .door { min-height: 84px; padding: 1rem 1.2rem; font-size: 1.125rem; border-radius: 18px; }
-  .eyebrow { font-size: .75rem; letter-spacing: .12em; margin-bottom: .85rem; }
-  h1 { font-size: clamp(2.15rem, 8.5vw, 2.9rem); line-height: 1.3; margin-bottom: .8rem; }
-  html[lang="en"] h1 { max-width: 390px; column-gap: .2em; }
-  .intro-description { font-size: 1rem; line-height: 1.85; max-width: 31ch; }
-  .games { --scene-size: calc(100vw - 40px); gap: 24px; }
-  .game-card { border-radius: 18px; }
-  .card-media { border-radius: 17px 17px 0 0; }
-  .card-copy { padding: 1.3rem 1.25rem 0; }
-  .media-topline { inset: .9rem .9rem auto; }
-  .scene-caption { left: 1.05rem; right: 1.05rem; font-size: .75rem; }
-  .category { font-size: .8125rem; }
-  h2 { font-size: 1.75rem; margin-bottom: .85rem; }
-  .game-description { margin-bottom: 1.15rem; }
-  .card-action { min-height: 65px; }
-  .site-footer { padding-bottom: max(1.75rem, env(safe-area-inset-bottom)); font-size: .75rem; }
-}
-@media (max-width: 359px) {
-  .page-shell { margin-inline: 14px; }
-  .wordmark { font-size: 1.1rem; }
-  .brand-heart { width: 20px; }
-  .language-toggle svg { display: none; }
-  .games { --scene-size: calc(100vw - 28px); }
-}
-@media (hover: none) {
-  .game-card:active { border-color: var(--pink); }
-}
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
-.motion-off { scroll-behavior: auto; }
-.motion-off .brand-heart { animation: none !important; }
-.motion-off .games, .motion-off .game-card, .motion-off .game-details, .motion-off .action-heart { transition: none; }
-.motion-off .particle-field { display: none; }
-
-html.dialog-open { overflow: hidden; }
-.game-card[role="button"] { cursor: pointer; }
-.choice-dialog { width: min(460px, calc(100% - 32px)); max-height: calc(100dvh - 32px); padding: 2rem; margin: auto; border: 1px solid #82536e; border-radius: 28px; background: #241c26; color: var(--ink); box-shadow: 0 24px 100px #000a; overflow-y: auto; overscroll-behavior: contain; }
-.choice-dialog::backdrop { background: #0c090fbb; backdrop-filter: blur(8px); }
-.choice-dialog[open] { animation: invitation-in .3s ease-out; }
-@keyframes invitation-in { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
-.dialog-close { position: absolute; top: .65rem; right: .65rem; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.65rem; cursor: pointer; }
-.dialog-close:hover { color: var(--pink); background: #ffffff08; }
-.dialog-art { position: relative; width: 112px; margin: .2rem auto 1.1rem; }
-.dialog-art img { display: block; width: 112px; height: 112px; border-radius: 25px; border: 1px solid #b9719a; transform: rotate(-4deg); }
-.dialog-art > span { position: absolute; right: -12px; bottom: -7px; display: grid; place-items: center; width: 38px; height: 38px; background: var(--pink); color: #321727; border: 4px solid #241c26; border-radius: 50%; font-size: 1.5rem; }
-.dialog-eyebrow { margin: 0 0 .35rem; text-align: center; color: var(--pink); font-size: .75rem; letter-spacing: .13em; }
-.dialog-title { min-height: 0; margin: 0; text-align: center; font-size: 1.8rem; line-height: 1.35; }
-.dialog-game { margin: .5rem 0 1.4rem; color: var(--muted); text-align: center; font-size: 1rem; line-height: 1.4; }
-.dialog-options { display: grid; gap: 1rem; }
-.dialog-steam, .dialog-invite { display: flex; align-items: center; justify-content: center; gap: .65rem; width: 100%; min-height: 50px; padding: .8rem 1rem; border-radius: 14px; text-decoration: none; font-weight: 650; font-size: 1rem; line-height: 1.4; }
-.dialog-steam { color: #e8d6e4; background: #19141c; border: 1px solid #554050; }
-.dialog-steam:hover { border-color: var(--pink); }
-.dialog-invite { border: 1px solid var(--pink); background: var(--pink); color: #301824; cursor: pointer; }
-.dialog-invite:hover:not(:disabled) { background: #ffbad9; }
-.dialog-invite:disabled { opacity: .5; cursor: not-allowed; }
-.dialog-invite > span:first-child { font-size: 1.35rem; }
-.privacy-consent { display: flex; gap: .65rem; padding: .9rem; border: 1px solid #483242; background: #1d161f; border-radius: 12px; color: #d8c4d3; font-size: .875rem; line-height: 1.55; cursor: pointer; }
-.privacy-consent input { width: 19px; height: 19px; flex: 0 0 19px; margin: .15rem 0 0; accent-color: var(--pink); }
-.privacy-note { color: var(--quiet); font-size: .75rem; line-height: 1.5; margin: .65rem .15rem .8rem; }
-.honey-field { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.turnstile-widget { min-width: 0; margin: .7rem 0; }
-.invite-status { min-height: 1.5em; margin: .85rem 0 0; text-align: center; color: var(--pink); font-size: .875rem; line-height: 1.5; }
-.invite-status[data-state="error"] { color: #ffb2bc; }
-@media (max-width: 540px) {
-  .choice-dialog { padding: 1.6rem 1.2rem 1.2rem; border-radius: 24px; }
-  .dialog-art, .dialog-art img { width: 88px; height: 88px; }
-  .dialog-title { font-size: 1.65rem; }
-  .game-wrap.is-scroll-active .game-card { border-color: #bf7396; box-shadow: 0 0 24px #f589b412; }
-  .game-particle { filter: none; }
-}
-.motion-off .choice-dialog { animation: none; }
-
-/* 05: loading — the arrival screen. It covers the apartment until the model says
-   every declared asset has settled, and everything behind it is `inert` until the
-   same moment. The fill is a CSS transition, so the reduced-motion query above
-   zeroes its travel; the sheen is decoration, and stops with the motion control. */
-.loading-screen { position: fixed; inset: 0; z-index: 30; display: grid; align-content: center; justify-items: center; gap: 1.1rem; padding: 2rem; background: radial-gradient(ellipse at 50% 32%, #4923373d, transparent 58%), var(--bg); text-align: center; }
-.loading-screen:focus { outline: none; }
-.loading-title { margin: 0; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 740; letter-spacing: -.045em; }
-.loading-track { position: relative; width: min(340px, 100%); height: 9px; border: 1px solid var(--line); border-radius: 100px; background: #2b2430; overflow: hidden; }
-.loading-fill { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), var(--pink-bright)); transform: scaleX(0); transform-origin: left; transition: transform .35s ease-out; }
-.loading-track::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #ffffff1f, transparent); transform: translateX(-100%); animation: loading-sheen 1.9s ease-in-out infinite; }
-@keyframes loading-sheen { to { transform: translateX(100%); } }
-.motion-off .loading-track::after { animation: none; opacity: 0; }
-.loading-percent { margin: -.4rem 0 0; color: var(--pink); font-size: .8125rem; font-variant-numeric: tabular-nums; letter-spacing: .08em; }
-.loading-note { max-width: 34ch; margin: 0; color: var(--muted); font-size: .9375rem; line-height: 1.7; }
-
-/* 06: audio — the header sound control and the Rooms' Music Source placeholders.
-   One appended block, and the control repeats the toggle styling rather than
-   joining the selector lists above, so this ticket adds lines instead of editing
-   the ones another ticket is landing beside. */
-.sound-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 100px; font-size: .875rem; line-height: 1.2; background: transparent; color: var(--muted); cursor: pointer; transition: border-color .25s, background .25s, color .25s; }
-.sound-toggle:hover { background: #35232e; border-color: var(--pink); }
-.sound-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.sound-toggle .sound-off-icon, .sound-toggle[aria-pressed="true"] .sound-on-icon { display: none; }
-.sound-toggle[aria-pressed="true"] .sound-off-icon { display: block; }
-.sound-toggle[aria-pressed="true"] { color: var(--pink); }
-
-/* A Music Source is a Prop in the Room, so it is dashed and tagged for as long
-   as it is a placeholder standing in for one. The design tickets replace it. */
-.music-source-row { margin-top: 1.6rem; }
-.music-source { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; padding: .5rem .9rem; border: 1px dashed var(--line); border-radius: 100px; background: transparent; color: var(--muted); font-size: .875rem; line-height: 1.2; cursor: pointer; transition: border-color .25s, color .25s; }
-.music-source:hover, .music-source:focus-visible { border-color: var(--pink); color: var(--ink); }
-.music-source[aria-pressed="true"] { border-style: solid; border-color: var(--pink); color: var(--ink); }
-.music-note { color: var(--pink); font-size: 1.05rem; line-height: 1; }
-.placeholder-tag { padding: .1rem .4rem; border-radius: 6px; background: #2a2230; color: var(--quiet); font-size: .6875rem; letter-spacing: .04em; }
-.motion-off .sound-toggle, .motion-off .music-source { transition: none; }
-
-@media (max-width: 540px) {
-  /* Three controls beside the wordmark now: the sound control keeps its icon
-     and gives up its words, exactly as the motion control does at this width. */
-  .sound-toggle { width: 44px; padding: 0; }
-  #sound-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .music-source-row { margin-top: 1.3rem; }
-}
-@media (max-width: 359px) {
-  /* Where the language toggle gives up its icon, the sound control gives up the
-     room around its own, so the header still fits on one line. */
-  .sound-toggle { width: 38px; }
-}
-
+@charset "UTF-8";
+:root {
+  color-scheme: dark;
+  --bg: #121013; --surface: #1c191d; --ink: #f6f0f3; --muted: #b9adb6;
+  --quiet: #998d97; --line: #373038; --pink: #f5a3c5; --pink-bright: #ff78b0;
+  font-family: "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-synthesis: none; font-size: 16px; line-height: 1.6;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+body { margin: 0; background: radial-gradient(ellipse at 82% 0, #49233725, transparent 43%), var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button { font: inherit; }
+a { color: inherit; }
+button svg { flex-shrink: 0; }
+::selection { background: var(--pink); color: var(--bg); }
+[hidden] { display: none !important; }
+.page-shell { width: min(1440px, calc(100% - 96px)); margin-inline: auto; }
+.site-header { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; min-height: 102px; border-bottom: 1px solid var(--line); }
+.wordmark { display: inline-flex; align-items: center; gap: .7rem; min-height: 44px; text-decoration: none; font-weight: 750; letter-spacing: -.065em; font-size: 1.55rem; white-space: nowrap; }
+.wordmark-dot { color: var(--pink); }
+.brand-heart { width: 28px; height: 32px; fill: var(--pink); overflow: visible; transform-origin: 50% 60%; }
+.heart-shine { fill: none; stroke: #fff4fa; stroke-width: 1.7; stroke-linecap: round; }
+.wordmark:hover .brand-heart, .wordmark:focus-visible .brand-heart { animation: heartbeat 1.15s ease-in-out infinite; }
+@keyframes heartbeat { 0%,45%,100% { transform: scale(1) rotate(-7deg); } 14% { transform: scale(1.16) rotate(-7deg); } 28% { transform: scale(1.04) rotate(-7deg); } 36% { transform: scale(1.1) rotate(-7deg); } }
+.header-actions { display: flex; align-items: center; gap: .65rem; }
+.language-toggle, .motion-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 100px; font-size: .875rem; line-height: 1.2; background: #211b21; color: var(--ink); cursor: pointer; transition: border-color .25s, background .25s; }
+.language-toggle:hover, .motion-toggle:hover { background: #35232e; border-color: var(--pink); }
+.language-toggle svg, .motion-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.language-toggle svg { color: var(--pink); }
+.motion-toggle { background: transparent; color: var(--muted); }
+.motion-toggle .play-icon { display: none; }
+.motion-off .motion-toggle .pause-icon { display: none; }
+.motion-off .motion-toggle .play-icon { display: block; }
+
+/* One Room is in the flow at a time; the Room being left is lifted out of it so
+   the entering Room does not wait for it, and put back by `hidden` once its
+   animation ends. The model decides whether that animation runs at all. */
+.apartment { position: relative; }
+.room { display: block; }
+.room.is-leaving { position: absolute; inset: 0 0 auto; width: 100%; pointer-events: none; animation: room-leave .32s ease-in both; }
+.room.is-entering { animation: room-enter .45s cubic-bezier(.22,.75,.2,1) both; }
+@keyframes room-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes room-leave { from { opacity: 1; } to { opacity: 0; transform: translateY(-12px); } }
+.room-title { margin: 0 0 1.1rem; font-size: clamp(2.3rem, 4vw, 3.4rem); line-height: 1.2; font-weight: 740; letter-spacing: -.05em; }
+.room-title:focus { outline: none; }
+.room-lede { max-width: 46ch; margin: 0; color: var(--muted); font-size: 1.0625rem; line-height: 1.8; }
+#room-entryway, #room-cinema, #room-activities { padding: 2.8rem 0 2.6rem; }
+.room-exit { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; margin-top: 1.6rem; color: var(--muted); text-decoration: none; font-size: .9375rem; }
+.room-exit:hover { color: var(--pink); }
+.exit-arrow { color: var(--pink); }
+.doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 2.4rem; }
+.door { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 96px; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); text-decoration: none; font-size: 1.25rem; font-weight: 650; transition: border-color .3s, background .3s, transform .3s; }
+.door:hover, .door:focus-visible { border-color: var(--pink); background: #2a1f27; transform: translateY(-3px); }
+.door-arrow { color: var(--pink); font-size: 1.4rem; }
+.motion-off .door { transition: none; }
+
+.intro { padding: 2.8rem 0 2.6rem; }
+.eyebrow { display: flex; align-items: center; gap: .7rem; margin: 0 0 1rem; color: var(--pink); font-size: .8125rem; letter-spacing: .16em; font-weight: 600; }
+.eyebrow-line { width: 23px; height: 1px; background: currentColor; }
+h1 { display: flex; align-items: baseline; flex-wrap: wrap; margin: 0 0 1.15rem; font-size: clamp(2.7rem, 4.5vw, 4.25rem); line-height: 1.2; font-weight: 740; letter-spacing: -.06em; }
+html[lang="en"] h1 { column-gap: .22em; }
+html[lang="zh-Hant"] h1 { letter-spacing: -.035em; }
+.title-accent { color: var(--pink); }
+.title-spark { width: .4em; height: .55em; margin-left: .27em; fill: var(--pink); align-self: center; }
+.intro-description { color: var(--muted); margin: 0; font-size: 1.0625rem; line-height: 1.8; }
+
+/* A shared media height keeps horizontal expansion from cropping vertically. */
+.games { --scene-size: clamp(310px, 29vw, 410px); display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap: 20px; align-items: stretch; transition: grid-template-columns .75s cubic-bezier(.22,.75,.2,1); }
+.game-wrap { position: relative; display: flex; min-width: 0; container-type: inline-size; container-name: card; }
+.game-wrap.is-active { z-index: 3; }
+.game-card { display: flex; flex-direction: column; position: relative; width: 100%; min-width: 0; text-decoration: none; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); transition: filter 1.15s ease, border-color .5s, box-shadow .5s; isolation: isolate; }
+.tango { --accent: #f2aacd; }
+.lovers { --accent: #ff93c2; }
+.heavenly { --accent: #edb6d7; }
+.game-wrap.is-active .game-card { border-color: var(--pink); box-shadow: 0 12px 45px #0004, 0 0 25px #fb80b50d; }
+.card-media { height: var(--scene-size); width: 100%; position: relative; flex-shrink: 0; background: #292029; border-radius: 19px 19px 0 0; overflow: hidden; isolation: isolate; }
+.scene-backdrop { position: absolute; inset: -25px; background-position: center; background-size: cover; filter: blur(18px) brightness(.65); transform: scale(1.12); opacity: .8; }
+.scene-frame { position: absolute; left: 50%; top: 50%; width: var(--scene-size); height: var(--scene-size); transform: translate(-50%, -50%); }
+.scene-frame picture, .game-art { display: block; width: 100%; height: 100%; }
+.game-art { object-fit: cover; }
+.scene-sprite { position: absolute; inset: 0; background-size: 400% 300%; background-repeat: no-repeat; }
+.scene-frame.has-sprite .game-art { opacity: 0; }
+.image-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, #14101970, transparent 26%, transparent 68%, #151017c4); }
+.media-topline { position: absolute; inset: 1rem 1rem auto; display: flex; justify-content: flex-end; align-items: center; gap: .5rem; }
+.category { border: 1px solid #ffffff38; background: #17121c9c; backdrop-filter: blur(12px); border-radius: 100px; color: #fff5fa; }
+.category { padding: .4rem .7rem; font-size: .8125rem; line-height: 1.6; }
+.scene-caption { position: absolute; left: 1.2rem; right: 1.2rem; bottom: 1.15rem; display: flex; align-items: center; gap: .5rem; color: #fff5fa; font-size: .8125rem; letter-spacing: .055em; text-shadow: 0 1px 8px #000; }
+.caption-dot { flex: 0 0 5px; height: 5px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 8px #ff87b7b3; }
+.card-copy { display: flex; flex-direction: column; flex: 1; padding: 1.5rem 1.4rem 0; min-width: 0; }
+.pick-line { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem .6rem; margin-bottom: .8rem; }
+.pick-label { color: var(--accent); font-size: .875rem; font-weight: 650; letter-spacing: .04em; }
+.player-count { font-size: .875rem; color: var(--muted); white-space: nowrap; }
+h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 690; line-height: 1.22; letter-spacing: -.035em; min-height: 2.44em; overflow-wrap: break-word; }
+.game-details { max-height: 650px; opacity: 1; transition: opacity .3s ease, max-height .65s ease; }
+.game-description { margin: 0 0 1.3rem; font-size: 1rem; line-height: 1.75; color: #d0c6ce; }
+.why-pick { padding-top: 1.05rem; border-top: 1px solid var(--line); }
+.detail-label { display: block; color: var(--quiet); font-weight: 650; font-size: .875rem; letter-spacing: .06em; margin-bottom: .4rem; }
+.why-pick p { font-size: 1rem; line-height: 1.75; margin: 0; color: #c4b8c1; }
+.setup { margin-top: auto; padding: 1.25rem 0; }
+.setup p { margin: 0; font-size: .875rem; line-height: 1.75; overflow-wrap: anywhere; color: #e1d6de; }
+.setup p.setup-note { color: var(--muted); font-size: .875rem; margin-top: .15rem; }
+.card-action { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem 0; border-top: 1px solid var(--line); color: var(--accent); font-weight: 600; font-size: .9375rem; }
+.action-heart { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; font-size: 1.75rem; line-height: 1; font-weight: 400; transition: transform .3s; }
+.game-card:hover .action-heart, .game-card:focus-visible .action-heart { transform: scale(1.18) rotate(-9deg); }
+.particle-field { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.game-particle { position: absolute; display: block; pointer-events: none; will-change: transform, opacity; filter: drop-shadow(0 0 5px currentColor); }
+.game-particle svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.game-particle.bit { font-family: monospace; font-weight: 700; font-size: 16px; line-height: 1; }
+.site-footer { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding: 1.6rem 0 2rem; border-top: 1px solid var(--line); font-size: .8125rem; color: var(--quiet); }
+.site-footer > span:first-child { color: var(--muted); }
+.footer-heart { font-size: 1.2rem; color: var(--pink); vertical-align: -.06em; padding-right: .2rem; }
+:focus-visible { outline: 2px solid var(--pink); outline-offset: 5px; }
+.skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 20; padding: .7rem 1rem; border-radius: 8px; background: var(--pink); color: var(--bg); transform: translateY(-200%); }
+.skip-link:focus { transform: translateY(0); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (min-width: 1080px) {
+  .games[data-active="tango"] { grid-template-columns: minmax(0,1.5fr) minmax(0,.75fr) minmax(0,.75fr); }
+  .games[data-active="lovers"] { grid-template-columns: minmax(0,.75fr) minmax(0,1.5fr) minmax(0,.75fr); }
+  .games[data-active="heavenly"] { grid-template-columns: minmax(0,.75fr) minmax(0,.75fr) minmax(0,1.5fr); }
+  .game-wrap.is-muted .game-card { filter: grayscale(1) brightness(.82); }
+  .game-wrap.is-muted .game-details { max-height: 0; opacity: 0; overflow: hidden; }
+  .game-wrap.is-muted .category { opacity: 0; }
+  .game-wrap.is-muted .scene-caption { opacity: .4; }
+  .category, .scene-caption { transition: opacity .5s; }
+}
+@container card (max-width: 300px) {
+  .card-copy { padding-inline: 1.1rem; }
+  h2 { font-size: 1.5rem; }
+  .pick-line { flex-direction: column; }
+}
+@media (max-width: 1199px) and (min-width: 1080px) {
+  .page-shell { width: calc(100% - 64px); }
+  .games { gap: 16px; }
+  .card-copy { padding-inline: 1.1rem; }
+}
+@media (max-width: 1079px) {
+  .page-shell { width: min(680px, calc(100% - 48px)); }
+  .site-header { min-height: 88px; }
+  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.4rem 0 2rem; }
+  .room-title { font-size: clamp(2.2rem, 6vw, 3rem); }
+  .doors { grid-template-columns: 1fr; gap: 14px; margin-top: 2rem; }
+  h1 { font-size: clamp(2.6rem, 6.4vw, 3.8rem); }
+  .games { grid-template-columns: 1fr; gap: 28px; --scene-size: min(680px, calc(100vw - 48px)); }
+  .card-copy { padding: 1.6rem 1.6rem 0; }
+  h2 { min-height: auto; font-size: 1.9rem; }
+  .game-description, .why-pick p { font-size: 1rem; }
+  .pick-label, .player-count, .category { font-size: .875rem; }
+  .setup p { font-size: .9375rem; }
+  .site-footer { flex-wrap: wrap; gap: .4rem; margin-top: 2rem; }
+}
+@media (max-width: 540px) {
+  .page-shell { width: auto; margin-left: max(20px, env(safe-area-inset-left)); margin-right: max(20px, env(safe-area-inset-right)); }
+  .site-header { min-height: 82px; padding-top: env(safe-area-inset-top); gap: .7rem; }
+  .wordmark { font-size: 1.25rem; letter-spacing: -.065em; gap: .35rem; }
+  .brand-heart { width: 23px; height: 27px; }
+  .header-actions { gap: .45rem; }
+  .language-toggle { padding-inline: .75rem; font-size: .8125rem; gap: .35rem; }
+  .language-toggle svg { width: 16px; }
+  .motion-toggle { width: 44px; padding: 0; }
+  #motion-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.1rem 0 1.9rem; }
+  .room-title { font-size: clamp(1.9rem, 8vw, 2.6rem); margin-bottom: .9rem; }
+  .room-lede { font-size: 1rem; line-height: 1.85; max-width: 33ch; }
+  .door { min-height: 84px; padding: 1rem 1.2rem; font-size: 1.125rem; border-radius: 18px; }
+  .eyebrow { font-size: .75rem; letter-spacing: .12em; margin-bottom: .85rem; }
+  h1 { font-size: clamp(2.15rem, 8.5vw, 2.9rem); line-height: 1.3; margin-bottom: .8rem; }
+  html[lang="en"] h1 { max-width: 390px; column-gap: .2em; }
+  .intro-description { font-size: 1rem; line-height: 1.85; max-width: 31ch; }
+  .games { --scene-size: calc(100vw - 40px); gap: 24px; }
+  .game-card { border-radius: 18px; }
+  .card-media { border-radius: 17px 17px 0 0; }
+  .card-copy { padding: 1.3rem 1.25rem 0; }
+  .media-topline { inset: .9rem .9rem auto; }
+  .scene-caption { left: 1.05rem; right: 1.05rem; font-size: .75rem; }
+  .category { font-size: .8125rem; }
+  h2 { font-size: 1.75rem; margin-bottom: .85rem; }
+  .game-description { margin-bottom: 1.15rem; }
+  .card-action { min-height: 65px; }
+  .site-footer { padding-bottom: max(1.75rem, env(safe-area-inset-bottom)); font-size: .75rem; }
+}
+@media (max-width: 359px) {
+  .page-shell { margin-inline: 14px; }
+  .wordmark { font-size: 1.1rem; }
+  .brand-heart { width: 20px; }
+  .language-toggle svg { display: none; }
+  .games { --scene-size: calc(100vw - 28px); }
+}
+@media (hover: none) {
+  .game-card:active { border-color: var(--pink); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+.motion-off { scroll-behavior: auto; }
+.motion-off .brand-heart { animation: none !important; }
+.motion-off .games, .motion-off .game-card, .motion-off .game-details, .motion-off .action-heart { transition: none; }
+.motion-off .particle-field { display: none; }
+
+html.dialog-open { overflow: hidden; }
+.game-card[role="button"] { cursor: pointer; }
+.choice-dialog { width: min(460px, calc(100% - 32px)); max-height: calc(100dvh - 32px); padding: 2rem; margin: auto; border: 1px solid #82536e; border-radius: 28px; background: #241c26; color: var(--ink); box-shadow: 0 24px 100px #000a; overflow-y: auto; overscroll-behavior: contain; }
+.choice-dialog::backdrop { background: #0c090fbb; backdrop-filter: blur(8px); }
+.choice-dialog[open] { animation: invitation-in .3s ease-out; }
+@keyframes invitation-in { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+.dialog-close { position: absolute; top: .65rem; right: .65rem; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.65rem; cursor: pointer; }
+.dialog-close:hover { color: var(--pink); background: #ffffff08; }
+.dialog-art { position: relative; width: 112px; margin: .2rem auto 1.1rem; }
+.dialog-art img { display: block; width: 112px; height: 112px; border-radius: 25px; border: 1px solid #b9719a; transform: rotate(-4deg); }
+.dialog-art > span { position: absolute; right: -12px; bottom: -7px; display: grid; place-items: center; width: 38px; height: 38px; background: var(--pink); color: #321727; border: 4px solid #241c26; border-radius: 50%; font-size: 1.5rem; }
+.dialog-eyebrow { margin: 0 0 .35rem; text-align: center; color: var(--pink); font-size: .75rem; letter-spacing: .13em; }
+.dialog-title { min-height: 0; margin: 0; text-align: center; font-size: 1.8rem; line-height: 1.35; }
+.dialog-game { margin: .5rem 0 1.4rem; color: var(--muted); text-align: center; font-size: 1rem; line-height: 1.4; }
+.dialog-options { display: grid; gap: 1rem; }
+.dialog-steam, .dialog-invite { display: flex; align-items: center; justify-content: center; gap: .65rem; width: 100%; min-height: 50px; padding: .8rem 1rem; border-radius: 14px; text-decoration: none; font-weight: 650; font-size: 1rem; line-height: 1.4; }
+.dialog-steam { color: #e8d6e4; background: #19141c; border: 1px solid #554050; }
+.dialog-steam:hover { border-color: var(--pink); }
+.dialog-invite { border: 1px solid var(--pink); background: var(--pink); color: #301824; cursor: pointer; }
+.dialog-invite:hover:not(:disabled) { background: #ffbad9; }
+.dialog-invite:disabled { opacity: .5; cursor: not-allowed; }
+.dialog-invite > span:first-child { font-size: 1.35rem; }
+.privacy-consent { display: flex; gap: .65rem; padding: .9rem; border: 1px solid #483242; background: #1d161f; border-radius: 12px; color: #d8c4d3; font-size: .875rem; line-height: 1.55; cursor: pointer; }
+.privacy-consent input { width: 19px; height: 19px; flex: 0 0 19px; margin: .15rem 0 0; accent-color: var(--pink); }
+.privacy-note { color: var(--quiet); font-size: .75rem; line-height: 1.5; margin: .65rem .15rem .8rem; }
+.honey-field { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.turnstile-widget { min-width: 0; margin: .7rem 0; }
+.invite-status { min-height: 1.5em; margin: .85rem 0 0; text-align: center; color: var(--pink); font-size: .875rem; line-height: 1.5; }
+.invite-status[data-state="error"] { color: #ffb2bc; }
+@media (max-width: 540px) {
+  .choice-dialog { padding: 1.6rem 1.2rem 1.2rem; border-radius: 24px; }
+  .dialog-art, .dialog-art img { width: 88px; height: 88px; }
+  .dialog-title { font-size: 1.65rem; }
+  .game-wrap.is-scroll-active .game-card { border-color: #bf7396; box-shadow: 0 0 24px #f589b412; }
+  .game-particle { filter: none; }
+}
+.motion-off .choice-dialog { animation: none; }
+
+/* 05: loading — the arrival screen. It covers the apartment until the model says
+   every declared asset has settled, and everything behind it is `inert` until the
+   same moment. The fill is a CSS transition, so the reduced-motion query above
+   zeroes its travel; the sheen is decoration, and stops with the motion control. */
+.loading-screen { position: fixed; inset: 0; z-index: 30; display: grid; align-content: center; justify-items: center; gap: 1.1rem; padding: 2rem; background: radial-gradient(ellipse at 50% 32%, #4923373d, transparent 58%), var(--bg); text-align: center; }
+.loading-screen:focus { outline: none; }
+.loading-title { margin: 0; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 740; letter-spacing: -.045em; }
+.loading-track { position: relative; width: min(340px, 100%); height: 9px; border: 1px solid var(--line); border-radius: 100px; background: #2b2430; overflow: hidden; }
+.loading-fill { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), var(--pink-bright)); transform: scaleX(0); transform-origin: left; transition: transform .35s ease-out; }
+.loading-track::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #ffffff1f, transparent); transform: translateX(-100%); animation: loading-sheen 1.9s ease-in-out infinite; }
+@keyframes loading-sheen { to { transform: translateX(100%); } }
+.motion-off .loading-track::after { animation: none; opacity: 0; }
+.loading-percent { margin: -.4rem 0 0; color: var(--pink); font-size: .8125rem; font-variant-numeric: tabular-nums; letter-spacing: .08em; }
+.loading-note { max-width: 34ch; margin: 0; color: var(--muted); font-size: .9375rem; line-height: 1.7; }
+
+/* 06: audio — the header sound control and the Rooms' Music Source placeholders.
+   One appended block, and the control repeats the toggle styling rather than
+   joining the selector lists above, so this ticket adds lines instead of editing
+   the ones another ticket is landing beside. */
+.sound-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 100px; font-size: .875rem; line-height: 1.2; background: transparent; color: var(--muted); cursor: pointer; transition: border-color .25s, background .25s, color .25s; }
+.sound-toggle:hover { background: #35232e; border-color: var(--pink); }
+.sound-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.sound-toggle .sound-off-icon, .sound-toggle[aria-pressed="true"] .sound-on-icon { display: none; }
+.sound-toggle[aria-pressed="true"] .sound-off-icon { display: block; }
+.sound-toggle[aria-pressed="true"] { color: var(--pink); }
+
+/* A Music Source is a Prop in the Room, so it is dashed and tagged for as long
+   as it is a placeholder standing in for one. The design tickets replace it. */
+.music-source-row { margin-top: 1.6rem; }
+.music-source { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; padding: .5rem .9rem; border: 1px dashed var(--line); border-radius: 100px; background: transparent; color: var(--muted); font-size: .875rem; line-height: 1.2; cursor: pointer; transition: border-color .25s, color .25s; }
+.music-source:hover, .music-source:focus-visible { border-color: var(--pink); color: var(--ink); }
+.music-source[aria-pressed="true"] { border-style: solid; border-color: var(--pink); color: var(--ink); }
+.music-note { color: var(--pink); font-size: 1.05rem; line-height: 1; }
+.placeholder-tag { padding: .1rem .4rem; border-radius: 6px; background: #2a2230; color: var(--quiet); font-size: .6875rem; letter-spacing: .04em; }
+.motion-off .sound-toggle, .motion-off .music-source { transition: none; }
+
+@media (max-width: 540px) {
+  /* Three controls beside the wordmark now: the sound control keeps its icon
+     and gives up its words, exactly as the motion control does at this width. */
+  .sound-toggle { width: 44px; padding: 0; }
+  #sound-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .music-source-row { margin-top: 1.3rem; }
+}
+@media (max-width: 359px) {
+  /* Where the language toggle gives up its icon, the sound control gives up the
+     room around its own, so the header still fits on one line. */
+  .sound-toggle { width: 38px; }
+}
+
+/* 07: actors — the stage each Room lays its Cast out on, and the Cast itself.
+   The stage is deliberately bare: it is a 16:9 canvas of 1600 x 900 units and
+   nothing else until each Room's design pass furnishes it. */
+.stage { position: relative; width: 100%; max-width: 64rem; margin: 2.2rem auto 0; aspect-ratio: 16 / 9; pointer-events: none; background: linear-gradient(to bottom, transparent 62%, #f589b40a); }
+/* The Cast waits in here until the model puts an Actor in a Room, so a parked
+   Actor needs no state of its own: the container is what hides it. */
+.cast { display: none; }
+/* `left` and `top` are the Actor's feet in stage units turned into percentages
+   of the stage, and the translate lifts the sprite so its feet land there. */
+.actor { position: absolute; transform: translate(-50%, -100%) scaleX(var(--flip, 1)); transform-origin: bottom center; }
+.actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
+

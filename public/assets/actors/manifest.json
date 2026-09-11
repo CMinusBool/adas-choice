@@ -1,0 +1,166 @@
+{
+  "kind": "placeholder",
+  "warning": "These are not Cycles. Each file is one neutral standing frame cut mechanically out of a Character Sheet turnaround, shipped so that the Actor system could be built and seen before any animation frames exist. Replace every one of them with generated artwork; the shot list for that is in the effort notes and the contract is in CLAUDE.md.",
+  "madeBy": "scripts/make-actor-placeholders.mjs",
+  "madeOn": "2026-09-11",
+  "identitySource": "art/characters/v1 — the version 1 Character Sheets, never a generated asset",
+  "missing": "Every run Cycle, every walking frame, and the left facing of the Boy and the Girl.",
+  "placeholders": [
+    {
+      "file": "boy-walk-right.png",
+      "actor": "boy",
+      "cycle": "walk",
+      "facing": "right",
+      "frames": 1,
+      "columns": 1,
+      "frameWidth": 192,
+      "frameHeight": 320,
+      "drawnAt": {
+        "width": 76,
+        "height": 320
+      },
+      "source": {
+        "file": "boy-character-sheet-v1.png",
+        "sha256": "e8d308bb7ed2066bad66319060e3886bd8b7c81b59923334b9f6f5722656b554",
+        "view": "Right side",
+        "box": {
+          "x0": 790,
+          "x1": 1020,
+          "y0": 50,
+          "y1": 578
+        }
+      },
+      "bytes": 44503
+    },
+    {
+      "file": "girl-walk-right.png",
+      "actor": "girl",
+      "cycle": "walk",
+      "facing": "right",
+      "frames": 1,
+      "columns": 1,
+      "frameWidth": 192,
+      "frameHeight": 320,
+      "drawnAt": {
+        "width": 121,
+        "height": 320
+      },
+      "source": {
+        "file": "girl-character-sheet-v1.png",
+        "sha256": "31b1c0ab87151f83de7e8d7402a8d14dbc583f81a4626225f70d25def23d9fda",
+        "view": "Right side",
+        "box": {
+          "x0": 810,
+          "x1": 1045,
+          "y0": 50,
+          "y1": 572
+        }
+      },
+      "bytes": 55601
+    },
+    {
+      "file": "mica-walk-left.png",
+      "actor": "mica",
+      "cycle": "walk",
+      "facing": "left",
+      "frames": 1,
+      "columns": 1,
+      "frameWidth": 256,
+      "frameHeight": 192,
+      "drawnAt": {
+        "width": 202,
+        "height": 192
+      },
+      "source": {
+        "file": "mica-character-sheet-v1.png",
+        "sha256": "d66afe84ee2538232567584dd74c905a09668849cddb3a11372b2d7a6c7bcb97",
+        "view": "Left side",
+        "box": {
+          "x0": 220,
+          "x1": 660,
+          "y0": 90,
+          "y1": 492
+        }
+      },
+      "bytes": 48016
+    },
+    {
+      "file": "mica-walk-right.png",
+      "actor": "mica",
+      "cycle": "walk",
+      "facing": "right",
+      "frames": 1,
+      "columns": 1,
+      "frameWidth": 256,
+      "frameHeight": 192,
+      "drawnAt": {
+        "width": 191,
+        "height": 192
+      },
+      "source": {
+        "file": "mica-character-sheet-v1.png",
+        "sha256": "d66afe84ee2538232567584dd74c905a09668849cddb3a11372b2d7a6c7bcb97",
+        "view": "Right side",
+        "box": {
+          "x0": 820,
+          "x1": 1225,
+          "y0": 90,
+          "y1": 492
+        }
+      },
+      "bytes": 47598
+    },
+    {
+      "file": "mira-walk-left.png",
+      "actor": "mira",
+      "cycle": "walk",
+      "facing": "left",
+      "frames": 1,
+      "columns": 1,
+      "frameWidth": 256,
+      "frameHeight": 192,
+      "drawnAt": {
+        "width": 221,
+        "height": 192
+      },
+      "source": {
+        "file": "mira-character-sheet-v1.png",
+        "sha256": "21e1c9f3afb4de1d80581fd284515957eb8bed8e9179ea7b596cc49cf713c6e3",
+        "view": "Left side",
+        "box": {
+          "x0": 215,
+          "x1": 645,
+          "y0": 92,
+          "y1": 448
+        }
+      },
+      "bytes": 56247
+    },
+    {
+      "file": "mira-walk-right.png",
+      "actor": "mira",
+      "cycle": "walk",
+      "facing": "right",
+      "frames": 1,
+      "columns": 1,
+      "frameWidth": 256,
+      "frameHeight": 192,
+      "drawnAt": {
+        "width": 220,
+        "height": 192
+      },
+      "source": {
+        "file": "mira-character-sheet-v1.png",
+        "sha256": "21e1c9f3afb4de1d80581fd284515957eb8bed8e9179ea7b596cc49cf713c6e3",
+        "view": "Right side",
+        "box": {
+          "x0": 805,
+          "x1": 1240,
+          "y0": 92,
+          "y1": 448
+        }
+      },
+      "bytes": 55164
+    }
+  ]
+}

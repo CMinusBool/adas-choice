@@ -73,6 +73,31 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   name (audio) goes in `ASSETS_OUTSIDE_MARKUP` in `src/dom/loading.ts`.
 - **Scene assets travel as a set**: GIF, still poster, and 4x3 sprite sheet (480x480 frames,
   12 frames, 4.1s loop) are replaced together.
+- **Cycle assets travel as a set too**, and to their own contract. An Actor's Cycles live at
+  `public/assets/actors/<actor>-<cycle>-<facing>.png` — `walk` and `run`, `left` and `right` — and
+  are replaced together. Frames are laid left to right then top to bottom in a 4-column grid, 8
+  frames to a Cycle, each frame 192x320 for the Boy and the Girl and 256x192 for the cats. In every
+  frame the Actor stands with its feet on the frame's bottom edge and centred across it: that point
+  is the Actor's position in the world, which is why nothing may be padded or cropped after the
+  fact. Backgrounds are transparent with no baked shadow, and **no frame moves the Actor** — the
+  world model does the travelling, so a Cycle that walks across its own box would move it twice.
+  Playback is a fixed rate: walk 10 fps, run 14 fps; `idle` is the walk sheet held on its first
+  frame, so there is no idle asset. A per-facing sheet always wins; where only `right` exists the
+  painter mirrors it with `scaleX(-1)`, which is a fallback and is **wrong for Míca**, whose nose
+  dot must not change sides — she ships both facings and so does Mira. Every sheet is declared as a
+  `data-sheet` on a `.cycle` layer inside `#apartment`, which is how the preload list and
+  `scripts/assert-built-page.mjs` find it; a URL built in TypeScript is invisible to both. What is
+  in the repository today is **placeholders**, not Cycles: one neutral standing frame per Actor,
+  cut out of a Character Sheet by `scripts/make-actor-placeholders.mjs`. See
+  `public/assets/actors/manifest.json`, and `docs/actor-cycles-shot-list.md` for the twelve
+  generations that replace them.
+- **Every Room has a stage**: a 16:9 logical canvas of 1600 x 900 units, origin top-left, x right,
+  y down, held by `<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS.
+  Walkable areas, Props, doors and Actor positions are all written in those units, so the same
+  numbers mean the same place at every screen width, and the DOM only ever turns them into
+  percentages of the stage. An Actor's position is its feet — the bottom-centre of its sprite —
+  and depth is a y-sort. Furnish a Room by placing things on its stage in stage units; never in
+  pixels.
 - **Relative paths only** — the site has to work from a repository subpath, which is why Vite's
   `base` is `'./'`. Never introduce a root-absolute URL that survives the build.
 - **No framework.** Rooms are absolutely-positioned DOM sprites driven by `requestAnimationFrame`.
