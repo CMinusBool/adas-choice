@@ -1,12 +1,17 @@
 dist/
 node_modules/
 .scratch/
+# Agent scaffolding: worktrees/ holds live nested checkouts that a stray
+# `git add -A` would commit wholesale, and settings.local.json is machine-local.
+.claude/
 # Source artwork: the Character Sheets are the identity source for every Actor,
 # and they are megabytes each. Runtime assets are cut from them into public/.
 # Anchored: unanchored, this also swallowed `scripts/art/`, the tracked toolchain
 # that generates them.
 /art/
 *.tar.gz
+# Deploy artifact from deploy-claude-config.sh; .tgz escapes *.tar.gz above.
+claude-config.tgz
 .env
 .env.*
 !.env.example
