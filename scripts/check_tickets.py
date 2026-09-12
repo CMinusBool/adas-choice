@@ -23,7 +23,7 @@ TITLE = re.compile(r"^# (\d{2}): \S.*$")
 HEADER = re.compile(r"^([A-Z][A-Za-z ]*): *(.*)$")
 BLOCKED_NONE = "None (can start immediately)"
 
-HEADER_ORDER = ["Type", "Status", "Labels", "Blocked by", "Model"]
+HEADER_ORDER = ["Type", "Status", "Labels", "Blocked by", "Profile"]
 REQUIRED_HEADERS = ["Type", "Status", "Labels", "Blocked by"]
 SPEC_HEADERS = ["Type", "Status", "Labels"]
 
@@ -36,7 +36,7 @@ LABELS = {
     "ready-for-human",
     "wontfix",
 }
-MODELS = {"sonnet", "opus", "fable", "haiku"}
+PROFILES = {"mechanical", "standard", "deep", "novel"}
 
 
 class Ticket:
@@ -56,8 +56,8 @@ class Ticket:
         return [label.strip() for label in raw.split(",") if label.strip()]
 
     @property
-    def model(self) -> str:
-        return self.headers.get("Model", "")
+    def profile(self) -> str:
+        return self.headers.get("Profile", "")
 
 
 def parse_headers(lines: list[str], where: str, errors: list[str]) -> dict[str, str]:
@@ -144,9 +144,9 @@ def check_ticket(path: Path, errors: list[str]) -> Ticket | None:
             if label not in LABELS:
                 errors.append(f"{where}: unknown label {label!r}; allowed: {', '.join(sorted(LABELS))}")
 
-    model = ticket.headers.get("Model")
-    if model is not None and model not in MODELS:
-        errors.append(f"{where}: `Model: {model}` is not one of {', '.join(sorted(MODELS))}")
+    profile = ticket.headers.get("Profile")
+    if profile is not None and profile not in PROFILES:
+        errors.append(f"{where}: `Profile: {profile}` is not one of {', '.join(sorted(PROFILES))}")
 
     blocked = ticket.headers.get("Blocked by")
     if blocked is not None and blocked != BLOCKED_NONE:
@@ -180,7 +180,7 @@ def check_spec(spec: Path, errors: list[str]) -> None:
     for required in SPEC_HEADERS:
         if required not in headers:
             errors.append(f"spec.md: missing required `{required}:` line")
-    for extra in ("Blocked by", "Model"):
+    for extra in ("Blocked by", "Profile"):
         if extra in headers:
             errors.append(f"spec.md: opens with {', '.join(SPEC_HEADERS)} only; drop the `{extra}:` line")
     status = headers.get("Status")
@@ -277,7 +277,7 @@ def main(argv: list[str]) -> int:
         blockers = ", ".join(ticket.blocked_by) if ticket.blocked_by else "-"
         print(
             f"  {ticket.path.stem:<{width}}  {ticket.status:<11}  "
-            f"{ticket.model or 'default':<7}  {','.join(ticket.labels):<15}  blocked by {blockers}"
+            f"{ticket.profile or 'standard':<10}  {','.join(ticket.labels):<15}  blocked by {blockers}"
         )
 
     frontier = [
