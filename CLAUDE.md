@@ -170,6 +170,13 @@ and the skills that read one do not apply here.
 
 - Windows workstation; the shell is Git Bash (POSIX), Python is `python` (3.14), not `python3` —
   `python3` on PATH is a Microsoft Store stub that exits 49.
+- Playwright 1.62 and a matching Chromium are already on the machine, in the npx cache and under
+  `%LOCALAPPDATA%\ms-playwright`. They are deliberately **not** in `package.json`:
+  `scripts/verify/room-shots.mjs` imports the package by `file:///` path, so `npm ci` gains no step.
+  That script is how a Room is really looked at — per-route screenshots at two widths, the
+  `requestAnimationFrame` motion check and `prefers-reduced-motion` emulation, neither of which the
+  desktop app's embedded browser pane can do. Windows reserves the port range `.claude/launch.json`
+  puts `preview` on (4173), so the script probes upward for one that binds.
 - `worker/` dependencies are already installed; `node --test worker/test/*.test.mjs` runs from the
   repo root without an install step. The Worker is not an npm workspace of the root package, so a
   root `npm ci` neither installs nor touches it.
