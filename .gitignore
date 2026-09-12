@@ -21,3 +21,7 @@ claude-config.tgz
 .wrangler/
 playwright-report/
 test-results/
+# Byte-cache the repo's Python scripts leave behind. Unanchored on purpose:
+# `scripts/check_tickets_test.py` writes `scripts/__pycache__/` on every run, and
+# a hook test run from anywhere else writes one beside itself.
+__pycache__/
