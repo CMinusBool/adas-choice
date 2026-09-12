@@ -5,6 +5,27 @@
   "madeOn": "2026-09-11",
   "identitySource": "art/characters/v1 — the version 1 Character Sheets, never a generated asset",
   "missing": "Every run Cycle, every walking frame, and the left facing of the Boy and the Girl.",
+  "schema": {
+    "version": 2,
+    "note": "Version 2 adds provenance, so that a generated sheet can be traced back to the call that made it without the raw generation being in the repository (art/ is gitignored and stays that way). `placeholders` holds the mechanical crops and is rewritten wholesale by scripts/make-actor-placeholders.mjs; `cycles` holds generated Cycle sheets and is written by the asset builder. Both arrays use the same entry shape. Delete this file when the last placeholder is gone.",
+    "entry": {
+      "file": "Sheet filename in this directory, `<actor>-<cycle>-<facing>.png`.",
+      "actor": "boy | girl | mica | mira",
+      "cycle": "walk | run",
+      "facing": "left | right",
+      "frames": "Frame count, matching the `.cycle` layer's data-frames in index.html.",
+      "columns": "Grid columns, matching data-columns. Frames run left to right then top to bottom.",
+      "frameWidth": "192 for the Boy and the Girl, 256 for the cats.",
+      "frameHeight": "320 for the Boy and the Girl, 192 for the cats.",
+      "source": "Where the pixels came from. For a generated sheet, the raw generation's path under the effort's art/ directory plus its sha256; for a placeholder, the Character Sheet object it was cropped out of.",
+      "generator": "The tool and model that made the raw generation, e.g. `codex image_gen`. Absent, or the script's own path, when nothing generated anything.",
+      "prompt": "Path to the prompt file in the effort directory, so the exact call can be read back.",
+      "references": "The Character Sheets the generation was anchored on: `[{ file, sha256 }]`. Identity comes from art/characters/v1 and never from another generated asset.",
+      "builtBy": "The script that turned the raw generation into this sheet, with its version: `scripts/<name>.mjs@<version>`.",
+      "validatedAt": "ISO date on which `node scripts/check-assets.mjs` last passed this file. The validator is the mechanical half of acceptance; the owner's taste gate is the other half."
+    }
+  },
+  "cycles": [],
   "placeholders": [
     {
       "file": "boy-walk-right.png",

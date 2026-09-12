@@ -90,7 +90,11 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   in the repository today is **placeholders**, not Cycles: one neutral standing frame per Actor,
   cut out of a Character Sheet by `scripts/make-actor-placeholders.mjs`. See
   `public/assets/actors/manifest.json`, and `docs/actor-cycles-shot-list.md` for the twelve
-  generations that replace them.
+  generations that replace them. Every rule in this paragraph is checked mechanically by
+  `node scripts/check-assets.mjs` — size, grid, binary alpha, feet on the bottom edge, centring,
+  no bleed into a neighbouring frame, no height pop and no translation across the Cycle — which
+  `npm run build` runs as a report and which a delivered sheet must pass before the owner is
+  asked to look at it.
 - **Every Room has a stage**: a 16:9 logical canvas of 1600 x 900 units, origin top-left, x right,
   y down, held by `<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS.
   Walkable areas, Props, doors and Actor positions are all written in those units, so the same

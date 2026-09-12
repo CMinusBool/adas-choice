@@ -15,6 +15,16 @@ numbers in `index.html`.
 The contract these are cut to is in CLAUDE.md under "Cycle assets travel as a set too". Read it
 first; this list only adds what is specific to each shot.
 
+**These twelve shots are tickets now.** This document stays the human-readable brief — it is what
+an art ticket points at rather than copies — but the work is tracked in the effort's issue graph:
+tickets 22–29 are the eight `Kind: art` generations grouped by Actor and Cycle, and ticket 30 is
+the `Kind: asset-code` ticket that turns the delivered strips into sheets in
+`public/assets/actors/` and corrects the `.cycle` attributes in `index.html`. Acceptance for any
+of them is two things and not one: `node scripts/check-assets.mjs` passing on the sheet, and the
+owner's taste gate on how it looks. The validator is the mechanical half — it is the only thing
+that can see a figure three pixels off the floor — and the owner is the only thing that can see
+that the Boy never changes which leg leads.
+
 ## Rules that apply to every shot
 
 - **One call per sheet, from the Character Sheet.** Attach

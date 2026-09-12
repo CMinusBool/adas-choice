@@ -19,7 +19,7 @@
 // Not wired into any npm script — it runs once, by hand, and its output is
 // committed.
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, resolve } from 'node:path';
 
@@ -301,8 +301,15 @@ for (const crop of CROPS) {
   console.log(`${file}: ${boxWidth}x${boxHeight} of ${crop.view} → ${width}x${frame.height} in ${frame.width}x${frame.height}, ${bytes.length} bytes`);
 }
 
+// This script owns the `placeholders` half of the manifest and nothing else.
+// The `schema` block and the `cycles` array belong to generated artwork, which
+// arrives long after the last run of this script, so they are carried across a
+// rewrite rather than clobbered by it.
+const manifestPath = join(output, 'manifest.json');
+const existing = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : {};
+
 writeFileSync(
-  join(output, 'manifest.json'),
+  manifestPath,
   `${JSON.stringify(
     {
       kind: 'placeholder',
@@ -312,6 +319,8 @@ writeFileSync(
       madeOn: new Date().toISOString().slice(0, 10),
       identitySource: 'art/characters/v1 — the version 1 Character Sheets, never a generated asset',
       missing: 'Every run Cycle, every walking frame, and the left facing of the Boy and the Girl.',
+      ...(existing.schema ? { schema: existing.schema } : {}),
+      cycles: existing.cycles ?? [],
       placeholders: made,
     },
     null,
