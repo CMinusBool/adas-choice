@@ -136,6 +136,15 @@ Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/
 
 ### Effort conventions
 
+- Before running **`/mattpocock-skills:grill-with-docs`** here, read
+  `~/.claude/docs/grill-checklists/creative-web.md`: the groups a creative web effort's grill must
+  have covered (space, asset contract, asset pipeline, review gates, where things live, copy, sound
+  and motion, ship), each with the COOP-001 miss it comes from, plus the rule that an uncovered
+  group is written into the spec verbatim rather than answered.
+- Before running **`/mattpocock-skills:to-spec`** here, read `~/.claude/docs/spec-addendum.md`: the
+  sections that plugin's template lacks — "Production design", "Asset pipeline" and "Review gates"
+  after Implementation Decisions, then "Not yet decided" and the run-filled "Decisions during the
+  build" at the end — and where each goes. The skill itself is not forked.
 - Write the tickets with **`/to-tickets`** (the personal skill), never with
   `/mattpocock-skills:to-tickets` bare: the plugin's template writes bold inline fields that
   `scripts/check_tickets.py` rejects, and it knows nothing about `Kind:`, `Profile:` or
