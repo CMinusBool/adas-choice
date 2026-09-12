@@ -3,7 +3,9 @@ node_modules/
 .scratch/
 # Source artwork: the Character Sheets are the identity source for every Actor,
 # and they are megabytes each. Runtime assets are cut from them into public/.
-art/
+# Anchored: unanchored, this also swallowed `scripts/art/`, the tracked toolchain
+# that generates them.
+/art/
 *.tar.gz
 .env
 .env.*
