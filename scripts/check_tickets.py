@@ -9,7 +9,10 @@ and stops on a non-zero exit, so every rule below is a rule a run depends on.
 
 Exit 0 with a listing and a frontier line; exit 1 on any violation, and also
 when the frontier is empty (nothing runnable, or every ticket already done).
-Standard library only: the repo has no Python toolchain.
+The listing carries each ticket's Kind, and an `awaiting review:` line names the
+tickets whose deliverable is waiting for the owner.
+Standard library only: the repo has no Python toolchain. Its tests are
+scripts/check_tickets_test.py (stdlib unittest).
 """
 
 from __future__ import annotations
@@ -23,12 +26,12 @@ TITLE = re.compile(r"^# (\d{2}): \S.*$")
 HEADER = re.compile(r"^([A-Z][A-Za-z ]*): *(.*)$")
 BLOCKED_NONE = "None (can start immediately)"
 
-HEADER_ORDER = ["Type", "Status", "Labels", "Blocked by", "Profile"]
+HEADER_ORDER = ["Type", "Status", "Labels", "Blocked by", "Profile", "Kind", "Deliverable"]
 REQUIRED_HEADERS = ["Type", "Status", "Labels", "Blocked by"]
 SPEC_HEADERS = ["Type", "Status", "Labels"]
 
 TYPES = {"task"}
-STATUSES = ["ready", "in-progress", "done"]
+STATUSES = ["ready", "in-progress", "review", "done"]
 LABELS = {
     "needs-triage",
     "needs-info",
@@ -37,6 +40,18 @@ LABELS = {
     "wontfix",
 }
 PROFILES = {"mechanical", "standard", "deep", "novel"}
+
+# What a ticket delivers, which is what decides how it is routed and how its
+# completion is judged. A missing `Kind:` line reads as `code`, so every ticket
+# written before the line existed stays valid.
+KINDS = ["code", "design", "research", "content", "art", "asset-code"]
+DEFAULT_KIND = "code"
+# Kinds whose deliverable is a matter of taste, so they wait for the owner.
+REVIEW_KINDS = {"design", "content", "art"}
+# Kinds that carry no `Deliverable:` line: their deliverable is the diff.
+BRANCH_KINDS = {"code"}
+# Kinds whose `Deliverable:` is relative to the repo root, not the effort directory.
+REPO_ROOT_KINDS = {"asset-code"}
 
 
 class Ticket:
@@ -58,6 +73,41 @@ class Ticket:
     @property
     def profile(self) -> str:
         return self.headers.get("Profile", "")
+
+    @property
+    def kind(self) -> str:
+        """A missing line reads as `code`; an invalid one is reported, not defaulted."""
+        return self.headers.get("Kind", DEFAULT_KIND)
+
+    @property
+    def deliverable(self) -> str:
+        return self.headers.get("Deliverable", "")
+
+
+def check_deliverable_path(value: str, kind: str, where: str, errors: list[str]) -> None:
+    """One relative path, no escaping the root it is measured from.
+
+    `asset-code` measures from the repo root; every other kind measures from the
+    effort directory. Checked lexically, because the path may name something a
+    ticket has not produced yet.
+    """
+    root = "the repo root" if kind in REPO_ROOT_KINDS else "the effort directory"
+    if not value:
+        errors.append(f"{where}: `Deliverable:` needs a path")
+        return
+    if "," in value or value.split() != [value]:
+        errors.append(f"{where}: `Deliverable:` takes exactly one path, got {value!r}")
+        return
+    normalised = value.replace("\\", "/")
+    if normalised.startswith(("/", "~")) or re.match(r"^[A-Za-z]:", normalised):
+        errors.append(
+            f"{where}: `Deliverable: {value}` must be relative to {root}, not an absolute path"
+        )
+        return
+    if ".." in normalised.split("/"):
+        errors.append(
+            f"{where}: `Deliverable: {value}` must stay inside {root}; it contains `..`"
+        )
 
 
 def parse_headers(lines: list[str], where: str, errors: list[str]) -> dict[str, str]:
@@ -128,13 +178,36 @@ def check_ticket(path: Path, errors: list[str]) -> Ticket | None:
         if required not in ticket.headers:
             errors.append(f"{where}: missing required `{required}:` line")
 
-    kind = ticket.headers.get("Type")
-    if kind is not None and kind not in TYPES:
-        errors.append(f"{where}: `Type: {kind}` is not one of {', '.join(sorted(TYPES))}")
+    type_ = ticket.headers.get("Type")
+    if type_ is not None and type_ not in TYPES:
+        errors.append(f"{where}: `Type: {type_}` is not one of {', '.join(sorted(TYPES))}")
+
+    kind = ticket.headers.get("Kind")
+    kind_ok = kind is None or kind in KINDS
+    if not kind_ok:
+        errors.append(f"{where}: `Kind: {kind}` is not one of {', '.join(KINDS)}")
+    effective_kind = ticket.kind if kind_ok else DEFAULT_KIND
 
     status = ticket.headers.get("Status")
     if status is not None and status not in STATUSES:
         errors.append(f"{where}: `Status: {status}` is not one of {', '.join(STATUSES)}")
+    elif status == "review" and kind_ok and effective_kind not in REVIEW_KINDS:
+        errors.append(
+            f"{where}: `Status: review` is only for {', '.join(sorted(REVIEW_KINDS))} tickets; "
+            f"a `{effective_kind}` ticket goes from in-progress straight to done"
+        )
+
+    if kind_ok:
+        if effective_kind in BRANCH_KINDS:
+            if "Deliverable" in ticket.headers:
+                errors.append(
+                    f"{where}: a `{effective_kind}` ticket carries no `Deliverable:` line; "
+                    "its deliverable is the diff"
+                )
+        elif "Deliverable" not in ticket.headers:
+            errors.append(f"{where}: `Kind: {effective_kind}` needs a `Deliverable:` line")
+        else:
+            check_deliverable_path(ticket.deliverable, effective_kind, where, errors)
 
     if "Labels" in ticket.headers:
         labels = ticket.labels
@@ -180,7 +253,7 @@ def check_spec(spec: Path, errors: list[str]) -> None:
     for required in SPEC_HEADERS:
         if required not in headers:
             errors.append(f"spec.md: missing required `{required}:` line")
-    for extra in ("Blocked by", "Profile"):
+    for extra in ("Blocked by", "Profile", "Kind", "Deliverable"):
         if extra in headers:
             errors.append(f"spec.md: opens with {', '.join(SPEC_HEADERS)} only; drop the `{extra}:` line")
     status = headers.get("Status")
@@ -277,7 +350,8 @@ def main(argv: list[str]) -> int:
         blockers = ", ".join(ticket.blocked_by) if ticket.blocked_by else "-"
         print(
             f"  {ticket.path.stem:<{width}}  {ticket.status:<11}  "
-            f"{ticket.profile or 'standard':<10}  {','.join(ticket.labels):<15}  blocked by {blockers}"
+            f"{ticket.profile or 'standard':<10}  {ticket.kind:<10}  "
+            f"{','.join(ticket.labels):<15}  blocked by {blockers}"
         )
 
     frontier = [
@@ -287,6 +361,10 @@ def main(argv: list[str]) -> int:
         and "ready-for-agent" in ticket.labels
         and all(tickets[blocker].status == "done" for blocker in ticket.blocked_by)
     ]
+    awaiting = [number for number, ticket in sorted(tickets.items()) if ticket.status == "review"]
+
+    if awaiting:
+        print("awaiting review: " + ", ".join(awaiting))
 
     if frontier:
         print("frontier: " + ", ".join(frontier))
