@@ -1,0 +1,192 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Cycle motion preview</title>
+<!--
+  The human half of acceptance for a Cycle. `check-assets.mjs` proves the geometry; nothing
+  mechanical proves the motion, so this plays a candidate sheet back at the contract's rate and
+  lets the owner watch the legs.
+
+  Open it either way:
+    node scripts/art/make-preview.mjs --sheet <sheet.png>   # writes a self-contained preview.html
+    npm run dev                                             # then browse to this file
+
+  `make-preview.mjs` rewrites the CONFIG block below and inlines every sheet as a data URI, because
+  the desktop app's preview pane loads a local page as a `data:` URL and cannot resolve an image
+  sitting beside it.
+-->
+<style>
+  :root { color-scheme: light; --ink: #1c1a17; --muted: #6b6560; --line: #d8d2ca; --bg: #f4f1ec; }
+  body { margin: 0; padding: 24px; font: 14px/1.5 system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+  h1 { font-size: 16px; margin: 0 0 4px; }
+  p.note { margin: 0 0 20px; color: var(--muted); max-width: 78ch; }
+  .controls { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: #fff; margin-bottom: 22px; }
+  .controls label { display: flex; gap: 7px; align-items: center; white-space: nowrap; }
+  button { font: inherit; padding: 4px 12px; border: 1px solid var(--line); border-radius: 5px; background: #fff; cursor: pointer; }
+  button:hover { background: #f0ece6; }
+  output { font-variant-numeric: tabular-nums; color: var(--muted); min-width: 3.5ch; }
+
+  .runs { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+  .run h2 { font-size: 13px; margin: 0 0 8px; font-weight: 600; }
+  .run h2 span { font-weight: 400; color: var(--muted); }
+
+  /* Checker so a stray chroma pixel or a soft edge is visible against transparency. */
+  .viewport { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 6px;
+    background-color: #fff;
+    background-image: linear-gradient(45deg, #e7e2db 25%, transparent 25%), linear-gradient(-45deg, #e7e2db 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e7e2db 75%), linear-gradient(-45deg, transparent 75%, #e7e2db 75%);
+    background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0; }
+  .sprite { position: absolute; left: 0; bottom: 0; background-repeat: no-repeat;
+    image-rendering: pixelated; transform-origin: 50% 100%; }
+  .guides { position: absolute; inset: 0; pointer-events: none; }
+  .guides .ground { position: absolute; left: 0; right: 0; bottom: 0; border-top: 1px dashed #c0392b; }
+  .guides .centre { position: absolute; top: 0; bottom: 0; border-left: 1px dashed #2980b9; }
+  .guides[hidden] { display: none; }
+
+  .strip { display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
+  .strip div { background-repeat: no-repeat; image-rendering: pixelated;
+    border: 1px solid var(--line); border-radius: 3px; background-color: #fff; }
+  .strip div.on { outline: 2px solid #c0392b; outline-offset: 1px; }
+</style>
+
+<h1 id="pageTitle">Cycle motion preview</h1>
+<p class="note">Every sheet below is played at the rate the contract fixes — walk 10 fps, run 14 fps.
+The question no measurement answers is <em>phase</em>: does the leading leg alternate between the two
+rows, or does the same leg lead throughout and the walk shuffles? Watch the legs, and use
+<em>travel</em> to see whether the feet plant or slide.</p>
+
+<div class="controls">
+  <button id="playPause">Pause</button>
+  <label><input id="contract" type="checkbox" checked> contract rate</label>
+  <label>fps <input id="fps" type="range" min="1" max="24" value="10" step="1"><output id="fpsOut">10</output></label>
+  <button id="prev">◀ frame</button>
+  <button id="next">frame ▶</button>
+  <label>zoom <input id="zoom" type="range" min="1" max="3" value="2" step="0.5"><output id="zoomOut">2x</output></label>
+  <label><input id="travel" type="checkbox"> travel <input id="stride" type="number" value="110" min="0" max="400" step="5" style="width:5em"> px / cycle</label>
+  <label><input id="mirror" type="checkbox"> mirror (other facing)</label>
+  <label><input id="guides" type="checkbox" checked> guides</label>
+</div>
+
+<div class="runs" id="runs"></div>
+
+<script>
+  // BUILD:CONFIG — make-preview.mjs replaces everything between this line and BUILD:END.
+  const CONFIG = {
+    title: 'Cycle motion preview',
+    runs: [
+      { title: 'candidate', note: 'a candidate sheet', sheet: 'candidate-sheet.png',
+        frameWidth: 192, frameHeight: 320, columns: 4, frames: 8, fps: 10 },
+    ],
+  };
+  // BUILD:END
+
+  const $ = (id) => document.getElementById(id);
+  document.title = CONFIG.title;
+  $('pageTitle').textContent = CONFIG.title;
+
+  const THUMB_HEIGHT = 80;
+  const runs = CONFIG.runs.map((run) => {
+    const el = document.createElement('section');
+    el.className = 'run';
+    el.innerHTML = `<h2>${run.title} <span>— ${run.note}</span></h2>
+      <div class="viewport"><div class="sprite"></div>
+        <div class="guides"><div class="ground"></div><div class="centre"></div></div></div>
+      <div class="strip">${Array.from({ length: run.frames }, () => '<div></div>').join('')}</div>`;
+    $('runs').append(el);
+    const sprite = el.querySelector('.sprite');
+    sprite.style.backgroundImage = `url("${run.sheet}")`;
+    const rows = Math.ceil(run.frames / run.columns);
+    const thumbScale = THUMB_HEIGHT / run.frameHeight;
+    el.querySelectorAll('.strip div').forEach((cell, index) => {
+      cell.style.backgroundImage = `url("${run.sheet}")`;
+      cell.style.width = `${Math.round(run.frameWidth * thumbScale)}px`;
+      cell.style.height = `${THUMB_HEIGHT}px`;
+      cell.style.backgroundSize = `${run.frameWidth * run.columns * thumbScale}px ${run.frameHeight * rows * thumbScale}px`;
+      cell.style.backgroundPosition =
+        `${-(index % run.columns) * run.frameWidth * thumbScale}px ${-Math.floor(index / run.columns) * THUMB_HEIGHT}px`;
+    });
+    return { ...run, rows, el, sprite, viewport: el.querySelector('.viewport'),
+             guides: el.querySelector('.guides'), cells: [...el.querySelectorAll('.strip div')] };
+  });
+
+  let playing = true, last = performance.now();
+  const phase = runs.map(() => ({ acc: 0, index: 0, travelled: 0 }));
+
+  const rateFor = (run) => ($('contract').checked ? run.fps : Number($('fps').value));
+
+  function layout() {
+    const zoom = Number($('zoom').value);
+    for (const run of runs) {
+      const width = run.frameWidth * zoom, height = run.frameHeight * zoom;
+      const lane = $('travel').checked ? Math.round(width * 2.4) : width;
+      run.viewport.style.width = `${lane}px`;
+      run.viewport.style.height = `${height}px`;
+      run.sprite.style.width = `${width}px`;
+      run.sprite.style.height = `${height}px`;
+      run.sprite.style.backgroundSize = `${run.frameWidth * run.columns * zoom}px ${run.frameHeight * run.rows * zoom}px`;
+      run.guides.hidden = !$('guides').checked;
+      run.guides.querySelector('.centre').style.left = `${Math.round(lane / 2)}px`;
+    }
+    // Read the readouts back off the inputs rather than trusting the markup: a browser restores a
+    // range's value across a reload, and a readout that lies about the rate would sink the one
+    // judgement this page exists to make.
+    $('fpsOut').textContent = $('fps').value;
+    $('zoomOut').textContent = `${Number($('zoom').value)}x`;
+    draw();
+  }
+
+  function draw() {
+    const zoom = Number($('zoom').value);
+    const flip = $('mirror').checked ? ' scaleX(-1)' : '';
+    for (const [index, run] of runs.entries()) {
+      const at = phase[index].index % run.frames;
+      const column = at % run.columns, row = Math.floor(at / run.columns);
+      run.sprite.style.backgroundPosition =
+        `${-column * run.frameWidth * zoom}px ${-row * run.frameHeight * zoom}px`;
+      const lane = run.viewport.clientWidth, width = run.frameWidth * zoom;
+      const x = $('travel').checked
+        ? (phase[index].travelled % (lane + width)) - width
+        : (lane - width) / 2;
+      run.sprite.style.transform = `translateX(${Math.round(x)}px)${flip}`;
+      run.cells.forEach((cell, cellIndex) => cell.classList.toggle('on', cellIndex === at));
+    }
+  }
+
+  function tick(now) {
+    const dt = (now - last) / 1000; last = now;
+    if (playing) {
+      for (const [index, run] of runs.entries()) {
+        const fps = rateFor(run);
+        phase[index].acc += dt * fps;
+        while (phase[index].acc >= 1) { phase[index].acc -= 1; phase[index].index = (phase[index].index + 1) % run.frames; }
+        // One Cycle covers `stride` px; scale by zoom so the walk reads the same at any size.
+        phase[index].travelled += (dt * fps / run.frames) * Number($('stride').value) * Number($('zoom').value);
+      }
+      draw();
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const step = (by) => {
+    playing = false;
+    $('playPause').textContent = 'Play';
+    for (const [index, run] of runs.entries()) phase[index].index = (phase[index].index + run.frames + by) % run.frames;
+    draw();
+  };
+
+  $('playPause').onclick = () => { playing = !playing; $('playPause').textContent = playing ? 'Pause' : 'Play'; };
+  $('prev').onclick = () => step(-1);
+  $('next').onclick = () => step(1);
+  $('fps').oninput = () => { $('contract').checked = false; $('fpsOut').textContent = $('fps').value; };
+  $('contract').onchange = () => ($('fpsOut').textContent = $('fps').value);
+  $('zoom').oninput = layout;
+  $('travel').onchange = () => { for (const one of phase) one.travelled = 0; layout(); };
+  $('mirror').onchange = draw;
+  $('guides').onchange = layout;
+  addEventListener('keydown', (event) => {
+    if (event.key === ' ') { event.preventDefault(); $('playPause').click(); }
+    if (event.key === 'ArrowLeft') $('prev').click();
+    if (event.key === 'ArrowRight') $('next').click();
+  });
+
+  layout();
+  requestAnimationFrame(tick);
+</script>

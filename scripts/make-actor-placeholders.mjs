@@ -18,6 +18,14 @@
 //
 // Not wired into any npm script — it runs once, by hand, and its output is
 // committed.
+//
+// `scripts/art/build-cycle.mjs` now owns the same three ideas for real Cycles —
+// a mask, one shared scale, feet on the frame's bottom edge — over a generated
+// strip rather than a Character Sheet turnaround. This script is deliberately
+// **not** rebuilt on that shared code: its committed output would have to stay
+// byte-identical to be worth the churn, and it retires with the last
+// placeholder. Read `scaleInto` and `place` below as the earlier statement of
+// the same arithmetic, and change neither to match the other.
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

@@ -125,6 +125,9 @@ export function readDeclarations(html) {
       columns: Number(attribute('data-columns')),
       cycle: attribute('data-cycle'),
       facing: attribute('data-facing'),
+      // Playback rate is not a rule this script checks — the contract fixes it at walk 10, run 14
+      // — but `scripts/art/make-preview.mjs` plays a sheet back at the rate the page declares.
+      fps: attribute('data-fps'),
     });
   }
   return declarations;

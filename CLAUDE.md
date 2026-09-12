@@ -95,6 +95,22 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   no bleed into a neighbouring frame, no height pop and no translation across the Cycle — which
   `npm run build` runs as a report and which a delivered sheet must pass before the owner is
   asked to look at it.
+- **A Cycle sheet is built by code, never by hand.** A generation comes back as a strip on a
+  chroma ground at whatever size the model felt like, and `node scripts/art/build-cycle.mjs
+  <strip.png> --out public/assets/actors/<actor>-<cycle>-<facing>.png` turns it into a sheet: mask
+  the ground out, take a bounding box per cell, scale the whole Cycle by **one shared factor**
+  taken from its tallest frame — scaling per frame is what makes a figure grow and shrink as it
+  walks — seat each figure on its frame's bottom edge, centre it, lay the frames out 4 across, and
+  run the validator over the result. It writes a `metrics.json` beside the sheet (send that to the
+  effort directory with `--metrics`, not into `public/`), appends the sheet's provenance to
+  `manifest.json`, and prints the `index.html` attribute changes the delivery needs, which
+  `--apply` makes. Nothing invents pixels and nothing is padded or cropped afterwards: a strip
+  that cannot be made to pass the validator is a wrong generation, and its art ticket is reopened
+  rather than the tolerance loosened. `--mirror` bakes the other facing and is refused for the
+  cats. What no script can judge is the **motion phase** — whether the leading leg alternates
+  between the two rows — so `node scripts/art/make-preview.mjs --sheet <sheet.png>` writes a
+  self-contained page that plays a candidate back at the contract's rate for the owner's eye, and
+  every sheet is "motion phase not verified" until that check has been made.
 - **Every Room has a stage**: a 16:9 logical canvas of 1600 x 900 units, origin top-left, x right,
   y down, held by `<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS.
   Walkable areas, Props, doors and Actor positions are all written in those units, so the same
