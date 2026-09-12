@@ -113,6 +113,10 @@ Efforts, specs and implementation tickets are **local markdown under `.scratch/`
 never committed). There is no Jira on this project, so `ticket-neighbours` and `jira-ro` do not
 apply here.
 
+- Write the tickets with **`/to-tickets`** (the personal skill), never with
+  `/mattpocock-skills:to-tickets` bare: the plugin's template writes bold inline fields that
+  `scripts/check_tickets.py` rejects, and it knows nothing about `Kind:`, `Profile:` or
+  `Deliverable:`. The personal skill calls the plugin one for the slicing and owns the file format.
 - One effort per directory: `.scratch/<KEY>-<slug>/`, where `<KEY>` is a local key of the form
   `COOP-001`. The integration branch carries the same key (`COOP-001-apartment`) — that is how
   `/implement-parallel` resolves `.scratch/<KEY>-*/`.
