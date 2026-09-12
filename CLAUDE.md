@@ -109,9 +109,16 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
 
 ## Agent skills
 
+### Issue tracker
+
 Efforts, specs and implementation tickets are **local markdown under `.scratch/`** (gitignored,
-never committed). There is no Jira on this project, so `ticket-neighbours` and `jira-ro` do not
-apply here.
+never committed), with no upstream tracker above them. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Effort conventions
 
 - Write the tickets with **`/to-tickets`** (the personal skill), never with
   `/mattpocock-skills:to-tickets` bare: the plugin's template writes bold inline fields that
@@ -131,7 +138,8 @@ apply here.
   ```
 
 When a skill says "publish to the issue tracker", write a file under `.scratch/<KEY>-<slug>/`.
-When it says "fetch the ticket", read the file. Do not look for an upstream tracker.
+When it says "fetch the ticket", read the file. Do not look for an upstream tracker: there is none,
+and the skills that read one do not apply here.
 
 ## Environment
 
