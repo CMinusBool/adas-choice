@@ -177,6 +177,34 @@ and the skills that read one do not apply here.
   `requestAnimationFrame` motion check and `prefers-reduced-motion` emulation, neither of which the
   desktop app's embedded browser pane can do. Windows reserves the port range `.claude/launch.json`
   puts `preview` on (4173), so the script probes upward for one that binds.
+- **Stop every dev and preview server before `npm ci`.** A running `vite preview` or `vite` holds
+  files under `node_modules`, and `npm ci` deletes that directory first, so it fails with `EPERM`
+  and leaves the tree half-installed. This is why a merger runs `npm ci` **only when the merge
+  actually changed `package.json` or `package-lock.json`** — on every other merge the installed
+  tree is already right and the reinstall is pure risk.
+- **esbuild leaves a service process behind**, one per Vite run, and it holds
+  `node_modules/@esbuild/...` open in whatever checkout started it — usually a worktree, where it
+  then blocks removal. Find it and end it before cleaning up:
+
+  ```bash
+  powershell -NoProfile -Command "Get-CimInstance Win32_Process -Filter \"Name='esbuild.exe'\" | Select-Object ProcessId, ExecutablePath"
+  powershell -NoProfile -Command "Stop-Process -Id <pid> -Force"
+  ```
+
+  (`node.exe` with `--service=` in its command line is the same thing under another name.)
+- **Removing a worktree on Windows.** `git worktree remove` refuses one holding modified or
+  untracked files; where those are a stray copy of something already committed, `git clean -f
+  <path>` or `git restore .` inside it makes the remove work without `--force`, which is worth the
+  extra step because `--force` throws away whatever was there unseen. A directory some process
+  still has open cannot be deleted at all, even once git has emptied it: `git worktree prune` drops
+  the administrative entry and the empty directory stays behind, which is a finished cleanup and
+  not a failed one.
+- **Codex runs its own shell steps through PowerShell 7, not Git Bash.** A `codex exec` turn that
+  shells out is writing PowerShell, so POSIX quoting and `/c/...` paths do not survive the trip;
+  hand it Windows paths. Node also refuses to spawn the `.cmd` shims npm installs (`EINVAL`, the
+  CVE-2024-27980 mitigation), so `scripts/art/codex-imagegen.mjs` and
+  `scripts/verify/room-shots.mjs` both walk a shim back to the package's own `.js` entry point and
+  spawn that with their own Node.
 - `worker/` dependencies are already installed; `node --test worker/test/*.test.mjs` runs from the
   repo root without an install step. The Worker is not an npm workspace of the root package, so a
   root `npm ci` neither installs nor touches it.
