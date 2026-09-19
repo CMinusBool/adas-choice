@@ -59,11 +59,19 @@ const WALKABLE: Record<RoomId, Polygon> = {
     { x: 1480, y: 860 },
     { x: 120, y: 860 },
   ],
+  // The Game Room's floor: a band across the front, with one notch cut from its
+  // bottom edge for the low table's footprint, so a cat never walks into the
+  // foreground Prop that would hide it. The poufs are deliberately not cut out —
+  // depth there is the y-sort, which is the cue we want.
   games: [
-    { x: 120, y: 640 },
-    { x: 1480, y: 640 },
-    { x: 1480, y: 860 },
-    { x: 120, y: 860 },
+    { x: 140, y: 660 },
+    { x: 1460, y: 660 },
+    { x: 1460, y: 860 },
+    { x: 1000, y: 860 },
+    { x: 1000, y: 800 },
+    { x: 560, y: 800 },
+    { x: 560, y: 860 },
+    { x: 140, y: 860 },
   ],
   cinema: [
     { x: 140, y: 640 },
