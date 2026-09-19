@@ -18,7 +18,7 @@ export type { MotionSlice } from './motion';
 export type { AssetOutcome, LoadingSlice } from './loading';
 
 export type { RoomsSlice, TransitionKind, World, WorldEvent, WorldInputs } from './world';
-export { advance, createWorld, isCurrentRoom, isRoomPainted, motionIsOn } from './world';
+export { advance, createWorld, isCurrentRoom, isRoomPainted, motionIsOn, motionIsOnByChoice } from './world';
 // 05: loading
 export { isInteractive, loadingProgress } from './world';
 

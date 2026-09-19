@@ -269,6 +269,17 @@ export function motionIsOn(world: World): boolean {
   return !world.motion.paused;
 }
 
+/**
+ * Has the visitor turned motion on themselves?
+ *
+ * The one case in which a reduced-motion request from their system is set
+ * aside. `motionIsOn` alone cannot separate a system that never asked from a
+ * visitor who overruled it, and the stylesheet needs exactly that difference.
+ */
+export function motionIsOnByChoice(world: World): boolean {
+  return world.motion.chosenByVisitor && !world.motion.paused;
+}
+
 /** Is this the Room the visitor is in? */
 export function isCurrentRoom(world: World, room: RoomId): boolean {
   return world.rooms.current === room;
