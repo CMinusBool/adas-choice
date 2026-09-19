@@ -33,3 +33,8 @@ export { STAGE_HEIGHT, STAGE_WIDTH } from './stage';
 export type { ActorId, ActorView, ActorsSlice, CycleId, Facing, RandomSource } from './actors';
 export { ACTOR_IDS, isWalkable, seededRandom } from './actors';
 export { actorView, actorsIn } from './world';
+
+// 17: the Cinema Room — its marks, its shelves, and who is sitting down.
+export type { CinemaShelf } from './cinema';
+export { CINEMA_MARKS, CINEMA_SHELVES } from './cinema';
+export { isSeated } from './world';
