@@ -1,4 +1,5 @@
 import { mountActors } from './dom/actors'; // 07: actors
+import { mountCinemaRoom } from './dom/cinema-room'; // 17: the Cinema Room
 import { mountGameRoom } from './dom/game-room';
 import { mountLanguage, readStoredLanguage } from './dom/language';
 // 05: loading
@@ -37,6 +38,7 @@ const mounts: Mount[] = [
   // opens the shell is out of `inert` before the Room router moves focus into it.
   mountLoading,
   mountLanguage, mountMotion, mountRooms, mountGameRoom,
+  mountCinemaRoom, // 17: the Cinema Room's bookshelves
   mountSound, // 06: audio
   mountActors, // 07: actors — the Cast stands on top of whatever the Room laid down.
 ];

@@ -1,3 +1,4 @@
+import { CINEMA_MARKS } from './cinema'; // 17: the Cinema Room's marks
 import type { RoomId } from './rooms';
 import { clampInto, containsPoint, distance, routeLength, routeThrough, type Point, type Polygon } from './stage';
 
@@ -65,11 +66,20 @@ const WALKABLE: Record<RoomId, Polygon> = {
     { x: 1480, y: 860 },
     { x: 120, y: 860 },
   ],
+  // 17: the Cinema Room's real floor. A band from the door to the board with
+  // one notch cut out of its front edge for the reel cabinet's footprint, so
+  // the Boy walks round the furniture the Room actually has rather than
+  // through it. The beanbags are not cut out on purpose: an Actor above them
+  // draws behind and one below draws in front, which is the depth cue.
   cinema: [
-    { x: 140, y: 640 },
-    { x: 1460, y: 640 },
-    { x: 1460, y: 860 },
-    { x: 140, y: 860 },
+    { x: 100, y: 660 },
+    { x: 1560, y: 660 },
+    { x: 1560, y: 860 },
+    { x: 575, y: 860 },
+    { x: 575, y: 742 },
+    { x: 425, y: 742 },
+    { x: 425, y: 860 },
+    { x: 100, y: 860 },
   ],
   activities: [
     { x: 140, y: 640 },
@@ -300,31 +310,111 @@ export function settleActors(slice: ActorsSlice): ActorsSlice {
 }
 
 /**
- * The Cast as the visitor finds it.
+ * Where an Actor belongs in a Room: its mark, its facing, and what it does
+ * there once it has arrived.
  *
- * Only the Boy is placed for now: he walks between the two ends of the
- * Entryway, which is this ticket's demonstration that a route is computed and
- * a Cycle plays in place while code does the travelling. The rest of the Cast
- * arrives with the Rooms that give them somewhere to be.
+ * A Room the Cast has no home in leaves whoever is standing in it alone.
  */
-export function createActors(random: RandomSource): ActorsSlice {
+interface Home {
+  readonly at: Point;
+  readonly facing: Facing;
+  /** Goals to walk between on arrival. Left out, the Actor simply stands there. */
+  readonly patrol?: readonly Point[];
+}
+
+/** No patrol, shared by every standing Actor so a home can be compared by identity. */
+const STILL: readonly Point[] = [];
+
+/**
+ * Who each Room places, and where.
+ *
+ * This is the whole of "the Cast is in the Room the visitor is in": a Room
+ * names the Actors it puts on its floor, and walking in puts them there. The
+ * Entryway's entry is ticket 07's demonstration walk, which is a home like any
+ * other; the Cinema Room seats the two of them in their beanbags. A Room with
+ * no entry here is one whose design pass has not given the Cast anywhere to be.
+ */
+const HOMES: Partial<Record<RoomId, Partial<Record<ActorId, Home>>>> = {
+  entryway: {
+    boy: {
+      at: { x: 220, y: 690 },
+      facing: 'right',
+      patrol: [
+        { x: 1380, y: 690 },
+        { x: 220, y: 690 },
+      ],
+    },
+  },
+  // 17: the Cinema Room — the visitor walks in on the two of them already sat
+  // down in front of the screen, each turned a little towards the other.
+  cinema: {
+    boy: { at: CINEMA_MARKS.boySeat, facing: 'left' },
+    girl: { at: CINEMA_MARKS.girlSeat, facing: 'right' },
+  },
+};
+
+function atHome(id: ActorId, room: RoomId, home: Home): ActorState {
   return {
-    actors: [
-      {
-        id: 'boy',
-        room: 'entryway',
-        at: { x: 220, y: 690 },
-        facing: 'right',
-        cycle: 'idle',
-        route: [],
-        distance: 0,
-        patrol: [
-          { x: 1380, y: 690 },
-          { x: 220, y: 690 },
-        ],
-      },
-    ],
-    lastTick: null,
-    random,
+    id,
+    room,
+    at: home.at,
+    facing: home.facing,
+    cycle: 'idle',
+    route: [],
+    distance: 0,
+    patrol: home.patrol ?? STILL,
   };
+}
+
+/** Is this Actor already standing exactly where its Room puts it? */
+function settledAt(actor: ActorState, home: ActorState): boolean {
+  return (
+    actor.room === home.room &&
+    actor.at.x === home.at.x &&
+    actor.at.y === home.at.y &&
+    actor.facing === home.facing &&
+    actor.route.length === 0 &&
+    actor.patrol === home.patrol
+  );
+}
+
+/**
+ * The Cast as the visitor finds a Room on walking into it.
+ *
+ * Everyone that Room places is put back on their mark, whatever they were doing
+ * elsewhere, and anyone it places who is not in the apartment yet arrives. The
+ * slice comes back by identity when nobody moved, so a Room with no Cast of its
+ * own costs no repaint.
+ */
+export function gatherInto(slice: ActorsSlice, room: RoomId): ActorsSlice {
+  const homes = HOMES[room];
+  if (!homes) return slice;
+  let moved = false;
+  const actors = slice.actors.map(actor => {
+    const home = homes[actor.id];
+    if (!home) return actor;
+    const placed = atHome(actor.id, room, home);
+    if (settledAt(actor, placed)) return actor;
+    moved = true;
+    return placed;
+  });
+  // Anyone this Room places who has not been anywhere yet arrives now, in
+  // Character Sheet order so the Cast is always built the same way round.
+  for (const id of ACTOR_IDS) {
+    const home = homes[id];
+    if (!home || slice.actors.some(actor => actor.id === id)) continue;
+    actors.push(atHome(id, room, home));
+    moved = true;
+  }
+  return moved ? { ...slice, actors } : slice;
+}
+
+/**
+ * The Cast as the visitor finds the apartment.
+ *
+ * Nobody is placed in advance: the Room the visitor arrives in puts its own
+ * Cast on the floor, and every Room they walk into afterwards does the same.
+ */
+export function createActors(random: RandomSource, room: RoomId): ActorsSlice {
+  return gatherInto({ actors: [], lastTick: null, random }, room);
 }

@@ -172,19 +172,76 @@
       <section class="room" id="room-cinema" data-room="cinema" aria-labelledby="cinema-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
         <h1 class="room-title" id="cinema-title" data-room-title tabindex="-1" data-i18n="cinemaTitle">放映室</h1>
-        <p class="room-lede" data-i18n="cinemaSoon">布幕掛好了，放映機還在等第一卷膠卷。</p>
-        <!-- 06: audio — this Room's Music Source. Ticket 20 gives the projector its
-             own two affordances; until then the Cinema Room has this placeholder too. -->
-        <div class="music-source-row">
-          <button class="music-source" type="button" data-music-source="cinema" aria-pressed="false" hidden>
-            <span class="music-note" aria-hidden="true">♪</span>
-            <span data-music-source-label>播放房間音樂</span>
-            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
+        <p class="room-lede" data-i18n="cinemaLede">放映機暖好了。先挑一排書架，他去找片。</p>
+        <!--
+          17: the Cinema Room, furnished.
+
+          Every Prop is placed in stage units with `--x --y --w --h`, which
+          `styles.css` turns into percentages of the 1600 x 900 stage, so the
+          numbers here are the design note's and mean the same place at every
+          width. The Room's artwork is drawn in CSS until ticket 36 lands the
+          generated images; nothing here names a file that does not exist.
+
+          07: this is also the Room's stage, so the Cast walks on it.
+        -->
+        <div class="stage stage-cinema" data-stage="cinema">
+          <div class="cinema-room-art" aria-hidden="true">
+            <span class="cinema-cornice"></span>
+            <span class="cinema-floor"></span>
+            <span class="cinema-prop cinema-rug" style="--x:190;--y:740;--w:600;--h:140"></span>
+            <span class="cinema-prop cinema-sconce" style="--x:640;--y:180;--w:40;--h:60"></span>
+            <span class="cinema-prop cinema-screen" style="--x:210;--y:80;--w:420;--h:245">
+              <span class="screen-case"></span>
+              <span class="screen-sheet"></span>
+              <span class="screen-cord"></span>
+            </span>
+          </div>
+          <!-- P4: the door back to the Entryway, a link like every other door. -->
+          <a class="cinema-prop cinema-door" href="#/entryway" style="--x:40;--y:270;--w:130;--h:370" aria-label="回到玄關" data-i18n-aria="backToEntryway"><span class="door-leaf" aria-hidden="true"></span></a>
+          <!-- P7-P9 and P21: three shelves you can tell apart from across the
+               Room — colour, crown silhouette and ornament, then the plaque. -->
+          <button class="cinema-prop cinema-shelf" type="button" data-shelf="comedy" style="--x:690;--y:260;--w:120;--h:380" aria-label="喜劇書架：點一下，讓他挑三部片" data-i18n-aria="shelfComedyAria">
+            <span class="shelf-ornament" aria-hidden="true"><span class="balloon"></span><span class="balloon"></span><span class="balloon"></span><span class="popcorn"></span></span>
+            <span class="shelf-body" aria-hidden="true"><span class="cubby"></span><span class="cubby"></span><span class="cubby"></span></span>
+            <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfComedy">喜劇</span>
           </button>
+          <button class="cinema-prop cinema-shelf" type="button" data-shelf="romance" style="--x:824;--y:260;--w:120;--h:380" aria-label="愛情書架：點一下，讓他挑三部片" data-i18n-aria="shelfRomanceAria">
+            <span class="shelf-ornament" aria-hidden="true"><span class="roses"></span><span class="fairy-lights"></span></span>
+            <span class="shelf-body" aria-hidden="true"><span class="cubby"></span><span class="cubby"></span><span class="cubby"></span></span>
+            <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfRomance">愛情</span>
+          </button>
+          <button class="cinema-prop cinema-shelf" type="button" data-shelf="horror" style="--x:958;--y:260;--w:120;--h:380" aria-label="恐怖書架：點一下，讓他挑三部片" data-i18n-aria="shelfHorrorAria">
+            <span class="shelf-ornament" aria-hidden="true"><span class="candle"></span><span class="skull"></span><span class="talisman"></span></span>
+            <span class="shelf-body" aria-hidden="true"><span class="cubby"></span><span class="cubby"></span><span class="cubby"></span></span>
+            <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfHorror">恐怖</span>
+          </button>
+          <!-- P10: the Poster board, empty until ticket 18 pins anything to it. -->
+          <section class="cinema-prop cinema-board" style="--x:1110;--y:300;--w:470;--h:320" aria-label="釘在牆上的海報" data-i18n-aria="boardLabel">
+            <span class="board-pin" aria-hidden="true"></span>
+            <span class="board-pin" aria-hidden="true"></span>
+            <span class="board-ghost" aria-hidden="true"></span>
+            <p class="board-empty" data-i18n="boardEmpty">牆上還空著。先選一排書架。</p>
+          </section>
+          <!-- P12-P14: her teal beanbag, his coral one, the reel cabinet between. -->
+          <span class="cinema-prop cinema-beanbag beanbag-girl" style="--x:230;--y:690;--w:180;--h:110" aria-hidden="true"></span>
+          <span class="cinema-prop cinema-beanbag beanbag-boy" style="--x:570;--y:690;--w:180;--h:110" aria-hidden="true"></span>
+          <span class="cinema-prop cinema-cabinet" style="--x:430;--y:730;--w:140;--h:100" aria-hidden="true"><span class="cabinet-knob"></span></span>
+          <!-- P15-P17: one machine, two affordances. The motor switch is low on
+               the base plate and red; the film gate is the machine's mouth, high
+               and cream, and stays disabled until ticket 20 loads a reel. -->
+          <span class="cinema-prop cinema-projector" style="--x:445;--y:600;--w:110;--h:130" aria-hidden="true">
+            <span class="projector-spindle"></span>
+            <span class="projector-spindle"></span>
+            <span class="projector-body"></span>
+            <span class="projector-lens"></span>
+          </span>
+          <button class="cinema-prop projector-motor" type="button" data-music-source="cinema" aria-pressed="false" data-label-start="projectorMotorStart" data-label-stop="projectorMotorStop" style="--x:520;--y:700;--w:36;--h:28" hidden>
+            <span class="motor-cap" aria-hidden="true"></span>
+            <span class="motor-plate" aria-hidden="true">♪</span>
+            <span class="visually-hidden" data-music-source-label>讓放映機空轉</span>
+          </button>
+          <button class="cinema-prop projector-gate" type="button" data-projector-gate aria-disabled="true" style="--x:445;--y:600;--w:100;--h:100" aria-label="還沒有膠卷。先選一部片。" data-i18n-aria="projectorGateEmpty"></button>
         </div>
-        <!-- end 06 -->
-        <!-- 07: actors -->
-        <div class="stage" data-stage="cinema" aria-hidden="true"></div>
       </section>
       <section class="room" id="room-activities" data-room="activities" aria-labelledby="activities-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
@@ -217,21 +274,21 @@
         and CLAUDE.md's "Cycle assets travel as a set".
       -->
       <div class="cast" id="cast" aria-hidden="true" hidden>
-        <div class="actor" data-actor="boy" data-height="360">
+        <div class="actor" data-actor="boy" data-height="360" aria-hidden="true">
           <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/boy-walk-right.png"></div>
         </div>
-        <div class="actor" data-actor="girl" data-height="328">
+        <div class="actor" data-actor="girl" data-height="328" aria-hidden="true">
           <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/girl-walk-right.png"></div>
         </div>
-        <div class="actor" data-actor="mica" data-height="132">
+        <div class="actor" data-actor="mica" data-height="132" aria-hidden="true">
           <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mica-walk-left.png"></div>
           <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mica-walk-right.png"></div>
         </div>
-        <div class="actor" data-actor="mira" data-height="132">
+        <div class="actor" data-actor="mira" data-height="132" aria-hidden="true">
           <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mira-walk-left.png"></div>
           <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mira-walk-right.png"></div>
         </div>
-        <div class="actor" data-actor="luna" data-height="144">
+        <div class="actor" data-actor="luna" data-height="144" aria-hidden="true">
           <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/luna-walk-left.png"></div>
           <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/luna-walk-right.png"></div>
         </div>

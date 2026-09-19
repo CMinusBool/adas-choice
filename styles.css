@@ -302,3 +302,124 @@ html.dialog-open { overflow: hidden; }
 .actor { position: absolute; transform: translate(-50%, -100%) scaleX(var(--flip, 1)); transform-origin: bottom center; }
 .actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
 
+
+/* 17: the Cinema Room.
+
+   The Room is furnished in stage units: every Prop carries `--x --y --w --h`
+   in `index.html` and the rule below turns them into percentages of the
+   1600 x 900 stage, so one set of numbers serves the markup, the walkable
+   polygon in `src/world/actors.ts` and the Cast's marks alike. `--u` is one
+   stage unit as a length, for the type, borders and radii inside a Prop.
+
+   All of it is drawn in CSS. Ticket 32 is generating this Room's artwork and
+   ticket 36 lands it; until then nothing here names a file, so the built page
+   has no URL that could 404. */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.stage-cinema {
+  --u: .0625cqw;
+  --wall: #3a2f3b; --floor: #4a3730; --cream: #efe6d6; --walnut: #5a3f31;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 14px;
+  background: linear-gradient(to bottom, #2f2631 0 6.7%, var(--wall) 6.7% 71.1%, var(--floor) 71.1%);
+}
+.stage-cinema .cinema-prop {
+  position: absolute;
+  left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%);
+  width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%);
+  z-index: 640;
+}
+/* The stage swallows pointer events so the Cast never blocks a click; the
+   Props the visitor can actually use take theirs back. */
+.stage-cinema a.cinema-prop, .stage-cinema button.cinema-prop { pointer-events: auto; }
+.stage-cinema button.cinema-prop { padding: 0; border: 0; background: none; cursor: pointer; }
+
+/* P1-P3, P5, P6: the empty Room. */
+.cinema-cornice { position: absolute; left: 0; right: 0; top: 6.7%; height: calc(var(--u) * 6); background: #6b5344; }
+.cinema-floor { position: absolute; left: 0; right: 0; top: 71.1%; bottom: 0; background: repeating-linear-gradient(90deg, #4a3730 0 calc(var(--u) * 76), #43312b calc(var(--u) * 76) calc(var(--u) * 80)); }
+.cinema-rug { border-radius: 50% / 40%; background: radial-gradient(ellipse at 50% 50%, #7a4a52, #5d3a3c 62%, #4d3134); opacity: .9; }
+.cinema-sconce { border-radius: calc(var(--u) * 6); background: linear-gradient(#c79a4e, #8a6a34); box-shadow: 0 0 calc(var(--u) * 150) calc(var(--u) * 60) #ffca8033; }
+.cinema-screen .screen-case { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--u) * 20); border-radius: calc(var(--u) * 4); background: #17141a; }
+.cinema-screen .screen-sheet { position: absolute; left: calc(var(--u) * 10); top: calc(var(--u) * 20); width: calc(var(--u) * 400); height: calc(var(--u) * 225); background: linear-gradient(#efe6d6, #e2d6c2); box-shadow: inset 0 0 calc(var(--u) * 40) #00000022; }
+.cinema-screen .screen-cord { position: absolute; left: calc(var(--u) * 408); top: calc(var(--u) * 245); width: calc(var(--u) * 4); height: calc(var(--u) * 35); background: #d8cbb6; }
+
+/* P4: the door, with the hallway leaking round it. */
+.cinema-door { border-radius: calc(var(--u) * 6); background: var(--walnut); box-shadow: 0 0 calc(var(--u) * 40) #ffca8022; transition: box-shadow .25s; }
+.cinema-door .door-leaf { position: absolute; inset: calc(var(--u) * 15); border-radius: calc(var(--u) * 4); background: linear-gradient(100deg, #ffd9a0 0 12%, #6a4a39 12%); }
+.cinema-door:hover, .cinema-door:focus-visible { box-shadow: 0 0 calc(var(--u) * 90) #ffca8066; outline: none; }
+.cinema-door:focus-visible .door-leaf { outline: 3px solid var(--pink); outline-offset: 2px; }
+
+/* P7-P9: the three shelves. Colour, crown silhouette and ornament each say the
+   genre on their own, so any one of them surviving a small screen is enough. */
+.cinema-shelf { z-index: 640; overflow: visible; transition: filter .2s; }
+/* `--glow` is the rim light a shelf comes up in. It is the trim colour, except
+   on the horror shelf, whose trim is nearly black: there it is the candle's
+   sick green, which is that shelf's own colour in the design note's table. */
+.cinema-shelf[data-shelf="comedy"] { --body: #f2c14e; --trim: #e39b2d; --cap: #e8703a; --glow: #e39b2d; }
+.cinema-shelf[data-shelf="romance"] { --body: #e86f8f; --trim: #b8405e; --cap: #f5a3c5; --glow: #f5a3c5; }
+.cinema-shelf[data-shelf="horror"] { --body: #3e2a4f; --trim: #1f1528; --cap: #14101a; --glow: #8fd14f; transform: rotate(-4deg); transform-origin: bottom center; }
+.cinema-shelf .shelf-body { position: absolute; inset: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 8); padding: calc(var(--u) * 12) calc(var(--u) * 10) calc(var(--u) * 52); background: var(--body); border: calc(var(--u) * 6) solid var(--trim); }
+.cinema-shelf .cubby { flex: 1; background: repeating-linear-gradient(90deg, var(--cap) 0 calc(var(--u) * 9), #00000055 calc(var(--u) * 9) calc(var(--u) * 12), var(--cap) calc(var(--u) * 12) calc(var(--u) * 21), #00000055 calc(var(--u) * 21) calc(var(--u) * 24)), #2a2028; }
+.cinema-shelf[data-shelf="comedy"] .shelf-body { border-radius: calc(var(--u) * 30) calc(var(--u) * 30) calc(var(--u) * 6) calc(var(--u) * 6); }
+.cinema-shelf[data-shelf="romance"] .shelf-body { border-radius: calc(var(--u) * 6); }
+.cinema-shelf[data-shelf="horror"] .shelf-body { clip-path: polygon(50% 0, 100% 10%, 100% 100%, 0 100%, 0 10%); }
+/* The crown ornament stands clear of the shelf and never rises above y 180. */
+.cinema-shelf .shelf-ornament { position: absolute; left: 0; right: 0; bottom: 100%; height: calc(var(--u) * 80); }
+.shelf-ornament > span { position: absolute; }
+.shelf-ornament .balloon { width: calc(var(--u) * 26); height: calc(var(--u) * 32); border-radius: 50%; background: #f2c14e; box-shadow: 0 calc(var(--u) * 16) 0 calc(var(--u) * -14) #e39b2d; }
+.shelf-ornament .balloon:nth-child(1) { left: calc(var(--u) * 6); top: 0; }
+.shelf-ornament .balloon:nth-child(2) { left: calc(var(--u) * 32); top: calc(var(--u) * -6); background: #e8703a; }
+.shelf-ornament .balloon:nth-child(3) { left: calc(var(--u) * 58); top: calc(var(--u) * 2); background: #f6d98a; }
+.shelf-ornament .popcorn { right: calc(var(--u) * 4); bottom: 0; width: calc(var(--u) * 42); height: calc(var(--u) * 34); border-radius: calc(var(--u) * 4) calc(var(--u) * 4) calc(var(--u) * 10) calc(var(--u) * 10); background: repeating-linear-gradient(90deg, #e8524a 0 calc(var(--u) * 7), #f6efe4 calc(var(--u) * 7) calc(var(--u) * 14)); box-shadow: 0 calc(var(--u) * -6) 0 calc(var(--u) * -3) #f6efe4; }
+/* Romance: a heart cut into the crown, roses and a string of warm lights. */
+.shelf-ornament .roses { left: 50%; bottom: 0; translate: -50% 0; width: calc(var(--u) * 46); height: calc(var(--u) * 38); border-radius: calc(var(--u) * 6) calc(var(--u) * 6) calc(var(--u) * 16) calc(var(--u) * 16); background: radial-gradient(circle at 30% 30%, #d5304f calc(var(--u) * 9), transparent 0), radial-gradient(circle at 68% 26%, #ef5570 calc(var(--u) * 8), transparent 0), linear-gradient(#3f6b46, #2c4b31); }
+.shelf-ornament .fairy-lights { left: 0; right: 0; bottom: calc(var(--u) * -4); height: calc(var(--u) * 6); background: repeating-linear-gradient(90deg, #ffd9a0 0 calc(var(--u) * 5), transparent calc(var(--u) * 5) calc(var(--u) * 16)); }
+.cinema-shelf[data-shelf="romance"] .shelf-body::before { content: ""; position: absolute; left: 50%; top: calc(var(--u) * -34); translate: -50% 0; width: calc(var(--u) * 44); height: calc(var(--u) * 40); background: var(--trim); clip-path: path("M22 40C22 40 0 24 0 12A11 11 0 0 1 22 8 11 11 0 0 1 44 12C44 24 22 40 22 40Z"); }
+/* Horror: a green candle flame, a skull and a talisman slip, red marks only. */
+.shelf-ornament .candle { left: calc(var(--u) * 20); bottom: 0; width: calc(var(--u) * 14); height: calc(var(--u) * 46); background: #cdbfae; box-shadow: 0 0 calc(var(--u) * 70) calc(var(--u) * 14) #8fd14f33; }
+.shelf-ornament .candle::after { content: ""; position: absolute; left: 50%; bottom: 100%; translate: -50% 0; width: calc(var(--u) * 12); height: calc(var(--u) * 20); border-radius: 50% 50% 40% 40%; background: #8fd14f; }
+.shelf-ornament .skull { right: calc(var(--u) * 14); bottom: 0; width: calc(var(--u) * 28); height: calc(var(--u) * 26); border-radius: 50% 50% 40% 40%; background: #ddd4c6; }
+.shelf-ornament .talisman { right: calc(var(--u) * -10); bottom: calc(var(--u) * -20); width: calc(var(--u) * 16); height: calc(var(--u) * 46); background: repeating-linear-gradient(#f1d163 0 calc(var(--u) * 10), #c8392f calc(var(--u) * 10) calc(var(--u) * 13)); }
+/* P21: the brass plaque on each plinth, muted until the shelf is attended. */
+.cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--u) * 12); width: calc(var(--u) * 100); padding: calc(var(--u) * 2) 0; border-radius: calc(var(--u) * 4); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--u) * 20); line-height: 1.2; text-align: center; opacity: .78; transition: opacity .2s; }
+.cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--u) * 30) var(--glow)) brightness(1.08); outline: none; }
+.cinema-shelf:hover .shelf-plaque, .cinema-shelf:focus-visible .shelf-plaque, .cinema-shelf.is-attended .shelf-plaque { opacity: 1; }
+.cinema-shelf:focus-visible .shelf-body { outline: 3px solid var(--pink); outline-offset: 3px; }
+
+/* P10: the felt board, bare until ticket 18 pins Posters to it. */
+.cinema-board { display: grid; place-items: center; padding: calc(var(--u) * 12); border: calc(var(--u) * 12) solid var(--walnut); background: #4a3a3f; }
+.cinema-board .board-pin { position: absolute; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f0d18a, #9a7a3a); }
+.cinema-board .board-pin:nth-child(1) { left: 12%; top: 14%; }
+.cinema-board .board-pin:nth-child(2) { right: 18%; bottom: 20%; }
+.cinema-board .board-ghost { position: absolute; left: 34%; top: 16%; width: calc(var(--u) * 132); height: calc(var(--u) * 196); background: #ffffff0b; }
+.cinema-board .board-empty { position: relative; margin: 0; max-width: calc(var(--u) * 330); color: #c8b9bd; font-size: calc(var(--u) * 26); line-height: 1.6; text-align: center; }
+
+/* P12-P14: the beanbags and the reel cabinet the projector stands on. */
+.cinema-beanbag { z-index: 800; border-radius: 48% 52% 44% 56% / 62% 58% 42% 38%; }
+.beanbag-girl { background: radial-gradient(circle at 38% 30%, #3a9bb5, #287f98 60%, #1d5f72); }
+.beanbag-boy { background: radial-gradient(circle at 38% 30%, #e5836f, #d76451 60%, #a64535); }
+.cinema-cabinet { z-index: 830; border-radius: calc(var(--u) * 5); background: linear-gradient(#6a4a39, #4c342a); border: calc(var(--u) * 4) solid #3a2820; }
+.cinema-cabinet .cabinet-knob { position: absolute; right: 12%; top: 46%; width: calc(var(--u) * 10); height: calc(var(--u) * 10); border-radius: 50%; background: #c79a4e; }
+
+/* P15-P17: the projector, and its two affordances. */
+.cinema-projector { z-index: 831; }
+.cinema-projector .projector-body { position: absolute; left: 0; bottom: 0; width: calc(var(--u) * 110); height: calc(var(--u) * 80); border-radius: calc(var(--u) * 8); background: linear-gradient(#4b4a52, #2a282f); }
+.cinema-projector .projector-spindle { position: absolute; top: 0; width: calc(var(--u) * 40); height: calc(var(--u) * 40); border-radius: 50%; border: calc(var(--u) * 5) solid #6d6b76; }
+.cinema-projector .projector-spindle:nth-child(1) { left: calc(var(--u) * 10); }
+.cinema-projector .projector-spindle:nth-child(2) { left: calc(var(--u) * 58); }
+.cinema-projector .projector-lens { position: absolute; left: calc(var(--u) * -6); bottom: calc(var(--u) * 46); width: calc(var(--u) * 26); height: calc(var(--u) * 22); border-radius: calc(var(--u) * 4); background: #23212a; box-shadow: inset 0 0 0 calc(var(--u) * 3) #6d6b76; }
+/* Both controls pad their hit area out to the 44 CSS px floor without moving
+   the painted Prop, which is smaller than a fingertip at every shell width. */
+.projector-gate::before, .projector-motor::before { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: max(100%, 44px); height: max(100%, 44px); }
+/* High on the machine, cream, and dim: the mouth a reel goes into. Ticket 20
+   enables it, and until then it says so rather than pretending. */
+.stage-cinema button.projector-gate { z-index: 832; border-radius: calc(var(--u) * 6); border: calc(var(--u) * 4) dashed #efe6d680; background: #efe6d611; cursor: not-allowed; }
+.projector-gate:focus-visible { outline: 3px solid var(--cream); outline-offset: 2px; }
+/* Low on the base plate, red, and a switch: the Room's Music Source. */
+.projector-motor { z-index: 833; display: grid; place-items: center; }
+.projector-motor .motor-cap { width: calc(var(--u) * 20); height: calc(var(--u) * 20); border-radius: 50%; background: radial-gradient(circle at 34% 30%, #f07a6e, #d9483b 60%, #8e2a21); transition: box-shadow .2s; }
+.projector-motor .motor-plate { position: absolute; right: calc(var(--u) * -18); bottom: calc(var(--u) * -2); color: #f0d18a; font-size: calc(var(--u) * 22); line-height: 1; }
+.projector-motor:hover .motor-cap, .projector-motor[aria-pressed="true"] .motor-cap { box-shadow: 0 0 calc(var(--u) * 40) calc(var(--u) * 8) #d9483b99; }
+.projector-motor:focus-visible { outline: 3px solid #d9483b; outline-offset: 3px; border-radius: 50%; }
+
+.motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap { transition: none; }

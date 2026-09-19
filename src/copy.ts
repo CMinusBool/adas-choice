@@ -13,7 +13,18 @@ const zhHant = {
   skip: '跳至內容', home: "Ada's choice，回到玄關", gamesLabel: '合作遊戲精選',
   entrywayTitle: '玄關', entrywayLede: '外套先掛著。三扇門通往其他房間，想去哪一間都可以。', doorsLabel: '通往其他房間的門',
   doorGames: '遊戲室', doorCinema: '放映室', doorActivities: '活動室', backToEntryway: '回到玄關',
-  cinemaTitle: '放映室', cinemaSoon: '布幕掛好了，放映機還在等第一卷膠卷。',
+  cinemaTitle: '放映室',
+  // 17: the Cinema Room — its lede, its three bookshelves, its board and the
+  // projector's two affordances. `cinemaSoon` retired when the Room was built.
+  cinemaLede: '放映機暖好了。先挑一排書架，他去找片。',
+  shelfComedy: '喜劇', shelfRomance: '愛情', shelfHorror: '恐怖',
+  shelfComedyAria: '喜劇書架：點一下，讓他挑三部片',
+  shelfRomanceAria: '愛情書架：點一下，讓他挑三部片',
+  shelfHorrorAria: '恐怖書架：點一下，讓他挑三部片',
+  boardLabel: '釘在牆上的海報', boardEmpty: '牆上還空著。先選一排書架。',
+  projectorMotorStart: '讓放映機空轉', projectorMotorStop: '停下放映機',
+  projectorGateEmpty: '還沒有膠卷。先選一部片。',
+  // end 17
   activitiesTitle: '活動室', activitiesSoon: '桌上空著，等著擺上今晚要一起做的事。',
   eyebrow: '三款精選・兩個玩家', titleStart: '今晚，', titleAccent: '一起玩。', intro: '一起解謎、分享操控，在手忙腳亂時接住彼此。',
   pause: '暫停動畫', play: '播放動畫', why: '為什麼選它', setup: '開玩前準備', steam: '在 Steam 上看看', newTab: '（在新分頁開啟）',
@@ -53,7 +64,17 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     skip: 'Skip to the content', home: "Ada's choice, back to the Entryway", gamesLabel: 'The co-op game picks',
     entrywayTitle: 'The Entryway', entrywayLede: 'Coats off. Three doors lead out of here — take whichever one you like.', doorsLabel: 'Doors to the other Rooms',
     doorGames: 'The Game Room', doorCinema: 'The Cinema Room', doorActivities: 'The Activity Room', backToEntryway: 'Back to the Entryway',
-    cinemaTitle: 'The Cinema Room', cinemaSoon: 'The screen is up. The projector is still waiting for its first reel.',
+    cinemaTitle: 'The Cinema Room',
+    // 17: the Cinema Room
+    cinemaLede: 'The projector is warmed up. Pick a shelf and he will go and find something.',
+    shelfComedy: 'Comedy', shelfRomance: 'Romance', shelfHorror: 'Horror',
+    shelfComedyAria: 'Comedy shelf: click and he will pick three Films',
+    shelfRomanceAria: 'Romance shelf: click and he will pick three Films',
+    shelfHorrorAria: 'Horror shelf: click and he will pick three Films',
+    boardLabel: 'Posters pinned to the wall', boardEmpty: 'The wall is still bare. Pick a shelf first.',
+    projectorMotorStart: 'Let the projector run', projectorMotorStop: 'Stop the projector',
+    projectorGateEmpty: 'No reel yet. Choose a Film first.',
+    // end 17
     activitiesTitle: 'The Activity Room', activitiesSoon: 'The table is clear, waiting for something to do tonight.',
     eyebrow: 'THREE PICKS. TWO PLAYERS.', titleStart: 'Your next', titleAccent: 'co-op night.', intro: 'Crack the puzzle. Share the controls. Catch each other when things go sideways.',
     pause: 'Pause motion', play: 'Play motion', why: 'WHY IT FITS', setup: 'THE SETUP', steam: 'Open on Steam', newTab: ' in a new tab',
