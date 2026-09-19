@@ -21,7 +21,15 @@ import { createLoading, declareAssets, everythingSettled, progressOf, settleAsse
 import { createMotion, toggleMotion, withReducedMotion, type MotionSlice } from './motion';
 import { parseRoute, type RoomId } from './rooms';
 // 17: cinema — the Cinema Room's own marks and shelves.
-import { isOnMark, seatOf } from './cinema';
+import {
+  boyMark,
+  createCinema,
+  isOnMark,
+  seatOf,
+  withAttendedShelf,
+  type CinemaShelf,
+  type CinemaSlice,
+} from './cinema';
 // 06: audio
 import { createAudio, isMusicSourceSwitchedOn, withFilmAudio, withInteraction, withMusicSourceToggled, withSoundToggled, type AudioSlice, type AudioTier } from './audio';
 // end 06
@@ -64,6 +72,8 @@ export interface World {
   // end 06
   // 07: actors
   readonly actors: ActorsSlice;
+  // 17: cinema
+  readonly cinema: CinemaSlice;
 }
 
 /** What the DOM layer knows at start-up that the model cannot ask for itself. */
@@ -109,7 +119,10 @@ export type WorldEvent =
       readonly actor: ActorId;
       readonly goal: Point;
       readonly cycle?: Extract<CycleId, 'walk' | 'run'>;
-    };
+    }
+  // 17: cinema — which bookshelf the visitor's pointer or focus is on, or
+  // `null` for none. What it means for the Boy is the model's decision.
+  | { readonly type: 'cinema-shelf-attended'; readonly shelf: CinemaShelf | null };
 
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
@@ -127,6 +140,8 @@ export function createWorld(inputs: WorldInputs): World {
     // 17: the Room the visitor arrives in places its own Cast, so walking
     // straight in at `#/cinema` still finds the two of them sat down.
     actors: createActors(inputs.random ?? seededRandom(DEFAULT_SEED), arriving),
+    // 17: cinema
+    cinema: createCinema(),
   };
 }
 
@@ -151,6 +166,9 @@ export function advance(world: World, event: WorldEvent): World {
         // 17: the Room being walked into puts its own Cast back on their
         // marks, so every Room is found the way its design note describes it.
         actors: gatherInto(world.actors, entering),
+        // 17: a shelf cannot hold the attention of a visitor who has walked
+        // out, so the Cinema Room is always returned to on a clear wall.
+        cinema: createCinema(),
       };
     }
     case 'room-transition-finished': {
@@ -209,6 +227,16 @@ export function advance(world: World, event: WorldEvent): World {
     case 'actor-sent': {
       const actors = sendActor(world.actors, event.actor, event.goal, event.cycle ?? 'walk', motionIsOn(world));
       return actors === world.actors ? world : { ...world, actors };
+    }
+    // 17: cinema — a shelf catching the visitor's eye is what sends the Boy
+    // over to it, and losing it is what sends him back to his beanbag. A
+    // report from anywhere but the Cinema Room means nothing here.
+    case 'cinema-shelf-attended': {
+      if (world.rooms.current !== 'cinema') return world;
+      const cinema = withAttendedShelf(world.cinema, event.shelf);
+      if (cinema === world.cinema) return world;
+      const actors = sendActor(world.actors, 'boy', boyMark(event.shelf), 'walk', motionIsOn(world));
+      return { ...world, cinema, actors };
     }
   }
 }
@@ -297,6 +325,11 @@ export function isRoomPainted(world: World, room: RoomId): boolean {
 }
 
 // 17: cinema
+/** The bookshelf the visitor's attention is on, for the Room to light up. */
+export function attendedShelf(world: World): CinemaShelf | null {
+  return world.cinema.attended;
+}
+
 /**
  * Is this Actor sitting in its beanbag in front of the screen?
  *

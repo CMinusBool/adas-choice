@@ -63,3 +63,33 @@ const ON_THE_MARK = 1;
 export function isOnMark(point: Point, mark: Point): boolean {
   return Math.abs(point.x - mark.x) <= ON_THE_MARK && Math.abs(point.y - mark.y) <= ON_THE_MARK;
 }
+
+/** What the Cinema Room is doing. One field for now; its sequences join it. */
+export interface CinemaSlice {
+  /**
+   * The shelf the visitor's pointer or focus is on, if any.
+   *
+   * Attention, not choice: it is what turns the shelf's rim light on and what
+   * the Boy is walking towards. Clicking a shelf is ticket 18's business.
+   */
+  readonly attended: CinemaShelf | null;
+}
+
+export function createCinema(): CinemaSlice {
+  return { attended: null };
+}
+
+/** The Room with a different shelf attended, or the same slice when it is not. */
+export function withAttendedShelf(slice: CinemaSlice, shelf: CinemaShelf | null): CinemaSlice {
+  return slice.attended === shelf ? slice : { ...slice, attended: shelf };
+}
+
+/**
+ * Where the Boy belongs while this shelf has the visitor's attention.
+ *
+ * No shelf is his beanbag: wandering back to it is the same decision as walking
+ * over, which is why one function answers both.
+ */
+export function boyMark(shelf: CinemaShelf | null): Point {
+  return shelf ? CINEMA_MARKS.shelves[shelf] : CINEMA_MARKS.boySeat;
+}

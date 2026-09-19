@@ -5,6 +5,7 @@ import {
   actorView,
   actorsIn,
   advance,
+  attendedShelf,
   createWorld,
   isSeated,
   isWalkable,
@@ -26,6 +27,25 @@ function who(world: World, id: ActorId): ActorView {
 /** The world after the visitor walks through the Cinema Room's door. */
 function inTheCinema(world: World = createWorld(plainArrival)): World {
   return advance(world, { type: 'hash-changed', hash: '#/cinema' });
+}
+
+/** One clock for the whole file, because a real visit's clock only goes up. */
+let clock = 0;
+
+/** Run the frame loop until something is true of the world, or give up. */
+function runUntil(world: World, ready: (world: World) => boolean, ms = 20000, step = 16): World {
+  const until = clock + ms;
+  let next = world;
+  while (clock < until && !ready(next)) {
+    clock += step;
+    next = advance(next, { type: 'actor-tick', now: clock });
+  }
+  return next;
+}
+
+/** The world once the Boy has finished whatever he was sent to do. */
+function settled(world: World): World {
+  return runUntil(world, next => !who(next, 'boy').moving);
 }
 
 describe('the Cinema Room floor', () => {
@@ -77,5 +97,63 @@ describe('walking into the Cinema Room', () => {
     const left = advance(inTheCinema(), { type: 'hash-changed', hash: '#/entryway' });
     expect(who(left, 'boy').room).toBe('entryway');
     expect(isSeated(left, 'boy')).toBe(false);
+  });
+});
+
+describe('a bookshelf holding the visitor’s attention', () => {
+  /** The Cinema Room with one shelf under the pointer, or none. */
+  function attending(shelf: 'comedy' | 'romance' | 'horror' | null, world = inTheCinema()): World {
+    return advance(world, { type: 'cinema-shelf-attended', shelf });
+  }
+
+  it('walks the Boy over to the shelf', () => {
+    const attended = attending('horror');
+    expect(attendedShelf(attended)).toBe('horror');
+    expect(who(attended, 'boy').moving).toBe(true);
+    expect(who(attended, 'boy').cycle).toBe('walk');
+
+    const arrived = settled(attended);
+    expect(who(arrived, 'boy').at).toEqual(CINEMA_MARKS.shelves.horror);
+    expect(isSeated(arrived, 'boy')).toBe(false);
+  });
+
+  it('leaves the Girl where she is', () => {
+    const arrived = settled(attending('comedy'));
+    expect(isSeated(arrived, 'girl')).toBe(true);
+  });
+
+  it('sends him back to his beanbag when attention leaves', () => {
+    const away = attending(null, settled(attending('comedy')));
+    expect(attendedShelf(away)).toBe(null);
+    expect(isSeated(settled(away), 'boy')).toBe(true);
+  });
+
+  it('walks him straight on to the next shelf rather than home first', () => {
+    const moved = attending('horror', settled(attending('comedy')));
+    const arrived = settled(moved);
+    expect(who(arrived, 'boy').at).toEqual(CINEMA_MARKS.shelves.horror);
+  });
+
+  it('puts him there at once when the apartment is not allowed to move', () => {
+    const still = inTheCinema(createWorld({ ...plainArrival, reducedMotion: true }));
+    const attended = attending('romance', still);
+    expect(who(attended, 'boy').moving).toBe(false);
+    expect(who(attended, 'boy').at).toEqual(CINEMA_MARKS.shelves.romance);
+  });
+
+  it('ignores a shelf reported from another Room', () => {
+    const elsewhere = createWorld(plainArrival);
+    expect(attending('comedy', elsewhere)).toBe(elsewhere);
+  });
+
+  it('is the same world when the same shelf is reported twice', () => {
+    const attended = attending('comedy');
+    expect(attending('comedy', attended)).toBe(attended);
+  });
+
+  it('lets go of the shelf when the visitor leaves the Room', () => {
+    const left = advance(attending('comedy'), { type: 'hash-changed', hash: '#/entryway' });
+    expect(attendedShelf(left)).toBe(null);
+    expect(attendedShelf(inTheCinema(left))).toBe(null);
   });
 });
