@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { advance, createWorld, isCurrentRoom, isRoomPainted, motionIsOn, type WorldInputs } from './index';
+import { advance, createWorld, isCurrentRoom, isRoomPainted, motionIsOn, motionIsOnByChoice, type WorldInputs } from './index';
 
 /** A visitor arriving with nothing stored, no reduced-motion request, no hash. */
 const plainArrival: WorldInputs = { hash: '', storedLanguage: null, reducedMotion: false };
@@ -112,6 +112,35 @@ describe('whether a Room transition animates', () => {
     // previous visit's toggle cannot reach it.
     expect(motionIsOn(createWorld({ ...plainArrival, reducedMotion: true }))).toBe(false);
     expect(motionIsOn(createWorld({ ...plainArrival, reducedMotion: false }))).toBe(true);
+  });
+});
+
+describe('whether the visitor has overruled their system on motion', () => {
+  const toggle = (world: ReturnType<typeof createWorld>) => advance(world, { type: 'motion-toggled' });
+
+  it('has not happened on arrival, whichever way the system leans', () => {
+    expect(motionIsOnByChoice(createWorld(plainArrival))).toBe(false);
+    expect(motionIsOnByChoice(createWorld({ ...plainArrival, reducedMotion: true }))).toBe(false);
+  });
+
+  it('happens when someone who asked for reduced motion turns motion on', () => {
+    const playing = toggle(createWorld({ ...plainArrival, reducedMotion: true }));
+    expect(motionIsOn(playing)).toBe(true);
+    expect(motionIsOnByChoice(playing)).toBe(true);
+  });
+
+  it('is undone by pausing again, and is never true while motion is off', () => {
+    const pausedAgain = toggle(toggle(createWorld({ ...plainArrival, reducedMotion: true })));
+    expect(motionIsOn(pausedAgain)).toBe(false);
+    expect(motionIsOnByChoice(pausedAgain)).toBe(false);
+    expect(motionIsOnByChoice(toggle(createWorld(plainArrival)))).toBe(false);
+  });
+
+  it('outlasts a reduced-motion request the system makes afterwards', () => {
+    const chosen = toggle(toggle(createWorld(plainArrival)));
+    const asked = advance(chosen, { type: 'reduced-motion-changed', reducedMotion: true });
+    expect(motionIsOn(asked)).toBe(true);
+    expect(motionIsOnByChoice(asked)).toBe(true);
   });
 });
 
