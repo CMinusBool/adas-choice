@@ -38,3 +38,7 @@ export { actorView, actorsIn } from './world';
 export type { CinemaShelf, CinemaSlice } from './cinema';
 export { CINEMA_MARKS, CINEMA_SHELVES } from './cinema';
 export { attendedShelf, isSeated } from './world';
+
+// 18: the nine Films, and the rummage that pins three of them to the wall.
+export type { Film, FilmId } from './films';
+export { filmById, filmsOn } from './films';
