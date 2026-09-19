@@ -2,15 +2,15 @@
   "kind": "placeholder",
   "warning": "These are not Cycles. Each file is one neutral standing frame cut mechanically out of a Character Sheet turnaround, shipped so that the Actor system could be built and seen before any animation frames exist. Replace every one of them with generated artwork; the shot list for that is in the effort notes and the contract is in CLAUDE.md.",
   "madeBy": "scripts/make-actor-placeholders.mjs",
-  "madeOn": "2026-09-11",
-  "identitySource": "art/characters/v1 — the version 1 Character Sheets, never a generated asset",
+  "madeOn": "2026-09-19",
+  "identitySource": "art/characters/v2 — the version 2 Character Sheets, never a generated asset",
   "missing": "Every run Cycle, every walking frame, and the left facing of the Boy and the Girl.",
   "schema": {
     "version": 2,
     "note": "Version 2 adds provenance, so that a generated sheet can be traced back to the call that made it without the raw generation being in the repository (art/ is gitignored and stays that way). `placeholders` holds the mechanical crops and is rewritten wholesale by scripts/make-actor-placeholders.mjs; `cycles` holds generated Cycle sheets and is written by the asset builder. Both arrays use the same entry shape. Delete this file when the last placeholder is gone.",
     "entry": {
       "file": "Sheet filename in this directory, `<actor>-<cycle>-<facing>.png`.",
-      "actor": "boy | girl | mica | mira",
+      "actor": "boy | girl | mica | mira | luna",
       "cycle": "walk | run",
       "facing": "left | right",
       "frames": "Frame count, matching the `.cycle` layer's data-frames in index.html.",
@@ -41,17 +41,17 @@
         "height": 320
       },
       "source": {
-        "file": "boy-character-sheet-v1.png",
-        "sha256": "e8d308bb7ed2066bad66319060e3886bd8b7c81b59923334b9f6f5722656b554",
+        "file": "boy-character-sheet-v2.png",
+        "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477",
         "view": "Right side",
         "box": {
-          "x0": 790,
-          "x1": 1020,
-          "y0": 50,
-          "y1": 578
+          "x0": 835,
+          "x1": 990,
+          "y0": 31,
+          "y1": 577
         }
       },
-      "bytes": 44503
+      "bytes": 44611
     },
     {
       "file": "girl-walk-right.png",
@@ -67,17 +67,17 @@
         "height": 320
       },
       "source": {
-        "file": "girl-character-sheet-v1.png",
-        "sha256": "31b1c0ab87151f83de7e8d7402a8d14dbc583f81a4626225f70d25def23d9fda",
+        "file": "girl-character-sheet-v2.png",
+        "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be",
         "view": "Right side",
         "box": {
-          "x0": 810,
-          "x1": 1045,
-          "y0": 50,
-          "y1": 572
+          "x0": 807,
+          "x1": 1032,
+          "y0": 40,
+          "y1": 571
         }
       },
-      "bytes": 55601
+      "bytes": 56829
     },
     {
       "file": "mica-walk-left.png",
@@ -89,21 +89,21 @@
       "frameWidth": 256,
       "frameHeight": 192,
       "drawnAt": {
-        "width": 202,
+        "width": 201,
         "height": 192
       },
       "source": {
-        "file": "mica-character-sheet-v1.png",
-        "sha256": "d66afe84ee2538232567584dd74c905a09668849cddb3a11372b2d7a6c7bcb97",
+        "file": "mica-character-sheet-v2.png",
+        "sha256": "6ef1ec9e83846fb62fb7cd5e5129e65b8f595f2f58bb604afa7570b222bf82b4",
         "view": "Left side",
         "box": {
           "x0": 220,
-          "x1": 660,
+          "x1": 677,
           "y0": 90,
-          "y1": 492
+          "y1": 491
         }
       },
-      "bytes": 48016
+      "bytes": 48112
     },
     {
       "file": "mica-walk-right.png",
@@ -119,17 +119,17 @@
         "height": 192
       },
       "source": {
-        "file": "mica-character-sheet-v1.png",
-        "sha256": "d66afe84ee2538232567584dd74c905a09668849cddb3a11372b2d7a6c7bcb97",
+        "file": "mica-character-sheet-v2.png",
+        "sha256": "6ef1ec9e83846fb62fb7cd5e5129e65b8f595f2f58bb604afa7570b222bf82b4",
         "view": "Right side",
         "box": {
-          "x0": 820,
-          "x1": 1225,
-          "y0": 90,
-          "y1": 492
+          "x0": 829,
+          "x1": 1227,
+          "y0": 98,
+          "y1": 491
         }
       },
-      "bytes": 47598
+      "bytes": 47513
     },
     {
       "file": "mira-walk-left.png",
@@ -145,17 +145,17 @@
         "height": 192
       },
       "source": {
-        "file": "mira-character-sheet-v1.png",
-        "sha256": "21e1c9f3afb4de1d80581fd284515957eb8bed8e9179ea7b596cc49cf713c6e3",
+        "file": "mira-character-sheet-v2.png",
+        "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443",
         "view": "Left side",
         "box": {
-          "x0": 215,
-          "x1": 645,
-          "y0": 92,
-          "y1": 448
+          "x0": 217,
+          "x1": 647,
+          "y0": 84,
+          "y1": 447
         }
       },
-      "bytes": 56247
+      "bytes": 57474
     },
     {
       "file": "mira-walk-right.png",
@@ -167,21 +167,73 @@
       "frameWidth": 256,
       "frameHeight": 192,
       "drawnAt": {
-        "width": 220,
+        "width": 221,
         "height": 192
       },
       "source": {
-        "file": "mira-character-sheet-v1.png",
-        "sha256": "21e1c9f3afb4de1d80581fd284515957eb8bed8e9179ea7b596cc49cf713c6e3",
+        "file": "mira-character-sheet-v2.png",
+        "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443",
         "view": "Right side",
         "box": {
-          "x0": 805,
-          "x1": 1240,
-          "y0": 92,
-          "y1": 448
+          "x0": 815,
+          "x1": 1235,
+          "y0": 82,
+          "y1": 447
         }
       },
-      "bytes": 55164
+      "bytes": 56367
+    },
+    {
+      "file": "luna-walk-left.png",
+      "actor": "luna",
+      "cycle": "walk",
+      "facing": "left",
+      "frames": 1,
+      "columns": 1,
+      "frameWidth": 256,
+      "frameHeight": 192,
+      "drawnAt": {
+        "width": 247,
+        "height": 192
+      },
+      "source": {
+        "file": "luna-character-sheet-v2.png",
+        "sha256": "5105207b66635b00860672957942010ed132c1c21f8b86c239cb6083d508fe7f",
+        "view": "Left side",
+        "box": {
+          "x0": 219,
+          "x1": 679,
+          "y0": 143,
+          "y1": 482
+        }
+      },
+      "bytes": 51885
+    },
+    {
+      "file": "luna-walk-right.png",
+      "actor": "luna",
+      "cycle": "walk",
+      "facing": "right",
+      "frames": 1,
+      "columns": 1,
+      "frameWidth": 256,
+      "frameHeight": 192,
+      "drawnAt": {
+        "width": 227,
+        "height": 192
+      },
+      "source": {
+        "file": "luna-character-sheet-v2.png",
+        "sha256": "5105207b66635b00860672957942010ed132c1c21f8b86c239cb6083d508fe7f",
+        "view": "Right side",
+        "box": {
+          "x0": 834,
+          "x1": 1231,
+          "y0": 143,
+          "y1": 482
+        }
+      },
+      "bytes": 48371
     }
   ]
 }

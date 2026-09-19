@@ -16,7 +16,7 @@
 //   node scripts/art/make-guide.mjs --out <path> [--cols 4] [--rows 2] [--width 1536]
 //     [--height 1024] [--ground 32] [--key '#00FF00' | --actor boy] [--no-dots]
 //
-// `--actor` reads `art/characters/v1/palette.json` and picks a key colour that is not in that
+// `--actor` reads `art/characters/v2/palette.json` and picks a key colour that is not in that
 // Actor's palette. None of the four Cast members has a near-green base colour today, so the answer
 // is `#00FF00` for all of them; the check is here so an Actor that ever does gets magenta instead
 // of a costume the chroma key eats.
@@ -144,7 +144,7 @@ export function main(argv = process.argv.slice(2)) {
   let why = 'given on the command line';
   if (!keyHex) {
     if (options.actor) {
-      const palettePath = resolve(root, 'art/characters/v1/palette.json');
+      const palettePath = resolve(root, 'art/characters/v2/palette.json');
       if (!existsSync(palettePath)) throw new Error(`No palette at ${palettePath}.`);
       const palette = JSON.parse(readFileSync(palettePath, 'utf8'));
       const chosen = chooseKey(paletteColours(palette, options.actor));

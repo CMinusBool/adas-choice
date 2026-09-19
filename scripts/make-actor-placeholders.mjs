@@ -7,14 +7,14 @@
 // one neutral standing frame per Actor per facing, cut mechanically out of the
 // Character Sheet's turnaround row. Mechanically is the point: a crop cannot
 // invent a face, so identity cannot drift on the way through this script, and
-// `art/characters/v1/` stays the only source any of it came from.
+// `art/characters/v2/` stays the only source any of it came from.
 //
 // The shot list that replaces these lives beside the effort's notes; the
 // contract they are cut to is in CLAUDE.md under "Cycle assets travel as a set".
 //
 // Needs the Character Sheets, which are deliberately not in the repository:
 //
-//   node scripts/make-actor-placeholders.mjs ../path/to/art/characters/v1
+//   node scripts/make-actor-placeholders.mjs ../path/to/art/characters/v2
 //
 // Not wired into any npm script — it runs once, by hand, and its output is
 // committed.
@@ -86,33 +86,49 @@ const FRAME = {
  * animal facing the page's left edge is showing its anatomical left side.
  *
  * The cats get both facings because the bible forbids mirroring Míca — her nose
- * dot sits beside her anatomical left nostril and a flipped bitmap would move
+ * mark sits beside her anatomical left nostril and a flipped bitmap would move
  * it to the wrong side of her face. Taking her left-facing frame from the Left
- * side view and her right-facing frame from the Right side view means the dot is
- * simply drawn where it belongs in each, and Mira matches her for symmetry of
- * treatment. The Boy and the Girl have only a right-side view on their sheets,
- * so they ship right-facing and the painter mirrors them.
+ * side view and her right-facing frame from the Right side view means the mark
+ * is simply drawn where it belongs in each. Mira and Luna carry no asymmetric
+ * marking, so mirroring either would in fact be safe; they are cut both ways
+ * anyway, because one rule for the cats is cheaper to hold than three. The Boy
+ * and the Girl have only a right-side view on their sheets, so they ship
+ * right-facing and the painter mirrors them.
+ */
+/**
+ * Measured against the **version 2** sheets, which is the set this script now
+ * reads. Version 1's bands are not reusable: v2 is a fresh set of generations
+ * and its figures land on different pixels.
+ *
+ * Each band clears the sheet title above (it overlaps the x range of the
+ * left-hand views) and the caption below, both of which are drawing that `lift`
+ * would otherwise take for part of the figure. The numbers came from a row ink
+ * profile over each view's own x range, so the gaps are real rather than
+ * assumed: on the Boy's sheet, for instance, only seven blank rows separate the
+ * shadow under his foot from the top of "Right side".
  */
 const CROPS = [
-  { actor: 'boy', shape: 'person', facing: 'right', view: 'Right side', band: { x0: 790, x1: 1020, y0: 50, y1: 578 } },
-  { actor: 'girl', shape: 'person', facing: 'right', view: 'Right side', band: { x0: 810, x1: 1045, y0: 50, y1: 572 } },
-  { actor: 'mica', shape: 'cat', facing: 'left', view: 'Left side', band: { x0: 220, x1: 660, y0: 90, y1: 492 } },
-  { actor: 'mica', shape: 'cat', facing: 'right', view: 'Right side', band: { x0: 820, x1: 1225, y0: 90, y1: 492 } },
-  { actor: 'mira', shape: 'cat', facing: 'left', view: 'Left side', band: { x0: 215, x1: 645, y0: 92, y1: 448 } },
-  { actor: 'mira', shape: 'cat', facing: 'right', view: 'Right side', band: { x0: 805, x1: 1240, y0: 92, y1: 448 } },
+  { actor: 'boy', shape: 'person', facing: 'right', view: 'Right side', band: { x0: 835, x1: 990, y0: 31, y1: 577 } },
+  { actor: 'girl', shape: 'person', facing: 'right', view: 'Right side', band: { x0: 807, x1: 1032, y0: 40, y1: 571 } },
+  { actor: 'mica', shape: 'cat', facing: 'left', view: 'Left side', band: { x0: 220, x1: 677, y0: 90, y1: 491 } },
+  { actor: 'mica', shape: 'cat', facing: 'right', view: 'Right side', band: { x0: 829, x1: 1227, y0: 98, y1: 491 } },
+  { actor: 'mira', shape: 'cat', facing: 'left', view: 'Left side', band: { x0: 217, x1: 647, y0: 84, y1: 447 } },
+  { actor: 'mira', shape: 'cat', facing: 'right', view: 'Right side', band: { x0: 815, x1: 1235, y0: 82, y1: 447 } },
+  { actor: 'luna', shape: 'cat', facing: 'left', view: 'Left side', band: { x0: 219, x1: 679, y0: 143, y1: 482 } },
+  { actor: 'luna', shape: 'cat', facing: 'right', view: 'Right side', band: { x0: 834, x1: 1231, y0: 143, y1: 482 } },
 ];
 
-const sheetDirectory = resolve(process.argv[2] ?? 'art/characters/v1');
+const sheetDirectory = resolve(process.argv[2] ?? 'art/characters/v2');
 const output = fileURLToPath(new URL('../public/assets/actors/', import.meta.url));
 
 const sheets = new Map();
 function sheet(actor) {
   if (!sheets.has(actor)) {
-    const path = join(sheetDirectory, `${actor}-character-sheet-v1.png`);
+    const path = join(sheetDirectory, `${actor}-character-sheet-v2.png`);
     const bytes = readFileSync(path);
     sheets.set(actor, {
       image: decodePng(bytes),
-      file: `${actor}-character-sheet-v1.png`,
+      file: `${actor}-character-sheet-v2.png`,
       sha256: createHash('sha256').update(bytes).digest('hex'),
     });
   }
@@ -325,7 +341,7 @@ writeFileSync(
         'These are not Cycles. Each file is one neutral standing frame cut mechanically out of a Character Sheet turnaround, shipped so that the Actor system could be built and seen before any animation frames exist. Replace every one of them with generated artwork; the shot list for that is in the effort notes and the contract is in CLAUDE.md.',
       madeBy: 'scripts/make-actor-placeholders.mjs',
       madeOn: new Date().toISOString().slice(0, 10),
-      identitySource: 'art/characters/v1 — the version 1 Character Sheets, never a generated asset',
+      identitySource: 'art/characters/v2 — the version 2 Character Sheets, never a generated asset',
       missing: 'Every run Cycle, every walking frame, and the left facing of the Boy and the Girl.',
       ...(existing.schema ? { schema: existing.schema } : {}),
       cycles: existing.cycles ?? [],

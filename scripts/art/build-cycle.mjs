@@ -14,7 +14,7 @@
 //
 //   node scripts/art/build-cycle.mjs <strip.png | frames-dir> --out <sheet.png> [--actor boy]
 //     [--frames 8] [--columns 4] [--key '#00FF00' | --key alpha] [--frame 192x320]
-//     [--fps 10] [--mirror] [--palette art/characters/v1/palette.json]
+//     [--fps 10] [--mirror] [--palette art/characters/v2/palette.json]
 //     [--metrics <path>] [--provenance <illustrator manifest.json>] [--shot <id>]
 //     [--apply] [--no-manifest]
 //
@@ -31,8 +31,9 @@
 // `metrics.json`; and run the Cycle contract over the result. A sheet that fails exits non-zero.
 //
 // `--mirror` produces the other facing, and only for the Actors the contract allows to be
-// mirrored: the Boy and the Girl. Míca's nose dot must not change sides, so she and Mira ship both
-// facings from their own generations and `--mirror` on a cat is an error, not a shortcut.
+// mirrored: the Boy and the Girl. Míca's nose dot must not change sides, so she, Mira and Luna
+// ship both facings from their own generations and `--mirror` on a cat is an error, not a
+// shortcut.
 //
 // `metrics.json` lands beside the sheet unless `--metrics` moves it. When the sheet is being
 // written into `public/assets/actors/`, point `--metrics` at the effort's generation directory:
@@ -139,8 +140,8 @@ export function parseArguments(argv) {
   if (options.mirror && !MIRRORABLE.has(options.actor)) {
     throw new Error(
       `--mirror is not allowed for ${options.actor}: the contract mirrors the Boy and the Girl only. ` +
-        `Míca's nose dot must not change sides, so she and Mira ship both facings from their own ` +
-        `generations.`,
+        `Míca's nose dot must not change sides, so she, Mira and Luna ship both facings from ` +
+        `their own generations.`,
     );
   }
   options.frame ??= frameBoxForActor(options.actor);

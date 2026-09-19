@@ -35,7 +35,7 @@ _Avoid_: destructible
 ### The cast
 
 **Cast**:
-The four characters who inhabit the apartment: the Boy, the Girl, Míca and Mira. Their
+The five characters who inhabit the apartment: the Boy, the Girl, Míca, Mira and Luna. Their
 appearance is fixed by the Character Sheet.
 
 **Boy** / **Girl**:
@@ -44,12 +44,20 @@ glasses; the Girl is shorter and athletic, with a black ponytail. Established by
 artwork and binding on all new artwork.
 
 **Míca**:
-The calico cat — white underside, black and light-brown patching over back and head. Adult,
-small, thin.
+The calico cat — white underside, black and light-brown patching over back and head, and one
+large irregular black mark beside her nose on her anatomical left. Adult, small, thin.
 
 **Mira**:
-The African wildcat-patterned cat — sandy-tawny base, faint dark mackerel striping strongest on
-the legs, rufous ear backs, ringed tail with a dark tip. Adult, small, thin.
+The African wildcat-patterned cat — sandy-tawny base, dark mackerel striping, rufous ear backs,
+ringed tail with a dark tip. Adult, small, thin.
+
+**Luna**:
+The black cat — solid black, short fine coat, a short tail about half the length of the other
+two's, and green-yellow eyes where theirs are pale. Adult, the largest of the three and the
+softest built, and the only cat who stands taller than 66 stage units to the shoulder: she is 72.
+She is an Actor as of 2026-09-20 — `ActorId`, `.cycle` layers and validated placeholder frames —
+and rides in the pet backpack with the other two. Her roaming, her meow and her petting Beat are
+ticket 08's; her Breakable is the Game Room's.
 
 **Character Sheet**:
 The frozen reference artwork and written description that fixes a Cast member's identity.

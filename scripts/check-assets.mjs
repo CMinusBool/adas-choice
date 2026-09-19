@@ -9,11 +9,11 @@
 //   node scripts/check-assets.mjs                     # every sheet index.html declares
 //   node scripts/check-assets.mjs <path> ...          # named sheets
 //   node scripts/check-assets.mjs --json              # machine-readable, for the orchestrator
-//   node scripts/check-assets.mjs --palette art/characters/v1/palette.json
+//   node scripts/check-assets.mjs --palette art/characters/v2/palette.json
 //
 // A path that `index.html` declares inherits that layer's `data-frames` and
 // `data-columns`; any other path needs `--frames N --columns N` and either
-// `--actor <boy|girl|mica|mira>` or `--frame <W>x<H>`.
+// `--actor <boy|girl|mica|mira|luna>` or `--frame <W>x<H>`.
 //
 // `--non-fatal` reports and exits 0. `npm run build` runs it that way for now,
 // because every sheet in the repository today is a placeholder; it becomes fatal
@@ -70,7 +70,7 @@ export const FRAME_BOXES = {
   cat: { width: 256, height: 192 },
 };
 
-export const ACTOR_SHAPES = { boy: 'person', girl: 'person', mica: 'cat', mira: 'cat' };
+export const ACTOR_SHAPES = { boy: 'person', girl: 'person', mica: 'cat', mira: 'cat', luna: 'cat' };
 
 /** `<actor>-<cycle>-<facing>.png` is the contract's filename, so the actor is readable off it. */
 export function actorFromFile(file) {

@@ -62,6 +62,16 @@ that the Boy never changes which leg leads.
 Twelve calls. The Boy and the Girl get one facing each because their identity survives a mirror;
 the cats get two because Míca's does not, and Mira is treated the same so the pair matches.
 
+**Luna is the thirteenth through sixteenth shots, and they were never written.** She arrived at
+ticket 38 after this list was frozen, and by then the Cycle programme was already parked, so no
+ticket was opened for her. If the programme ever resumes she needs the same four as the other two
+cats — `luna-walk-left`, `luna-walk-right`, `luna-run-left`, `luna-run-right`, 256x192 frames,
+1024x384 sheets, both facings generated rather than mirrored — drawn from
+`art/characters/v2/luna-character-sheet-v2.png`, with her solid black coat read by its highlights
+rather than flattening into a silhouette, and her short tail (about half the other two's) the same
+length in every frame. She is the largest of the three, so she sits ~92 px tall in the frame where
+they sit ~85. Until then she ships the same one-frame placeholders they do.
+
 Per-Actor notes, on top of the bible's own:
 
 - **Boy** — the browline glasses stay on through every frame, including the ones where his head

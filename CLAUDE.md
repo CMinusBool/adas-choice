@@ -84,17 +84,29 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   Playback is a fixed rate: walk 10 fps, run 14 fps; `idle` is the walk sheet held on its first
   frame, so there is no idle asset. A per-facing sheet always wins; where only `right` exists the
   painter mirrors it with `scaleX(-1)`, which is a fallback and is **wrong for Míca**, whose nose
-  dot must not change sides — she ships both facings and so does Mira. Every sheet is declared as a
-  `data-sheet` on a `.cycle` layer inside `#apartment`, which is how the preload list and
-  `scripts/assert-built-page.mjs` find it; a URL built in TypeScript is invisible to both. What is
-  in the repository today is **placeholders**, not Cycles: one neutral standing frame per Actor,
-  cut out of a Character Sheet by `scripts/make-actor-placeholders.mjs`. See
-  `public/assets/actors/manifest.json`, and `docs/actor-cycles-shot-list.md` for the twelve
-  generations that replace them. Every rule in this paragraph is checked mechanically by
-  `node scripts/check-assets.mjs` — size, grid, binary alpha, feet on the bottom edge, centring,
-  no bleed into a neighbouring frame, no height pop and no translation across the Cycle — which
-  `npm run build` runs as a report and which a delivered sheet must pass before the owner is
-  asked to look at it.
+  mark must not change sides — she ships both facings, and so do Mira and Luna. Every sheet is
+  declared as a `data-sheet` on a `.cycle` layer inside `#apartment`, which is how the preload list
+  and `scripts/assert-built-page.mjs` find it; a URL built in TypeScript is invisible to both.
+  **That declaration is also what makes an Actor real**: `check-assets.mjs` reads its list off
+  `index.html`, so a sheet sitting in `public/assets/actors/` with no layer naming it is neither
+  preloaded nor checked. **Luna, the third cat, was in exactly that state until 2026-09-20** and is
+  not any more: she has her `.cycle` layers, her `ActorId` and her row in `ACTOR_SHAPES`, so her
+  placeholders preload and validate like everyone else's. What she still lacks is behaviour — the
+  roaming, the meow and the petting Beat are ticket 08's, and her Breakable is the Game Room's. She
+  stands slightly taller than the other two, `data-height="144"` against their `132`, which is her
+  Character Sheet's 24 bible units to the shoulder against their 22. What is in the repository is
+  **placeholders**
+  — one neutral standing frame per Actor, cut out of that Actor's Character Sheet in
+  `art/characters/v2/` by `scripts/make-actor-placeholders.mjs` — and **that is the shipped state,
+  on purpose**: see "Animation is parked" below. A one-frame sheet is a valid Cycle under every rule
+  above, and the Actor still travels, because the world model does the travelling. See
+  `public/assets/actors/manifest.json`, and `docs/actor-cycles-shot-list.md` for the generations
+  that would replace them if the work ever resumes. Every rule in this paragraph is checked
+  mechanically by `node scripts/check-assets.mjs` — size, grid, binary alpha, feet on the bottom
+  edge, centring, no bleed into a neighbouring frame, no height pop and no translation across the
+  Cycle — which `npm run build` runs as a report and which any delivered sheet must still pass.
+  **Those rules are not relaxed.** They are geometry, they cost nothing to run, and they have
+  never been what a generation failed on.
 - **A Cycle sheet is built by code, never by hand.** A generation comes back as a strip on a
   chroma ground at whatever size the model felt like, and `node scripts/art/build-cycle.mjs
   <strip.png> --out public/assets/actors/<actor>-<cycle>-<facing>.png` turns it into a sheet: mask
@@ -107,10 +119,22 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   `--apply` makes. Nothing invents pixels and nothing is padded or cropped afterwards: a strip
   that cannot be made to pass the validator is a wrong generation, and its art ticket is reopened
   rather than the tolerance loosened. `--mirror` bakes the other facing and is refused for the
-  cats. What no script can judge is the **motion phase** — whether the leading leg alternates
-  between the two rows — so `node scripts/art/make-preview.mjs --sheet <sheet.png>` writes a
-  self-contained page that plays a candidate back at the contract's rate for the owner's eye, and
-  every sheet is "motion phase not verified" until that check has been made.
+  cats. `node scripts/art/make-preview.mjs --sheet <sheet.png>` writes a self-contained page that
+  plays a candidate back at the contract's rate for the owner's eye. **Motion phase is no longer
+  checked by machine**, and no sheet carries a "motion phase not verified" status — see
+  "Animation is parked" below.
+- **Animation is parked, and placeholders are the answer.** Seven generations of one walk Cycle,
+  across every prompt technique that was tried — plain brief, explicit leg order, phase wording,
+  per-limb shading, a stick-figure pose reference — failed to produce a walk whose leading leg
+  alternates across the cycle. The owner ruled on 2026-09-18 that the cost is not worth the
+  result and that placeholder Cycles ship. Concretely: the twelve-shot Cycle programme is
+  `wontfix` (COOP-001 tickets 23–30); `scripts/art/` and `scripts/check-assets.mjs` stay in the
+  repository and keep working; and **no motion check runs in the pipeline** —
+  `/implement-parallel` no longer spawns `motion-reviewer`, because its answers were measured
+  wrong often enough to be worth nothing at the price of an `opus` vision run per Cycle. The
+  mechanical geometry validator above is untouched. If a real Cycle is ever delivered, it goes
+  through `build-cycle.mjs`, passes `check-assets.mjs`, and the owner watches `make-preview.mjs`
+  — one pair of eyes, no grader.
 - **Every Room has a stage**: a 16:9 logical canvas of 1600 x 900 units, origin top-left, x right,
   y down, held by `<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS.
   Walkable areas, Props, doors and Actor positions are all written in those units, so the same

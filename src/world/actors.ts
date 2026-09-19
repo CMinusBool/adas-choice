@@ -10,10 +10,10 @@ import { clampInto, containsPoint, distance, routeLength, routeThrough, type Poi
  * to. Nothing here knows about pixels, elements or the clock — time arrives as
  * a `now` on a tick and the DOM layer paints whatever comes back.
  */
-export type ActorId = 'boy' | 'girl' | 'mica' | 'mira';
+export type ActorId = 'boy' | 'girl' | 'mica' | 'mira' | 'luna';
 
 /** Every Actor the apartment can hold, in Character Sheet order. */
-export const ACTOR_IDS: readonly ActorId[] = ['boy', 'girl', 'mica', 'mira'];
+export const ACTOR_IDS: readonly ActorId[] = ['boy', 'girl', 'mica', 'mira', 'luna'];
 
 /**
  * A reusable looping animation for an Actor.
