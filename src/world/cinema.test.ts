@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import {
   CINEMA_MARKS,
+  CINEMA_SHELVES,
   actorView,
   actorsIn,
   advance,
   attendedShelf,
   createWorld,
+  filmById,
+  filmsOn,
   isSeated,
   isWalkable,
   type ActorId,
@@ -47,6 +50,34 @@ function runUntil(world: World, ready: (world: World) => boolean, ms = 20000, st
 function settled(world: World): World {
   return runUntil(world, next => !who(next, 'boy').moving);
 }
+
+describe('the Films each bookshelf holds', () => {
+  // The three per shelf and the order he pins them in are the research note's
+  // tone spread, lightest Film first, as the design note's table repeats them.
+  it('holds three Films per shelf, lightest first', () => {
+    expect(filmsOn('comedy')).toEqual(['knives-out', 'kung-fu-hustle', 'eat-drink-man-woman']);
+    expect(filmsOn('romance')).toEqual(['crazy-rich-asians', 'about-time', 'in-the-mood-for-love']);
+    expect(filmsOn('horror')).toEqual(['mr-vampire', 'get-out', 'detention']);
+  });
+
+  it('gives every Film a title in both languages and its own shelf', () => {
+    for (const shelf of CINEMA_SHELVES) {
+      for (const id of filmsOn(shelf)) {
+        const film = filmById(id);
+        expect(film.shelf).toBe(shelf);
+        expect(film.title['zh-Hant']).not.toBe('');
+        expect(film.title.en).not.toBe('');
+        expect(film.title['zh-Hant']).not.toBe(film.title.en);
+      }
+    }
+  });
+
+  it('names Knives Out in both languages and dates it', () => {
+    const film = filmById('knives-out');
+    expect(film.title).toEqual({ 'zh-Hant': '鋒迴路轉', en: 'Knives Out' });
+    expect(film.year).toBe(2019);
+  });
+});
 
 describe('the Cinema Room floor', () => {
   it('opens the whole band between the screen and the board', () => {
