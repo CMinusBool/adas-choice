@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { advance, createWorld, isWalkable, openActivity, type WorldInputs } from './index';
+import { advance, chosenActivity, createWorld, isWalkable, openActivity, type WorldInputs } from './index';
 
 /** A visitor arriving with nothing stored, no reduced-motion request, no hash. */
 const plainArrival: WorldInputs = { hash: '', storedLanguage: null, reducedMotion: false };
@@ -76,5 +76,48 @@ describe('the activity card', () => {
     expect(advance(arrived, { type: 'activity-card-closed' })).toBe(arrived);
     const hunt = advance(arrived, { type: 'activity-card-opened', activity: 'hunt' });
     expect(advance(hunt, { type: 'activity-card-opened', activity: 'hunt' })).toBe(hunt);
+  });
+});
+
+/**
+ * Picking one for tonight, from §5.1's "Choosing" and §5.3: exactly one
+ * station can be chosen, the card leaves with the decision, and the choice
+ * lasts the visit rather than the session.
+ */
+describe('choosing an activity for tonight', () => {
+  const arrive = () => createWorld(plainArrival);
+  const choose = (world = arrive(), activity: 'draw' | 'hunt' | 'map' = 'draw') =>
+    advance(world, { type: 'activity-chosen', activity });
+
+  it('starts the visit with nothing picked', () => {
+    expect(chosenActivity(arrive())).toBe(null);
+  });
+
+  it('takes the pick, and the card leaves with the decision', () => {
+    const open = advance(arrive(), { type: 'activity-card-opened', activity: 'draw' });
+    const chosen = choose(open, 'draw');
+    expect(chosenActivity(chosen)).toBe('draw');
+    expect(openActivity(chosen)).toBe(null);
+  });
+
+  it('holds exactly one pick, so a change of mind moves it', () => {
+    const changed = choose(choose(arrive(), 'draw'), 'map');
+    expect(chosenActivity(changed)).toBe('map');
+  });
+
+  it('keeps the pick while the visitor goes and looks at another Room', () => {
+    const away = advance(choose(arrive(), 'hunt'), { type: 'hash-changed', hash: '#/cinema' });
+    const back = advance(away, { type: 'hash-changed', hash: '#/activities' });
+    expect(chosenActivity(back)).toBe('hunt');
+  });
+
+  it('forgets the pick on a reload, because only Breakables and the language last that long', () => {
+    choose(arrive(), 'hunt');
+    expect(chosenActivity(createWorld(plainArrival))).toBe(null);
+  });
+
+  it('costs no repaint when the visitor picks what is already picked', () => {
+    const chosen = choose(arrive(), 'map');
+    expect(advance(chosen, { type: 'activity-chosen', activity: 'map' })).toBe(chosen);
   });
 });
