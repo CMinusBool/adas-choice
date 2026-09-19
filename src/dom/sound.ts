@@ -1,4 +1,4 @@
-import { copy } from '../copy';
+import { copy, type CopyKey } from '../copy';
 import { ROOM_IDS, isAudible, isMusicSourceOn, isRoomMusicAudible, soundIsOn, type AudioSlice, type Language, type RoomId, type World } from '../world';
 import { byId, type Dispatch, type Painter } from './painter';
 
@@ -153,7 +153,12 @@ export const mountSound = (dispatch: Dispatch): Painter => {
       const source = element.dataset.musicSource as RoomId;
       const playing = isMusicSourceOn(next, source);
       element.setAttribute('aria-pressed', String(playing));
-      element.querySelector<HTMLElement>('[data-music-source-label]')!.textContent = playing ? words.musicSourceStop : words.musicSourceStart;
+      // 17: a Music Source that is a real Prop rather than a placeholder can
+      // say what it is — the Cinema Room's projector offers to run its motor,
+      // not to "play the Room's music" — by naming its own two copy keys.
+      const start = (element.dataset.labelStart ?? 'musicSourceStart') as CopyKey;
+      const stop = (element.dataset.labelStop ?? 'musicSourceStop') as CopyKey;
+      element.querySelector<HTMLElement>('[data-music-source-label]')!.textContent = words[playing ? stop : start];
       element.hidden = false;
     }
 
