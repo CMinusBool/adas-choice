@@ -33,3 +33,7 @@ export { STAGE_HEIGHT, STAGE_WIDTH } from './stage';
 export type { ActorId, ActorView, ActorsSlice, CycleId, Facing, RandomSource } from './actors';
 export { ACTOR_IDS, isWalkable, seededRandom } from './actors';
 export { actorView, actorsIn } from './world';
+
+// 14: the Entryway — the Room's geometry, its Props and its arrival.
+export type { EntrywayPropId, EntrywayProps, VaseState } from './entryway';
+export { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';

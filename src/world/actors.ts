@@ -1,3 +1,5 @@
+// 14: the Entryway's floor and marks are the design note's, written down once.
+import { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';
 import type { RoomId } from './rooms';
 import { clampInto, containsPoint, distance, routeLength, routeThrough, type Point, type Polygon } from './stage';
 
@@ -42,23 +44,12 @@ const MAX_STEP_MS = 100;
 /**
  * Where an Actor may stand in each Room, as a polygon in stage units.
  *
- * The Entryway's floor is the one designed here, because it is where this
- * ticket's walk happens: a band of floor with the hall furniture standing in
- * the middle of its back edge, so crossing the Room is a route that has to bend
- * rather than a straight line. The other three are plain bands until each
+ * The Entryway's floor is its design note's (§3.2), kept in `entryway.ts` with
+ * the rest of that Room's geometry. The other three are plain bands until each
  * Room's design pass gives them their real furniture.
  */
 const WALKABLE: Record<RoomId, Polygon> = {
-  entryway: [
-    { x: 120, y: 620 },
-    { x: 640, y: 620 },
-    { x: 640, y: 760 },
-    { x: 960, y: 760 },
-    { x: 960, y: 620 },
-    { x: 1480, y: 620 },
-    { x: 1480, y: 860 },
-    { x: 120, y: 860 },
-  ],
+  entryway: ENTRYWAY_WALKABLE,
   games: [
     { x: 120, y: 640 },
     { x: 1480, y: 640 },
@@ -299,31 +290,68 @@ export function settleActors(slice: ActorsSlice): ActorsSlice {
   return { ...slice, actors, lastTick: null };
 }
 
+// 14: the Entryway
 /**
- * The Cast as the visitor finds it.
+ * Put an Actor somewhere, at once, with no walking and no route.
  *
- * Only the Boy is placed for now: he walks between the two ends of the
- * Entryway, which is this ticket's demonstration that a route is computed and
- * a Cycle plays in place while code does the travelling. The rest of the Cast
- * arrives with the Rooms that give them somewhere to be.
+ * What the arrival's script does when a figure simply appears — the Girl in the
+ * doorway, a cat landing off the end of the bench — and the only way an Actor
+ * that is not in the apartment yet gets into it. A mark outside the Room's
+ * walkable area is pulled onto it, exactly as a goal is.
+ */
+export function placeActor(slice: ActorsSlice, id: ActorId, room: RoomId, at: Point, facing: Facing): ActorsSlice {
+  const placed = clampInto(WALKABLE[room], at);
+  const existing = slice.actors.find(actor => actor.id === id);
+  const next: ActorState = existing
+    ? { ...standing(existing, placed, facing), room }
+    : { id, room, at: placed, facing, cycle: 'idle', route: [], distance: 0, patrol: [] };
+  return {
+    ...slice,
+    actors: existing ? slice.actors.map(actor => (actor.id === id ? next : actor)) : [...slice.actors, next],
+  };
+}
+
+// 14: the Entryway
+/**
+ * The Cast with everyone standing in one Room taken out of the apartment.
+ *
+ * The Entryway's arrival opens on an empty hall, and an empty hall is the
+ * absence of the Cast rather than a flag on it: an Actor nobody has placed has
+ * no position to paint and no answer to give, which is already what
+ * `actorView` says about one.
+ */
+export function clearRoom(slice: ActorsSlice, room: RoomId): ActorsSlice {
+  const actors = slice.actors.filter(actor => actor.room !== room);
+  return actors.length === slice.actors.length ? slice : { ...slice, actors, lastTick: null };
+}
+
+/**
+ * The Cast as the visitor finds it: home, in the Entryway's settled tableau.
+ *
+ * Design note §5.4 — the two of them in the coat corner, the three cats on
+ * their landing marks — which is the Room's state for the rest of the visit and
+ * what a visitor who never sees the arrival is shown. The arrival, when it
+ * plays, empties the hall and walks everyone back to exactly these marks.
  */
 export function createActors(random: RandomSource): ActorsSlice {
+  const home: ReadonlyArray<readonly [ActorId, Point, Facing]> = [
+    ['boy', ENTRYWAY_MARKS.BS, 'left'],
+    ['girl', ENTRYWAY_MARKS.GS, 'right'],
+    ['mica', ENTRYWAY_MARKS.EMica, 'left'],
+    ['mira', ENTRYWAY_MARKS.EMira, 'right'],
+    ['luna', ENTRYWAY_MARKS.ELuna, 'left'],
+  ];
   return {
-    actors: [
-      {
-        id: 'boy',
-        room: 'entryway',
-        at: { x: 220, y: 690 },
-        facing: 'right',
-        cycle: 'idle',
-        route: [],
-        distance: 0,
-        patrol: [
-          { x: 1380, y: 690 },
-          { x: 220, y: 690 },
-        ],
-      },
-    ],
+    actors: home.map(([id, at, facing]) => ({
+      id,
+      room: 'entryway',
+      at,
+      facing,
+      cycle: 'idle',
+      route: [],
+      distance: 0,
+      patrol: [],
+    })),
     lastTick: null,
     random,
   };
