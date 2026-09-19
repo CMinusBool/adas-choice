@@ -21,15 +21,24 @@ import { createLoading, declareAssets, everythingSettled, progressOf, settleAsse
 import { createMotion, toggleMotion, withReducedMotion, type MotionSlice } from './motion';
 import { parseRoute, type RoomId } from './rooms';
 // 17: cinema — the Cinema Room's own marks and shelves.
+// 18: and the errand that fetches Posters off one of them.
 import {
+  CINEMA_MARKS,
   boyMark,
   createCinema,
   isOnMark,
+  openShelfOf,
   seatOf,
+  settleCinema,
+  stepCinema,
   withAttendedShelf,
+  withChosenShelf,
   type CinemaShelf,
   type CinemaSlice,
+  type CinemaStep,
 } from './cinema';
+// 18: films
+import type { FilmId } from './films';
 // 06: audio
 import { createAudio, isMusicSourceSwitchedOn, withFilmAudio, withInteraction, withMusicSourceToggled, withSoundToggled, type AudioSlice, type AudioTier } from './audio';
 // end 06
@@ -122,7 +131,11 @@ export type WorldEvent =
     }
   // 17: cinema — which bookshelf the visitor's pointer or focus is on, or
   // `null` for none. What it means for the Boy is the model's decision.
-  | { readonly type: 'cinema-shelf-attended'; readonly shelf: CinemaShelf | null };
+  | { readonly type: 'cinema-shelf-attended'; readonly shelf: CinemaShelf | null }
+  // 18: cinema — a bookshelf clicked or activated. `now` is the clock the
+  // errand's Beats are timed against; it is the same reading the ticks carry,
+  // because the model is never allowed to ask what time it is.
+  | { readonly type: 'cinema-shelf-chosen'; readonly shelf: CinemaShelf; readonly now: number };
 
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
@@ -167,8 +180,9 @@ export function advance(world: World, event: WorldEvent): World {
         // marks, so every Room is found the way its design note describes it.
         actors: gatherInto(world.actors, entering),
         // 17: a shelf cannot hold the attention of a visitor who has walked
-        // out, so the Cinema Room is always returned to on a clear wall.
-        cinema: createCinema(),
+        // out. 18: the errand he was on finishes rather than being abandoned,
+        // so the wall they come back to shows the Posters he went to fetch.
+        cinema: settleCinema(world.cinema),
       };
     }
     case 'room-transition-finished': {
@@ -221,7 +235,9 @@ export function advance(world: World, event: WorldEvent): World {
     // 07: actors
     case 'actor-tick': {
       const actors = tickActors(world.actors, event.now, motionIsOn(world));
-      return actors === world.actors ? world : { ...world, actors };
+      // 18: the same tick is the Cinema Room's clock: the errand's Beats end
+      // on it, and so does each leg of the walk it is waiting on.
+      return runErrand(actors === world.actors ? world : { ...world, actors }, event.now);
     }
     // 07: actors
     case 'actor-sent': {
@@ -235,10 +251,52 @@ export function advance(world: World, event: WorldEvent): World {
       if (world.rooms.current !== 'cinema') return world;
       const cinema = withAttendedShelf(world.cinema, event.shelf);
       if (cinema === world.cinema) return world;
+      // 18: attention still lights the shelf up while he is on an errand, but
+      // it stops moving him: a pointer wandering across the Room mid-rummage
+      // would otherwise strand him halfway through it.
+      if (world.cinema.step !== 'seated') return { ...world, cinema };
       const actors = sendActor(world.actors, 'boy', boyMark(event.shelf), 'walk', motionIsOn(world));
       return { ...world, cinema, actors };
     }
+    // 18: cinema — a bookshelf chosen. Whatever he was doing, he goes to this
+    // shelf, rummages in it, and pins its three Posters to the board.
+    case 'cinema-shelf-chosen': {
+      if (world.rooms.current !== 'cinema') return world;
+      const cinema = withChosenShelf(world.cinema, event.shelf);
+      const actors = sendActor(world.actors, 'boy', CINEMA_MARKS.shelves[event.shelf], 'walk', motionIsOn(world));
+      return runErrand({ ...world, cinema, actors }, event.now);
+    }
   }
+}
+
+// 18: cinema
+/**
+ * How far the Cinema Room's errand can get right now.
+ *
+ * Each turn of the loop asks the Room what the Boy's position and the clock
+ * mean for it, and carries out the one move it asks for. With motion on that is
+ * at most one step a frame, because every step that follows is waiting on a
+ * walk or a Beat that has only just started. With motion off nothing waits: the
+ * loop runs the whole errand out in this one call, which is how the Posters
+ * still reach the wall for a visitor who asked the apartment to hold still.
+ */
+function runErrand(world: World, now: number | null): World {
+  if (world.rooms.current !== 'cinema' || world.cinema.step === 'seated') return world;
+  const motionOn = motionIsOn(world);
+  let next = world;
+  // The errand is nine steps long, so a loop that has not settled by twice that
+  // is one that never will; the bound is a guard, not a schedule.
+  for (let turn = 0; turn < 24; turn += 1) {
+    const boy = findActorView(next.actors, 'boy');
+    if (!boy) return next;
+    const progress = stepCinema(next.cinema, { at: boy.at, moving: boy.moving }, now, motionOn);
+    if (progress.slice === next.cinema && progress.sendBoyTo === null) return next;
+    const actors = progress.sendBoyTo
+      ? sendActor(next.actors, 'boy', progress.sendBoyTo, 'walk', motionOn)
+      : next.actors;
+    next = { ...next, cinema: progress.slice, actors };
+  }
+  return next;
 }
 
 // 05: loading
@@ -339,6 +397,27 @@ export function isRoomPainted(world: World, room: RoomId): boolean {
 /** The bookshelf the visitor's attention is on, for the Room to light up. */
 export function attendedShelf(world: World): CinemaShelf | null {
   return world.cinema.attended;
+}
+
+// 18: cinema
+/** Where the Room's errand has got to, for the Beat the DOM layer is playing. */
+export function cinemaStep(world: World): CinemaStep {
+  return world.cinema.step;
+}
+
+/**
+ * The Posters on the wall, in the order he pinned them.
+ *
+ * One entry per filled slot, so the list grows from none to three as the pin
+ * Beats finish and the board paints exactly what is up.
+ */
+export function pinnedPosters(world: World): readonly FilmId[] {
+  return world.cinema.pinned;
+}
+
+/** The genre whose Posters are on the wall, or `null` while it is bare. */
+export function openShelf(world: World): CinemaShelf | null {
+  return openShelfOf(world.cinema);
 }
 
 /**
