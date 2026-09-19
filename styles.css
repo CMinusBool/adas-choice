@@ -347,9 +347,12 @@ html.dialog-open { overflow: hidden; }
 /* P7-P9: the three shelves. Colour, crown silhouette and ornament each say the
    genre on their own, so any one of them surviving a small screen is enough. */
 .cinema-shelf { z-index: 640; overflow: visible; transition: filter .2s; }
-.cinema-shelf[data-shelf="comedy"] { --body: #f2c14e; --trim: #e39b2d; --cap: #e8703a; }
-.cinema-shelf[data-shelf="romance"] { --body: #e86f8f; --trim: #b8405e; --cap: #f5a3c5; }
-.cinema-shelf[data-shelf="horror"] { --body: #3e2a4f; --trim: #1f1528; --cap: #14101a; transform: rotate(-4deg); transform-origin: bottom center; }
+/* `--glow` is the rim light a shelf comes up in. It is the trim colour, except
+   on the horror shelf, whose trim is nearly black: there it is the candle's
+   sick green, which is that shelf's own colour in the design note's table. */
+.cinema-shelf[data-shelf="comedy"] { --body: #f2c14e; --trim: #e39b2d; --cap: #e8703a; --glow: #e39b2d; }
+.cinema-shelf[data-shelf="romance"] { --body: #e86f8f; --trim: #b8405e; --cap: #f5a3c5; --glow: #f5a3c5; }
+.cinema-shelf[data-shelf="horror"] { --body: #3e2a4f; --trim: #1f1528; --cap: #14101a; --glow: #8fd14f; transform: rotate(-4deg); transform-origin: bottom center; }
 .cinema-shelf .shelf-body { position: absolute; inset: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 8); padding: calc(var(--u) * 12) calc(var(--u) * 10) calc(var(--u) * 52); background: var(--body); border: calc(var(--u) * 6) solid var(--trim); }
 .cinema-shelf .cubby { flex: 1; background: repeating-linear-gradient(90deg, var(--cap) 0 calc(var(--u) * 9), #00000055 calc(var(--u) * 9) calc(var(--u) * 12), var(--cap) calc(var(--u) * 12) calc(var(--u) * 21), #00000055 calc(var(--u) * 21) calc(var(--u) * 24)), #2a2028; }
 .cinema-shelf[data-shelf="comedy"] .shelf-body { border-radius: calc(var(--u) * 30) calc(var(--u) * 30) calc(var(--u) * 6) calc(var(--u) * 6); }
@@ -374,7 +377,7 @@ html.dialog-open { overflow: hidden; }
 .shelf-ornament .talisman { right: calc(var(--u) * -10); bottom: calc(var(--u) * -20); width: calc(var(--u) * 16); height: calc(var(--u) * 46); background: repeating-linear-gradient(#f1d163 0 calc(var(--u) * 10), #c8392f calc(var(--u) * 10) calc(var(--u) * 13)); }
 /* P21: the brass plaque on each plinth, muted until the shelf is attended. */
 .cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--u) * 12); width: calc(var(--u) * 100); padding: calc(var(--u) * 2) 0; border-radius: calc(var(--u) * 4); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--u) * 20); line-height: 1.2; text-align: center; opacity: .78; transition: opacity .2s; }
-.cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--u) * 26) var(--trim)) brightness(1.08); outline: none; }
+.cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--u) * 30) var(--glow)) brightness(1.08); outline: none; }
 .cinema-shelf:hover .shelf-plaque, .cinema-shelf:focus-visible .shelf-plaque, .cinema-shelf.is-attended .shelf-plaque { opacity: 1; }
 .cinema-shelf:focus-visible .shelf-body { outline: 3px solid var(--pink); outline-offset: 3px; }
 
@@ -405,7 +408,7 @@ html.dialog-open { overflow: hidden; }
 .projector-gate::before, .projector-motor::before { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: max(100%, 44px); height: max(100%, 44px); }
 /* High on the machine, cream, and dim: the mouth a reel goes into. Ticket 20
    enables it, and until then it says so rather than pretending. */
-.projector-gate { z-index: 832; border-radius: calc(var(--u) * 6) !important; border: calc(var(--u) * 4) dashed #efe6d680 !important; background: #efe6d611 !important; cursor: not-allowed; }
+.stage-cinema button.projector-gate { z-index: 832; border-radius: calc(var(--u) * 6); border: calc(var(--u) * 4) dashed #efe6d680; background: #efe6d611; cursor: not-allowed; }
 .projector-gate:focus-visible { outline: 3px solid var(--cream); outline-offset: 2px; }
 /* Low on the base plate, red, and a switch: the Room's Music Source. */
 .projector-motor { z-index: 833; display: grid; place-items: center; }
