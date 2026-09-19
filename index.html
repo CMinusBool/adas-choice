@@ -187,20 +187,122 @@
         <div class="stage" data-stage="cinema" aria-hidden="true"></div>
       </section>
       <section class="room" id="room-activities" data-room="activities" aria-labelledby="activities-title" hidden>
+        <!--
+          16: the Activity Room, built from `design/12-activity-room.md`.
+
+          Every Prop is placed in stage units — `--x`, `--y`, `--w`, `--h` are the design note's
+          §4.1 boxes and `--z` its base line, which `styles.css` turns into percentages of the
+          1600 x 900 stage. The artwork itself does not exist yet: each Prop below is a CSS
+          surface standing in for the shot §7 names for it, so the Room can be walked through and
+          judged before a pixel is generated. Ticket 35 swaps the images in and touches nothing
+          else, which is why the boxes are here and not in TypeScript.
+        -->
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
         <h1 class="room-title" id="activities-title" data-room-title tabindex="-1" data-i18n="activitiesTitle">活動室</h1>
-        <p class="room-lede" data-i18n="activitiesSoon">桌上空著，等著擺上今晚要一起做的事。</p>
-        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
-        <div class="music-source-row">
-          <button class="music-source" type="button" data-music-source="activities" aria-pressed="false" hidden>
-            <span class="music-note" aria-hidden="true">♪</span>
-            <span data-music-source-label>播放房間音樂</span>
-            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
-          </button>
+        <p class="room-lede" data-i18n="activitiesLede">三件事，隔著螢幕也能一起做。挑一件，今晚就開始。</p>
+        <div class="activity-room" id="activity-room">
+          <div class="activity-stage-area">
+            <div class="stage-pan">
+              <div class="stage" data-stage="activities" role="group" aria-label="今晚可以一起做的三件事" data-i18n-aria="activityStationsLabel">
+                <!-- A-S01, the empty Room: cornice, wall, skirting, floor, rug, window, pendant. -->
+                <div class="prop a-cornice" aria-hidden="true" style="--x:0;--y:0;--w:1600;--h:40;--z:1"></div>
+                <div class="prop a-wall" aria-hidden="true" style="--x:0;--y:40;--w:1600;--h:565;--z:1"></div>
+                <div class="prop a-skirting" aria-hidden="true" style="--x:0;--y:605;--w:1600;--h:15;--z:1"></div>
+                <div class="prop a-floor" aria-hidden="true" style="--x:0;--y:620;--w:1600;--h:280;--z:1"></div>
+                <div class="prop a-rug" aria-hidden="true" style="--x:500;--y:704;--w:700;--h:164;--z:2"></div>
+                <div class="prop a-window" aria-hidden="true" style="--x:820;--y:86;--w:240;--h:204;--z:2"></div>
+                <div class="prop a-sill" aria-hidden="true" style="--x:812;--y:290;--w:256;--h:12;--z:2"></div>
+                <div class="prop a-cord" aria-hidden="true" style="--x:558;--y:40;--w:4;--h:110;--z:2"></div>
+                <div class="prop a-pendant" aria-hidden="true" style="--x:500;--y:150;--w:120;--h:72;--z:2"></div>
+                <!-- L8: the door back to the Entryway. An ordinary hash link; routing is the browser's. -->
+                <a class="prop a-door" href="#/entryway" style="--x:60;--y:256;--w:180;--h:364;--z:620" aria-label="回到玄關" data-i18n-aria="backToEntryway">
+                  <span class="a-door-leaf" aria-hidden="true"></span>
+                  <span class="a-door-tag" aria-hidden="true"></span>
+                </a>
+                <!-- L20, A-S05: the world map, on the wall and always behind the Cast. -->
+                <div class="prop a-map" aria-hidden="true" style="--x:1160;--y:120;--w:360;--h:272;--z:392"></div>
+                <!-- The Blind Portrait's station: L9-L12, A-S02. -->
+                <div class="prop a-table" aria-hidden="true" style="--x:320;--y:472;--w:380;--h:148;--z:620"></div>
+                <div class="prop a-pad" aria-hidden="true" style="--x:390;--y:320;--w:140;--h:152;--z:621"></div>
+                <div class="prop a-paper" aria-hidden="true" style="--x:545;--y:464;--w:80;--h:8;--z:621"></div>
+                <div class="prop a-clamp-lamp" aria-hidden="true" style="--x:330;--y:352;--w:70;--h:120;--z:621"></div>
+                <!-- L13, A-S06 / A-S07: Mira's Breakable. Ticket 09 owns the knock and the state;
+                     both Props stand here so that ticket only has to flip which one is hidden. -->
+                <div class="prop a-mug" data-breakable="activity-pencil-mug" data-breakable-state="intact" role="img" aria-label="一只裝滿鉛筆的馬克杯" data-i18n-aria="pencilMugIntact" style="--x:630;--y:400;--w:50;--h:72;--z:621"></div>
+                <div class="prop a-mug-broken" data-breakable="activity-pencil-mug" data-breakable-state="broken" role="img" aria-label="摔成兩半的馬克杯，鉛筆滾了一地" data-i18n-aria="pencilMugBroken" style="--x:560;--y:786;--w:160;--h:46;--z:832" hidden></div>
+                <!-- The Treasure Hunt's station: L14-L19, A-S03. -->
+                <div class="prop a-shelf" aria-hidden="true" style="--x:760;--y:360;--w:340;--h:260;--z:620"></div>
+                <div class="prop a-timer" aria-hidden="true" style="--x:930;--y:296;--w:84;--h:64;--z:621"></div>
+                <div class="prop a-basket" aria-hidden="true" style="--x:790;--y:384;--w:140;--h:68;--z:621"></div>
+                <div class="prop a-finds" aria-hidden="true" style="--x:950;--y:392;--w:130;--h:60;--z:621"></div>
+                <div class="prop a-boxes" aria-hidden="true" style="--x:782;--y:476;--w:298;--h:64;--z:621"></div>
+                <div class="prop a-storage" aria-hidden="true" style="--x:782;--y:556;--w:298;--h:52;--z:621"></div>
+                <div class="prop a-stopwatch" aria-hidden="true" style="--x:1076;--y:360;--w:28;--h:74;--z:621"></div>
+                <!-- Take Me Somewhere's station: L21-L24, A-S04. -->
+                <div class="prop a-desk" aria-hidden="true" style="--x:1180;--y:472;--w:380;--h:148;--z:620"></div>
+                <div class="prop a-globe" aria-hidden="true" style="--x:1210;--y:384;--w:90;--h:88;--z:621"></div>
+                <div class="prop a-atlas" aria-hidden="true" style="--x:1330;--y:452;--w:220;--h:20;--z:621"></div>
+                <div class="prop a-desk-lamp" aria-hidden="true" style="--x:1490;--y:392;--w:60;--h:80;--z:621"></div>
+                <!-- C1-C3: the chalkboards. DOM text on a CSS slate, never drawn into the art. -->
+                <div class="prop a-chalkboard" data-chalkboard="draw" aria-hidden="true" style="--x:330;--y:570;--w:270;--h:48;--z:618"><span class="a-chalk" data-i18n="activityDrawName">盲畫大賽</span></div>
+                <div class="prop a-chalkboard" data-chalkboard="hunt" aria-hidden="true" style="--x:790;--y:570;--w:270;--h:48;--z:618"><span class="a-chalk" data-i18n="activityHuntName">三十秒尋寶</span></div>
+                <div class="prop a-chalkboard" data-chalkboard="map" aria-hidden="true" style="--x:1200;--y:570;--w:270;--h:48;--z:618"><span class="a-chalk" data-i18n="activityMapName">帶我去一個地方</span></div>
+                <!-- The three tableaux, A-S12-A-S14: a painted still replaces the Cast once an
+                     activity is chosen. Placeholder surfaces until ticket 35. -->
+                <div class="prop a-tableau" data-tableau="draw" aria-hidden="true" style="--x:290;--y:520;--w:460;--h:260;--z:780" hidden></div>
+                <div class="prop a-tableau" data-tableau="hunt" aria-hidden="true" style="--x:710;--y:372;--w:440;--h:380;--z:752" hidden></div>
+                <div class="prop a-tableau" data-tableau="map" aria-hidden="true" style="--x:1130;--y:352;--w:420;--h:400;--z:752" hidden></div>
+                <!-- L25, A-S08: the call corner. Scenery — the Room saying, without a word, that
+                     all three of these are things you can do while apart. -->
+                <div class="prop a-laptop" aria-hidden="true" style="--x:214;--y:626;--w:106;--h:116;--z:842"></div>
+                <div class="prop a-stool" aria-hidden="true" style="--x:196;--y:742;--w:138;--h:100;--z:842"></div>
+                <div class="prop a-tea" aria-hidden="true" style="--x:150;--y:814;--w:32;--h:28;--z:842"></div>
+                <!-- The three stations (§5.1): one transparent button over each group and its
+                     chalkboard. The painter owns their accessible names, because the chosen one
+                     gains a suffix the `data-i18n-aria` sweep knows nothing about. -->
+                <button class="prop a-station" type="button" data-activity="draw" aria-haspopup="dialog" aria-controls="activity-card" aria-expanded="false" aria-label="盲畫大賽：點一下看怎麼玩" style="--x:300;--y:320;--w:410;--h:306;--z:630"></button>
+                <button class="prop a-station" type="button" data-activity="hunt" aria-haspopup="dialog" aria-controls="activity-card" aria-expanded="false" aria-label="三十秒尋寶：點一下看怎麼玩" style="--x:752;--y:296;--w:356;--h:330;--z:630"></button>
+                <button class="prop a-station" type="button" data-activity="map" aria-haspopup="dialog" aria-controls="activity-card" aria-expanded="false" aria-label="帶我去一個地方：點一下看怎麼玩" style="--x:1150;--y:110;--w:418;--h:516;--z:630"></button>
+                <!-- L26, A-S09: the boombox on its crate — 06's Music Source for this Room,
+                     replacing the placeholder row. `data-label-start` / `data-label-stop` give it
+                     its own painted label instead of the generic one. -->
+                <div class="prop a-crate" aria-hidden="true" style="--x:1380;--y:772;--w:170;--h:74;--z:846"></div>
+                <button class="prop a-boombox" type="button" data-music-source="activities" data-label-start="boomboxStart" data-label-stop="boomboxStop" aria-pressed="false" style="--x:1360;--y:660;--w:210;--h:120;--z:847" hidden>
+                  <span class="sr-only" data-i18n="activityBoombox">角落的手提音響</span>
+                  <span class="sr-only" data-music-source-label>按下播放鍵</span>
+                  <span class="a-boombox-body" aria-hidden="true">
+                    <span class="a-boombox-speaker left"></span>
+                    <span class="a-boombox-speaker right"></span>
+                    <span class="a-boombox-window"><span class="a-reel left"></span><span class="a-reel right"></span></span>
+                    <span class="a-boombox-dial"></span>
+                  </span>
+                  <span class="a-boombox-notes" aria-hidden="true"><span>♪</span><span>♪</span><span>♪</span></span>
+                </button>
+              </div>
+            </div>
+            <!-- §5.2: one card, reused by all three stations. Over the stage on a wide shell,
+                 an ordinary block below it under 1080 px. -->
+            <div class="activity-scrim" id="activity-scrim" hidden></div>
+            <div class="activity-card" id="activity-card" role="dialog" aria-modal="false" aria-labelledby="activity-card-title" hidden>
+              <h2 class="activity-card-title" id="activity-card-title" tabindex="-1"></h2>
+              <p class="activity-card-line" id="activity-card-line"></p>
+              <dl class="activity-card-meta">
+                <dt data-i18n="activityCardTime">大約時間</dt><dd id="activity-card-time"></dd>
+                <dt data-i18n="activityCardNeeds">需要準備</dt><dd id="activity-card-needs"></dd>
+              </dl>
+              <h3 class="activity-card-label" data-i18n="activityCardWhat">怎麼玩</h3>
+              <ol class="activity-card-steps" id="activity-card-steps"><li></li><li></li><li></li></ol>
+              <p class="activity-card-extra" id="activity-card-extra" hidden></p>
+              <h3 class="activity-card-label" data-i18n="activityCardWhy">為什麼是這個</h3>
+              <p class="activity-card-why" id="activity-card-why"></p>
+              <div class="activity-card-actions">
+                <button class="activity-pick" id="activity-pick" type="button" data-i18n="activityPick">今晚就做這個</button>
+                <button class="activity-close" id="activity-close" type="button" data-i18n="activityCardClose">收起</button>
+              </div>
+            </div>
+          </div>
+          <p class="activity-chosen-note" id="activity-chosen-note" role="status" data-i18n="activityChosenNote" hidden>今晚就這個了。想換再點另一個。</p>
         </div>
-        <!-- end 06 -->
-        <!-- 07: actors -->
-        <div class="stage" data-stage="activities" aria-hidden="true"></div>
       </section>
       <!--
         07: actors — the Cast's artwork, declared rather than built in TypeScript.

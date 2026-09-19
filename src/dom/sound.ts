@@ -1,4 +1,4 @@
-import { copy } from '../copy';
+import { copy, type CopyKey } from '../copy';
 import { ROOM_IDS, isAudible, isMusicSourceOn, isRoomMusicAudible, soundIsOn, type AudioSlice, type Language, type RoomId, type World } from '../world';
 import { byId, type Dispatch, type Painter } from './painter';
 
@@ -153,7 +153,13 @@ export const mountSound = (dispatch: Dispatch): Painter => {
       const source = element.dataset.musicSource as RoomId;
       const playing = isMusicSourceOn(next, source);
       element.setAttribute('aria-pressed', String(playing));
-      element.querySelector<HTMLElement>('[data-music-source-label]')!.textContent = playing ? words.musicSourceStop : words.musicSourceStart;
+      // A Music Source is a Prop, and a Prop is a particular thing: a boombox
+      // says "press play" where the generic control says "play the Room's
+      // music". `data-label-start` / `data-label-stop` name that Prop's own
+      // pair of labels, and a Prop without them keeps the generic ones.
+      const own = playing ? element.dataset.labelStop : element.dataset.labelStart;
+      element.querySelector<HTMLElement>('[data-music-source-label]')!.textContent =
+        own ? words[own as CopyKey] : playing ? words.musicSourceStop : words.musicSourceStart;
       element.hidden = false;
     }
 
