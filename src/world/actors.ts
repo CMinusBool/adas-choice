@@ -65,11 +65,20 @@ const WALKABLE: Record<RoomId, Polygon> = {
     { x: 1480, y: 860 },
     { x: 120, y: 860 },
   ],
+  // 17: the Cinema Room's real floor. A band from the door to the board with
+  // one notch cut out of its front edge for the reel cabinet's footprint, so
+  // the Boy walks round the furniture the Room actually has rather than
+  // through it. The beanbags are not cut out on purpose: an Actor above them
+  // draws behind and one below draws in front, which is the depth cue.
   cinema: [
-    { x: 140, y: 640 },
-    { x: 1460, y: 640 },
-    { x: 1460, y: 860 },
-    { x: 140, y: 860 },
+    { x: 100, y: 660 },
+    { x: 1560, y: 660 },
+    { x: 1560, y: 860 },
+    { x: 575, y: 860 },
+    { x: 575, y: 742 },
+    { x: 425, y: 742 },
+    { x: 425, y: 860 },
+    { x: 100, y: 860 },
   ],
   activities: [
     { x: 140, y: 640 },
