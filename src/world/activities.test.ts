@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { isWalkable } from './index';
+import { advance, createWorld, isWalkable, openActivity, type WorldInputs } from './index';
+
+/** A visitor arriving with nothing stored, no reduced-motion request, no hash. */
+const plainArrival: WorldInputs = { hash: '', storedLanguage: null, reducedMotion: false };
 
 /**
  * The Activity Room's floor, from `design/12-activity-room.md` §4.2.
@@ -41,5 +44,37 @@ describe('the Activity Room floor', () => {
   it('stops at the floor line above and the front of the stage below', () => {
     expect(isWalkable('activities', { x: 800, y: 600 })).toBe(false);
     expect(isWalkable('activities', { x: 800, y: 880 })).toBe(false);
+  });
+});
+
+/**
+ * The activity card, from §5.2: one card reused by all three stations, so the
+ * model holds which station's card is open rather than the page holding three.
+ */
+describe('the activity card', () => {
+  it('is closed when the visitor arrives', () => {
+    expect(openActivity(createWorld(plainArrival))).toBe(null);
+  });
+
+  it('opens on the station the visitor asked for', () => {
+    const world = advance(createWorld(plainArrival), { type: 'activity-card-opened', activity: 'hunt' });
+    expect(openActivity(world)).toBe('hunt');
+  });
+
+  it('swaps to another station without closing in between', () => {
+    const hunt = advance(createWorld(plainArrival), { type: 'activity-card-opened', activity: 'hunt' });
+    expect(openActivity(advance(hunt, { type: 'activity-card-opened', activity: 'map' }))).toBe('map');
+  });
+
+  it('closes', () => {
+    const hunt = advance(createWorld(plainArrival), { type: 'activity-card-opened', activity: 'hunt' });
+    expect(openActivity(advance(hunt, { type: 'activity-card-closed' }))).toBe(null);
+  });
+
+  it('costs no repaint when it is told what it already knows', () => {
+    const arrived = createWorld(plainArrival);
+    expect(advance(arrived, { type: 'activity-card-closed' })).toBe(arrived);
+    const hunt = advance(arrived, { type: 'activity-card-opened', activity: 'hunt' });
+    expect(advance(hunt, { type: 'activity-card-opened', activity: 'hunt' })).toBe(hunt);
   });
 });
