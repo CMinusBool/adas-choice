@@ -39,8 +39,12 @@ const zhHant = {
   loadingTitle: '正在整理公寓⋯', loadingProgress: '載入進度', loadingNote: '畫都掛上牆之後，門就會打開。',
   // 06: audio
   mute: '關閉聲音', unmute: '開啟聲音',
-  musicSourceStart: '播放房間音樂', musicSourceStop: '停止房間音樂', placeholder: '暫代'
+  musicSourceStart: '播放房間音樂', musicSourceStop: '停止房間音樂', placeholder: '暫代',
   // end 06
+  // 15: the Game Room's own Props — the boombox Music Source and Luna's snow globe.
+  gamesBoombox: '遊戲室的手提音響', boomboxStart: '放卡帶', boomboxStop: '停下卡帶',
+  globeIntact: '一顆雪花球', globeBroken: '被貓推下去的雪花球，玻璃碎了，水也灑在地板上'
+  // end 15
 };
 
 /** Every piece of copy on the page. Both dictionaries carry the same keys. */
@@ -79,7 +83,11 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     loadingTitle: 'Tidying the apartment…', loadingProgress: 'Loading progress', loadingNote: 'The door opens once every picture is on the wall.',
     // 06: audio
     mute: 'Mute sound', unmute: 'Unmute sound',
-    musicSourceStart: "Play the Room's music", musicSourceStop: "Stop the Room's music", placeholder: 'placeholder'
+    musicSourceStart: "Play the Room's music", musicSourceStop: "Stop the Room's music", placeholder: 'placeholder',
     // end 06
+    // 15: the Game Room
+    gamesBoombox: 'The boombox in the Game Room', boomboxStart: 'Put the tape on', boomboxStop: 'Stop the tape',
+    globeIntact: 'A snow globe', globeBroken: 'A snow globe the cat pushed off: the glass is broken and the water has spilled across the floor'
+    // end 15
   }
 };

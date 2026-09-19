@@ -1,4 +1,4 @@
-import { copy } from '../copy';
+import { copy, type CopyKey } from '../copy';
 import { ROOM_IDS, isAudible, isMusicSourceOn, isRoomMusicAudible, soundIsOn, type AudioSlice, type Language, type RoomId, type World } from '../world';
 import { byId, type Dispatch, type Painter } from './painter';
 
@@ -153,7 +153,13 @@ export const mountSound = (dispatch: Dispatch): Painter => {
       const source = element.dataset.musicSource as RoomId;
       const playing = isMusicSourceOn(next, source);
       element.setAttribute('aria-pressed', String(playing));
-      element.querySelector<HTMLElement>('[data-music-source-label]')!.textContent = playing ? words.musicSourceStop : words.musicSourceStart;
+      // A Music Source that is a real machine wants its own words — "put the
+      // tape on" rather than "play the Room's music" — so a Prop may name a
+      // copy key for each state. Anything else falls back to the generic pair,
+      // which is what every placeholder button still uses.
+      const named = (playing ? element.dataset.labelStop : element.dataset.labelStart) ?? '';
+      element.querySelector<HTMLElement>('[data-music-source-label]')!.textContent =
+        named in words ? words[named as CopyKey] : playing ? words.musicSourceStop : words.musicSourceStart;
       element.hidden = false;
     }
 
