@@ -65,7 +65,7 @@ export const ENTRYWAY_WALKABLE: Polygon = [
  */
 export interface EntrywayProps {
   /** The front door's leaf: the Cast comes in through it and it shuts itself. */
-  readonly frontDoor: 'closed' | 'open';
+  readonly frontDoor: 'closed' | 'opening' | 'open' | 'closing';
   /** The pet backpack: off-stage on the Boy's back, then on the bench. */
   readonly backpack: 'carried' | 'closed' | 'open';
   /** The Girl's plum coat: on her, then on hook 450. */
@@ -83,14 +83,6 @@ export const ENTRYWAY_PROPS_AT_REST: EntrywayProps = {
   backpack: 'carried',
   girlCoat: 'worn',
   boyParka: 'worn',
-};
-
-/** The Room once the arrival is over — the settled tableau of §5.4. */
-export const ENTRYWAY_PROPS_SETTLED: EntrywayProps = {
-  frontDoor: 'closed',
-  backpack: 'open',
-  girlCoat: 'hung',
-  boyParka: 'hung',
 };
 
 /**
