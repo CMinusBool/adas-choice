@@ -9,6 +9,7 @@ import {
   arrivalView,
   createWorld,
   entrywayProps,
+  vaseState,
   type ActorId,
   type World,
   type WorldInputs,
@@ -155,5 +156,105 @@ describe('the arrival', () => {
   it('does not play again once it is done', () => {
     const settled = arriving(ARRIVAL_SECONDS + 1);
     expect(advance(settled, { type: 'arrival-started' })).toBe(settled);
+  });
+});
+
+describe('the arrival when the apartment is not allowed to move', () => {
+  const askedForStillness: WorldInputs = { ...plainArrival, reducedMotion: true };
+
+  it('is over before it starts for a visitor who asked for stillness', () => {
+    const world = createWorld(askedForStillness);
+    expect(arrivalView(world).state).toBe('done');
+    for (const [actor, mark] of TABLEAU) standsAt(world, actor, mark);
+  });
+
+  it('does not play when such a visitor turns motion on afterwards', () => {
+    const playing = advance(createWorld(askedForStillness), { type: 'motion-toggled' });
+    expect(advance(playing, { type: 'arrival-started' })).toBe(playing);
+    for (const [actor, mark] of TABLEAU) standsAt(playing, actor, mark);
+  });
+
+  it('completes at once when motion is paused half way through', () => {
+    const paused = advance(arriving(5), { type: 'motion-toggled' });
+    expect(arrivalView(paused).state).toBe('done');
+    for (const [actor, mark] of TABLEAU) standsAt(paused, actor, mark);
+    expect(entrywayProps(paused).boyParka).toBe('hung');
+  });
+
+  it('completes at once when the visitor’s system starts asking for stillness', () => {
+    const stilled = advance(arriving(3), { type: 'reduced-motion-changed', reducedMotion: true });
+    expect(arrivalView(stilled).state).toBe('done');
+    for (const [actor, mark] of TABLEAU) standsAt(stilled, actor, mark);
+  });
+});
+
+describe('the arrival and the rest of the apartment', () => {
+  it('settles the moment the visitor walks out of the Entryway', () => {
+    const left = advance(arriving(4), { type: 'hash-changed', hash: '#/games' });
+    expect(arrivalView(left).state).toBe('done');
+    for (const [actor, mark] of TABLEAU) standsAt(left, actor, mark);
+    const back = advance(left, { type: 'hash-changed', hash: '#/entryway' });
+    for (const [actor, mark] of TABLEAU) standsAt(back, actor, mark);
+  });
+
+  it('never plays for a tab that has already been shown it', () => {
+    const world = createWorld({ ...plainArrival, arrived: true });
+    expect(arrivalView(world).state).toBe('done');
+    expect(advance(world, { type: 'arrival-started' })).toBe(world);
+  });
+
+  it('runs its Beats and its sounds while it plays, and neither once it is over', () => {
+    const duet = arrivalView(arriving(5));
+    expect(duet.beats.map(beat => beat.id)).toContain('S16');
+    expect(duet.costumes.girl).toBe('coat');
+    expect(duet.costumes.boy).toBe('parka');
+
+    const settled = arrivalView(arriving(ARRIVAL_SECONDS + 1));
+    expect(settled.beats).toEqual([]);
+    expect(settled.costumes).toEqual({});
+    expect(settled.sfx).toEqual([]);
+  });
+
+  it('plays each sound once, in the order the script has them', () => {
+    let world = advance(createWorld(plainArrival), { type: 'arrival-started' });
+    const heard: string[] = [];
+    let now = 500000;
+    while (arrivalView(world).state === 'playing') {
+      now += 16;
+      world = advance(world, { type: 'actor-tick', now });
+      heard.push(...arrivalView(world).sfx);
+    }
+    expect(heard).toEqual([
+      'keys',
+      'door-open',
+      'door-close',
+      'backpack-down',
+      'coat',
+      'coat',
+      'zip',
+      'mica-meow',
+      'mira-meow',
+      'luna-meow',
+    ]);
+  });
+});
+
+describe('the Entryway’s Breakable', () => {
+  it('starts on the hall table and stays there until something knocks it off', () => {
+    const world = createWorld(plainArrival);
+    expect(vaseState(world)).toBe('intact');
+    expect(advance(world, { type: 'actor-tick', now: 1 })).toBe(world);
+  });
+
+  it('is broken for the rest of the visit once a cat has been at it', () => {
+    const broken = advance(createWorld(plainArrival), { type: 'breakable-broken', breakable: 'entryway-vase' });
+    expect(vaseState(broken)).toBe('broken');
+    // Breaking it twice is one broken vase, and a Room change does not mend it.
+    expect(advance(broken, { type: 'breakable-broken', breakable: 'entryway-vase' })).toBe(broken);
+    expect(vaseState(advance(broken, { type: 'hash-changed', hash: '#/cinema' }))).toBe('broken');
+  });
+
+  it('is whole again in a new tab', () => {
+    expect(vaseState(createWorld({ ...plainArrival, arrived: true }))).toBe('intact');
   });
 });
