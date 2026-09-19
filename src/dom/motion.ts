@@ -1,5 +1,5 @@
 import { copy } from '../copy';
-import { motionIsOn, type Language, type World } from '../world';
+import { motionIsOn, motionIsOnByChoice, type Language, type World } from '../world';
 import { byId, type Dispatch, type Painter } from './painter';
 
 const root = document.documentElement;
@@ -23,12 +23,19 @@ export const mountMotion = (dispatch: Dispatch): Painter => {
   reducedMotion.addEventListener('change', event => dispatch({ type: 'reduced-motion-changed', reducedMotion: event.matches }));
   toggle.hidden = false;
 
-  let painted: { paused: boolean; language: Language } | null = null;
+  let painted: { paused: boolean; byChoice: boolean; language: Language } | null = null;
   return (world: World) => {
     const paused = !motionIsOn(world);
-    if (painted && painted.paused === paused && painted.language === world.language) return;
-    painted = { paused, language: world.language };
+    const byChoice = motionIsOnByChoice(world);
+    if (painted && painted.paused === paused && painted.byChoice === byChoice && painted.language === world.language) return;
+    painted = { paused, byChoice, language: world.language };
+    // Two classes, because the stylesheet asks two questions. `motion-off` is
+    // the page with motion off, however it was turned off. `motion-on` is the
+    // visitor's own choice to have motion, and is what lets `styles.css` set
+    // aside a reduced-motion request from their system; a visitor whose system
+    // never asked gets neither class.
     root.classList.toggle('motion-off', paused);
+    root.classList.toggle('motion-on', byChoice);
     const label = copy[world.language][paused ? 'play' : 'pause'];
     byId('motion-label').textContent = label;
     toggle.setAttribute('aria-label', label);

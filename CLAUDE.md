@@ -65,7 +65,12 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   button works without a history stack. Never `pushState` (ADR 0001). An unreadable hash is
   rewritten with `location.replace`, so junk never lands in history.
 - **Motion is opt-outable.** Respect `prefers-reduced-motion`; keep explicit playback available;
-  stop animating offscreen scenes and background tabs.
+  stop animating offscreen scenes and background tabs. The model decides (`motionIsOn`,
+  `motionIsOnByChoice`) and `src/dom/motion.ts` paints the answer onto `<html>`: `motion-off`
+  while motion is off, however it was turned off, and `motion-on` only when the visitor turned it
+  on themselves. The `prefers-reduced-motion` block in `styles.css` is scoped to
+  `:root:not(.motion-on)` so that choice reaches CSS animations and transitions too; a new
+  animation or transition needs no opt-out of its own.
 - **The apartment waits for its artwork.** Nothing is reachable until every declared asset has
   loaded behind the loading screen. The list is read off the built page — the `data-still`,
   `data-animated` and `data-sheet` attributes and the `<img src>`s inside `#apartment` — so

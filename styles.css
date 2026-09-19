@@ -189,9 +189,14 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
 @media (hover: none) {
   .game-card:active { border-color: var(--pink); }
 }
+/* The system's reduced-motion request holds from the first paint, before any
+   script runs, and keeps holding unless the visitor turns motion on with the
+   control themselves: `src/dom/motion.ts` paints `motion-on` on <html> for that
+   one case, and nothing else lifts this. The `motion-off` rules below are the
+   other direction and stand on their own. */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  :root:not(.motion-on) { scroll-behavior: auto; }
+  :root:not(.motion-on), :root:not(.motion-on) *, :root:not(.motion-on) *::before, :root:not(.motion-on) *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 .motion-off { scroll-behavior: auto; }
 .motion-off .brand-heart { animation: none !important; }
