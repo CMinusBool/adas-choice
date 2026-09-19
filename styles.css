@@ -302,3 +302,377 @@ html.dialog-open { overflow: hidden; }
 .actor { position: absolute; transform: translate(-50%, -100%) scaleX(var(--flip, 1)); transform-origin: bottom center; }
 .actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
 
+
+/* 15: the Game Room — a den at night, and the three cards are its three lit
+   bays. Design note 11. Nothing above this block changes: the cards, their
+   Scenes, their expansion and the Invitation are the shipped page's, and this
+   builds a room around them.
+
+   Two rules here are the apartment's, not this Room's: every Prop element
+   carries `z-index: <its sort key>` (§3.3), which is how Props interleave with
+   `src/dom/actors.ts`'s `z-index: round(y)` with no wrapper layers; and a stage
+   that holds controls cannot be `aria-hidden` wholesale, so the attribute and
+   `pointer-events: none` move to its decorative children.
+
+   Every Prop below is a CSS placeholder standing in its exact §4.1 box. Ticket
+   34 drops the artwork; until then nothing here names a file that is not on
+   disk, because the loading screen waits for every URL the markup declares. */
+
+#games-scene {
+  /* The stage's rendered width, measured by `src/dom/game-stage.ts`. The
+     fallback is the page shell at its widest, so the Room has the right
+     proportions on the paint before the first measurement lands. */
+  --stage-width: min(1440px, calc(100vw - 96px));
+  /* One stage unit. 1600 of them across, 900 down. */
+  --u: calc(var(--stage-width) / 1600);
+  --deck-height: 0px;
+  /* The deck's bottom edge is pinned to stage y 380; whatever does not fit
+     between y 0 and there hangs above the stage, and this section carries the
+     wall for it to hang on (§3.4). */
+  --deck-overhang: max(0px, calc(var(--deck-height) - 380 * var(--u)));
+  --wall: #2E4A55;
+  --oak: #7A5636;
+  --oak-line: #4A3320;
+  --brass: #C9A25E;
+  --bulb: #FFD9A8;
+  position: relative;
+  margin-top: 1.5rem;
+  /* The cornice sits at the top of this padding, and the overhang fills it. */
+  padding-top: calc(var(--deck-overhang) + 60px);
+  /* The backdrop's top 200 units are flat wall in this exact colour, so the
+     join between the DOM wall and the painted one is invisible. */
+  background: linear-gradient(to bottom, #27414B, var(--wall) 55%);
+}
+#games-scene .cornice {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(40 * var(--u));
+  background: #22343C;
+  border-bottom: calc(6 * var(--u)) solid #3D5B66;
+}
+
+/* This Room is width-driven and scrolls: the deck's height comes from DOM type,
+   which does not scale with the stage, so a stage capped to the viewport height
+   would shrink the room out from under the cards (§3.5). */
+#room-games { padding-bottom: 2.4rem; }
+#room-games .intro { padding: 1.8rem 0 1.4rem; }
+#room-games .stage {
+  max-width: none;
+  margin: 0;
+  background: none;
+  /* The deck hangs out of the top, and the controls have to be clickable. */
+  overflow: visible;
+  pointer-events: auto;
+}
+#room-games .stage [aria-hidden="true"] { pointer-events: none; }
+
+/* A box in stage units, turned into percentages of the stage — the same
+   arithmetic `src/dom/actors.ts` does for a feet point. */
+#room-games .stage [data-box] {
+  position: absolute;
+  left: calc(var(--x) / 16 * 1%);
+  top: calc(var(--y) / 9 * 1%);
+  width: calc(var(--w) / 16 * 1%);
+  height: calc(var(--h) / 9 * 1%);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* G2-G5, G20: the backdrop. One image once ticket 34 lands (S01); three bands
+   and two shapes until then. */
+.stage-backdrop {
+  background:
+    radial-gradient(60% 22% at 90% 86%, #FFD9A82e, transparent 70%),
+    linear-gradient(to bottom,
+      var(--wall) 0 62%, #29424C 62% 68.889%,
+      #3A2A22 68.889% 71.111%,
+      #8A6647 71.111% 100%);
+}
+.prop-rug {
+  border-radius: calc(10 * var(--u));
+  background: linear-gradient(to bottom,
+    #4A3340 0 16%, #287F98 16% 23%, #4A3340 23% 68%, #B76E85 68% 75%, #4A3340 75% 100%);
+}
+.prop-cat-bed {
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #6E4A56 0 52%, #B76E85 52% 100%);
+}
+
+/* G9, G10: the ledge the bays stand on, and the pink the Room borrows from the
+   page. The LED is always on, and steps back while a bay is selected so the
+   bay wins. */
+.prop-ledge {
+  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) 0 0;
+  background: linear-gradient(to bottom, #93693F, #6A4A2E);
+  box-shadow: 0 calc(8 * var(--u)) calc(16 * var(--u)) calc(-4 * var(--u)) #0007;
+}
+.prop-led {
+  background: var(--pink);
+  box-shadow: 0 0 calc(26 * var(--u)) calc(5 * var(--u)) #f5a3c555;
+  transition: opacity .5s;
+}
+#room-games .stage:has(.games[data-active]) .prop-led { opacity: .4; }
+
+/* G7, G8: the wall unit. The deck is the joinery's three bays, so the casework
+   is drawn on the deck's own box and grows with it. */
+.deck-slot {
+  position: absolute;
+  left: 18.75%;
+  width: 67.5%;
+  bottom: 57.7778%;
+  z-index: 381;
+}
+.deck-slot::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: calc(-20 * var(--u)) calc(-20 * var(--u)) calc(-22 * var(--u));
+  border: calc(14 * var(--u)) solid var(--oak);
+  border-radius: calc(8 * var(--u));
+  box-shadow: inset 0 0 0 calc(2 * var(--u)) var(--oak-line);
+  /* The bay interior, behind the cards. */
+  background: #150F14;
+}
+/* The bulb strip along each bay's top inner edge, and its wash over the card's
+   top third. CSS, not artwork, because the bays resize. */
+.deck-slot .game-wrap::before,
+.deck-slot .bay::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(6 * var(--u));
+  background: var(--bulb);
+  box-shadow: 0 calc(9 * var(--u)) calc(26 * var(--u)) #ffd9a833;
+  pointer-events: none;
+  transition: opacity .5s, background .5s, box-shadow .5s;
+}
+.deck-slot .game-wrap::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 0 0 67% 0;
+  background: linear-gradient(to bottom, #ffd9a826, transparent);
+  pointer-events: none;
+  transition: opacity .5s;
+}
+.motion-off .deck-slot .game-wrap::before,
+.motion-off .deck-slot .game-wrap::after,
+.motion-off .deck-slot .bay::before { transition: none; }
+
+/* G11-G16, G19: the sideboard and what stands on it, the lamp, and the table
+   that is the front edge of the doll's house. */
+.prop-sideboard {
+  border-radius: calc(4 * var(--u));
+  background:
+    linear-gradient(to bottom, #8C6440 0 15%, var(--oak) 15% 100%),
+    var(--oak);
+  box-shadow: inset 0 calc(-3 * var(--u)) 0 #3A2A22, 0 calc(6 * var(--u)) calc(18 * var(--u)) #0006;
+}
+.prop-lamp {
+  background:
+    /* the shade */
+    linear-gradient(to bottom, #EAD9C2, #D3BE9F) no-repeat 8% 0 / 74% 14%,
+    /* the arc, reaching left from the pole */
+    linear-gradient(to right, transparent 0 78%, var(--brass) 78% 92%, transparent 92%) no-repeat 0 0 / 100% 12%,
+    linear-gradient(to right, transparent 0 78%, var(--brass) 78% 92%, transparent 92%) no-repeat 0 0 / 100% 100%;
+}
+.prop-pouf {
+  border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
+  box-shadow: inset 0 calc(-6 * var(--u)) calc(10 * var(--u)) #0000004d;
+}
+.prop-pouf-girl { background: radial-gradient(closest-side at 42% 28%, #35A0BE, #287F98); }
+.prop-pouf-boy { background: radial-gradient(closest-side at 42% 28%, #E8806E, #D76451); }
+.prop-table {
+  border-radius: calc(6 * var(--u));
+  background:
+    /* a pink mug and a cream one, and a bowl of crisps */
+    radial-gradient(closest-side, #E8A0BE 0 92%, transparent 92%) no-repeat 22% 16% / calc(46 * var(--u)) calc(30 * var(--u)),
+    radial-gradient(closest-side, #EAD9C2 0 92%, transparent 92%) no-repeat 42% 16% / calc(46 * var(--u)) calc(30 * var(--u)),
+    radial-gradient(closest-side, #D9A55E 0 92%, transparent 92%) no-repeat 72% 18% / calc(80 * var(--u)) calc(34 * var(--u)),
+    linear-gradient(to bottom, #6E4C35 0 34%, #5C3F2C 34% 100%);
+  box-shadow: 0 calc(-4 * var(--u)) calc(16 * var(--u)) #0006;
+}
+
+/* G12: the boombox, and this Room's Music Source. The whole machine is the
+   control, so the hit box is padded out to 44 px at every width and the label
+   lives in a `.sr-only` span. */
+.prop-boombox {
+  background: none;
+  cursor: pointer;
+  /* The painted box is 68 x 38 px at the narrow shell, so the hit area is grown
+     around it rather than the artwork being made unreadably large. */
+  outline-offset: calc(3 * var(--u));
+}
+.prop-boombox::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(44px, 100%);
+  height: max(44px, 100%);
+  transform: translate(-50%, -50%);
+}
+.boombox-body {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  align-items: center;
+  gap: calc(5 * var(--u));
+  padding: calc(8 * var(--u));
+  border-radius: calc(7 * var(--u));
+  background: linear-gradient(to bottom, #4A4F55, #3B3F44);
+  box-shadow: inset 0 0 0 calc(2 * var(--u)) #2A2D31;
+}
+.boombox-grille {
+  height: 72%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #8F959C 0 34%, #B9BEC4 34% 100%);
+}
+.boombox-window {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 58%;
+  border-radius: calc(3 * var(--u));
+  background: #1B1E21;
+  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #2A2D31;
+}
+.spindle {
+  width: calc(14 * var(--u));
+  height: calc(14 * var(--u));
+  border-radius: 50%;
+  border: calc(3 * var(--u)) solid #5A6068;
+  /* The teeth, so a turning spindle reads as turning. */
+  background: conic-gradient(#5A6068 0 12%, transparent 12% 38%, #5A6068 38% 50%, transparent 50% 88%, #5A6068 88% 100%);
+}
+.boombox-keys {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: calc(4 * var(--u));
+  height: calc(7 * var(--u));
+  border-radius: calc(2 * var(--u));
+  background: repeating-linear-gradient(to right, #D9483B 0 14%, #3B3F44 14% 20%);
+}
+/* On: the window lights, the pilot glows, the spindles turn. The lit window
+   alone carries the state, so with motion off nothing is lost. */
+.prop-boombox[aria-pressed="true"] .boombox-window {
+  background: linear-gradient(to bottom, #F2B85A, #C98F33);
+  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #2A2D31, 0 0 calc(14 * var(--u)) #f2b85a66;
+}
+.prop-boombox[aria-pressed="true"] .spindle {
+  animation: spindle-turn .9s linear infinite;
+  border-color: #6B4C1E;
+}
+.prop-boombox[aria-pressed="true"] .spindle:last-child { animation-duration: 1.4s; }
+@keyframes spindle-turn { to { transform: rotate(1turn); } }
+.motion-off .spindle { animation: none !important; }
+
+/* G15: Luna's snow globe, the only Breakable in this Room. Ticket 09 swaps the
+   two states over; nothing here is clickable, and the visitor cannot break it. */
+.prop-globe {
+  background:
+    /* the dome, with one cool highlight and the little house inside */
+    radial-gradient(closest-side at 34% 30%, #ffffff8c 0 12%, transparent 14%) no-repeat 0 0 / 100% 72%,
+    radial-gradient(closest-side, #E8A0BE00 0 58%, transparent 58%) no-repeat 50% 40% / 40% 26%,
+    radial-gradient(closest-side, #F6E7CF 0 44%, #9FC9D6b3 44% 92%, #7FB0C0 92%) no-repeat 50% 0 / 100% 72%,
+    /* the turned stand */
+    linear-gradient(to bottom, #4A3320, #33210F) no-repeat 50% 100% / 82% 30%;
+}
+.prop-globe-broken {
+  background:
+    /* the wet patch soaking into the planks */
+    radial-gradient(closest-side, #5A3E2Bcc 0 70%, transparent 100%) no-repeat 50% 78% / 100% 52%,
+    /* the shards */
+    conic-gradient(from .58turn, #B9D3DCcc 0 6%, transparent 6%) no-repeat 22% 40% / 26% 44%,
+    conic-gradient(from .05turn, #D6E7EEcc 0 7%, transparent 7%) no-repeat 68% 34% / 30% 48%,
+    /* the stand on its side, and the little house loose beside it */
+    linear-gradient(to right, #4A3320, #33210F) no-repeat 6% 84% / 30% 30%,
+    radial-gradient(closest-side, #F6E7CF 0 80%, transparent 80%) no-repeat 84% 80% / 22% 34%;
+}
+
+/* G6: the door back to the Entryway — the Entryway's own Game door, seen from
+   this side. The text `.room-exit` at the top of the Room leads out too; §8.3
+   asks the owner whether both should stay. */
+.prop-door {
+  border-radius: calc(4 * var(--u)) calc(4 * var(--u)) 0 0;
+  background: linear-gradient(to bottom, #6B4A34, #5C3F2C);
+  box-shadow: inset 0 0 0 calc(3 * var(--u)) #4A3320;
+  /* The hallway light in the gap. */
+  overflow: hidden;
+  transition: box-shadow .35s;
+}
+.prop-door .door-leaf {
+  position: absolute;
+  left: 7.8%;
+  right: 7.8%;
+  top: 4%;
+  bottom: 0;
+  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) 0 0;
+  background: linear-gradient(to right, #FFE2B4 0 6%, #3F6B7A 6% 100%);
+  transform-origin: left center;
+  transform: perspective(600px) rotateY(-12deg);
+  transition: transform .35s;
+}
+.prop-door:hover, .prop-door:focus-visible {
+  box-shadow: inset 0 0 0 calc(3 * var(--u)) #4A3320, 0 0 calc(24 * var(--u)) #ffd9a840;
+}
+.prop-door:hover .door-leaf, .prop-door:focus-visible .door-leaf {
+  transform: perspective(600px) rotateY(-20deg);
+}
+.motion-off .prop-door, .motion-off .prop-door .door-leaf { transition: none; }
+
+/* The wide layout: the deck is in the wall unit and the three bays are the
+   three cards. A bay is 344 stage units wide neutral, and the gap between two
+   is 24 units — 2.2222 % of the deck's 1080. */
+@media (min-width: 1080px) {
+  .deck-slot .games {
+    --scene-size: calc(344 * var(--u));
+    gap: 2.2222%;
+  }
+  .deck-slot .bay { display: none; }
+  .deck-slot .game-wrap.is-active::before {
+    background: color-mix(in srgb, var(--bulb) 45%, var(--pink));
+    box-shadow: 0 calc(9 * var(--u)) calc(32 * var(--u)) #ffb0d24d;
+  }
+  .deck-slot .game-wrap.is-muted::before,
+  .deck-slot .game-wrap.is-muted::after { opacity: .35; }
+}
+
+/* The narrow layout: the deck leaves the stage for the flow below it, exactly
+   as the page has always shown it, and the bays stay behind empty and lit —
+   the games are off the shelf and in your hands. The bay matching the card
+   being read warms to pink while the other two dim (§3.5). */
+@media (max-width: 1079px) {
+  #games-scene { margin-top: 1.2rem; }
+  .deck-slot { top: 0; }
+  .deck-flow { margin-top: 1.8rem; }
+  .deck-slot .bay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 31.852%;
+    border-radius: calc(4 * var(--u));
+    background: linear-gradient(to bottom, #150F14, #1E1620);
+    transition: box-shadow .5s;
+  }
+  .deck-slot .bay[data-bay="lovers"] { left: 34.074%; }
+  .deck-slot .bay[data-bay="heavenly"] { left: 68.148%; }
+  .stage[data-lit-bay] .bay::before { opacity: .35; }
+  .stage[data-lit-bay="tango"] .bay[data-bay="tango"]::before,
+  .stage[data-lit-bay="lovers"] .bay[data-bay="lovers"]::before,
+  .stage[data-lit-bay="heavenly"] .bay[data-bay="heavenly"]::before {
+    opacity: 1;
+    background: var(--pink);
+    box-shadow: 0 calc(9 * var(--u)) calc(30 * var(--u)) #f5a3c54d;
+  }
+  .motion-off .deck-slot .bay { transition: none; }
+}
