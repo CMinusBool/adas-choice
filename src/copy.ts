@@ -115,6 +115,10 @@ const zhHant = {
   tangoPortal: '打開 Operation: Tango 的傳送門',
   loversPortal: '打開 Lovers in a Dangerous Spacetime 的傳送門',
   heavenlyPortal: '打開 Heavenly Bodies 的傳送門',
+  // 47: below 1080 px the wall carries one Portal at a time. The dots choose
+  // which; these two say so to anyone who cannot see them.
+  portalChooser: '選擇牆上要開哪一個傳送門',
+  portalShowing: '牆上的傳送門：',
   globeIntact: '一顆雪花球', globeBroken: '被貓推下去的雪花球，玻璃碎了，水也灑在地板上',
   // end 15
   // 14: the Entryway
@@ -233,6 +237,9 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     tangoPortal: 'Open the Operation: Tango Portal',
     loversPortal: 'Open the Lovers in a Dangerous Spacetime Portal',
     heavenlyPortal: 'Open the Heavenly Bodies Portal',
+    // 47: the narrow wall's chooser
+    portalChooser: 'Choose which Portal is on the wall',
+    portalShowing: 'Portal on the wall:',
     globeIntact: 'A snow globe', globeBroken: 'A snow globe the cat pushed off: the glass is broken and the water has spilled across the floor',
     // end 15
     // 14: the Entryway

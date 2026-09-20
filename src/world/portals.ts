@@ -91,6 +91,31 @@ export function withPortalClosed(portals: PortalsSlice): PortalsSlice {
 }
 
 /**
+ * How far a finger has to travel across before it is a swipe, in CSS pixels.
+ *
+ * The site's touch-target unit, which is the smallest distance anywhere on
+ * this page that already means "deliberate".
+ */
+const SWIPE_MINIMUM = 44;
+
+/**
+ * 47: which way a drag across the wall carries it, if it carries it at all.
+ *
+ * A swipe is the touch shorthand for the dots and the arrow keys (§3.5), and
+ * two things stop it being a nuisance: it has to travel, and it has to be
+ * plainly more across than down, so a finger on its way down the page scrolls
+ * the page and nothing else. A drag that is neither is `0` — not a swipe, and
+ * the tap it may still turn into is none of this function's business.
+ *
+ * Left carries the wall forward, the way every carousel on a phone reads: the
+ * world leaves with the finger and the next one comes in behind it.
+ */
+export function swipeStep(dx: number, dy: number): number {
+  if (Math.abs(dx) < SWIPE_MINIMUM || Math.abs(dx) <= Math.abs(dy)) return 0;
+  return dx < 0 ? 1 : -1;
+}
+
+/**
  * The wall one Portal along, in either direction.
  *
  * The three are a ring rather than a queue: an arrow key at either end comes

@@ -1053,6 +1053,26 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   box-shadow: 0 0 calc(18 * var(--u)) #f5a3c5aa;
 }
 @media (min-width: 1080px) { .portal-dots { display: none; } }
+/* 47: and below it, a sideways drag across the chooser — the Portal itself
+   or the dots — moves the wall on. `src/dom/game-room.ts` listens across the
+   whole stage, and this is where a finger is told the gesture is not the
+   browser's: `pan-y` takes horizontal panning off the chooser and leaves
+   vertical scrolling, which is never ours to take.
+
+   Deliberately not the whole stage. `#games-scene` is a horizontal scroller
+   at every width below 1080 px — the stage holds its 880 px and the shell is
+   680 px at most — and the one Portal on the wall is centred in it by the
+   rule near the foot of this file, so the pan is the only way a phone sees
+   the door, the lamp, the cat bed or Luna’s snow globe at all. Measured at
+   390 px: with the pan gone the visitor keeps the middle third of the Room
+   and nothing else. A mouse cannot pan by dragging, so on a desktop the
+   swipe still works anywhere on the stage; this rule only arbitrates the
+   gesture a touch device has two uses for. */
+@media (max-width: 1079px) {
+  #room-games .stage .portal,
+  #room-games .stage .portal-dots,
+  #room-games .stage .portal-dot { touch-action: pan-y; }
+}
 
 /* §5.4: the expanded Portal — one overlay serving all three, built on the
    Activity Room's `.activity-card` pattern above rather than a second one of

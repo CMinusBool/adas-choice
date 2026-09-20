@@ -5,6 +5,7 @@ import {
   isCurrentRoom,
   motionIsOn,
   openPortal,
+  swipeStep,
   type Language,
   type PortalId,
   type World,
@@ -136,6 +137,8 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   const stage = document.querySelector<HTMLElement>('[data-stage="games"]')!;
   const portals = [...stage.querySelectorAll<HTMLButtonElement>('.portal')];
   const dots = [...stage.querySelectorAll<HTMLButtonElement>('.portal-dot')];
+  // 47: what the dots say to the eye, said once to a screen reader.
+  const announcement = byId('portal-announcement');
   const dialog = byId<HTMLDialogElement>('game-dialog');
   // 46: the expanded Portal, and the parts of it the painter fills.
   const scrim = byId('portal-scrim');
@@ -402,12 +405,63 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   }
 
   /**
+   * 47: the swipe — the touch shorthand for the dots and the arrow keys, and
+   * never the only way to do anything (§3.5).
+   *
+   * The gesture is measured across the whole stage and judged by the model:
+   * 44 px across and plainly more across than down, or it is not a swipe.
+   *
+   * Which finger gets here is CSS's call. `#games-scene` is a horizontal
+   * scroller at every width below 1080 px, and that pan is the only way a
+   * phone sees the door or Luna's snow globe at all, so only the chooser — the
+   * Portal and the dots — is `touch-action: pan-y`. A finger there is swiping
+   * the wall; a finger on the floorboards is panning the Room, and the browser
+   * says so by cancelling the pointer. A mouse cannot pan by dragging, so a
+   * drag anywhere on the stage is a swipe.
+   *
+   * The same answer stops the click: a finger that leaves the Portal it landed
+   * on was swiping the wall, not tapping a hole in it.
+   */
+  let gestureFrom: { pointer: number; x: number; y: number } | null = null;
+  let swiped = false;
+
+  stage.addEventListener('pointerdown', event => {
+    swiped = false;
+    gestureFrom = wideLayout.matches ? null : { pointer: event.pointerId, x: event.clientX, y: event.clientY };
+  });
+  stage.addEventListener('pointerup', event => {
+    if (!gestureFrom || gestureFrom.pointer !== event.pointerId) return;
+    const step = swipeStep(event.clientX - gestureFrom.x, event.clientY - gestureFrom.y);
+    gestureFrom = null;
+    if (step === 0) return;
+    swiped = true;
+    dispatch({ type: 'portal-stepped', step });
+  });
+  // A gesture the browser took over is the Room being panned, not the wall.
+  stage.addEventListener('pointercancel', () => { gestureFrom = null; });
+  // A Scene is an `<img>`, and a press that moves across one is a drag of the
+  // picture as far as the browser is concerned: it cancels the pointer to
+  // start the drag and the swipe is lost. Nothing here is draggable.
+  stage.addEventListener('dragstart', event => event.preventDefault());
+  // Capture, so the Portal's own click handler never sees the swipe's tail.
+  stage.addEventListener('click', event => {
+    if (!swiped) return;
+    swiped = false;
+    event.preventDefault();
+    event.stopPropagation();
+  }, true);
+  // A swipe whose click never arrived must not swallow the Enter that follows
+  // it: the keyboard is a different visitor's hands on the same wall.
+  stage.addEventListener('keydown', () => { swiped = false; });
+
+  /**
    * The arrow keys, where the wall only has room for one Portal (§3.5).
    *
    * They do nothing on a wide wall, where all three are already up, and they
    * leave the focus where it makes sense: on the dots if that is where it was,
-   * and otherwise on the Portal, which is the same button showing another
-   * game.
+   * and otherwise on the Portal now on the wall — a different button, because
+   * all three are in the markup and two of them are hidden, which is why
+   * `paintWall` has to hand the focus on rather than let it fall on the floor.
    */
   function chooseByKey(event: KeyboardEvent) {
     if (wideLayout.matches) return;
@@ -615,12 +669,33 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     const wide = wideLayout.matches;
     const showing = currentPortal(world);
     if (!force && paintedWide === wide && paintedShowing === showing) return;
+    // 47: the wall moved rather than merely being painted for the first time,
+    // which is the difference between an announcement and noise on arrival.
+    const moved = paintedShowing !== '' && paintedShowing !== showing;
+    // 47: and whoever had the wall keeps it. Hiding the focused button drops
+    // its focus on the floor, and a second arrow key would then go nowhere.
+    const held = portals.some(portal => portal === document.activeElement);
     paintedWide = wide;
     paintedShowing = showing;
     for (const portal of portals) portal.hidden = !wide && portal.dataset.game !== showing;
     for (const dot of dots) dot.setAttribute('aria-current', String(dot.dataset.game === showing));
+    if (held && !wide) portals.find(portal => portal.dataset.game === showing)?.focus({ preventScroll: true });
+    if (moved && !wide) announceWall(showing);
     panToPortal();
     syncPlayers();
+  }
+
+  /**
+   * 47: which Portal the wall is carrying, said out loud.
+   *
+   * The dots say it to the eye and `aria-current` says it to anyone whose
+   * focus is on them; this is for the visitor who moved the wall from the
+   * Portal itself or with a swipe, and never hears the dots at all. The game's
+   * name is a proper noun, so only the words around it need a dictionary.
+   */
+  function announceWall(showing: PortalId) {
+    const portal = players.find(player => player.game === showing)!.portal;
+    announcement.textContent = copy[world.language].portalShowing + ' ' + portal.dataset.title;
   }
 
   /**
@@ -723,6 +798,9 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
       // page is swept by `src/dom/language.ts` off its `data-i18n` hook.
       setStatus(statusKey, status.dataset.state === 'error');
       updateSendButton();
+      // 47: the wall's last move was announced in the language it happened in.
+      // Saying it again in the new one announces a move nobody made.
+      announcement.textContent = '';
     }
     if (paintedPaused !== paused()) {
       paintedPaused = paused();

@@ -7,6 +7,7 @@ import {
   createWorld,
   currentPortal,
   openPortal,
+  swipeStep,
   type World,
   type WorldInputs,
 } from './index';
@@ -104,6 +105,39 @@ describe('the Portal a narrow wall has room for', () => {
     const cinema = createWorld({ ...arrival, hash: '#/cinema' });
     expect(advance(cinema, { type: 'portal-chosen', portal: 'lovers' })).toBe(cinema);
     expect(advance(cinema, { type: 'portal-stepped', step: 1 })).toBe(cinema);
+  });
+});
+
+/**
+ * 47: a swipe across a narrow wall — the touch shorthand for the dots and the
+ * arrow keys, never the only way to do anything (design note 11 §3.5).
+ *
+ * Whether a drag is a swipe at all is a decision, so it lives here rather than
+ * in the painter that measures the finger. The page reads the answer twice:
+ * once to move the wall, and once to know that the gesture was a swipe rather
+ * than the tap that would have opened the Portal it started on.
+ */
+describe('a swipe across a narrow wall', () => {
+  it('carries the wall forward when the finger runs left, as a carousel does', () => {
+    expect(swipeStep(-90, 4)).toBe(1);
+  });
+
+  it('carries it back when the finger runs right', () => {
+    expect(swipeStep(90, -4)).toBe(-1);
+  });
+
+  it('is nothing at all when the finger barely moved', () => {
+    expect(swipeStep(-20, 0)).toBe(0);
+    expect(swipeStep(0, 0)).toBe(0);
+  });
+
+  it('leaves a drag that is mostly down the page alone, because that is scrolling', () => {
+    expect(swipeStep(-60, 90)).toBe(0);
+    expect(swipeStep(50, -140)).toBe(0);
+  });
+
+  it('takes a long diagonal that is plainly more across than down', () => {
+    expect(swipeStep(-120, 50)).toBe(1);
   });
 });
 

@@ -49,6 +49,8 @@ export { PORTAL_IDS } from './portals';
 export { attendedPortal, currentPortal } from './world';
 // 46: and which one is expanded over the stage.
 export { openPortal } from './world';
+// 47: and whether a drag across a narrow wall is a swipe, and which way.
+export { swipeStep } from './portals';
 // 14: the Entryway — the Room's geometry, its Props and its arrival.
 export type { EntrywayPropId, EntrywayProps, VaseState } from './entryway';
 export { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';

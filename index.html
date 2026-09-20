@@ -251,7 +251,7 @@
                  and these three dots say there are three. They are the pointer
                  and keyboard path — arrow keys step either way — and each one's
                  name is its game's, a proper noun in both languages. -->
-            <div class="portal-dots" data-box style="--x:680;--y:550;--w:240;--h:40;z-index:642">
+            <div class="portal-dots" data-box role="group" aria-label="選擇牆上要開哪一個傳送門" data-i18n-aria="portalChooser" style="--x:680;--y:550;--w:240;--h:40;z-index:642">
               <button class="portal-dot" type="button" data-game="tango" aria-label="Operation: Tango" aria-current="true"></button>
               <button class="portal-dot" type="button" data-game="lovers" aria-label="Lovers in a Dangerous Spacetime" aria-current="false"></button>
               <button class="portal-dot" type="button" data-game="heavenly" aria-label="Heavenly Bodies" aria-current="false"></button>
@@ -280,6 +280,13 @@
             <a class="prop prop-door" data-box href="#/entryway" aria-label="回到玄關" data-i18n-aria="backToEntryway" style="--x:60;--y:290;--w:180;--h:350;z-index:640"><span class="door-leaf" aria-hidden="true"></span></a>
           </div>
         </div>
+        <!-- 47: the wall moved, said once. The dots say it to the eye and
+             `aria-current` says it to whoever is on them; this is for the
+             visitor who moved the wall from the Portal itself or with a swipe.
+             Painter-owned and empty at first paint, so nobody who has only
+             just walked in is told about a move they did not make. It sits
+             outside the stage, which an open expansion makes `inert`. -->
+        <p class="sr-only" id="portal-announcement" role="status"></p>
         <!-- §5.4: the expanded Portal. One overlay reused by all three, on the
              Activity Room's `.activity-card` pattern one Room over: over the
              stage on a wide shell with the Room visible around its edges, an
