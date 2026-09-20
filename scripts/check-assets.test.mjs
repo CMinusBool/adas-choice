@@ -401,7 +401,8 @@ test('--beat without --frames and --columns is refused', () => {
 
 test('--beat with --actor is refused: --actor is a Cycle frame box by another name', () => {
   assert.throws(() => parseArguments([...BEAT_ARGS, '--actor', 'mira']), {
-    message: /--actor names a Cycle's frame box/,
+    // It must name the values --actor really takes, not the two frame-box shapes behind them.
+    message: /--actor names a Cycle's frame box \(boy, girl, mica, mira, luna\)/,
   });
 });
 

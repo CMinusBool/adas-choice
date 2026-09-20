@@ -416,7 +416,7 @@ function parseArguments(args) {
     }
     if (options.actor) {
       throw new Error(
-        `--actor names a Cycle's frame box (${Object.keys(FRAME_BOXES).join(' or ')}), which a Beat does not use; ` +
+        `--actor names a Cycle's frame box (${Object.keys(ACTOR_SHAPES).join(', ')}), which a Beat does not use; ` +
           'pass --frame <width>x<height> instead.',
       );
     }
