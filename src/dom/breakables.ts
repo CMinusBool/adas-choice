@@ -56,6 +56,30 @@ function rememberBroken(ids: readonly BreakableId[]) {
  */
 const FALLING_CLASS = 'is-breakable-falling';
 
+/**
+ * Do this when the fall is over, however it ended.
+ *
+ * A fall runs 620 ms and the Room it is in is hidden about 450 ms after a door
+ * click, so a visitor who leaves while something is going over cancels the
+ * animation — and a cancelled animation fires `animationcancel`, never
+ * `animationend`. Waiting on the one event left the **intact** Prop standing in
+ * a Room the visitor had walked out of, still carrying the falling class, to go
+ * over again from its first frame when they came back. Whichever event arrives
+ * first wins and the other is dropped, so the swap still happens exactly once.
+ *
+ * `src/dom/entryway.ts` reaches for this for the vase, which is the one
+ * Breakable that predates this file.
+ */
+export function whenFallen(element: HTMLElement, settle: () => void) {
+  const done = () => {
+    element.removeEventListener('animationend', done);
+    element.removeEventListener('animationcancel', done);
+    settle();
+  };
+  element.addEventListener('animationend', done);
+  element.addEventListener('animationcancel', done);
+}
+
 function swapToState(elements: readonly HTMLElement[], state: 'intact' | 'broken') {
   for (const element of elements) {
     element.hidden = element.dataset.breakableState !== state;
@@ -86,7 +110,7 @@ export const mountBreakables = (_dispatch: Dispatch, _initial: World): Painter =
       // a cat that is not there knocking over something already on the floor.
       // `src/dom/entryway.ts` guards its own vase the same way.
       if (state === 'broken' && previous === 'intact' && motionIsOn(world) && intact) {
-        intact.addEventListener('animationend', () => swapToState(els, state), { once: true });
+        whenFallen(intact, () => swapToState(els, state));
         intact.classList.add(FALLING_CLASS);
       } else {
         swapToState(els, state);

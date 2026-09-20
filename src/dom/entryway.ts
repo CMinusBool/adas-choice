@@ -13,6 +13,7 @@ import {
   type VaseState,
   type World,
 } from '../world';
+import { whenFallen } from './breakables';
 import { type Dispatch, type Painter } from './painter';
 import { playSfx } from './sound';
 
@@ -177,15 +178,14 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
     // ticket 09 shipped it.
     if (previousVase !== undefined && previousVase !== vase && vase === 'broken' && motionIsOn(next)) {
       const intact = props.get('vaseIntact')!;
-      intact.addEventListener(
-        'animationend',
-        () => {
-          intact.hidden = true;
-          intact.classList.remove('is-breakable-falling');
-          props.get('vaseBroken')!.hidden = false;
-        },
-        { once: true },
-      );
+      // Ticket 51: and the swap happens whether the fall finished or a Room
+      // change cut it short, which is `whenFallen`'s whole job — otherwise the
+      // vase is left standing, mid-topple, in a hall nobody is in.
+      whenFallen(intact, () => {
+        intact.hidden = true;
+        intact.classList.remove('is-breakable-falling');
+        props.get('vaseBroken')!.hidden = false;
+      });
       intact.classList.add('is-breakable-falling');
     } else {
       props.get('vaseIntact')!.hidden = vase !== 'intact';
