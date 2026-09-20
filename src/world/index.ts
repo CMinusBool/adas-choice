@@ -42,6 +42,11 @@ export { attendedShelf, isSeated } from './world';
 export type { ActivitiesSlice, ActivityId } from './activities';
 export { ACTIVITY_IDS } from './activities';
 export { chosenActivity, openActivity } from './world';
+// 45: the Game Room's three Portals — the one the visitor is at, and the one
+// a narrow wall has room for.
+export type { PortalId, PortalsSlice } from './portals';
+export { PORTAL_IDS } from './portals';
+export { attendedPortal, currentPortal } from './world';
 // 14: the Entryway — the Room's geometry, its Props and its arrival.
 export type { EntrywayPropId, EntrywayProps, VaseState } from './entryway';
 export { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';

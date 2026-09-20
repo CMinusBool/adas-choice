@@ -65,44 +65,16 @@ html[lang="zh-Hant"] h1 { letter-spacing: -.035em; }
 .title-spark { width: .4em; height: .55em; margin-left: .27em; fill: var(--pink); align-self: center; }
 .intro-description { color: var(--muted); margin: 0; font-size: 1.0625rem; line-height: 1.8; }
 
-/* A shared media height keeps horizontal expansion from cropping vertically. */
-.games { --scene-size: clamp(310px, 29vw, 410px); display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap: 20px; align-items: stretch; transition: grid-template-columns .75s cubic-bezier(.22,.75,.2,1); }
-.game-wrap { position: relative; display: flex; min-width: 0; container-type: inline-size; container-name: card; }
-.game-wrap.is-active { z-index: 3; }
-.game-card { display: flex; flex-direction: column; position: relative; width: 100%; min-width: 0; text-decoration: none; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); transition: filter 1.15s ease, border-color .5s, box-shadow .5s; isolation: isolate; }
-.tango { --accent: #f2aacd; }
-.lovers { --accent: #ff93c2; }
-.heavenly { --accent: #edb6d7; }
-.game-wrap.is-active .game-card { border-color: var(--pink); box-shadow: 0 12px 45px #0004, 0 0 25px #fb80b50d; }
-.card-media { height: var(--scene-size); width: 100%; position: relative; flex-shrink: 0; background: #292029; border-radius: 19px 19px 0 0; overflow: hidden; isolation: isolate; }
-.scene-backdrop { position: absolute; inset: -25px; background-position: center; background-size: cover; filter: blur(18px) brightness(.65); transform: scale(1.12); opacity: .8; }
-.scene-frame { position: absolute; left: 50%; top: 50%; width: var(--scene-size); height: var(--scene-size); transform: translate(-50%, -50%); }
+/* The Scene seen through a Portal: the still poster, and the sprite sheet laid
+   over it once it has loaded. The grid is written in percentages — 4 columns
+   by 3 rows, 12 frames — so nothing here knows the frame's shape, which lives
+   in `index.html` and in CLAUDE.md's Scene contract (ADR 0004). */
+.scene-frame { position: absolute; inset: 0; }
 .scene-frame picture, .game-art { display: block; width: 100%; height: 100%; }
 .game-art { object-fit: cover; }
 .scene-sprite { position: absolute; inset: 0; background-size: 400% 300%; background-repeat: no-repeat; }
 .scene-frame.has-sprite .game-art { opacity: 0; }
-.image-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, #14101970, transparent 26%, transparent 68%, #151017c4); }
-.media-topline { position: absolute; inset: 1rem 1rem auto; display: flex; justify-content: flex-end; align-items: center; gap: .5rem; }
-.category { border: 1px solid #ffffff38; background: #17121c9c; backdrop-filter: blur(12px); border-radius: 100px; color: #fff5fa; }
-.category { padding: .4rem .7rem; font-size: .8125rem; line-height: 1.6; }
-.scene-caption { position: absolute; left: 1.2rem; right: 1.2rem; bottom: 1.15rem; display: flex; align-items: center; gap: .5rem; color: #fff5fa; font-size: .8125rem; letter-spacing: .055em; text-shadow: 0 1px 8px #000; }
-.caption-dot { flex: 0 0 5px; height: 5px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 8px #ff87b7b3; }
-.card-copy { display: flex; flex-direction: column; flex: 1; padding: 1.5rem 1.4rem 0; min-width: 0; }
-.pick-line { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem .6rem; margin-bottom: .8rem; }
-.pick-label { color: var(--accent); font-size: .875rem; font-weight: 650; letter-spacing: .04em; }
-.player-count { font-size: .875rem; color: var(--muted); white-space: nowrap; }
 h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 690; line-height: 1.22; letter-spacing: -.035em; min-height: 2.44em; overflow-wrap: break-word; }
-.game-details { max-height: 650px; opacity: 1; transition: opacity .3s ease, max-height .65s ease; }
-.game-description { margin: 0 0 1.3rem; font-size: 1rem; line-height: 1.75; color: #d0c6ce; }
-.why-pick { padding-top: 1.05rem; border-top: 1px solid var(--line); }
-.detail-label { display: block; color: var(--quiet); font-weight: 650; font-size: .875rem; letter-spacing: .06em; margin-bottom: .4rem; }
-.why-pick p { font-size: 1rem; line-height: 1.75; margin: 0; color: #c4b8c1; }
-.setup { margin-top: auto; padding: 1.25rem 0; }
-.setup p { margin: 0; font-size: .875rem; line-height: 1.75; overflow-wrap: anywhere; color: #e1d6de; }
-.setup p.setup-note { color: var(--muted); font-size: .875rem; margin-top: .15rem; }
-.card-action { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem 0; border-top: 1px solid var(--line); color: var(--accent); font-weight: 600; font-size: .9375rem; }
-.action-heart { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; font-size: 1.75rem; line-height: 1; font-weight: 400; transition: transform .3s; }
-.game-card:hover .action-heart, .game-card:focus-visible .action-heart { transform: scale(1.18) rotate(-9deg); }
 .particle-field { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
 .game-particle { position: absolute; display: block; pointer-events: none; will-change: transform, opacity; filter: drop-shadow(0 0 5px currentColor); }
 .game-particle svg { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -114,25 +86,8 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
 .skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 20; padding: .7rem 1rem; border-radius: 8px; background: var(--pink); color: var(--bg); transform: translateY(-200%); }
 .skip-link:focus { transform: translateY(0); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-@media (min-width: 1080px) {
-  .games[data-active="tango"] { grid-template-columns: minmax(0,1.5fr) minmax(0,.75fr) minmax(0,.75fr); }
-  .games[data-active="lovers"] { grid-template-columns: minmax(0,.75fr) minmax(0,1.5fr) minmax(0,.75fr); }
-  .games[data-active="heavenly"] { grid-template-columns: minmax(0,.75fr) minmax(0,.75fr) minmax(0,1.5fr); }
-  .game-wrap.is-muted .game-card { filter: grayscale(1) brightness(.82); }
-  .game-wrap.is-muted .game-details { max-height: 0; opacity: 0; overflow: hidden; }
-  .game-wrap.is-muted .category { opacity: 0; }
-  .game-wrap.is-muted .scene-caption { opacity: .4; }
-  .category, .scene-caption { transition: opacity .5s; }
-}
-@container card (max-width: 300px) {
-  .card-copy { padding-inline: 1.1rem; }
-  h2 { font-size: 1.5rem; }
-  .pick-line { flex-direction: column; }
-}
 @media (max-width: 1199px) and (min-width: 1080px) {
   .page-shell { width: calc(100% - 64px); }
-  .games { gap: 16px; }
-  .card-copy { padding-inline: 1.1rem; }
 }
 @media (max-width: 1079px) {
   .page-shell { width: min(680px, calc(100% - 48px)); }
@@ -141,12 +96,7 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
   .room-title { font-size: clamp(2.2rem, 6vw, 3rem); }
   .doors { grid-template-columns: 1fr; gap: 14px; margin-top: 2rem; }
   h1 { font-size: clamp(2.6rem, 6.4vw, 3.8rem); }
-  .games { grid-template-columns: 1fr; gap: 28px; --scene-size: min(680px, calc(100vw - 48px)); }
-  .card-copy { padding: 1.6rem 1.6rem 0; }
   h2 { min-height: auto; font-size: 1.9rem; }
-  .game-description, .why-pick p { font-size: 1rem; }
-  .pick-label, .player-count, .category { font-size: .875rem; }
-  .setup p { font-size: .9375rem; }
   .site-footer { flex-wrap: wrap; gap: .4rem; margin-top: 2rem; }
 }
 @media (max-width: 540px) {
@@ -167,16 +117,7 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
   h1 { font-size: clamp(2.15rem, 8.5vw, 2.9rem); line-height: 1.3; margin-bottom: .8rem; }
   html[lang="en"] h1 { max-width: 390px; column-gap: .2em; }
   .intro-description { font-size: 1rem; line-height: 1.85; max-width: 31ch; }
-  .games { --scene-size: calc(100vw - 40px); gap: 24px; }
-  .game-card { border-radius: 18px; }
-  .card-media { border-radius: 17px 17px 0 0; }
-  .card-copy { padding: 1.3rem 1.25rem 0; }
-  .media-topline { inset: .9rem .9rem auto; }
-  .scene-caption { left: 1.05rem; right: 1.05rem; font-size: .75rem; }
-  .category { font-size: .8125rem; }
   h2 { font-size: 1.75rem; margin-bottom: .85rem; }
-  .game-description { margin-bottom: 1.15rem; }
-  .card-action { min-height: 65px; }
   .site-footer { padding-bottom: max(1.75rem, env(safe-area-inset-bottom)); font-size: .75rem; }
 }
 @media (max-width: 359px) {
@@ -184,10 +125,6 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
   .wordmark { font-size: 1.1rem; }
   .brand-heart { width: 20px; }
   .language-toggle svg { display: none; }
-  .games { --scene-size: calc(100vw - 28px); }
-}
-@media (hover: none) {
-  .game-card:active { border-color: var(--pink); }
 }
 /* The system's reduced-motion request holds from the first paint, before any
    script runs, and keeps holding unless the visitor turns motion on with the
@@ -200,11 +137,13 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
 }
 .motion-off { scroll-behavior: auto; }
 .motion-off .brand-heart { animation: none !important; }
-.motion-off .games, .motion-off .game-card, .motion-off .game-details, .motion-off .action-heart { transition: none; }
+.motion-off .portal, .motion-off .portal-dot { transition: none; }
+/* The rim and the sparks are the most motion-heavy thing in the apartment,
+   and they are stopped dead rather than exempted from the opt-out (ADR 0004). */
+.motion-off .portal-rim { animation: none; }
 .motion-off .particle-field { display: none; }
 
 html.dialog-open { overflow: hidden; }
-.game-card[role="button"] { cursor: pointer; }
 .choice-dialog { width: min(460px, calc(100% - 32px)); max-height: calc(100dvh - 32px); padding: 2rem; margin: auto; border: 1px solid #82536e; border-radius: 28px; background: #241c26; color: var(--ink); box-shadow: 0 24px 100px #000a; overflow-y: auto; overscroll-behavior: contain; }
 .choice-dialog::backdrop { background: #0c090fbb; backdrop-filter: blur(8px); }
 .choice-dialog[open] { animation: invitation-in .3s ease-out; }
@@ -236,7 +175,6 @@ html.dialog-open { overflow: hidden; }
   .choice-dialog { padding: 1.6rem 1.2rem 1.2rem; border-radius: 24px; }
   .dialog-art, .dialog-art img { width: 88px; height: 88px; }
   .dialog-title { font-size: 1.65rem; }
-  .game-wrap.is-scroll-active .game-card { border-color: #bf7396; box-shadow: 0 0 24px #f589b412; }
   .game-particle { filter: none; }
 }
 .motion-off .choice-dialog { animation: none; }
@@ -900,51 +838,48 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
    disk, because the loading screen waits for every URL the markup declares. */
 
 #games-scene {
-  /* The stage's rendered width, measured by `src/dom/game-stage.ts`. The
-     fallback is the page shell at its widest, so the Room has the right
-     proportions on the paint before the first measurement lands. */
-  --stage-width: min(1440px, calc(100vw - 96px));
-  /* One stage unit. 1600 of them across, 900 down. */
-  --u: calc(var(--stage-width) / 1600);
-  --deck-height: 0px;
-  /* The deck's bottom edge is pinned to stage y 380; whatever does not fit
-     between y 0 and there hangs above the stage, and this section carries the
-     wall for it to hang on (§3.4). */
-  --deck-overhang: max(0px, calc(var(--deck-height) - 380 * var(--u)));
   --wall: #2E4A55;
   --oak: #7A5636;
   --oak-line: #4A3320;
   --brass: #C9A25E;
   --bulb: #FFD9A8;
   position: relative;
-  margin-top: 1.5rem;
-  /* The cornice sits at the top of this padding, and the overhang fills it. */
-  padding-top: calc(var(--deck-overhang) + 60px);
-  /* The backdrop's top 200 units are flat wall in this exact colour, so the
-     join between the DOM wall and the painted one is invisible. */
-  background: linear-gradient(to bottom, #27414B, var(--wall) 55%);
-}
-#games-scene .cornice {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: calc(40 * var(--u));
-  background: #22343C;
-  border-bottom: calc(6 * var(--u)) solid #3D5B66;
+  margin-top: .8rem;
+  /* Below a rendered 880 px the stage keeps 880 px of legibility and the Room
+     pans from its left end, which is the door — the Entryway's rule and the
+     Activity Room's. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
 }
 
-/* This Room is width-driven and scrolls: the deck's height comes from DOM type,
-   which does not scale with the stage, so a stage capped to the viewport height
-   would shrink the room out from under the cards (§3.5). */
-#room-games { padding-bottom: 2.4rem; }
-#room-games .intro { padding: 1.8rem 0 1.4rem; }
+/* Nothing hangs off the stage any more (§3.4), so this Room *is* its stage:
+   no DOM wall above it, no padding for an overhang, no measured deck height,
+   and no painter measuring anything. `--u` is one stage unit, read off the
+   stage's own inline size exactly as the Cinema Room reads its own. */
+/* Measured at 1440 x 900 rather than guessed: the header, the way out and the
+   intro come to 410 px above the stage as this Room shipped, and the stage's
+   own legibility floor is 495 px tall, which leaves 900 px of viewport five px
+   short. These three trims are what buy it back — the intro keeps its copy and
+   gives up 16 px of padding, and the Room is one screenful. */
+#room-games { padding-bottom: 1rem; }
+#room-games .intro { padding: 1.1rem 0 .9rem; }
+#room-games .room-exit { margin-top: 1rem; }
 #room-games .stage {
-  max-width: none;
-  margin: 0;
+  --u: .0625cqw;
+  container-type: inline-size;
+  /* Everything above the stage in this Room comes to about 23rem, and the
+     Room's own foot to another 1rem, so capping the stage's width by what the
+     viewport has left keeps the whole Room — the cats roaming on the floor
+     included — in one screenful. The aspect ratio is untouched: the stage is
+     exactly 16:9 at every width, at 1600, 1440, 1280 and 1100 px alike. */
+  min-width: 880px;
+  max-width: min(100%, calc((100dvh - 25.5rem) * 16 / 9));
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 14px;
   background: none;
-  /* The deck hangs out of the top, and the controls have to be clickable. */
-  overflow: visible;
+  /* The Portals, the three dots, the boombox and the door are all controls. */
   pointer-events: auto;
   /* The sort keys below run up to 890 and the Cast's `round(y)` up to 900, so
      the stage is its own stacking context: a Prop sorts against the Room's
@@ -953,6 +888,8 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   isolation: isolate;
 }
 #room-games .stage [aria-hidden="true"] { pointer-events: none; }
+/* The stage clips, so a ring hung 5 px off a Portal would be cut in half. */
+#room-games .stage :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 
 /* A box in stage units, turned into percentages of the stage — the same
    arithmetic `src/dom/actors.ts` does for a feet point. */
@@ -986,80 +923,143 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   border-radius: 50%;
   background: radial-gradient(closest-side, #6E4A56 0 52%, #B76E85 52% 100%);
 }
-
-/* G9, G10: the ledge the bays stand on, and the pink the Room borrows from the
-   page. The LED is always on, and steps back while a bay is selected so the
-   bay wins. */
-.prop-ledge {
-  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) 0 0;
-  background: linear-gradient(to bottom, #93693F, #6A4A2E);
-  box-shadow: 0 calc(8 * var(--u)) calc(16 * var(--u)) calc(-4 * var(--u)) #0007;
-}
+/* G1: the cornice. An ordinary band inside the stage now that there is no wall
+   unit bolted above it; the 6-unit highlight is the bottom 15% of its 40. */
+.prop-cornice { background: linear-gradient(to bottom, #22343C 0 85%, #3D5B66 85% 100%); }
+/* G10: the pink the Room borrows from the page, under the sideboard's lip and
+   blooming onto the floor. Always on — it is no longer the only pink in the
+   Room, because P2's rim is, but it is the only pink on the floor. */
 .prop-led {
   background: var(--pink);
   box-shadow: 0 0 calc(26 * var(--u)) calc(5 * var(--u)) #f5a3c555;
-  transition: opacity .5s;
 }
-#room-games .stage:has(.games[data-active]) .prop-led { opacity: .4; }
 
-/* G7, G8: the wall unit. The deck is the joinery's three bays, so the casework
-   is drawn on the deck's own box and grows with it. */
-.deck-slot {
+/* G8, G8a, G8b: the three Portals — apertures into each game's world, 300 x
+   480 units and a 5:8 ellipse, on the wall at every width (ADR 0004).
+
+   The rim is the button's own border, because a border follows an ellipse at
+   a constant width and no radial mask can: a percentage ring on a 300 x 480
+   box is 16 units across one way and 26 the other. The turning sweep over it
+   is `.portal-rim`, a conic gradient masked back to that same ring; a browser
+   without `mask-composite` keeps the solid rim and loses only the sweep.
+
+   The sparks deliberately are *not* clipped to the ellipse — they drift out of
+   it into the room — so the clipping happens one layer in, on `.portal-world`,
+   and the stage's own `overflow: hidden` is what keeps them in the Room. */
+#room-games .stage .portal {
+  --rim: var(--pink);
+  border: calc(16 * var(--u)) solid var(--rim);
+  border-radius: 50%;
+  background: #0A0810;
+  cursor: pointer;
+  box-shadow:
+    0 0 calc(30 * var(--u)) calc(4 * var(--u)) color-mix(in srgb, var(--rim) 45%, transparent),
+    inset 0 0 calc(24 * var(--u)) calc(2 * var(--u)) color-mix(in srgb, var(--rim) 30%, transparent);
+  transition: box-shadow .45s;
+}
+#room-games .stage .portal[data-game="tango"] { --rim: #4DA3D9; }
+#room-games .stage .portal[data-game="lovers"] { --rim: #F5A3C5; }
+#room-games .stage .portal[data-game="heavenly"] { --rim: #287F98; }
+/* Awake: the visitor is at this one, so its world plays and its rim brightens.
+   The other two are not dimmed — they are already still, which is contrast
+   enough, and there is no muted state for a Portal to be in (§5.4). */
+#room-games .stage .portal.is-awake {
+  box-shadow:
+    0 0 calc(44 * var(--u)) calc(7 * var(--u)) color-mix(in srgb, var(--rim) 65%, transparent),
+    inset 0 0 calc(30 * var(--u)) calc(3 * var(--u)) color-mix(in srgb, var(--rim) 45%, transparent);
+}
+.portal-world {
   position: absolute;
-  left: 18.75%;
-  width: 67.5%;
-  bottom: 57.7778%;
+  inset: 0;
   z-index: 381;
-}
-.deck-slot::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: calc(-20 * var(--u)) calc(-20 * var(--u)) calc(-22 * var(--u));
-  border: calc(14 * var(--u)) solid var(--oak);
-  border-radius: calc(8 * var(--u));
-  box-shadow: inset 0 0 0 calc(2 * var(--u)) var(--oak-line);
-  /* The 24-unit gaps between the bays are the joinery between them, so the
-     unit reads as three bays rather than one long recess; the interior proper
-     is behind each card, and only the narrow layout ever shows it (.bay). */
-  background: linear-gradient(to bottom, #835C3A, var(--oak));
-}
-/* The bulb strip along each bay's top inner edge, and its wash over the card's
-   top third. CSS, not artwork, because the bays resize. */
-.deck-slot .game-wrap::before,
-.deck-slot .bay::before {
-  content: "";
-  position: absolute;
-  z-index: 4;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: calc(6 * var(--u));
-  background: var(--bulb);
-  box-shadow: 0 calc(9 * var(--u)) calc(26 * var(--u)) #ffd9a833;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #0A0810;
   pointer-events: none;
-  transition: opacity .5s, background .5s, box-shadow .5s;
 }
-.deck-slot .game-wrap::after {
+@property --rim-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.portal-rim {
+  position: absolute;
+  /* Out to the button's border box, so this ring lands exactly on the rim. */
+  inset: calc(-16 * var(--u));
+  z-index: 382;
+  border: calc(16 * var(--u)) solid transparent;
+  border-radius: 50%;
+  background: conic-gradient(from var(--rim-angle, 0deg),
+      #ffffff00 0 6%,
+      color-mix(in srgb, var(--rim) 55%, #fff) 17%,
+      #fff 24%,
+      color-mix(in srgb, var(--rim) 55%, #fff) 31%,
+      #ffffff00 44% 58%,
+      color-mix(in srgb, var(--rim) 45%, #fff) 72%,
+      #ffffff00 86%) border-box;
+  mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  animation: portal-turn 6s linear infinite;
+}
+@keyframes portal-turn { to { --rim-angle: 360deg; } }
+/* G8b: the sparks, thrown outward off the rim into the room. */
+#room-games .stage .particle-field { z-index: 383; overflow: visible; }
+
+/* §3.5: the three dots under a narrow wall's one Portal. Painted 40 units
+   across so they are still 22 px at the 880 px floor, with a 44 px hit box
+   around each and 33 px between centres, so the boxes never overlap. */
+.portal-dots { display: flex; align-items: center; justify-content: space-between; }
+.portal-dot {
+  position: relative;
+  width: calc(40 * var(--u));
+  height: calc(40 * var(--u));
+  padding: 0;
+  border: calc(3 * var(--u)) solid #EAD9C2aa;
+  border-radius: 50%;
+  background: #1B1E21;
+  cursor: pointer;
+  transition: background .3s, box-shadow .3s;
+}
+.portal-dot::after {
   content: "";
   position: absolute;
-  z-index: 4;
-  inset: 0 0 67% 0;
-  background: linear-gradient(to bottom, #ffd9a826, transparent);
-  pointer-events: none;
-  transition: opacity .5s;
+  left: 50%;
+  top: 50%;
+  width: max(44px, 100%);
+  height: max(44px, 100%);
+  transform: translate(-50%, -50%);
 }
-.motion-off .deck-slot .game-wrap::before,
-.motion-off .deck-slot .game-wrap::after,
-.motion-off .deck-slot .bay::before { transition: none; }
+.portal-dot[aria-current="true"] {
+  border-color: var(--pink);
+  background: var(--pink);
+  box-shadow: 0 0 calc(18 * var(--u)) #f5a3c5aa;
+}
+@media (min-width: 1080px) { .portal-dots { display: none; } }
+
 
 /* G11-G16, G19: the sideboard and what stands on it, the lamp, and the table
    that is the front edge of the doll's house. */
+/* The image box reaches up to y 468 because the console and the stack of game
+   cases stand above the surface at y 540 (G13, G14) — so only those two are
+   drawn up there and the rest of the band is wall, which the Portals show
+   through. An opaque slab here would take the bottom 62 units off all three. */
 .prop-sideboard {
-  border-radius: calc(4 * var(--u));
   background:
-    linear-gradient(to bottom, #8C6440 0 15%, var(--oak) 15% 100%),
-    var(--oak);
+    /* G13: the console and its two controllers, at (700,504)-(880,540) */
+    linear-gradient(to bottom, #4A4F55 0 55%, #2A2D31 55% 100%)
+      no-repeat calc(400 * var(--u)) calc(36 * var(--u)) / calc(180 * var(--u)) calc(36 * var(--u)),
+    /* G14: three game cases leaning together, at (940,468)-(1010,540) */
+    linear-gradient(to right, #D9483B 0 30%, #EAD9C2 30% 64%, #4DA3D9 64% 100%)
+      no-repeat calc(640 * var(--u)) 0 / calc(70 * var(--u)) calc(72 * var(--u));
+}
+.prop-sideboard::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* y 540, which is 72 units down this box. */
+  top: calc(72 * var(--u));
+  bottom: 0;
+  border-radius: calc(4 * var(--u));
+  background: linear-gradient(to bottom, #8C6440 0 15%, var(--oak) 15% 100%);
   box-shadow: inset 0 calc(-3 * var(--u)) 0 #3A2A22, 0 calc(6 * var(--u)) calc(18 * var(--u)) #0006;
 }
 /* The pole stands at x 1470 with its foot on the floor line, and the shade
@@ -1240,51 +1240,14 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 }
 .motion-off .prop-door, .motion-off .prop-door .door-leaf { transition: none; }
 
-/* The wide layout: the deck is in the wall unit and the three bays are the
-   three cards. A bay is 344 stage units wide neutral, and the gap between two
-   is 24 units — 2.2222 % of the deck's 1080. */
-@media (min-width: 1080px) {
-  .deck-slot .games {
-    --scene-size: calc(344 * var(--u));
-    gap: 2.2222%;
-  }
-  .deck-slot .bay { display: none; }
-  .deck-slot .game-wrap.is-active::before {
-    background: color-mix(in srgb, var(--bulb) 45%, var(--pink));
-    box-shadow: 0 calc(9 * var(--u)) calc(32 * var(--u)) #ffb0d24d;
-  }
-  .deck-slot .game-wrap.is-muted::before,
-  .deck-slot .game-wrap.is-muted::after { opacity: .35; }
-}
-
-/* The narrow layout: the deck leaves the stage for the flow below it, exactly
-   as the page has always shown it, and the bays stay behind empty and lit —
-   the games are off the shelf and in your hands. The bay matching the card
-   being read warms to pink while the other two dim (§3.5). */
+/* The narrow layout: the wall only has room for one Portal, so it carries one
+   and the three dots say there are three (§3.5). The stage is already at its
+   880 px floor here, so the pan is doing the work and the height cap has
+   nothing left to cap. The Portal that is on the wall stands in the middle of
+   it; `src/dom/game-room.ts` hides the other two. */
 @media (max-width: 1079px) {
-  #games-scene { margin-top: 1.2rem; }
-  .deck-slot { top: 0; }
-  .deck-flow { margin-top: 1.8rem; }
-  .deck-slot .bay {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 31.852%;
-    border-radius: calc(4 * var(--u));
-    background: linear-gradient(to bottom, #150F14, #1E1620);
-    transition: box-shadow .5s;
-  }
-  .deck-slot .bay[data-bay="lovers"] { left: 34.074%; }
-  .deck-slot .bay[data-bay="heavenly"] { left: 68.148%; }
-  .stage[data-lit-bay] .bay::before { opacity: .35; }
-  .stage[data-lit-bay="tango"] .bay[data-bay="tango"]::before,
-  .stage[data-lit-bay="lovers"] .bay[data-bay="lovers"]::before,
-  .stage[data-lit-bay="heavenly"] .bay[data-bay="heavenly"]::before {
-    opacity: 1;
-    background: var(--pink);
-    box-shadow: 0 calc(9 * var(--u)) calc(30 * var(--u)) #f5a3c54d;
-  }
-  .motion-off .deck-slot .bay { transition: none; }
+  #room-games .stage { max-width: none; }
+  #room-games .stage .portal { left: 40.625%; }
 }
 
 /* 14: the Entryway. One appended block, so this ticket adds lines rather than
