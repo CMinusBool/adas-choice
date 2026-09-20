@@ -160,7 +160,8 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
     if (arrival.state === 'done') rememberArrival();
 
     const vase = vaseState(next);
-    if (painted && painted.arrival === next.arrival && painted.vase === vase) return;
+    const previousVase = painted?.vase;
+    if (painted && painted.arrival === next.arrival && previousVase === vase) return;
     painted = { arrival: next.arrival, vase };
 
     showProps(entrywayProps(next));
@@ -169,8 +170,27 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
     // `data-i18n-aria` and `src/dom/language.ts` sweeps them like any other —
     // the same arrangement the other four Breakables ship with. All that is
     // left here is which of the two is on the table.
-    props.get('vaseIntact')!.hidden = vase !== 'intact';
-    props.get('vaseBroken')!.hidden = vase !== 'broken';
+    //
+    // Ticket 48: the same wobble-tip-fall the other four Breakables play,
+    // motion-on only, before the swap to broken. Motion off, or a vase that
+    // was already broken when this tab loaded, swaps immediately exactly as
+    // ticket 09 shipped it.
+    if (previousVase !== undefined && previousVase !== vase && vase === 'broken' && motionIsOn(next)) {
+      const intact = props.get('vaseIntact')!;
+      intact.addEventListener(
+        'animationend',
+        () => {
+          intact.hidden = true;
+          intact.classList.remove('is-breakable-falling');
+          props.get('vaseBroken')!.hidden = false;
+        },
+        { once: true },
+      );
+      intact.classList.add('is-breakable-falling');
+    } else {
+      props.get('vaseIntact')!.hidden = vase !== 'intact';
+      props.get('vaseBroken')!.hidden = vase !== 'broken';
+    }
 
     const acted = playBeats(arrival);
     for (const [id, element] of cast) {

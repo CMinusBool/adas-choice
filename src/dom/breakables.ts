@@ -1,4 +1,4 @@
-import { BREAKABLE_IDS, breakableState, type BreakableId, type World } from '../world';
+import { BREAKABLE_IDS, breakableState, motionIsOn, type BreakableId, type World } from '../world';
 import { type Dispatch, type Painter } from './painter';
 
 /**
@@ -49,6 +49,20 @@ function rememberBroken(ids: readonly BreakableId[]) {
   }
 }
 
+/**
+ * The wobble-tip-fall this Prop plays before it swaps to broken, motion-on
+ * only. Motion off keeps ticket 09's original behaviour untouched: the swap
+ * happens in the same tick the model reports broken, with no animation.
+ */
+const FALLING_CLASS = 'is-breakable-falling';
+
+function swapToState(elements: readonly HTMLElement[], state: 'intact' | 'broken') {
+  for (const element of elements) {
+    element.hidden = element.dataset.breakableState !== state;
+    element.classList.remove(FALLING_CLASS);
+  }
+}
+
 export const mountBreakables = (_dispatch: Dispatch, _initial: World): Painter => {
   const elements = new Map<BreakableId, HTMLElement[]>(
     BREAKABLE_IDS.map(id => [id, [...document.querySelectorAll<HTMLElement>(`[data-breakable="${id}"]`)]]),
@@ -62,7 +76,14 @@ export const mountBreakables = (_dispatch: Dispatch, _initial: World): Painter =
       if (painted.get(id) === state) continue;
       changed = true;
       painted.set(id, state);
-      for (const element of elements.get(id)!) element.hidden = element.dataset.breakableState !== state;
+      const els = elements.get(id)!;
+      const intact = els.find(element => element.dataset.breakableState === 'intact');
+      if (state === 'broken' && motionIsOn(world) && intact) {
+        intact.addEventListener('animationend', () => swapToState(els, state), { once: true });
+        intact.classList.add(FALLING_CLASS);
+      } else {
+        swapToState(els, state);
+      }
     }
     if (changed) rememberBroken(BREAKABLE_IDS.filter(id => breakableState(world, id) === 'broken'));
   };

@@ -135,6 +135,23 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
   :root:not(.motion-on) { scroll-behavior: auto; }
   :root:not(.motion-on), :root:not(.motion-on) *, :root:not(.motion-on) *::before, :root:not(.motion-on) *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+/* Ticket 48: the wobble-tip-fall a knocked Breakable plays before the swap to
+   broken, shared by all five — the Entryway's vase and the four
+   `src/dom/breakables.ts` paints. Only ever added when motion is on
+   (`src/dom/entryway.ts`, `src/dom/breakables.ts`), so this needs no
+   `prefers-reduced-motion` opt-out of its own: with motion off the class is
+   never applied and the swap stays the immediate one ticket 09 shipped. */
+.is-breakable-falling {
+  transform-origin: 50% 100%;
+  animation: breakable-fall 620ms cubic-bezier(.4, 0, .2, 1) both;
+}
+@keyframes breakable-fall {
+  0%, 12% { transform: rotate(0deg) translateY(0); }
+  32% { transform: rotate(-9deg) translateY(0); }
+  52% { transform: rotate(16deg) translateY(2%); }
+  74% { transform: rotate(58deg) translateY(24%); opacity: 1; }
+  100% { transform: rotate(104deg) translateY(150%); opacity: 0; }
+}
 .motion-off { scroll-behavior: auto; }
 .motion-off .brand-heart { animation: none !important; }
 .motion-off .portal, .motion-off .portal-dot { transition: none; }
