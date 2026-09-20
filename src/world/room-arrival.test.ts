@@ -195,6 +195,40 @@ describe.each(ROOMS)('the arrival of the %s Room', room => {
     expect(actorsIn(shown, room)).toEqual([]);
   });
 
+  it('is not ended by input before it has begun', () => {
+    // The window's `pointerdown` and `keydown` are live from the moment the
+    // page mounts, and the loading screen is a fixed overlay over an apartment
+    // that is only `inert` underneath it — so a tap on the screen itself, or a
+    // Tab press, is reported like any other input. It must not end an entrance
+    // that has not started: the page would then lift the loading screen onto a
+    // Room whose Door never opened and whose Cast never walked in.
+    const opened = createWorld({ ...visitor, hash: `#/${room}` });
+    const tapped = advance(opened, { type: 'visitor-input' });
+    expect(tapped).toBe(opened);
+    expect(roomArrivalState(tapped)).toBe('pending');
+    // And the entrance the page was waiting to ask for still plays.
+    expect(roomArrivalState(advance(tapped, { type: 'arrival-started' }))).toBe('playing');
+  });
+
+  it('settles a waiting entrance for a Room nobody can see', () => {
+    // The other two ways a waiting entrance can be called off are not input:
+    // a stage below the fold, and motion turned off. Both end it, and both put
+    // everybody on their mark — a waiting entrance has already emptied its
+    // Room, so ending it with no cues would leave a Room with no Cast.
+    const opened = createWorld({ ...visitor, hash: `#/${room}` });
+    const unseen = advance(opened, { type: 'room-unwatched', room });
+    expect(roomArrivalState(unseen)).toBe('done');
+    expect(actorsIn(unseen, room)).toHaveLength(5);
+    standsOnItsMark(unseen, room, 'boy');
+    standsOnItsMark(unseen, room, 'girl');
+
+    const still = advance(opened, { type: 'motion-toggled' });
+    expect(roomArrivalState(still)).toBe('done');
+    expect(actorsIn(still, room)).toHaveLength(5);
+    standsOnItsMark(still, room, 'boy');
+    standsOnItsMark(still, room, 'girl');
+  });
+
   it('walks the Cast to their own marks after opening on this Room', () => {
     // The marks are the Room's own — `HOMES` and `CAT_MARKS` — and they are
     // taken down as the entrance is made rather than as it starts, because by
