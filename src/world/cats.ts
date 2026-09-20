@@ -142,3 +142,175 @@ export function freeMark(
   if (free.length === 0) return null;
   return free[Math.min(free.length - 1, Math.floor(random() * free.length))];
 }
+
+/**
+ * How long a cat stops for before it thinks of somewhere else, in milliseconds.
+ *
+ * Long enough to read as a cat sitting down rather than a thing on rails, short
+ * enough that a Room the visitor stands in for a minute is never still.
+ */
+const REST_MS = { least: 900, most: 3400 };
+
+/** How long between one cat's meows, in milliseconds. Three cats, so: rarely. */
+const MEOW_MS = { least: 12000, most: 34000 };
+
+/** The sound this cat makes. One name each: the three never share a sample. */
+export function meowOf(cat: CatId): string {
+  return `${cat}-meow`;
+}
+
+function between(span: { least: number; most: number }, random: () => number): number {
+  return span.least + random() * (span.most - span.least);
+}
+
+/**
+ * When something next happens, given the clock and the longest it could be.
+ *
+ * A clock that restarted — a tab woken hours later, a test running a second
+ * visit — would otherwise leave every cat waiting for a moment already past or
+ * impossibly far off, so anything further ahead than its own longest gap is
+ * measured again from now.
+ */
+function due(at: number | null, now: number, span: { least: number; most: number }, random: () => number): number {
+  return at !== null && at > now && at <= now + span.most ? at : now + between(span, random);
+}
+
+/**
+ * Has this scheduled moment come?
+ *
+ * A moment further in the past than its own longest gap is a clock that jumped
+ * rather than a cat that is overdue — a tab left in the background for an hour
+ * comes back to one meow, not to forty of them at once.
+ */
+function reached(at: number | null, now: number, span: { least: number; most: number }): boolean {
+  return at !== null && at <= now && at >= now - span.most;
+}
+
+/** What one cat has decided. Private to this file: the DOM layer asks questions. */
+interface CatMind {
+  readonly id: CatId;
+  /** The mark it is walking to, or `null` while it is not going anywhere. */
+  readonly goal: Point | null;
+  /** When it next thinks of somewhere to be, or `null` until it is told the time. */
+  readonly restUntil: number | null;
+  /** When it next meows, or `null` until it is told the time. */
+  readonly meowAt: number | null;
+  /** When the fuss it is having ends, or `null` when nobody is petting it. */
+  readonly pettedUntil: number | null;
+}
+
+/** What the three of them have decided, and what the last tick made a noise about. */
+export interface CatsSlice {
+  readonly minds: readonly CatMind[];
+  /**
+   * SFX names the last tick or the last fuss crossed, to play once and forget.
+   *
+   * Edge-triggered, exactly as the arrival's are: the slice changes identity on
+   * the tick that makes a sound and again on the one that forgets it, so the
+   * DOM layer plays each meow once by watching the slice rather than counting.
+   */
+  readonly sfx: readonly string[];
+}
+
+/** Three cats who have not decided anything yet, and have not been told the time. */
+export function createCats(): CatsSlice {
+  return {
+    minds: CAT_IDS.map(id => ({ id, goal: null, restUntil: null, meowAt: null, pettedUntil: null })),
+    sfx: [],
+  };
+}
+
+/** Somewhere a cat has been told to walk to, for `actors.ts` to route. */
+export interface CatSend {
+  readonly cat: CatId;
+  readonly goal: Point;
+}
+
+/** The three of them one tick on, and everything that tick asked for. */
+export interface CatsStep {
+  readonly slice: CatsSlice;
+  readonly sends: readonly CatSend[];
+}
+
+const same = (one: CatMind, other: CatMind) =>
+  one.goal === other.goal &&
+  one.restUntil === other.restUntil &&
+  one.meowAt === other.meowAt &&
+  one.pettedUntil === other.pettedUntil;
+
+/**
+ * The cats after one tick of the clock.
+ *
+ * A cat standing still long enough picks somewhere else in the Room to be and
+ * sets off; one walking is left alone until it arrives; one being petted stays
+ * for the whole fuss. Each of them meows on its own schedule, so the apartment
+ * never produces three meows at once and never the same meow twice running.
+ *
+ * `places` is the cats in the Room the visitor is in, and nobody else: a cat in
+ * a Room nobody is looking at has nothing to decide. The slice comes back by
+ * identity when the tick changed nothing, so a quiet frame costs no repaint.
+ */
+export function tickCats(
+  slice: CatsSlice,
+  room: RoomId,
+  places: readonly CatPlace[],
+  now: number,
+  random: () => number,
+): CatsStep {
+  const sends: CatSend[] = [];
+  const sfx: string[] = [];
+  // Updated as each cat decides, so two of them settling on the same tick still
+  // see each other's choice rather than both reaching for the same mark.
+  const goals = new Map<CatId, Point | null>(slice.minds.map(mind => [mind.id, mind.goal]));
+  const minds = slice.minds.map(mind => {
+    const place = places.find(candidate => candidate.id === mind.id);
+    // A cat in a Room the visitor is not in has nothing to decide and nothing
+    // to say: it waits, exactly where the Room it was left in put it.
+    if (!place) return mind;
+
+    const meowing = reached(mind.meowAt, now, MEOW_MS);
+    if (meowing) sfx.push(meowOf(mind.id));
+    const meowAt = meowing ? now + between(MEOW_MS, random) : due(mind.meowAt, now, MEOW_MS, random);
+    const next = (decided: Partial<CatMind>): CatMind => {
+      const made = { ...mind, meowAt, ...decided };
+      return same(made, mind) ? mind : made;
+    };
+
+    // A fuss holds the cat where it is; it wanders off once it is over.
+    if (mind.pettedUntil !== null) {
+      if (now < mind.pettedUntil) return next({});
+      return next({ pettedUntil: null, restUntil: now + between(REST_MS, random) });
+    }
+    if (place.moving) return next({});
+    if (mind.goal !== null) {
+      // Arrived. Sit here a moment before thinking of anywhere else.
+      goals.set(mind.id, null);
+      return next({ goal: null, restUntil: now + between(REST_MS, random) });
+    }
+    if (!reached(mind.restUntil, now, REST_MS)) return next({ restUntil: due(mind.restUntil, now, REST_MS, random) });
+    const goal = freeMark(room, mind.id, places, goals, random);
+    // Nowhere free is a cat that stays put and asks again shortly, which is
+    // what keeps two of them off one mark without any of them queueing.
+    if (!goal) return next({ restUntil: now + between(REST_MS, random) });
+    goals.set(mind.id, goal);
+    sends.push({ cat: mind.id, goal });
+    return next({ goal, restUntil: null });
+  });
+
+  const settled = minds.every((mind, index) => mind === slice.minds[index]);
+  if (settled && sfx.length === 0 && slice.sfx.length === 0) return { slice, sends };
+  return { slice: { minds: settled ? slice.minds : minds, sfx }, sends };
+}
+
+/**
+ * The cats with whatever they were heading for forgotten.
+ *
+ * A goal is a mark in one Room, so it means nothing the moment the visitor
+ * walks into another one. Everything else a cat is carrying — when it next
+ * meows, the fuss it is having — comes with it, because they are the same three
+ * animals throughout rather than three new ones in every Room.
+ */
+export function arriveCats(slice: CatsSlice): CatsSlice {
+  if (slice.minds.every(mind => mind.goal === null)) return slice;
+  return { ...slice, minds: slice.minds.map(mind => (mind.goal === null ? mind : { ...mind, goal: null })) };
+}

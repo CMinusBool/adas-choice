@@ -52,7 +52,7 @@ export { arrivalView, entrywayProps, vaseState } from './world';
 
 // 08: the three cats — who they are, and where a Room lets them stand.
 export type { CatId } from './cats';
-export { CAT_IDS, CAT_MARKS } from './cats';
+export { CAT_CLEARANCE, CAT_IDS, CAT_MARKS } from './cats';
 
 // 18: the nine Films, and the rummage that pins three of them to the wall.
 export type { Film, FilmId } from './films';
