@@ -291,6 +291,64 @@ test('the same Beat passes under beat: true', () => {
   assert.equal(result.ok, true);
 });
 
+test('a Beat of the wrong size still fails on dimensions', () => {
+  const result = check(buildBeat(), { beat: true, columns: 2 });
+  assert.deepEqual(rules(result), ['dimensions']);
+  assert.match(result.failures[0].message, /is 768x640; 8 frames of 192x320 in 2 columns needs 384x1280/);
+});
+
+test('a Beat that declares no grid still fails on grid', () => {
+  const result = check(buildBeat(), { beat: true, frames: 0 });
+  assert.deepEqual(rules(result), ['grid']);
+});
+
+test('an RGB Beat still fails the rgba rule', () => {
+  assert.deepEqual(rules(check(buildBeat(), { beat: true, colourType: 2 })), ['rgba']);
+});
+
+test('a Beat that is one soft ramp still fails the alpha-binary rule', () => {
+  const sheet = buildBeat();
+  for (let index = 0; index < sheet.image.width * sheet.image.height; index += 4) {
+    sheet.image.data[index * 4 + 3] = 200;
+  }
+  // The ramp paints every fourth pixel, edges included, so edge-bleed rides along.
+  assert.equal(rules(check(sheet, { beat: true }))[0], 'alpha-binary');
+});
+
+test('colour under a transparent pixel of a Beat still fails the residue rule', () => {
+  const sheet = buildBeat();
+  sheet.image.data[0] = 12; // alpha is still 0 here.
+  assert.deepEqual(rules(check(sheet, { beat: true })), ['colour-residue']);
+});
+
+test('an empty frame in a Beat still fails the content rule', () => {
+  const sheet = buildBeat({ frames: 7 });
+  sheet.frames = 8;
+  const result = check(sheet, { beat: true });
+  assert.deepEqual(rules(result), ['content']);
+  assert.match(result.failures[0].message, /frame 8 is empty/);
+});
+
+test('a Beat frame touching its right edge still fails the edge-bleed rule', () => {
+  const sheet = buildSheet({
+    figure: index => (index === 3 ? { width: 180, height: 200, centreOffset: 6 } : { width: 40, height: 150 + index * 10 }),
+  });
+  const result = check(sheet, { beat: true });
+  assert.deepEqual(rules(result), ['edge-bleed']);
+  assert.match(result.failures[0].message, /frame 4 touches the frame's right edge/);
+});
+
+test('content in a spare cell of a Beat still fails the spare-cell rule', () => {
+  const sheet = buildBeat();
+  sheet.frames = 7;
+  assert.deepEqual(rules(check(sheet, { beat: true })), ['spare-cell']);
+});
+
+test('a Beat run records which contract was applied, and a Cycle run does not', () => {
+  assert.equal(check(buildBeat(), { beat: true }).stats.contract, 'beat');
+  assert.equal('contract' in check(buildSheet()).stats, false);
+});
+
 // --- the two real generations, when they are on disk ---------------------------
 
 const fixtureRoots = [
