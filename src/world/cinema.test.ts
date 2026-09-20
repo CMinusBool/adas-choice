@@ -9,6 +9,7 @@ import {
   attendedShelf,
   cinemaStep,
   createWorld,
+  expandedPoster,
   filmById,
   filmsOn,
   isSeated,
@@ -19,6 +20,7 @@ import {
   type ActorId,
   type ActorView,
   type CinemaShelf,
+  type FilmId,
   type World,
   type WorldInputs,
 } from './index';
@@ -372,5 +374,56 @@ describe('choosing a bookshelf', () => {
     const horror = runUntil(choose('horror', comedy), world => cinemaStep(world) === 'seated', 40000);
     expect(pinnedPosters(horror)).toEqual(filmsOn('horror'));
     expect(openShelf(horror)).toBe('horror');
+  });
+});
+
+// 19: the Poster expansion. Hovering or focusing a pinned Poster opens it out
+// of its frame, and once it has finished opening its Film can be read.
+describe('expanding a pinned Poster', () => {
+  /** The Cinema Room with one shelf's three Posters already on the wall. */
+  function wallUp(shelf: CinemaShelf = 'comedy', world = inTheCinema()): World {
+    const chosen = advance(world, { type: 'cinema-shelf-chosen', shelf, now: clock });
+    return runUntil(chosen, next => cinemaStep(next) === 'seated', 40000);
+  }
+
+  /** A pointer resting on a Poster, a Tab landing on one, or both leaving. */
+  function attend(world: World, film: FilmId | null): World {
+    return advance(world, { type: 'cinema-poster-attended', film, now: clock });
+  }
+
+  it('expands the Poster the visitor’s pointer or focus is on', () => {
+    const wall = wallUp();
+    expect(expandedPoster(wall)).toBe(null);
+
+    const hovered = attend(wall, 'knives-out');
+    expect(expandedPoster(hovered)).toBe('knives-out');
+  });
+
+  it('collapses it again when the pointer and focus both leave', () => {
+    const away = attend(attend(wallUp(), 'knives-out'), null);
+    expect(expandedPoster(away)).toBe(null);
+  });
+
+  it('moves the expansion to the Poster next door rather than opening two', () => {
+    const second = attend(attend(wallUp(), 'knives-out'), 'kung-fu-hustle');
+    expect(expandedPoster(second)).toBe('kung-fu-hustle');
+  });
+
+  it('is the same world when the same Poster is reported twice', () => {
+    const hovered = attend(wallUp(), 'knives-out');
+    expect(attend(hovered, 'knives-out')).toBe(hovered);
+  });
+
+  it('ignores a Film that is not on the wall', () => {
+    // The horror shelf's Posters are rolled up in their bookshelf, so there is
+    // nothing there to hover: a report about one means nothing.
+    const wall = wallUp();
+    expect(attend(wall, 'mr-vampire')).toBe(wall);
+    expect(expandedPoster(wall)).toBe(null);
+  });
+
+  it('ignores a Poster reported from another Room', () => {
+    const elsewhere = createWorld(plainArrival);
+    expect(attend(elsewhere, 'knives-out')).toBe(elsewhere);
   });
 });

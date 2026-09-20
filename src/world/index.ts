@@ -56,3 +56,6 @@ export type { Film, FilmId, FilmPairing } from './films';
 export { filmById, filmsOn } from './films';
 export type { CinemaStep } from './cinema';
 export { cinemaStep, openShelf, pinnedPosters, rummagingShelf } from './world';
+
+// 19: the Poster expansion, and the Film whose details it opens onto.
+export { expandedPoster, posterDetails } from './world';
