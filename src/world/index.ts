@@ -51,7 +51,7 @@ export { ARRIVAL_SECONDS } from './arrival';
 // the same marks. A Door's leaf has four states; the painter asks for one.
 export type { DoorState, RoomArrivalSlice } from './arrival';
 export { ROOM_ARRIVAL_SECONDS } from './arrival';
-export { roomArrivalState, roomDoorState } from './world';
+export { roomArrivalSfx, roomArrivalState, roomDoorState } from './world';
 export type { BreakableId } from './world';
 export { arrivalView, breakableState, entrywayProps, vaseState } from './world';
 

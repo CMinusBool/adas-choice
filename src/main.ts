@@ -1,5 +1,6 @@
 import { mountActivityRoom } from './dom/activity-room'; // 16: the Activity Room
 import { mountActors } from './dom/actors'; // 07: actors
+import { mountArrival } from './dom/arrival'; // 44: every Room's own entrance
 import { mountBreakables, readStoredBroken } from './dom/breakables'; // 09: the Breakables
 import { mountCats } from './dom/cats'; // 08: the cats
 import { mountCinemaRoom } from './dom/cinema-room'; // 17: the Cinema Room
@@ -51,6 +52,9 @@ const mounts: Mount[] = [
   mountCinemaRoom, // 17: the Cinema Room's bookshelves
   mountActivityRoom, // 16: the Activity Room
   mountSound, // 06: audio
+  // 44: after the sound painter, because the Door's own sounds go out through
+  // `playSfx` and that painter is what hands the module the world to ask.
+  mountArrival,
   mountActors, // 07: actors — the Cast stands on top of whatever the Room laid down.
   // 08: the cats slice, after the Cast, because the petting Beat stands in for
   // a cat the painter above has just placed and takes its box from her.

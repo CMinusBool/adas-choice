@@ -988,6 +988,18 @@ export function roomArrivalState(world: World): ArrivalState {
 }
 
 /**
+ * Sounds the Room's entrance has just made, to play once and then forget.
+ *
+ * Edge-triggered, exactly as the Entryway's and the cats' are: the names are
+ * the ones the last tick crossed, and the slice changes identity as they
+ * appear and again as they are forgotten, so a painter watching it plays each
+ * one exactly once without keeping a count of its own.
+ */
+export function roomArrivalSfx(world: World): readonly string[] {
+  return world.roomArrival.sfx;
+}
+
+/**
  * Which state a Room's Door leaf is in.
  *
  * Shut in every Room but the one being walked into, and shut there too once
