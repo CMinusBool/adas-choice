@@ -68,16 +68,18 @@ export const mountCats = (dispatch: Dispatch): Painter => {
    * here invents a `data-sheet` for a file that is not on disk.
    *
    * The one thing it asks of the Actors painter is the shape of the frame she
-   * is being drawn from, read back off the `aspect-ratio` that painter has
-   * just put on her own element: the Beat stands in for the sprite, so it has
-   * to be the sprite's box, and the sheet's frame shape is not the model's
-   * business and not worth measuring a second time. This painter runs after
-   * that one for exactly this reason.
+   * is being drawn from, which that painter publishes on her own element as
+   * `--actor-aspect`: the Beat stands in for the sprite, so it has to be the
+   * sprite's box, and the sheet's frame shape is not the model's business and
+   * not worth measuring a second time. This painter is mounted after that one
+   * for exactly this reason. A cat with no sheet loaded yet has no property to
+   * read and falls back to square, which is the same answer that painter's own
+   * `aspect` starts at.
    */
   function playPetting(cat: Fussable, view: ActorView): boolean {
     const layer = cat.beat;
     if (!layer) return false;
-    const aspect = Number(cat.element.style.aspectRatio);
+    const aspect = Number(cat.element.style.getPropertyValue('--actor-aspect'));
     const width = cat.height * (Number.isFinite(aspect) && aspect > 0 ? aspect : 1);
     const style = layer.style;
     style.setProperty('--x', String(view.at.x - width / 2));

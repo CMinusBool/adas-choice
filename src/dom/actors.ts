@@ -145,6 +145,12 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
     layer.element.hidden = false;
     layer.element.style.backgroundSize = `${layer.columns * 100}% ${layer.rows * 100}%`;
     sprite.element.style.aspectRatio = String(layer.aspect);
+    // The same number again, as a custom property, because the browser
+    // normalises `aspect-ratio` to `w / h` and a reader would have to parse it
+    // back. `src/dom/cats.ts` is that reader: the petting Beat stands in for
+    // this sprite and needs the box it is drawn in. It is the one thing this
+    // painter publishes for another, and this line is the whole contract.
+    sprite.element.style.setProperty('--actor-aspect', String(layer.aspect));
     // Carry the stride across rather than restarting it: turning round swaps
     // Míca onto her other sheet, and a Cycle that jumped back to its first
     // frame every time she changed her mind would read as a stumble.
