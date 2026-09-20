@@ -43,6 +43,9 @@
  * - counts `requestAnimationFrame` callbacks and measures whether an Actor's position
  *   advanced over two seconds — the check the pane could not do — with motion on and
  *   again with reduced motion emulated;
+ * - measures whether the Room **fits** each of `--fit-at`'s viewports without the page
+ *   scrolling, reporting the document's scroll height and the Room's own bottom edge
+ *   side by side so the two can never be confused for each other again;
  * - records the document's `lang` attribute and every console error and page error.
  *
  * Screenshots land under `<effort>/notes/screens/`, which is gitignored scratch and is
@@ -82,13 +85,28 @@ const WIDTHS = {
   narrow: { width: 390, height: 844 },
 };
 
+/**
+ * The viewports the fit check measures a Room against.
+ *
+ * Separate from `WIDTHS`, which is about screenshots. These are about one
+ * question ADR 0004 turns on — *does the Room fit without scrolling?* — so they
+ * are all 900 tall but the phone, which never had a 900 px screen to fit.
+ * Override with `--fit-at 1440x900,390x844`.
+ */
+const FIT_VIEWPORTS = [
+  { width: 1600, height: 900 },
+  { width: 1440, height: 900 },
+  { width: 1100, height: 900 },
+  { width: 390, height: 844 },
+];
+
 /** How long the rAF check watches an Actor for. Two seconds is a patrol leg's worth. */
 const MOTION_WINDOW_MS = 2000;
 
 /** Movement under this many CSS pixels over the window is noise, not a walk. */
 const MOVED_PX = 1;
 
-const HOW_TO = 'usage: node scripts/verify/room-shots.mjs (--launch <name> | --base-url <url>) [--routes a,b,c] [--ticket NN] [--effort <dir>] [--out <dir>] [--port N] [--keep-server]';
+const HOW_TO = 'usage: node scripts/verify/room-shots.mjs (--launch <name> | --base-url <url>) [--routes a,b,c] [--ticket NN] [--effort <dir>] [--out <dir>] [--port N] [--keep-server] [--fit-at 1440x900,390x844] [--no-fit]';
 
 // ---------------------------------------------------------------- arguments
 
@@ -102,6 +120,7 @@ function parseArguments(argv) {
     out: null,
     port: null,
     keepServer: false,
+    fitAt: FIT_VIEWPORTS,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
@@ -119,6 +138,8 @@ function parseArguments(argv) {
     else if (flag === '--out') options.out = value();
     else if (flag === '--port') options.port = Number(value());
     else if (flag === '--keep-server') options.keepServer = true;
+    else if (flag === '--fit-at') options.fitAt = parseViewports(value());
+    else if (flag === '--no-fit') options.fitAt = [];
     else if (flag === '--help' || flag === '-h') { console.log(HOW_TO); process.exit(0); }
     else fail(`unknown argument ${flag}`);
   }
@@ -126,6 +147,17 @@ function parseArguments(argv) {
   if (options.routes.length === 0) fail('--routes listed nothing');
   options.ticket = /^\d+$/.test(options.ticket) ? String(options.ticket).padStart(2, '0') : options.ticket;
   return options;
+}
+
+/** `1440x900,390x844` → the viewports the fit check measures against. */
+function parseViewports(text) {
+  const sizes = text.split(',').map(entry => entry.trim()).filter(Boolean).map(entry => {
+    const match = /^(\d+)x(\d+)$/.exec(entry);
+    if (!match) fail(`--fit-at wants WIDTHxHEIGHT, not ${entry}`);
+    return { width: Number(match[1]), height: Number(match[2]) };
+  });
+  if (sizes.length === 0) fail('--fit-at listed no viewport');
+  return sizes;
 }
 
 function fail(message) {
@@ -169,7 +201,7 @@ function currentBranch(repoRoot) {
  * (`vite preview`) this walks it back to that bin's own JS and spawns it with this Node.
  * One process, killable without `taskkill`. Anything else falls back to a shell spawn.
  */
-async function startServer(repoRoot, name, wanted) {
+export async function startServer(repoRoot, name, wanted) {
   const configPath = path.join(repoRoot, '.claude', 'launch.json');
   if (!existsSync(configPath)) fail(`no ${configPath} to read --launch ${name} from`);
   const configurations = JSON.parse(readFileSync(configPath, 'utf8')).configurations ?? [];
@@ -278,7 +310,7 @@ async function answers(url) {
 
 // ------------------------------------------------------------------ browser
 
-async function loadPlaywright() {
+export async function loadPlaywright() {
   try {
     return await import(pathToFileURL(PLAYWRIGHT_PACKAGE).href);
   } catch (error) {
@@ -347,12 +379,56 @@ const WATCH = async ({ room, windowMs }) => {
 };
 
 /**
+ * Does the Room fit the viewport, or does the visitor have to scroll?
+ *
+ * ADR 0004 turns on this one number and nobody had measured it: ticket 45's
+ * implementer reported the Game Room "ending at 863-885 px" and ticket 44's
+ * verifier reported `scrollHeight` 1001 px against `innerHeight` 900, from two
+ * different harnesses. Those are **different quantities** — a Room's bottom
+ * edge is not the document's scroll height, and everything below the Room
+ * (the page's own footer and padding) sits between them — so neither refuted
+ * the other and the question stayed open through the whole run.
+ *
+ * So both are taken here, at once, side by side, and the derived answer is
+ * `scrolls`: the document's scroll height against the viewport, which is the
+ * only one of them the visitor can feel. `roomBottom` is kept beside it to say
+ * *why* a page scrolls when it does — a Room taller than the viewport and a
+ * short Room under a tall page are different problems with different fixes.
+ *
+ * `scrollsSideways` is here because `#games-scene` is deliberately a horizontal
+ * scroller below 1080 px of rendered width (ticket 47): that is the Room's own
+ * pan and is expected, but the *document* scrolling sideways never is.
+ */
+const FIT = ({ room }) => {
+  const doc = document.documentElement;
+  const roomElement = document.querySelector(`[data-room="${room}"]`);
+  const stage = document.querySelector(`[data-stage="${room}"]`);
+  const bottomOf = element => {
+    if (!element) return null;
+    const box = element.getBoundingClientRect();
+    return Number((box.bottom + window.scrollY).toFixed(1));
+  };
+  return {
+    viewport: { width: window.innerWidth, height: window.innerHeight },
+    scrollHeight: doc.scrollHeight,
+    bodyScrollHeight: document.body.scrollHeight,
+    clientHeight: doc.clientHeight,
+    roomBottom: bottomOf(roomElement),
+    stageBottom: bottomOf(stage),
+    // One pixel of slack: a fractional layout height rounds up into an integer
+    // `scrollHeight` and that is not a scrollbar anybody sees.
+    scrolls: doc.scrollHeight > window.innerHeight + 1,
+    scrollsSideways: doc.scrollWidth > doc.clientWidth + 1,
+  };
+};
+
+/**
  * One pass over every route in one motion condition.
  *
  * `about:blank` between routes forces a real load rather than a hash change, so every
  * route is measured from the same cold start the visitor gets.
  */
-async function walkRoutes(context, { baseUrl, routes, outDir, ticket, reduced, widths }) {
+async function walkRoutes(context, { baseUrl, routes, outDir, ticket, reduced, widths, fitAt }) {
   const page = await context.newPage();
   const results = [];
   let bucket = null;
@@ -364,7 +440,7 @@ async function walkRoutes(context, { baseUrl, routes, outDir, ticket, reduced, w
   });
 
   for (const route of routes) {
-    const result = { route, reducedMotion: reduced, ok: true, consoleErrors: [], screenshots: [], error: null };
+    const result = { route, reducedMotion: reduced, ok: true, consoleErrors: [], screenshots: [], fit: [], error: null };
     bucket = result;
     results.push(result);
     try {
@@ -396,6 +472,14 @@ async function walkRoutes(context, { baseUrl, routes, outDir, ticket, reduced, w
         // and the owner cannot see the one thing they were sent the picture for.
         await page.screenshot({ path: file, fullPage: true });
         result.screenshots.push(file);
+      }
+
+      // Last, because it leaves the viewport wherever the final size put it and
+      // every route re-sets it on the way in anyway.
+      for (const size of fitAt ?? []) {
+        await page.setViewportSize(size);
+        await page.waitForTimeout(200);
+        result.fit.push(await page.evaluate(FIT, { room: route }));
       }
     } catch (error) {
       result.ok = false;
@@ -452,6 +536,9 @@ async function main() {
         { name: 'desktop', size: WIDTHS.desktop },
         { name: 'narrow', size: WIDTHS.narrow },
       ],
+      // Only this pass: reduced motion stops things moving, it does not re-lay
+      // the page out, so measuring the fit twice would cost time and say the same.
+      fitAt: options.fitAt,
     });
     await motionContext.close();
 
@@ -480,6 +567,7 @@ async function main() {
           withMotion: summarise(normal),
           withReducedMotion: summarise(reduced),
         },
+        fit: normal.fit,
         screenshots: [...normal.screenshots, ...reduced.screenshots],
       });
     }
@@ -514,7 +602,13 @@ function summarise(result) {
   };
 }
 
-main().catch(error => {
-  console.error(`room-shots: ${error.stack ?? error.message}`);
-  process.exit(1);
-});
+// Only when run as a command. `startServer` and `loadPlaywright` above are the
+// two pieces of plumbing every other check in this directory would otherwise
+// copy — `breakable-fall.mjs` imports them — and importing this file must not
+// walk all four Rooms as a side effect of that.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch(error => {
+    console.error(`room-shots: ${error.stack ?? error.message}`);
+    process.exit(1);
+  });
+}
