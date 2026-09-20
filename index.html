@@ -388,6 +388,73 @@
             <span class="visually-hidden" data-music-source-label>讓放映機空轉</span>
           </button>
           <button class="cinema-prop projector-gate" type="button" data-projector-gate aria-disabled="true" style="--x:445;--y:600;--w:100;--h:100" aria-label="還沒有膠卷。先選一部片。" data-i18n-aria="projectorGateEmpty"></button>
+          <!--
+            20: what the projector throws, from `design/13-cinema-room.md`
+            §6 and §10.
+
+            P20 and the room dim first: the beam is a cone from the lens up to
+            the screen's bottom edge, and the dim is the Room going to the
+            pictures — everything under it darkens, and nothing under it stops
+            working, which is why it takes no pointer events. Both are placed
+            in stage units like every other Prop, and both are `hidden` until
+            there is a picture: `src/dom/cinema-room.ts` shows them.
+          -->
+          <span class="cinema-prop cinema-dim" aria-hidden="true" style="--x:0;--y:0;--w:1600;--h:900" hidden></span>
+          <span class="cinema-prop cinema-beam" aria-hidden="true" style="--x:210;--y:95;--w:420;--h:595" hidden></span>
+          <!--
+            §10: the screen sheet's own box (220, 100, 400 x 225), holding the
+            Bumper and then the title card.
+
+            The Bumper is drawn here in CSS and SVG from the design note's own
+            shapes and colours (§10.2) — no generated frames, so it is crisp at
+            every shell width and its reduced-motion form (§10.3) is a matter
+            of which animations run. Nothing in it names a file.
+
+            The card is the one part a reader needs, so it is not
+            `aria-hidden`: the Film's title in both languages, its year, and —
+            once the card becomes the slate — the link out that ADR 0002 makes
+            the end of the trail. The Film's own strings come from
+            `src/world/films.ts`; the studio's come from `src/copy.ts`.
+          -->
+          <div class="cinema-prop cinema-film" style="--x:220;--y:100;--w:400;--h:225" hidden>
+            <div class="bumper" aria-hidden="true">
+              <span class="bumper-ground"></span>
+              <!-- Ahead of the beanbags in the markup, because the tails come
+                   up from behind them: the two silhouettes have to paint over
+                   the base of each tail for it to read as one. -->
+              <svg class="bumper-art" viewBox="0 0 400 225" preserveAspectRatio="none" focusable="false" aria-hidden="true">
+                <!-- The cinema-screen rectangle, drawn on by its own dash. -->
+                <rect class="bumper-frame" x="60" y="24" width="280" height="178" rx="8" />
+                <!-- Míca's broad tail, with the light-brown patch in its
+                     middle, and Mira's slender one with its four dark rings
+                     and dark tip: the two cats, named by the only part of them
+                     anyone ever sees over the back of a beanbag. -->
+                <g class="bumper-tails">
+                  <path class="tail-mica" d="M158 86C148 72 136 54 143 38" />
+                  <path class="tail-mica-patch" d="M146 70C142 62 141 54 142 46" />
+                  <path class="tail-mira" d="M244 86C258 72 268 54 262 38" />
+                  <path class="tail-mira-rings" d="M244 86C258 72 268 54 262 38" />
+                  <circle class="tail-mira-tip" cx="262" cy="38" r="5" />
+                </g>
+              </svg>
+              <span class="bumper-bag bumper-bag-left"></span>
+              <span class="bumper-bag bumper-bag-right"></span>
+              <span class="bumper-wordmark">
+                <span class="bumper-name" data-i18n="studioName">懶骨頭影業</span>
+                <span class="bumper-name-other"></span>
+                <span class="bumper-presents" data-i18n="studioPresents">呈獻</span>
+              </span>
+              <span class="bumper-iris"></span>
+              <span class="bumper-lamp"></span>
+            </div>
+            <div class="film-card" aria-live="polite" hidden>
+              <span class="film-grain" aria-hidden="true"></span>
+              <span class="film-title-main"></span>
+              <span class="film-title-other"></span>
+              <span class="film-year"></span>
+              <a class="film-slate-link" target="_blank" rel="noopener" hidden data-i18n="detailsLink">在 Apple TV 找到它</a>
+            </div>
+          </div>
         </div>
         <!-- 19, §4.6: what an expanded Poster opens onto. The Film's own
              strings — both titles, the year, the premise and the reason — are
@@ -404,7 +471,11 @@
           <p class="details-text details-premise"></p>
           <h3 class="details-label" data-i18n="detailsReason">為什麼值得看</h3>
           <p class="details-text details-reason"></p>
+          <!-- 20: the primary action, and the one explicit act the evening
+               turns on: it closes the card, flattens the Poster, and sends him
+               to the cabinet for that Film's reel. -->
           <div class="details-actions">
+            <button class="details-choose" type="button" data-i18n="detailsChoose">今晚就看這部</button>
             <a class="details-link" target="_blank" rel="noopener" data-i18n="detailsLink">在 Apple TV 找到它</a>
             <button class="details-close" type="button" data-i18n="detailsClose">收起</button>
           </div>

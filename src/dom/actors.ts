@@ -7,6 +7,7 @@ import {
   actorsIn,
   arrivalView, // 14: the Entryway
   catSfx, // 08: the cats
+  cinemaNeedsClock, // 20: the Cinema Room's Bumper
   isBeingPetted,
   isCat,
   motionIsOn,
@@ -230,7 +231,13 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
    */
   function needsClock() {
     const room = world.rooms.current;
-    if (!motionIsOn(world) || document.hidden || !onScreen.has(room)) return false;
+    if (document.hidden || !onScreen.has(room)) return false;
+    // 20: a Film on the Cinema Room's screen is the one thing in the apartment
+    // that still runs on the clock while motion is off. It is not the
+    // apartment moving: it is four seconds of Bumper with its own music, which
+    // §10.3 keeps whole under reduced motion and only simplifies inside.
+    if (cinemaNeedsClock(world)) return true;
+    if (!motionIsOn(world)) return false;
     return actorsIn(world, room).length > 0 || arrivalView(world).state === 'playing';
   }
 

@@ -3,24 +3,31 @@ import { describe, expect, it } from 'vitest';
 import {
   CINEMA_MARKS,
   CINEMA_SHELVES,
+  REEL_STEPS,
   actorView,
   actorsIn,
   advance,
   attendedShelf,
+  cinemaNeedsClock,
   cinemaStep,
   createWorld,
   expandedPoster,
   filmById,
   filmsOn,
+  isAudible,
+  isRoomMusicAudible,
   isSeated,
   isWalkable,
+  loadedReel,
   openShelf,
   pinnedPosters,
   posterDetails,
+  rollingFilm,
   rummagingShelf,
   type ActorId,
   type ActorView,
   type CinemaShelf,
+  type CinemaStep,
   type FilmId,
   type World,
   type WorldInputs,
@@ -507,5 +514,292 @@ describe('expanding a pinned Poster', () => {
     expect(pinnedPosters(back)).toEqual(filmsOn('comedy'));
     expect(expandedPoster(back)).toBe(null);
     expect(posterDetails(back)).toBe(null);
+  });
+});
+
+// 20: the reel, the projector and the Bumper. Choosing a Film sends him to the
+// cabinet to find its reel, he loads it, and the projector plays the studio's
+// Bumper into the Film's title card and then its slate.
+describe('choosing a Film, and the reel he fetches for it', () => {
+  /** The Cinema Room with one shelf's three Posters already on the wall. */
+  function wallUp(shelf: CinemaShelf = 'comedy', world = inTheCinema()): World {
+    const chosen = advance(world, { type: 'cinema-shelf-chosen', shelf, now: clock });
+    return runUntil(chosen, next => cinemaStep(next) === 'seated', 40000);
+  }
+
+  /** The visitor pressing the details card's primary action. */
+  function choose(world: World, film: FilmId): World {
+    return advance(world, { type: 'cinema-film-chosen', film, now: clock });
+  }
+
+  it('sends him to the cabinet to look for that Film’s reel', () => {
+    const chosen = choose(wallUp(), 'knives-out');
+    expect(cinemaStep(chosen)).toBe('fetching');
+
+    const searching = runUntil(chosen, next => cinemaStep(next) === 'searching', 40000);
+    expect(who(searching, 'boy').at).toEqual(CINEMA_MARKS.cabinet);
+  });
+
+  /**
+   * Every step the Room passes through, in the order it reached them.
+   *
+   * One entry per change rather than one per tick, so what comes back is the
+   * route the sequence took and not how long it spent on each leg.
+   */
+  function route(world: World, done: (world: World) => boolean, ms = 40000): CinemaStep[] {
+    const seen: CinemaStep[] = [cinemaStep(world)];
+    runUntil(
+      world,
+      next => {
+        if (cinemaStep(next) !== seen[seen.length - 1]) seen.push(cinemaStep(next));
+        return done(next);
+      },
+      ms,
+    );
+    return seen;
+  }
+
+  // The spec's Testing Decisions name this one: the Bumper-to-Film sequence
+  // advancing in order, and refusing to run backwards.
+  it('runs the cabinet search, the loading, the Bumper and the title card in order', () => {
+    const seen = route(choose(wallUp(), 'knives-out'), next => cinemaStep(next) === 'slate');
+    expect(seen).toEqual([...REEL_STEPS]);
+  });
+
+  it('never takes a step backwards, however long the visitor watches', () => {
+    // Asserted on every tick rather than on the route above, because a step
+    // the sequence dipped into and came straight back out of would not show
+    // up in a list of changes at all.
+    let world = choose(wallUp(), 'knives-out');
+    let furthest = 0;
+    for (let tick = 0; tick < 1200; tick += 1) {
+      clock += 16;
+      world = advance(world, { type: 'actor-tick', now: clock });
+      const reached = REEL_STEPS.indexOf(cinemaStep(world));
+      expect(reached).toBeGreaterThanOrEqual(furthest);
+      furthest = reached;
+    }
+    // And it did get somewhere: a sequence that never moved would pass the
+    // assertion above without meaning anything.
+    expect(cinemaStep(world)).toBe('slate');
+  });
+
+  it('is unmoved by a tick whose clock reads earlier than the Beat it is in', () => {
+    const rolling = runUntil(choose(wallUp(), 'knives-out'), next => cinemaStep(next) === 'bumper', 40000);
+    // A tab coming back to the front, a clock the page never promised to keep
+    // going up: neither is licence to un-play four seconds of Bumper.
+    const stale = advance(rolling, { type: 'actor-tick', now: 1 });
+    expect(cinemaStep(stale)).toBe('bumper');
+    expect(rollingFilm(stale)?.id).toBe('knives-out');
+  });
+
+  it('reads out the Film’s title in both languages while it rolls', () => {
+    const rolling = runUntil(choose(wallUp('romance'), 'about-time'), next => cinemaStep(next) === 'title', 40000);
+    const film = rollingFilm(rolling);
+    expect(film?.title).toEqual({ 'zh-Hant': '真愛每一天', en: 'About Time' });
+    expect(film?.year).toBe(2013);
+    // The title cue is the shelf's, which is the genre the card is dressed in.
+    expect(film?.shelf).toBe('romance');
+  });
+
+  it('shows nothing on the screen before the reel is threaded', () => {
+    const chosen = choose(wallUp(), 'knives-out');
+    expect(rollingFilm(chosen)).toBe(null);
+    expect(loadedReel(chosen)).toBe(null);
+
+    const loading = runUntil(chosen, next => cinemaStep(next) === 'loading', 40000);
+    expect(rollingFilm(loading)).toBe(null);
+    expect(loadedReel(loading)).toBe(null);
+  });
+
+  // §10.3: the Bumper's four seconds and its music are unchanged under reduced
+  // motion — only the drop, the bounce and the iris go. It is a Film being
+  // projected, not the apartment moving, so it is the one thing in this Room
+  // that still runs on the clock when everything else is told to stand still.
+  describe('when the visitor has asked the apartment to hold still', () => {
+    /** The Cinema Room, reached without a single frame of animation. */
+    function stillWallUp(shelf: CinemaShelf = 'comedy'): World {
+      return wallUp(shelf, inTheCinema(createWorld({ ...plainArrival, reducedMotion: true })));
+    }
+
+    it('walks the errand out to the Bumper without waiting for anything', () => {
+      // No tick at all: the fetch and the search and the loading are Beats,
+      // and a visitor who asked for stillness is owed their outcome.
+      const chosen = advance(stillWallUp(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
+      expect(cinemaStep(chosen)).toBe('bumper');
+      expect(loadedReel(chosen)).toBe('knives-out');
+      expect(who(chosen, 'boy').at).toEqual(CINEMA_MARKS.boySeat);
+    });
+
+    it('still gives the Bumper its four seconds and the title card its three', () => {
+      const chosen = advance(stillWallUp(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
+      const started = clock;
+
+      const titled = runUntil(chosen, next => cinemaStep(next) === 'title', 20000);
+      expect(clock - started).toBeGreaterThanOrEqual(4000);
+      expect(cinemaStep(titled)).toBe('title');
+
+      const slated = runUntil(titled, next => cinemaStep(next) === 'slate', 20000);
+      expect(clock - started).toBeGreaterThanOrEqual(7000);
+      expect(cinemaStep(slated)).toBe('slate');
+    });
+
+    it('tells the page to keep the clock running while the picture is on', () => {
+      // The frame loop stops when the apartment holds still, and it is right
+      // to: nothing else here has anywhere to be. A Film does.
+      const chosen = advance(stillWallUp(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
+      expect(cinemaNeedsClock(chosen)).toBe(true);
+
+      const slated = runUntil(chosen, next => cinemaStep(next) === 'slate', 20000);
+      // The slate holds until somebody ends it, so there is nothing left to
+      // wait for and the loop may stop again.
+      expect(cinemaNeedsClock(slated)).toBe(false);
+    });
+  });
+});
+
+// 20, §5: the projector's second affordance. The motor switch is the Room's
+// Music Source and ticket 06 owns it; this is the gate lever beside it, which
+// rolls the reel that is already threaded and stops the one that is running.
+describe('the projector’s gate lever', () => {
+  function wallUp(shelf: CinemaShelf = 'comedy', world = inTheCinema()): World {
+    const chosen = advance(world, { type: 'cinema-shelf-chosen', shelf, now: clock });
+    return runUntil(chosen, next => cinemaStep(next) === 'seated', 40000);
+  }
+
+  /** The Room with a Film chosen and its reel already on the screen. */
+  function rolling(film: FilmId = 'knives-out', shelf: CinemaShelf = 'comedy'): World {
+    const chosen = advance(wallUp(shelf), { type: 'cinema-film-chosen', film, now: clock });
+    return runUntil(chosen, next => cinemaStep(next) === 'slate', 40000);
+  }
+
+  function pullGate(world: World): World {
+    return advance(world, { type: 'projector-gate-toggled', now: clock });
+  }
+
+  it('does nothing at all while the machine is empty', () => {
+    const bare = wallUp();
+    expect(loadedReel(bare)).toBe(null);
+    expect(pullGate(bare)).toBe(bare);
+  });
+
+  it('stops the reel and leaves it threaded', () => {
+    const stopped = pullGate(rolling());
+    expect(cinemaStep(stopped)).toBe('seated');
+    expect(rollingFilm(stopped)).toBe(null);
+    // The reel is still on the spindle, which is the whole of the design
+    // note's `loaded`: rolling it again costs no second trip to the cabinet.
+    expect(loadedReel(stopped)).toBe('knives-out');
+  });
+
+  it('rolls a threaded reel again from the top of the Bumper', () => {
+    const again = pullGate(pullGate(rolling()));
+    expect(cinemaStep(again)).toBe('bumper');
+    expect(rollingFilm(again)?.id).toBe('knives-out');
+
+    // And it runs the same route from there, without another errand.
+    const slated = runUntil(again, next => cinemaStep(next) === 'slate', 40000);
+    expect(cinemaStep(slated)).toBe('slate');
+    expect(who(slated, 'boy').at).toEqual(CINEMA_MARKS.boySeat);
+  });
+
+  it('is ignored while he is still away fetching the reel', () => {
+    const fetching = advance(wallUp(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
+    expect(cinemaStep(fetching)).toBe('fetching');
+    expect(pullGate(fetching)).toBe(fetching);
+  });
+
+  it('fetches a new reel when a second Film is chosen mid-picture', () => {
+    const swapped = advance(rolling(), { type: 'cinema-film-chosen', film: 'eat-drink-man-woman', now: clock });
+    // §4.6: the Film that was rolling stops first, and the machine is empty
+    // again until he comes back from the cabinet with the other can.
+    expect(cinemaStep(swapped)).toBe('fetching');
+    expect(rollingFilm(swapped)).toBe(null);
+    expect(loadedReel(swapped)).toBe(null);
+
+    const slated = runUntil(swapped, next => cinemaStep(next) === 'slate', 40000);
+    expect(rollingFilm(slated)?.id).toBe('eat-drink-man-woman');
+  });
+
+  it('ignores a Film whose Poster is not on the wall', () => {
+    // The card that offers the choice only opens on a pinned Poster, so a
+    // choice of anything else is a report about nothing.
+    const wall = wallUp();
+    expect(advance(wall, { type: 'cinema-film-chosen', film: 'mr-vampire', now: clock })).toBe(wall);
+  });
+});
+
+// 20, §9: the projector's idle clatter is the Room Music and the Bumper
+// carries its own bed of it, so the two are never heard at once.
+describe('what the Cinema Room sounds like while a Film rolls', () => {
+  function wallUp(world = inTheCinema()): World {
+    const chosen = advance(world, { type: 'cinema-shelf-chosen', shelf: 'comedy', now: clock });
+    return runUntil(chosen, next => cinemaStep(next) === 'seated', 40000);
+  }
+
+  /** The Room with the visitor's first interaction behind it and the motor on. */
+  function motorRunning(): World {
+    const touched = advance(wallUp(), { type: 'visitor-interacted' });
+    return advance(touched, { type: 'music-source-toggled', room: 'cinema' });
+  }
+
+  it('plays the projector’s idle clatter while nothing is on the screen', () => {
+    expect(isRoomMusicAudible(motorRunning(), 'cinema')).toBe(true);
+  });
+
+  it('takes the clatter away for as long as the picture is up', () => {
+    const chosen = advance(motorRunning(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
+    const rolling = runUntil(chosen, next => cinemaStep(next) === 'bumper', 40000);
+    expect(isAudible(rolling, 'film')).toBe(true);
+    expect(isRoomMusicAudible(rolling, 'cinema')).toBe(false);
+
+    // Through the title card and the slate, too: the lights stay down.
+    const slated = runUntil(rolling, next => cinemaStep(next) === 'slate', 40000);
+    expect(isRoomMusicAudible(slated, 'cinema')).toBe(false);
+  });
+
+  it('gives the clatter back when the gate lever stops the reel', () => {
+    const chosen = advance(motorRunning(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
+    const rolling = runUntil(chosen, next => cinemaStep(next) === 'slate', 40000);
+    const stopped = advance(rolling, { type: 'projector-gate-toggled', now: clock });
+    // The Music Source was never switched off, only veiled, so it comes back.
+    expect(isRoomMusicAudible(stopped, 'cinema')).toBe(true);
+    expect(isAudible(stopped, 'film')).toBe(false);
+  });
+
+  it('is silenced along with everything else by the header control', () => {
+    const chosen = advance(motorRunning(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
+    const rolling = runUntil(chosen, next => cinemaStep(next) === 'bumper', 40000);
+    const muted = advance(rolling, { type: 'sound-toggled' });
+    expect(isAudible(muted, 'film')).toBe(false);
+    expect(isAudible(muted, 'sfx')).toBe(false);
+    expect(isRoomMusicAudible(muted, 'cinema')).toBe(false);
+    // The Film is still on the screen; it is the sound that has been veiled.
+    expect(rollingFilm(muted)?.id).toBe('knives-out');
+  });
+
+  it('stops the Film when the visitor walks out, and leaves the reel in', () => {
+    const chosen = advance(motorRunning(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
+    const rolling = runUntil(chosen, next => cinemaStep(next) === 'bumper', 40000);
+    const left = advance(rolling, { type: 'hash-changed', hash: '#/entryway' });
+    expect(isAudible(left, 'film')).toBe(false);
+    expect(rollingFilm(left)).toBe(null);
+
+    // §8.3: they come back to a loaded projector rather than to a Boy still
+    // standing at the cabinet holding a film can.
+    const back = inTheCinema(left);
+    expect(cinemaStep(back)).toBe('seated');
+    expect(loadedReel(back)).toBe('knives-out');
+    expect(isRoomMusicAudible(back, 'cinema')).toBe(true);
+  });
+
+  it('threads the reel he was still fetching when the visitor left', () => {
+    const fetching = advance(wallUp(), { type: 'cinema-film-chosen', film: 'kung-fu-hustle', now: clock });
+    expect(cinemaStep(fetching)).toBe('fetching');
+
+    const back = inTheCinema(advance(fetching, { type: 'hash-changed', hash: '#/entryway' }));
+    expect(cinemaStep(back)).toBe('seated');
+    expect(loadedReel(back)).toBe('kung-fu-hustle');
+    expect(isSeated(back, 'boy')).toBe(true);
   });
 });

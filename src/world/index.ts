@@ -68,3 +68,9 @@ export { cinemaStep, openShelf, pinnedPosters, rummagingShelf } from './world';
 
 // 19: the Poster expansion, and the Film whose details it opens onto.
 export { expandedPoster, posterDetails } from './world';
+
+// 20: the reel he fetches for a chosen Film, and the projector that rolls it.
+// `REEL_STEPS` is the order the sequence runs in and the one rule about it:
+// forwards, one step at a time, and never back the way it came.
+export { REEL_STEPS } from './cinema';
+export { cinemaNeedsClock, loadedReel, rollingFilm } from './world';

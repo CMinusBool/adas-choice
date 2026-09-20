@@ -77,6 +77,21 @@ const RUMMAGE_MS = 1800;
 const PIN_MS = 1000;
 
 /**
+ * How long each Beat of the reel sequence holds, in milliseconds.
+ *
+ * The first two are Beats like the rummage — B7 and B8 of the design note —
+ * and stop when the apartment is asked to hold still. The last two are not:
+ * the Bumper and the title card are a Film being projected, with their own
+ * music, and §10.3 keeps both at their full length under reduced motion with
+ * only the performance inside them simplified. That difference is the whole
+ * reason `filmUntil` exists beside `beatUntil` below.
+ */
+const SEARCH_MS = 1800;
+const LOAD_MS = 1400;
+const BUMPER_MS = 4000;
+const TITLE_MS = 3000;
+
+/**
  * How long a Poster takes to come out of its frame, in milliseconds.
  *
  * The design note's 450 ms: the Poster scales about its centre while its clip
@@ -88,12 +103,18 @@ const PIN_MS = 1000;
 const EXPAND_MS = 450;
 
 /**
- * Where the rummage has got to.
+ * Where the Room's sequence has got to.
  *
- * The steps run in this order and never backwards: choosing a shelf starts at
- * `walking-to-shelf` and the errand ends back at `seated`. Nothing outside this
- * file may put the Room into a step; it advances by the Boy arriving somewhere
- * and by the clock, both of which arrive as arguments.
+ * One machine, two sequences, and they never run backwards. The shelf sequence
+ * is `walking-to-shelf → rummaging → carrying → pinning → returning`; the reel
+ * sequence is `fetching → searching → loading → bumper → title → slate`. Both
+ * begin and end at `seated`, which is the Room with nothing on: the design
+ * note's `idle` and `loaded` are both this step, and what tells them apart is
+ * whether there is a reel on the projector (`reel`), which is also the only
+ * thing the gate lever needs to know.
+ *
+ * Nothing outside this file may put the Room into a step; it advances by the
+ * Boy arriving somewhere and by the clock, both of which arrive as arguments.
  */
 export type CinemaStep =
   | 'seated'
@@ -101,7 +122,35 @@ export type CinemaStep =
   | 'rummaging'
   | 'carrying'
   | 'pinning'
-  | 'returning';
+  | 'returning'
+  // 20: the reel sequence, from the cabinet to the slate.
+  | 'fetching'
+  | 'searching'
+  | 'loading'
+  | 'bumper'
+  | 'title'
+  | 'slate';
+
+/**
+ * The reel sequence in the order it runs, for the one rule about it.
+ *
+ * It is here to be read, not to be indexed into: `stepCinema` moves between
+ * these by name, and this is what "advances in order and never backwards"
+ * means when a test or a reader asks.
+ */
+export const REEL_STEPS: readonly CinemaStep[] = [
+  'fetching',
+  'searching',
+  'loading',
+  'bumper',
+  'title',
+  'slate',
+];
+
+/** Is the projector throwing a picture — the Bumper, the title card or the slate? */
+function isRolling(step: CinemaStep): boolean {
+  return step === 'bumper' || step === 'title' || step === 'slate';
+}
 
 /** What the Cinema Room is doing, and what is on its wall. */
 export interface CinemaSlice {
@@ -143,10 +192,38 @@ export interface CinemaSlice {
    * performance they asked not to see.
    */
   readonly expandedUntil: number | null;
+  /**
+   * The Film he has gone to the cabinet for, while he is still fetching it.
+   *
+   * The reel sequence's counterpart to `errand`: non-null from the moment the
+   * visitor chooses a Film until the reel is threaded, and `null` the rest of
+   * the time, including while that same Film is on the screen.
+   */
+  readonly fetching: FilmId | null;
+  /**
+   * The Film whose reel is on the projector, or `null` for an empty machine.
+   *
+   * This is the whole of the difference between the design note's `idle` and
+   * `loaded`: the gate lever is enabled when there is a reel to roll, and a
+   * reel stays threaded after the visitor stops it, so rolling it again costs
+   * no second trip to the cabinet.
+   */
+  readonly reel: FilmId | null;
 }
 
 export function createCinema(): CinemaSlice {
-  return { attended: null, step: 'seated', errand: null, pinned: [], until: null, expanded: null, expandedUntil: null };
+  return {
+    attended: null,
+    step: 'seated',
+    errand: null,
+    pinned: [],
+    until: null,
+    expanded: null,
+    expandedUntil: null,
+    // 20: an empty projector, and nobody sent for a reel.
+    fetching: null,
+    reel: null,
+  };
 }
 
 /** The genre whose Posters are on the wall, read off the Posters themselves. */
@@ -162,7 +239,10 @@ function shelfOf(film: FilmId): CinemaShelf {
 
 /** The Room with a shelf chosen: whatever he was doing, he is off to this one. */
 export function withChosenShelf(slice: CinemaSlice, shelf: CinemaShelf): CinemaSlice {
-  return { ...slice, step: 'walking-to-shelf', errand: shelf, until: null };
+  // 20: including a reel he had set off for. The shelf is the new errand, and
+  // a Film on the screen stops — the step is the Room's one state machine, so
+  // being on this errand is already being on no other.
+  return { ...slice, step: 'walking-to-shelf', errand: shelf, fetching: null, until: null };
 }
 
 /**
@@ -177,11 +257,26 @@ export function withChosenShelf(slice: CinemaSlice, shelf: CinemaShelf): CinemaS
  */
 export function settleCinema(slice: CinemaSlice): CinemaSlice {
   const pinned = slice.errand ? filmsOn(slice.errand) : slice.pinned;
-  const settled = slice.attended === null && slice.step === 'seated' && pinned === slice.pinned;
+  // 20: a reel he was fetching is threaded rather than left in the cabinet, so
+  // the projector they come back to is loaded and its gate lever works. A Film
+  // that was rolling stops: the Bumper is a Cinema Room moment (§8.3).
+  const reel = slice.fetching ?? slice.reel;
+  const settled =
+    slice.attended === null && slice.step === 'seated' && pinned === slice.pinned && reel === slice.reel;
   // 19: nobody is looking at a Poster in a Room they have walked out of, so the
   // wall they come back to is the wall, flat, however they left it.
   if (settled && slice.expanded === null) return slice;
-  return { attended: null, step: 'seated', errand: null, pinned, until: null, expanded: null, expandedUntil: null };
+  return {
+    attended: null,
+    step: 'seated',
+    errand: null,
+    pinned,
+    until: null,
+    expanded: null,
+    expandedUntil: null,
+    fetching: null,
+    reel,
+  };
 }
 
 // 19: the Poster expansion.
@@ -244,6 +339,11 @@ export function readableFilmOf(slice: CinemaSlice): Film | null {
 export interface CinemaProgress {
   readonly slice: CinemaSlice;
   readonly sendBoyTo: Point | null;
+  /**
+   * How he covers that ground. Walking, except the one errand he hurries over:
+   * a Film has been chosen and the evening is waiting on him (B6).
+   */
+  readonly cycle: 'walk' | 'run';
 }
 
 /** What the errand can see of the Boy: where he is, and whether he is still going. */
@@ -252,7 +352,14 @@ export interface BoyReading {
   readonly moving: boolean;
 }
 
-const WAITING = (slice: CinemaSlice): CinemaProgress => ({ slice, sendBoyTo: null });
+const WAITING = (slice: CinemaSlice): CinemaProgress => ({ slice, sendBoyTo: null, cycle: 'walk' });
+
+/** A step that also sends him somewhere, on foot unless it says otherwise. */
+const SENDING = (slice: CinemaSlice, sendBoyTo: Point, cycle: 'walk' | 'run' = 'walk'): CinemaProgress => ({
+  slice,
+  sendBoyTo,
+  cycle,
+});
 
 /** Is the Beat in progress over? With motion off it never began. */
 function beatOver(slice: CinemaSlice, now: number | null, motionOn: boolean): boolean {
@@ -263,6 +370,27 @@ function beatOver(slice: CinemaSlice, now: number | null, motionOn: boolean): bo
 /** How long a Beat holds from here: nothing at all when the apartment is still. */
 function beatUntil(now: number | null, motionOn: boolean, length: number): number | null {
   return motionOn && now !== null ? now + length : null;
+}
+
+/**
+ * How long a projected Beat holds from here, whatever the visitor asked for.
+ *
+ * The Bumper and the title card are not the apartment moving: they are a Film
+ * on a screen with its own music, and §10.3 keeps all four seconds of the
+ * Bumper and all three of the title card under reduced motion. Only the
+ * performance inside them simplifies, and that is the stylesheet's business.
+ *
+ * `null` means the clock has not been read yet, and the caller holds the step
+ * where it is rather than starting a Beat it cannot time — which is what keeps
+ * a motion toggle mid-search from skipping the Bumper altogether.
+ */
+function filmUntil(now: number | null, length: number): number | null {
+  return now === null ? null : now + length;
+}
+
+/** Is the projected Beat in progress over? An untimed one never is. */
+function filmOver(slice: CinemaSlice, now: number | null): boolean {
+  return slice.until !== null && now !== null && now >= slice.until;
 }
 
 /** Has he arrived, and stopped, where the errand sent him? */
@@ -306,7 +434,7 @@ export function stepCinema(
     case 'rummaging': {
       if (!beatOver(slice, now, motionOn)) return WAITING(slice);
       // Three tubes under his arm; the first slot is where he takes them.
-      return { slice: { ...slice, step: 'carrying', until: null }, sendBoyTo: CINEMA_MARKS.boardSlots[0] };
+      return SENDING({ ...slice, step: 'carrying', until: null }, CINEMA_MARKS.boardSlots[0]);
     }
     case 'carrying': {
       const slot = CINEMA_MARKS.boardSlots[slice.pinned.length];
@@ -321,14 +449,111 @@ export function stepCinema(
       // is what makes them arrive one at a time rather than as a set of three.
       const pinned = next ? [...slice.pinned, next] : slice.pinned;
       const slot = CINEMA_MARKS.boardSlots[pinned.length];
-      if (slot) return { slice: { ...slice, step: 'carrying', pinned, until: null }, sendBoyTo: slot };
-      return { slice: { ...slice, step: 'returning', pinned, until: null }, sendBoyTo: CINEMA_MARKS.boySeat };
+      if (slot) return SENDING({ ...slice, step: 'carrying', pinned, until: null }, slot);
+      return SENDING({ ...slice, step: 'returning', pinned, until: null }, CINEMA_MARKS.boySeat);
     }
     case 'returning': {
       if (!arrivedAt(boy, CINEMA_MARKS.boySeat)) return WAITING(slice);
       return WAITING({ ...slice, step: 'seated', errand: null, until: null });
     }
+    // 20: the reel sequence. B6-B8: he hurries to the cabinet, finds the can,
+    // threads it, and the projector takes over from there.
+    case 'fetching': {
+      if (!arrivedAt(boy, CINEMA_MARKS.cabinet)) return WAITING(slice);
+      return WAITING({ ...slice, step: 'searching', until: beatUntil(now, motionOn, SEARCH_MS) });
+    }
+    case 'searching': {
+      if (!beatOver(slice, now, motionOn)) return WAITING(slice);
+      return WAITING({ ...slice, step: 'loading', until: beatUntil(now, motionOn, LOAD_MS) });
+    }
+    case 'loading': {
+      if (!beatOver(slice, now, motionOn)) return WAITING(slice);
+      // The lamp lights on the last frame of the Beat and the Bumper begins,
+      // so the reel is on the projector from here and he is free to sit down
+      // beside her while the studio logo lands (B8′).
+      const until = filmUntil(now, BUMPER_MS);
+      if (until === null) return WAITING(slice);
+      return SENDING(
+        { ...slice, step: 'bumper', reel: slice.fetching, fetching: null, until },
+        CINEMA_MARKS.boySeat,
+      );
+    }
+    case 'bumper': {
+      if (!filmOver(slice, now)) return WAITING(slice);
+      const until = filmUntil(now, TITLE_MS);
+      if (until === null) return WAITING(slice);
+      return WAITING({ ...slice, step: 'title', until });
+    }
+    case 'title': {
+      if (!filmOver(slice, now)) return WAITING(slice);
+      // The slate holds: it ends when the gate lever stops the reel, another
+      // Film is chosen, or the visitor leaves the Room — never on its own.
+      return WAITING({ ...slice, step: 'slate', until: null });
+    }
+    case 'slate':
+      return WAITING(slice);
   }
+}
+
+/**
+ * The Room with a Film chosen: he goes for its reel, whatever else was on.
+ *
+ * Only a Film whose Poster is on the wall can be chosen, because the card that
+ * offers the choice only opens on a pinned Poster — the same rule the
+ * expansion keeps, and for the same reason. Choosing while a Film is already
+ * rolling stops it and fetches the new reel (§4.6), and the card closes behind
+ * the visitor's own click: the Poster is flat again by the time he sets off.
+ */
+export function withChosenFilm(slice: CinemaSlice, film: FilmId): CinemaSlice {
+  if (!slice.pinned.includes(film)) return slice;
+  return {
+    ...slice,
+    step: 'fetching',
+    errand: null,
+    fetching: film,
+    reel: null,
+    until: null,
+    expanded: null,
+    expandedUntil: null,
+  };
+}
+
+/**
+ * The Room with the projector's gate lever pulled.
+ *
+ * One lever, two things to do with it, and which one is not a choice: a Film
+ * on the screen is stopped, and a threaded reel with nothing on the screen is
+ * rolled from the top of the Bumper. An empty machine does nothing at all,
+ * which is what its disabled state on the page is saying.
+ */
+export function withGateToggled(slice: CinemaSlice, now: number | null): CinemaSlice {
+  if (isRolling(slice.step)) return { ...slice, step: 'seated', until: null };
+  if (slice.step !== 'seated' || slice.reel === null) return slice;
+  const until = filmUntil(now, BUMPER_MS);
+  if (until === null) return slice;
+  return { ...slice, step: 'bumper', until };
+}
+
+/** The Film whose reel is threaded, or `null`. The gate lever's whole state. */
+export function loadedReelOf(slice: CinemaSlice): FilmId | null {
+  return slice.reel;
+}
+
+/** The Film on the screen right now — Bumper, title card or slate — or `null`. */
+export function rollingFilmOf(slice: CinemaSlice): Film | null {
+  return isRolling(slice.step) && slice.reel !== null ? filmById(slice.reel) : null;
+}
+
+/**
+ * Is the Room waiting on the clock?
+ *
+ * The one thing the frame loop needs from this Room that it cannot work out
+ * from the Cast: a projected Beat runs at its own length however the visitor
+ * feels about motion (§10.3), so the loop that would otherwise have stopped
+ * has to keep turning until the Bumper and the title card are through.
+ */
+export function cinemaAwaitsClock(slice: CinemaSlice): boolean {
+  return slice.until !== null;
 }
 
 /** The Room with a different shelf attended, or the same slice when it is not. */
