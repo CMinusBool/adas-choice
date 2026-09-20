@@ -450,6 +450,9 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     event.preventDefault();
     event.stopPropagation();
   }, true);
+  // A swipe whose click never arrived must not swallow the Enter that follows
+  // it: the keyboard is a different visitor's hands on the same wall.
+  stage.addEventListener('keydown', () => { swiped = false; });
 
   /**
    * The arrow keys, where the wall only has room for one Portal (§3.5).
