@@ -2,6 +2,7 @@ import { mountActivityRoom } from './dom/activity-room'; // 16: the Activity Roo
 import { mountActors } from './dom/actors'; // 07: actors
 import { mountCinemaRoom } from './dom/cinema-room'; // 17: the Cinema Room
 import { mountGameRoom } from './dom/game-room';
+import { mountGameStage } from './dom/game-stage'; // 15: the Game Room's wall unit
 import { mountLanguage, readStoredLanguage } from './dom/language';
 // 05: loading
 import { mountLoading } from './dom/loading';
@@ -39,6 +40,9 @@ const mounts: Mount[] = [
   // opens the shell is out of `inert` before the Room router moves focus into it.
   mountLoading,
   mountLanguage, mountMotion, mountRooms, mountGameRoom,
+  // 15: after the Game Room's own painter, because it rehouses the deck that
+  // painter has already taken hold of.
+  mountGameStage,
   mountCinemaRoom, // 17: the Cinema Room's bookshelves
   mountActivityRoom, // 16: the Activity Room
   mountSound, // 06: audio

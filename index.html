@@ -75,15 +75,6 @@
       </section>
       <section class="room" id="room-games" data-room="games" aria-labelledby="page-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
-        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
-        <div class="music-source-row">
-          <button class="music-source" type="button" data-music-source="games" aria-pressed="false" hidden>
-            <span class="music-note" aria-hidden="true">♪</span>
-            <span data-music-source-label>播放房間音樂</span>
-            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
-          </button>
-        </div>
-        <!-- end 06 -->
         <section class="intro" aria-labelledby="page-title">
           <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span><span data-i18n="eyebrow">三款精選・兩個玩家</span></p>
           <h1 id="page-title" data-room-title tabindex="-1"><span data-i18n="titleStart">今晚，</span><span class="title-accent" data-i18n="titleAccent">一起玩。</span><svg class="title-spark" viewBox="0 0 32 40" aria-hidden="true"><path d="M16 0c0 14-3 20-16 20 13 0 16 6 16 20 0-14 3-20 16-20C19 20 16 14 16 0Z"/></svg></h1>
@@ -166,8 +157,58 @@
             <div class="particle-field" aria-hidden="true"></div>
           </article>
         </section>
-        <!-- 07: actors -->
-        <div class="stage" data-stage="games" aria-hidden="true"></div>
+        <!-- 15: the Game Room, and 07: actors — this Room's stage.
+
+             The deck of three cards is the wall unit's three bays, so it is not
+             in the flow here: `src/dom/game-stage.ts` moves `.games` into
+             `[data-deck-slot]` in the wide layout, and into `[data-deck-flow]`
+             below 1080 px, where the bays stay in the stage, empty and lit. The
+             cards themselves are untouched by this ticket.
+
+             This stage is not `aria-hidden` — it holds the cards, the boombox
+             and the door — so every decorative child carries `aria-hidden`
+             instead, and `pointer-events` comes back on the controls.
+
+             Boxes are design note 11 §4.1's, in stage units (1600 x 900, origin
+             top-left, x right, y down); `z-index` is each Prop's sort key from
+             §3.3, which is how Props interleave with the Cast's `round(y)`.
+             Every Prop below is a CSS placeholder standing in its exact box:
+             the artwork is ticket 34's, and a URL with no file behind it would
+             fail the build and stall the loading screen. -->
+        <div class="room-scene" id="games-scene">
+          <div class="cornice" aria-hidden="true"></div>
+          <div class="stage" data-stage="games">
+            <div class="stage-backdrop" data-box aria-hidden="true" style="--x:0;--y:0;--w:1600;--h:900;z-index:0"></div>
+            <div class="prop prop-rug" data-box aria-hidden="true" style="--x:260;--y:700;--w:1160;--h:162;z-index:0"></div>
+            <div class="prop prop-cat-bed" data-box aria-hidden="true" style="--x:1150;--y:648;--w:140;--h:42;z-index:648"></div>
+            <div class="prop prop-ledge" data-box aria-hidden="true" style="--x:280;--y:380;--w:1120;--h:22;z-index:380"></div>
+            <div class="prop prop-led" data-box aria-hidden="true" style="--x:300;--y:402;--w:1080;--h:3;z-index:380"></div>
+            <div class="deck-slot" data-deck-slot>
+              <div class="bay" data-bay="tango" aria-hidden="true"></div>
+              <div class="bay" data-bay="lovers" aria-hidden="true"></div>
+              <div class="bay" data-bay="heavenly" aria-hidden="true"></div>
+            </div>
+            <div class="prop prop-sideboard" data-box aria-hidden="true" style="--x:300;--y:468;--w:1080;--h:172;z-index:640"></div>
+            <div class="prop prop-lamp" data-box aria-hidden="true" style="--x:1390;--y:246;--w:110;--h:394;z-index:640"></div>
+            <div class="prop prop-pouf prop-pouf-girl" data-box aria-hidden="true" style="--x:535;--y:722;--w:170;--h:58;z-index:780"></div>
+            <div class="prop prop-pouf prop-pouf-boy" data-box aria-hidden="true" style="--x:795;--y:717;--w:170;--h:58;z-index:775"></div>
+            <!-- Luna's snow globe, and the only Breakable in this Room (§5.2).
+                 Ticket 09 owns the knock: it swaps `data-breakable-state` and
+                 plays the SFX. The visitor cannot break it by clicking. -->
+            <div class="prop prop-globe" data-box role="img" data-breakable="snow-globe" data-breakable-owner="luna" data-breakable-state="intact" aria-label="一顆雪花球" data-i18n-aria="globeIntact" style="--x:1240;--y:476;--w:60;--h:64;z-index:641"></div>
+            <div class="prop prop-globe-broken" data-box role="img" data-breakable="snow-globe" data-breakable-owner="luna" data-breakable-state="broken" aria-label="被貓推下去的雪花球，玻璃碎了，水也灑在地板上" data-i18n-aria="globeBroken" style="--x:1210;--y:646;--w:120;--h:46;z-index:692" hidden></div>
+            <!-- 06: audio — this Room's Music Source is the boombox itself. -->
+            <button class="prop prop-boombox" type="button" data-box data-music-source="games" aria-pressed="false" data-label-start="gamesBoomboxStart" data-label-stop="gamesBoomboxStop" style="--x:340;--y:450;--w:160;--h:90;z-index:641" hidden>
+              <span class="sr-only"><span data-i18n="gamesBoombox">遊戲室的手提音響</span> <span data-music-source-label>放卡帶</span></span>
+              <span class="boombox-body" aria-hidden="true"><span class="boombox-grille"></span><span class="boombox-window"><span class="spindle"></span><span class="spindle"></span></span><span class="boombox-grille"></span><span class="boombox-keys"></span></span>
+            </button>
+            <div class="prop prop-table" data-box aria-hidden="true" style="--x:560;--y:790;--w:440;--h:100;z-index:890"></div>
+            <!-- Last in the stage, so the tab order is the cards, the boombox,
+                 then the door (§5.5). The text `.room-exit` above leads out too. -->
+            <a class="prop prop-door" data-box href="#/entryway" aria-label="回到玄關" data-i18n-aria="backToEntryway" style="--x:60;--y:290;--w:180;--h:350;z-index:640"><span class="door-leaf" aria-hidden="true"></span></a>
+          </div>
+        </div>
+        <div class="deck-flow" data-deck-flow></div>
       </section>
       <section class="room" id="room-cinema" data-room="cinema" aria-labelledby="cinema-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
