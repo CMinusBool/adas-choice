@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  ROOM_ARRIVAL_SECONDS,
   actorView,
   actorsIn,
   advance,
+  apartmentNeedsClock,
   createWorld,
   roomArrivalState,
   roomDoorState,
@@ -91,5 +93,129 @@ describe('a Room arrival', () => {
     const shut = play('games', 2.2);
     expect(roomDoorState(shut, 'games')).toBe('closed');
     expect(who(shut, 'girl').moving).toBe(true);
+  });
+});
+
+/**
+ * Where each Room's design note puts the two of them once they are in.
+ *
+ * Taken from the notes rather than from `HOMES`, so that these are a check of
+ * the table as well as of the arrival that walks the Cast to it. The Game
+ * Room's pair are §4.3.1's interim standing marks and go when S09 and S10 land.
+ */
+const MARKS: Readonly<Record<'games' | 'cinema' | 'activities', Readonly<Record<'boy' | 'girl', readonly [number, number, 'left' | 'right']>>>> = {
+  games: { boy: [940, 795, 'left'], girl: [560, 800, 'right'] },
+  cinema: { boy: [660, 800, 'left'], girl: [320, 800, 'right'] },
+  activities: { boy: [868, 744, 'left'], girl: [762, 742, 'right'] },
+};
+
+const ROOMS = ['games', 'cinema', 'activities'] as const;
+
+function standsOnItsMark(world: World, room: keyof typeof MARKS, id: 'boy' | 'girl') {
+  const [x, y, facing] = MARKS[room][id];
+  const view = who(world, id);
+  expect(view.room, `${id} is in the ${room}`).toBe(room);
+  expect(view.at, `${id} is on the note's mark`).toEqual({ x, y });
+  expect(view.facing, `${id} takes the mark's stance`).toBe(facing);
+  expect(view.moving, `${id} is not mid-stride`).toBe(false);
+}
+
+describe.each(ROOMS)('the arrival of the %s Room', room => {
+  it('runs to rest in about three seconds, everybody on their own mark', () => {
+    // Three seconds is the script: the Door has shut and the entrance is over.
+    // The frame the clock starts on is the frame the model is first told the
+    // time, so the script runs out one tick after three seconds of them.
+    const scripted = play(room, ROOM_ARRIVAL_SECONDS + 0.05);
+    expect(roomArrivalState(scripted)).toBe('done');
+    expect(roomDoorState(scripted, room)).toBe('closed');
+    // The last stride lands inside another half second in every Room — 3.28 s
+    // in the Game Room, 3.44 in the Activity Room, 3.60 in the Cinema Room,
+    // measured against ticket 07's walk and run speeds. The two of them stay
+    // put once they are there; the cats are free to go somewhere else.
+    const quiet = run(scripted, 0.55);
+    expect(actorsIn(quiet, room)).toHaveLength(5);
+    standsOnItsMark(quiet, room, 'boy');
+    standsOnItsMark(quiet, room, 'girl');
+  });
+
+  it('ends at once on a click, a tap or a key press', () => {
+    const half = play(room, 1.2);
+    expect(roomArrivalState(half)).toBe('playing');
+
+    const cut = advance(half, { type: 'visitor-input' });
+    expect(roomArrivalState(cut)).toBe('done');
+    // Nothing half-open, nobody mid-route, everyone on a home mark.
+    expect(roomDoorState(cut, room)).toBe('closed');
+    expect(actorsIn(cut, room)).toHaveLength(5);
+    for (const view of actorsIn(cut, room)) expect(view.moving, `${view.id} has stopped`).toBe(false);
+    standsOnItsMark(cut, room, 'boy');
+    standsOnItsMark(cut, room, 'girl');
+  });
+
+  it('does not play at all for a visitor who asked for stillness', () => {
+    const still = walkInto(room, { ...visitor, reducedMotion: true });
+    expect(roomArrivalState(still)).toBe('done');
+    expect(roomDoorState(still, room)).toBe('closed');
+    expect(actorsIn(still, room)).toHaveLength(5);
+    standsOnItsMark(still, room, 'boy');
+    standsOnItsMark(still, room, 'girl');
+  });
+
+  it('completes at once when motion is paused half way through', () => {
+    const paused = advance(play(room, 1.5), { type: 'motion-toggled' });
+    expect(roomArrivalState(paused)).toBe('done');
+    expect(roomDoorState(paused, room)).toBe('closed');
+    standsOnItsMark(paused, room, 'boy');
+    standsOnItsMark(paused, room, 'girl');
+  });
+
+  it('plays again on the next entry to the same Room', () => {
+    const first = play(room, 3.5);
+    const away = advance(first, { type: 'hash-changed', hash: '#/entryway' });
+    const again = advance(away, { type: 'hash-changed', hash: `#/${room}` });
+    expect(roomArrivalState(again)).toBe('playing');
+    expect(actorsIn(again, room)).toEqual([]);
+  });
+
+  it('waits behind the loading screen when the page opens on this Room', () => {
+    // Opening the page on a Room is not walking through its Door: the page
+    // says when the loading screen has gone, and that is when it plays.
+    const opened = createWorld({ ...visitor, hash: `#/${room}` });
+    expect(roomArrivalState(opened)).toBe('pending');
+    expect(actorsIn(opened, room)).toHaveLength(5);
+
+    const shown = advance(opened, { type: 'arrival-started' });
+    expect(roomArrivalState(shown)).toBe('playing');
+    expect(actorsIn(shown, room)).toEqual([]);
+  });
+
+  it('keeps the frame clock turning while it plays, and lets it stop after', () => {
+    const opening = walkInto(room);
+    // Nobody is in the Room yet, and the clock still has to run: an empty Room
+    // is where the entrance starts.
+    expect(actorsIn(opening, room)).toEqual([]);
+    expect(apartmentNeedsClock(opening)).toBe(true);
+    expect(apartmentNeedsClock(advance(opening, { type: 'visitor-input' }))).toBe(true);
+  });
+});
+
+describe('the Entryway and a Room arrival', () => {
+  it('plays none of it: coming home is not walking in for the first time', () => {
+    const home = advance(play('games', 3.5), { type: 'hash-changed', hash: '#/entryway' });
+    expect(roomArrivalState(home)).toBe('done');
+    expect(roomDoorState(home, 'entryway')).toBe('closed');
+    // The Room is found settled, which is the Entryway's own tableau.
+    expect(actorsIn(home, 'entryway')).toHaveLength(5);
+    for (const view of actorsIn(home, 'entryway')) expect(view.moving, `${view.id} is home`).toBe(false);
+  });
+
+  it('leaves its own arrival to run: the front door is a different thing', () => {
+    // A tab that has not been shown it yet, opening on the hallway.
+    const first = createWorld({ hash: '', storedLanguage: null, reducedMotion: false });
+    const playing = advance(first, { type: 'arrival-started' });
+    expect(actorsIn(playing, 'entryway')).toEqual([]);
+    // 44's interrupt is a Room's, not the Entryway's: eleven seconds of coming
+    // home is not cut short by the first thing the visitor touches.
+    expect(advance(playing, { type: 'visitor-input' })).toBe(playing);
   });
 });
