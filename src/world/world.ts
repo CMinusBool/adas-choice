@@ -44,6 +44,16 @@ import { resolveLanguage, toggleLanguage, type Language } from './language';
 // 05: loading
 import { createLoading, declareAssets, everythingSettled, progressOf, settleAsset, type AssetOutcome, type LoadingSlice } from './loading';
 import { createMotion, toggleMotion, withReducedMotion, type MotionSlice } from './motion';
+// 45: the Game Room's three Portals — which one is awake, and which one a
+// narrow wall has room for.
+import {
+  createPortals,
+  steppedPortal,
+  withPortalAttended,
+  withPortalChosen,
+  type PortalId,
+  type PortalsSlice,
+} from './portals';
 import { ENTRYWAY, parseRoute, type RoomId } from './rooms';
 // 17: cinema — the Cinema Room's own marks and shelves.
 // 18: and the errand that fetches Posters off one of them.
@@ -134,6 +144,8 @@ export interface World {
   readonly cinema: CinemaSlice;
   // 16: the Activity Room
   readonly activities: ActivitiesSlice;
+  // 45: the Game Room's three Portals
+  readonly portals: PortalsSlice;
   // 14: the Entryway
   readonly arrival: ArrivalSlice;
   /** Every Breakable the apartment holds, broken so far. Persists across a reload. */
@@ -215,6 +227,14 @@ export type WorldEvent =
   // the whole evening turns on: he goes for the reel and the Film tier is
   // allowed to make a sound, which is why nothing before it ever plays one.
   | { readonly type: 'cinema-film-chosen'; readonly film: FilmId; readonly now: number }
+  // 45: the Game Room — the Portal the visitor's pointer or focus is on, or
+  // `null` for none. Hover and focus are one report, as they are for a Poster:
+  // both mean the visitor is at that Portal, and the world inside it wakes.
+  | { readonly type: 'portal-attended'; readonly portal: PortalId | null }
+  // 45: which Portal the wall carries where it only has room for one — a dot
+  // clicked, and the arrow keys or a step either side of it.
+  | { readonly type: 'portal-chosen'; readonly portal: PortalId }
+  | { readonly type: 'portal-stepped'; readonly step: number }
   // 20: cinema — the projector's gate lever, the machine's other affordance.
   // It says nothing about what it wants done: a Film on the screen is stopped
   // and a threaded reel is rolled, and which of the two is the model's answer.
@@ -243,6 +263,8 @@ export function createWorld(inputs: WorldInputs): World {
     // 16: the Activity Room — nothing about tonight's pick survives the visit,
     // so it takes no input either.
     activities: createActivities(),
+    // 45: the Game Room's wall, at rest and on the first of the three Portals.
+    portals: createPortals(),
     // 14: the Entryway. The arrival is over before it starts for a visitor who
     // has already had it, who asked for stillness, or who opened the page in
     // another Room — all three find the Cast at home in the settled tableau.
@@ -285,6 +307,9 @@ export function advance(world: World, event: WorldEvent): World {
         // out. 18: the errand he was on finishes rather than being abandoned,
         // so the wall they come back to shows the Posters he went to fetch.
         cinema: settleCinema(world.cinema),
+        // 45: and no Portal is still awake on a wall nobody is looking at,
+        // so the Game Room is found at rest however it was left.
+        portals: withPortalAttended(world.portals, null),
       };
       // 20: and a Film that was rolling falls silent on the way out, because
       // the Bumper is a Cinema Room moment rather than something that follows
@@ -443,6 +468,21 @@ export function advance(world: World, event: WorldEvent): World {
             ? withCardClosed(world.activities)
             : withActivityChosen(world.activities, event.activity);
       return activities === world.activities ? world : { ...world, activities };
+    }
+    // 45: the Game Room's three Portals. Every one of these is about a wall
+    // the visitor is standing in front of, so a report from anywhere else in
+    // the apartment is a stale listener and means nothing.
+    case 'portal-attended':
+    case 'portal-chosen':
+    case 'portal-stepped': {
+      if (world.rooms.current !== 'games') return world;
+      const portals =
+        event.type === 'portal-attended'
+          ? withPortalAttended(world.portals, event.portal)
+          : event.type === 'portal-chosen'
+            ? withPortalChosen(world.portals, event.portal)
+            : steppedPortal(world.portals, event.step);
+      return portals === world.portals ? world : { ...world, portals };
     }
   }
 }
@@ -817,6 +857,22 @@ export function openActivity(world: World): ActivityId | null {
 /** What the visitor has picked for tonight, or `null` while nothing is picked. */
 export function chosenActivity(world: World): ActivityId | null {
   return world.activities.chosen;
+}
+
+// 45: the Game Room's three Portals
+/**
+ * The Portal the visitor is at, or `null` while the whole wall is at rest.
+ *
+ * What plays: the Scene inside this one runs and the other two hold their
+ * still, which is the whole effect of looking *through* something.
+ */
+export function attendedPortal(world: World): PortalId | null {
+  return world.portals.attended;
+}
+
+/** The Portal on the wall where it only has room for one. Never `null`. */
+export function currentPortal(world: World): PortalId {
+  return world.portals.current;
 }
 
 // 14: the Entryway. 09: the other four.
