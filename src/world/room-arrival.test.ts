@@ -7,6 +7,7 @@ import {
   advance,
   apartmentNeedsClock,
   createWorld,
+  roomArrivalSfx,
   roomArrivalState,
   roomDoorState,
   type ActorId,
@@ -227,6 +228,26 @@ describe.each(ROOMS)('the arrival of the %s Room', room => {
     expect(actorsIn(opening, room)).toEqual([]);
     expect(apartmentNeedsClock(opening)).toBe(true);
     expect(apartmentNeedsClock(advance(opening, { type: 'visitor-input' }))).toBe(true);
+  });
+});
+
+describe('a Room entrance the visitor was not watching', () => {
+  it('forgets the sounds it caught up on, so none of them can repeat', () => {
+    // The tab goes to the background a moment after the Door opens and comes
+    // back after the entrance would have finished, so the very next tick runs
+    // the whole of what is left in one go. The sounds that window crossed are
+    // not played — the Entryway's own ending is silent for exactly the same
+    // reason — and, above all, they are not left standing on the slice. The
+    // painter plays whatever it finds there on every paint, so a `door-close`
+    // left behind is one that fires sixty times a second while the Cast is
+    // crossing the floor, and again on every cat and every hover after that.
+    const away = 900000;
+    const opened = advance(walkInto('games'), { type: 'actor-tick', now: away });
+    const back = advance(opened, { type: 'actor-tick', now: away + ROOM_ARRIVAL_SECONDS * 1000 + 100 });
+    expect(roomArrivalState(back)).toBe('done');
+    expect(roomArrivalSfx(back)).toEqual([]);
+    // And it stays silent: nothing drains the slice once the clock has stopped.
+    expect(roomArrivalSfx(advance(back, { type: 'actor-tick', now: away + 4000 }))).toEqual([]);
   });
 });
 
