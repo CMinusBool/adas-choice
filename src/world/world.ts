@@ -2,10 +2,13 @@
 import {
   DEFAULT_SEED,
   actorViewsIn,
+  catPlaces, // 08: the cats
   clearRoom,
   createActors,
   findActorView,
+  gatherCats, // 08: the cats
   gatherInto, // 17: cinema
+  haltActor, // 08: the cats
   placeActor,
   seededRandom,
   sendActor,
@@ -26,6 +29,8 @@ import {
   type ActivitiesSlice,
   type ActivityId,
 } from './activities';
+// 08: the three cats, who decide for themselves where to be and when to meow.
+import { arriveCats, createCats, isPetted, petCats, tickCats, type CatId, type CatsSlice } from './cats';
 import { resolveLanguage, toggleLanguage, type Language } from './language';
 // 05: loading
 import { createLoading, declareAssets, everythingSettled, progressOf, settleAsset, type AssetOutcome, type LoadingSlice } from './loading';
@@ -110,6 +115,8 @@ export interface World {
   // end 06
   // 07: actors
   readonly actors: ActorsSlice;
+  // 08: what the three cats have decided to do next
+  readonly cats: CatsSlice;
   // 17: cinema
   readonly cinema: CinemaSlice;
   // 16: the Activity Room
@@ -185,7 +192,11 @@ export type WorldEvent =
   // 19: cinema — the pinned Poster the visitor's pointer or focus is on, or
   // `null` for none. Hover and focus are the same report, because they are the
   // same thing happening: the visitor is looking at that Poster.
-  | { readonly type: 'cinema-poster-attended'; readonly film: FilmId | null; readonly now: number };
+  | { readonly type: 'cinema-poster-attended'; readonly film: FilmId | null; readonly now: number }
+  // 08: a cat clicked, tapped or activated from the keyboard. `now` is the same
+  // reading the ticks carry, because the fuss is timed and the model is never
+  // allowed to ask what time it is.
+  | { readonly type: 'cat-petted'; readonly cat: CatId; readonly now: number };
 
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
@@ -203,6 +214,8 @@ export function createWorld(inputs: WorldInputs): World {
     // 17: the Room the visitor arrives in places its own Cast, so walking
     // straight in at `#/cinema` still finds the two of them sat down.
     actors: createActors(inputs.random ?? seededRandom(DEFAULT_SEED), arriving),
+    // 08: nobody has decided anything yet; the first tick tells them the time.
+    cats: createCats(),
     // 17: cinema
     cinema: createCinema(),
     // 16: the Activity Room — nothing about tonight's pick survives the visit,
@@ -240,7 +253,12 @@ export function advance(world: World, event: WorldEvent): World {
         rooms: { current: entering, leaving: world.rooms.current, transition },
         // 17: the Room being walked into puts its own Cast back on their
         // marks, so every Room is found the way its design note describes it.
-        actors: gatherInto(world.actors, entering),
+        // 08: and the three cats come with the visitor, onto whichever of that
+        // Room's marks are free, so they are the same three animals throughout.
+        actors: gatherCats(gatherInto(world.actors, entering), entering),
+        // A mark is a place in one Room, so whatever a cat was heading for is
+        // forgotten at the door. Everything else about it comes along.
+        cats: arriveCats(world.cats),
         // 17: a shelf cannot hold the attention of a visitor who has walked
         // out. 18: the errand he was on finishes rather than being abandoned,
         // so the wall they come back to shows the Posters he went to fetch.
@@ -313,7 +331,10 @@ export function advance(world: World, event: WorldEvent): World {
       const ticked = actors === cued.actors ? cued : { ...cued, actors };
       // 18: the same tick is the Cinema Room's clock: the errand's Beats end
       // on it, and so does each leg of the walk it is waiting on.
-      return runCinema(ticked, event.now);
+      // 08: and the same tick is the cats' clock: it is when one of them thinks
+      // of somewhere else to be, arrives, finishes a fuss, or meows. The Cinema's
+      // own clock runs after them, on the world the cats have already moved.
+      return runCinema(roamCats(ticked, event.now), event.now);
     }
     // 07: actors
     // 14: the Entryway
@@ -363,6 +384,18 @@ export function advance(world: World, event: WorldEvent): World {
       const cinema = withAttendedPoster(world.cinema, event.film, event.now, motionIsOn(world));
       return cinema === world.cinema ? world : { ...world, cinema };
     }
+    // 08: a cat fussed over. Only a cat that is actually in the Room the
+    // visitor is in: one still in the backpack has no ear to scratch.
+    case 'cat-petted': {
+      const view = findActorView(world.actors, event.cat);
+      if (!view || view.room !== world.rooms.current) return world;
+      return {
+        ...world,
+        cats: petCats(world.cats, event.cat, event.now, motionIsOn(world)),
+        // She stops under the hand rather than finishing the walk she was on.
+        actors: motionIsOn(world) ? haltActor(world.actors, event.cat) : world.actors,
+      };
+    }
     // 16: the Activity Room
     case 'activity-card-opened':
     case 'activity-card-closed':
@@ -376,6 +409,26 @@ export function advance(world: World, event: WorldEvent): World {
       return activities === world.activities ? world : { ...world, activities };
     }
   }
+}
+
+// 08: the cats
+/**
+ * The world with the three cats one tick further into their afternoon.
+ *
+ * Only the Room the visitor is in: a cat nobody can see has nothing to decide,
+ * and its clock starts again from the moment they walk back in. Roaming is
+ * motion, so an apartment asked to hold still has three cats sitting exactly
+ * where they were — and roaming starts when the arrival is over, because until
+ * then the three of them are in a backpack on the Boy's back.
+ */
+function roamCats(world: World, now: number): World {
+  if (!motionIsOn(world) || world.arrival.state !== 'done') return world;
+  const room = world.rooms.current;
+  const stepped = tickCats(world.cats, room, catPlaces(world.actors, room), now, world.actors.random);
+  let actors = world.actors;
+  for (const send of stepped.sends) actors = sendActor(actors, send.cat, send.goal, 'walk', true);
+  if (stepped.slice === world.cats && actors === world.actors) return world;
+  return { ...world, cats: stepped.slice, actors };
 }
 
 // 18: cinema
@@ -609,6 +662,24 @@ export function actorsIn(world: World, room: RoomId): readonly ActorView[] {
  */
 export function actorView(world: World, actor: ActorId): ActorView | null {
   return findActorView(world.actors, actor);
+}
+
+// 08: the cats
+/**
+ * Meows the apartment has just made, to play once and then forget.
+ *
+ * Edge-triggered: the names are the ones the last tick or the last fuss
+ * crossed, and the slice they live on changes identity as they appear and
+ * again as they are forgotten, so a painter watching the slice plays each meow
+ * exactly once without keeping a count of its own.
+ */
+export function catSfx(world: World): readonly string[] {
+  return world.cats.sfx;
+}
+
+/** Is this cat being fussed over? What its petting Beat hangs on. */
+export function isBeingPetted(world: World, cat: CatId): boolean {
+  return isPetted(world.cats, cat);
 }
 
 // 16: the Activity Room

@@ -6,15 +6,22 @@ import {
   actorView,
   actorsIn,
   arrivalView, // 14: the Entryway
+  catSfx, // 08: the cats
+  isBeingPetted,
+  isCat,
   motionIsOn,
+  pettingBeat,
   type ActorId,
   type ActorView,
+  type CatId,
+  type CatsSlice,
   type CycleId,
   type Facing,
   type RoomId,
   type World,
 } from '../world';
 import { byId, type Dispatch, type Painter } from './painter';
+import { playSfx } from './sound'; // 08: the cats
 
 /**
  * Paint the Cast.
@@ -103,6 +110,21 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
       };
     });
 
+  // 08: the three cats are the one part of the Cast the visitor can reach.
+  // Each is a real `<button>` in `index.html`, so Enter, Space and a tap all
+  // arrive here as one click and the focus ring is the browser's; the order
+  // Tab visits them in is the order they were written, which is the order the
+  // painter appends them to a stage in. The model decides what a fuss means.
+  const petLayers = new Map<string, HTMLElement>(
+    [...byId('apartment').querySelectorAll<HTMLElement>('[data-beat]')].map(layer => [layer.dataset.beat!, layer]),
+  );
+  for (const sprite of sprites) {
+    if (!isCat(sprite.id)) continue;
+    sprite.element.addEventListener('click', () => {
+      dispatch({ type: 'cat-petted', cat: sprite.id as CatId, now: performance.now() });
+    });
+  }
+
   /**
    * The sheet this Actor should be painted from, and whether it has to be
    * flipped to get there.
@@ -171,6 +193,23 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
   function park(sprite: Sprite) {
     if (sprite.element.parentElement !== cast) cast.append(sprite.element);
     sprite.moving = false;
+  }
+
+  /**
+   * Put this Actor's element in its Room, in Cast order.
+   *
+   * 08: the three cats are focusable, so the order they sit in is the order Tab
+   * visits them in, and that has to be the Character Sheet's rather than an
+   * accident. Appending would give the order the sheets happened to finish
+   * loading in — an Actor is not painted until its artwork has really arrived —
+   * so each one is inserted ahead of the first Actor that comes after it in the
+   * Cast and is already standing here. Only ever called when an Actor changes
+   * Room, so nothing moves under a focus ring frame by frame.
+   */
+  function attach(sprite: Sprite, stage: HTMLElement) {
+    if (sprite.element.parentElement === stage) return;
+    const after = sprites.slice(sprites.indexOf(sprite) + 1).find(later => later.element.parentElement === stage);
+    stage.insertBefore(sprite.element, after ? after.element : null);
   }
 
   let frameRequest = 0;
@@ -281,8 +320,40 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
     startClock();
   });
 
+  // 08: the cats. The slice changes identity on the tick that names a meow and
+  // again on the one that forgets it, so watching it plays each one exactly
+  // once — and a repaint from a sheet finishing its load replays nothing.
+  let heard: CatsSlice | null = null;
+
+  /**
+   * Play the petting Beat over a cat, if a sheet for it has been delivered.
+   *
+   * Named by the model and skipped when `index.html` declares no layer for it,
+   * which is ticket 14's arrangement for the arrival: the fuss then degrades to
+   * the cat stopping where she is rather than to a cat that vanishes. Nothing
+   * here invents a `data-sheet` for a file that is not on disk.
+   */
+  function playPetting(sprite: Sprite, view: ActorView): boolean {
+    const layer = petLayers.get(pettingBeat(sprite.id as CatId));
+    if (!layer) return false;
+    const width = sprite.height * (sprite.showing?.aspect ?? 1);
+    const style = layer.style;
+    style.setProperty('--x', String(view.at.x - width / 2));
+    style.setProperty('--y', String(view.at.y - sprite.height));
+    style.setProperty('--w', String(width));
+    style.setProperty('--h', String(sprite.height));
+    style.setProperty('--z', String(Math.round(view.at.y)));
+    if (layer.parentElement !== sprite.element.parentElement) sprite.element.parentElement?.append(layer);
+    layer.hidden = false;
+    return true;
+  }
+
   function paint(next: World) {
     world = next;
+    if (next.cats !== heard) {
+      heard = next.cats;
+      for (const name of catSfx(next)) playSfx(name);
+    }
     for (const sprite of sprites) {
       const view = actorView(world, sprite.id);
       const resolved = view && resolve(sprite, view.cycle, view.facing);
@@ -290,11 +361,24 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
         park(sprite);
         continue;
       }
-      const stage = stages.get(view.room)!;
-      if (sprite.element.parentElement !== stage) stage.append(sprite.element);
+      attach(sprite, stages.get(view.room)!);
       show(sprite, resolved.layer);
       place(sprite, view, resolved.mirrored);
       sprite.moving = view.moving;
+      // 08: a cat being fussed over. The class is what the stylesheet reads;
+      // the Beat, if one has been drawn, stands in for the sprite as the
+      // arrival's Beats do for the Cast they draw.
+      if (!isCat(sprite.id)) continue;
+      const petted = isBeingPetted(world, sprite.id as CatId);
+      sprite.element.classList.toggle('is-petted', petted);
+      // `is-fussed` rather than the arrival's `is-acted`, because the Entryway
+      // painter owns that one and the two must never argue over a cat.
+      const acted = petted && playPetting(sprite, view);
+      sprite.element.classList.toggle('is-fussed', acted);
+      if (!acted) {
+        const layer = petLayers.get(pettingBeat(sprite.id as CatId));
+        if (layer) layer.hidden = true;
+      }
     }
     startClock();
   }

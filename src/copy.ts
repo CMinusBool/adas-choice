@@ -101,8 +101,12 @@ const zhHant = {
   // 14: the Entryway
   entrywayRadio: '玄關的收音機',
   vaseIntact: '玄關桌上插著乾燥花的花瓶', vaseBroken: '摔碎的花瓶，乾燥花散了一地',
-  arrivalDescription: '他們回到家了：他背著裝了三隻貓的背包，幫她脫下大衣，貓咪一隻一隻跳出來。'
+  arrivalDescription: '他們回到家了：他背著裝了三隻貓的背包，幫她脫下大衣，貓咪一隻一隻跳出來。',
   // end 14
+  // 08: the three cats. Each name says which cat it is as well as what happens
+  // if you reach for her, because the sprite is the only other thing saying so.
+  catMica: '三花貓 Míca：摸摸她', catMira: '虎斑貓 Mira：摸摸她', catLuna: '黑貓 Luna：摸摸她'
+  // end 08
 };
 
 /** Every piece of copy on the page. Both dictionaries carry the same keys. */
@@ -199,7 +203,12 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     // 14: the Entryway
     entrywayRadio: 'The hall radio',
     vaseIntact: 'A vase of dried grasses on the hall table', vaseBroken: 'The vase in pieces, its dried grasses scattered across the floor',
-    arrivalDescription: 'They are home. He carries the three cats in a backpack and helps her out of her coat, and the cats climb out one by one.'
+    arrivalDescription: 'They are home. He carries the three cats in a backpack and helps her out of her coat, and the cats climb out one by one.',
     // end 14
+    // 08: the three cats
+    catMica: 'Míca the calico cat: give her a fuss',
+    catMira: 'Mira the tabby cat: give her a fuss',
+    catLuna: 'Luna the black cat: give her a fuss'
+    // end 08
   }
 };

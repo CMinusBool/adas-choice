@@ -299,7 +299,19 @@ html.dialog-open { overflow: hidden; }
 .cast { display: none; }
 /* `left` and `top` are the Actor's feet in stage units turned into percentages
    of the stage, and the translate lifts the sprite so its feet land there. */
-.actor { position: absolute; transform: translate(-50%, -100%) scaleX(var(--flip, 1)); transform-origin: bottom center; }
+.actor { position: absolute; transform: translate(-50%, -100%) scaleX(var(--flip, 1)) scaleY(var(--fuss, 1)); transform-origin: bottom center; }
+/* 08: the three cats are the only part of the Cast the visitor can reach, so
+   they are real buttons — the focus ring, Enter and Space are the browser's,
+   and Tab visits them in the order `index.html` writes them. The stage takes
+   no pointer events, so a cat has to ask for them back. */
+.actor.cat { padding: 0; border: 0; background: none; font: inherit; color: inherit; pointer-events: auto; cursor: pointer; border-radius: 8px; transition: transform .18s ease-out; }
+.actor.cat:focus-visible { outline: 3px solid var(--pink); outline-offset: 5px; }
+/* Being fussed over, until a petting Beat is drawn for one: she settles on to
+   her paws under the hand. A Beat that does exist stands in for the sprite. */
+.actor.cat.is-petted { --fuss: .93; }
+.actor.cat.is-fussed { display: none; }
+.motion-off .actor.cat { transition: none; }
+@media (prefers-reduced-motion: reduce) { :root:not(.motion-on) .actor.cat { transition: none; } }
 .actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
 
 
