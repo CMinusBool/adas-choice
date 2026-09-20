@@ -37,8 +37,11 @@ export interface AudioSlice {
   /**
    * A Film is running on the projector, Bumper included.
    *
-   * Set by the projector's own flow, which is ticket 20's: this ticket models
-   * the tier and answers for it, and starts nothing by itself.
+   * Derived, never reported. `withFilmSound` recomputes this from the Cinema
+   * Room's own state on every tick, so there is no event that sets it: one
+   * dispatched from the DOM layer would be overwritten by the next tick, and
+   * the two would disagree about §9's rule that the Room Music falls silent
+   * while a picture is up.
    */
   readonly filmPlaying: boolean;
 }

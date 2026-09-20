@@ -180,8 +180,6 @@ export type WorldEvent =
   | { readonly type: 'visitor-interacted' }
   | { readonly type: 'sound-toggled' }
   | { readonly type: 'music-source-toggled'; readonly room: RoomId }
-  | { readonly type: 'film-audio-started' }
-  | { readonly type: 'film-audio-stopped' }
   // end 06
   // 07: actors — `now` is how time reaches the model; it never asks for it.
   // 14: the Entryway — the DOM layer starts the arrival 0.6 s after the loading
@@ -341,11 +339,6 @@ export function advance(world: World, event: WorldEvent): World {
     }
     case 'music-source-toggled': {
       return { ...world, audio: withMusicSourceToggled(world.audio, event.room) };
-    }
-    case 'film-audio-started':
-    case 'film-audio-stopped': {
-      const audio = withFilmAudio(world.audio, event.type === 'film-audio-started');
-      return audio === world.audio ? world : { ...world, audio };
     }
     // end 06
     // 07: actors

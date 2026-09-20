@@ -110,35 +110,25 @@ describe('Room Music and the Room the visitor is in', () => {
   });
 });
 
+// 21: the Film tier has exactly one cause — a picture on the Cinema Room's
+// screen — and the model derives it from the Cinema's own state on every tick.
+// There is no event that starts it and there must not be one, because the next
+// tick would overwrite whatever a caller set. So this file owns only the tier's
+// resting state; every rule about it while a Film rolls, the header control
+// included, is driven through the projector in `cinema.test.ts`.
 describe('Film audio', () => {
-  /** A Film on the projector. Ticket 20 owns what starts it; this is the tier. */
-  const filmRunning = () => advance(afterInteraction(), { type: 'film-audio-started' });
-
-  it('is silent until a Film is started', () => {
+  it('is silent until a Film is on the screen', () => {
     expect(isAudible(afterInteraction(), 'film')).toBe(false);
-  });
-
-  it('is audible while a Film plays', () => {
-    expect(isAudible(filmRunning(), 'film')).toBe(true);
-  });
-
-  it('is silent again once the Film stops', () => {
-    expect(isAudible(advance(filmRunning(), { type: 'film-audio-stopped' }), 'film')).toBe(false);
-  });
-
-  it('does not turn on the Room Music of the Room it plays in', () => {
-    expect(isAudible(filmRunning(), 'music')).toBe(false);
   });
 });
 
-describe('the header control as a veil over all three tiers', () => {
-  /** Everything the apartment can make a noise with, on at once. */
-  const everythingOn = () =>
-    advance(advance(afterInteraction(), { type: 'music-source-toggled', room: 'entryway' }), { type: 'film-audio-started' });
+describe('the header control as a veil over the tiers', () => {
+  /** Everything this file can switch on: SFX by default, and one Room's music. */
+  const everythingOn = () => advance(afterInteraction(), { type: 'music-source-toggled', room: 'entryway' });
 
   const mute = (world: World) => advance(world, { type: 'sound-toggled' });
 
-  it('silences all three tiers at once', () => {
+  it('silences every tier at once', () => {
     const muted = mute(everythingOn());
     expect(isAudible(muted, 'sfx')).toBe(false);
     expect(isAudible(muted, 'music')).toBe(false);
@@ -154,7 +144,6 @@ describe('the header control as a veil over all three tiers', () => {
     const restored = mute(mute(everythingOn()));
     expect(isAudible(restored, 'sfx')).toBe(true);
     expect(isAudible(restored, 'music')).toBe(true);
-    expect(isAudible(restored, 'film')).toBe(true);
   });
 
   it('brings back nothing that was off', () => {

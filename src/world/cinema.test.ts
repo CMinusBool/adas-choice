@@ -778,6 +778,18 @@ describe('what the Cinema Room sounds like while a Film rolls', () => {
     expect(rollingFilm(muted)?.id).toBe('knives-out');
   });
 
+  // 21: the Film tier's half of "a veil, not a reset". The other two tiers
+  // prove it in `audio.test.ts`; this one cannot, because the only thing that
+  // switches it on is a picture on this Room's screen.
+  it('brings the Film’s sound back when the header control is lifted', () => {
+    const chosen = advance(motorRunning(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
+    const rolling = runUntil(chosen, next => cinemaStep(next) === 'bumper', 40000);
+    const restored = advance(advance(rolling, { type: 'sound-toggled' }), { type: 'sound-toggled' });
+    expect(isAudible(restored, 'film')).toBe(true);
+    // And the clatter stays away, because the picture is still up.
+    expect(isRoomMusicAudible(restored, 'cinema')).toBe(false);
+  });
+
   it('stops the Film when the visitor walks out, and leaves the reel in', () => {
     const chosen = advance(motorRunning(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
     const rolling = runUntil(chosen, next => cinemaStep(next) === 'bumper', 40000);
