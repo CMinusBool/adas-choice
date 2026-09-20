@@ -11,6 +11,8 @@
  *  - **Which one the wall is showing.** Below 1080 px a Portal is 165 px wide
  *    and three of them buy nothing (§3.5), so the wall carries one at a time
  *    and the three dots, the arrow keys and a tap on a dot all move it.
+ *  - **Which one is expanded.** 46: a Portal is a button that expands rather
+ *    than a link that navigates, so the expansion is a decision too.
  *
  * The narrow wall's answer is kept at every width rather than only below the
  * breakpoint: a breakpoint is the page's business, and the model has no way to
@@ -37,11 +39,18 @@ export interface PortalsSlice {
    * this and shows all three.
    */
   readonly current: PortalId;
+  /**
+   * The Portal expanded over the stage, or `null` while the wall is whole.
+   *
+   * 46: one at a time, because the expansion covers the stage — it is the
+   * Room's one answer rather than a flag each Portal carries for itself.
+   */
+  readonly open: PortalId | null;
 }
 
-/** The wall as the visitor finds it: at rest, on the first of the three. */
+/** The wall as the visitor finds it: at rest, whole, on the first of the three. */
 export function createPortals(): PortalsSlice {
-  return { attended: null, current: PORTAL_IDS[0] };
+  return { attended: null, current: PORTAL_IDS[0], open: null };
 }
 
 /** The wall after the visitor comes near a Portal, or looks away from one. */
@@ -58,7 +67,27 @@ export function withPortalAttended(portals: PortalsSlice, portal: PortalId | nul
  */
 export function withPortalChosen(portals: PortalsSlice, portal: PortalId): PortalsSlice {
   if (portals.current === portal && portals.attended === null) return portals;
-  return { attended: null, current: portal };
+  return { ...portals, attended: null, current: portal };
+}
+
+/**
+ * The wall with one Portal expanded over the stage.
+ *
+ * The wall moves to the Portal that was opened as well as expanding it: the
+ * visitor chose this one, so it is the one a narrow wall gives back when the
+ * expansion closes, whatever the wall was carrying when the click landed.
+ *
+ * Attention is left alone. The expanded world is the same world, and the
+ * pointer or the focus that opened it is still on the Portal underneath.
+ */
+export function withPortalOpened(portals: PortalsSlice, portal: PortalId): PortalsSlice {
+  if (portals.open === portal && portals.current === portal) return portals;
+  return { ...portals, current: portal, open: portal };
+}
+
+/** The wall whole again — by Escape, by the close button, by the scrim. */
+export function withPortalClosed(portals: PortalsSlice): PortalsSlice {
+  return portals.open === null ? portals : { ...portals, open: null };
 }
 
 /**
