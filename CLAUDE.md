@@ -45,7 +45,7 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   returns a `Painter`. A new slice is a new file plus one entry in `src/main.ts`'s `mounts` list,
   not a branch inside an existing painter. `src/dom/painter.ts` holds that contract and `byId`.
   Today, in mount order: `loading`, `language`, `motion`, `rooms`, `game-room`, `game-stage`,
-  `cinema-room`, `activity-room`, `sound`, `actors`, `entryway`, `breakables`. The order is load
+  `cinema-room`, `activity-room`, `sound`, `actors`, `cats`, `entryway`, `breakables`. The order is load
   bearing at both ends — `loading` first so the shell leaves `inert` before the router moves focus,
   `actors` after the Rooms so the Cast stands on top of whatever the Room laid down.
 - `src/copy.ts` — both copy dictionaries, typed against each other.
