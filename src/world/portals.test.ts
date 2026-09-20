@@ -6,6 +6,7 @@ import {
   attendedPortal,
   createWorld,
   currentPortal,
+  openPortal,
   type World,
   type WorldInputs,
 } from './index';
@@ -103,5 +104,28 @@ describe('the Portal a narrow wall has room for', () => {
     const cinema = createWorld({ ...arrival, hash: '#/cinema' });
     expect(advance(cinema, { type: 'portal-chosen', portal: 'lovers' })).toBe(cinema);
     expect(advance(cinema, { type: 'portal-stepped', step: 1 })).toBe(cinema);
+  });
+});
+
+/**
+ * A Portal expanded over the stage (ticket 46, design note 11 §5.4).
+ *
+ * A Portal is a button that expands rather than a link that navigates, so
+ * which one is expanded is a decision and it lives here. One at a time: the
+ * expansion is the stage's one answer rather than each Portal's own.
+ */
+describe('a Portal expanded over the stage', () => {
+  it('is found with the wall whole and nothing expanded', () => {
+    expect(openPortal(inTheGameRoom())).toBeNull();
+  });
+
+  it('expands the Portal the visitor opens', () => {
+    const open = advance(inTheGameRoom(), { type: 'portal-opened', portal: 'lovers' });
+    expect(openPortal(open)).toBe('lovers');
+  });
+
+  it('closes again, and the wall is whole', () => {
+    const open = advance(inTheGameRoom(), { type: 'portal-opened', portal: 'lovers' });
+    expect(openPortal(advance(open, { type: 'portal-closed' }))).toBeNull();
   });
 });
