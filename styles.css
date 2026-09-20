@@ -386,13 +386,52 @@ html.dialog-open { overflow: hidden; }
 .cinema-shelf:hover .shelf-plaque, .cinema-shelf:focus-visible .shelf-plaque, .cinema-shelf.is-attended .shelf-plaque { opacity: 1; }
 .cinema-shelf:focus-visible .shelf-body { outline: 3px solid var(--pink); outline-offset: 3px; }
 
-/* P10: the felt board, bare until ticket 18 pins Posters to it. */
+/* P10: the felt board, bare until he pins Posters to it. */
 .cinema-board { display: grid; place-items: center; padding: calc(var(--u) * 12); border: calc(var(--u) * 12) solid var(--walnut); background: #4a3a3f; }
 .cinema-board .board-pin { position: absolute; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f0d18a, #9a7a3a); }
 .cinema-board .board-pin:nth-child(1) { left: 12%; top: 14%; }
 .cinema-board .board-pin:nth-child(2) { right: 18%; bottom: 20%; }
 .cinema-board .board-ghost { position: absolute; left: 34%; top: 16%; width: calc(var(--u) * 132); height: calc(var(--u) * 196); background: #ffffff0b; }
 .cinema-board .board-empty { position: relative; margin: 0; max-width: calc(var(--u) * 330); color: #c8b9bd; font-size: calc(var(--u) * 26); line-height: 1.6; text-align: center; }
+
+/* 18: P11, the three Poster slots.
+
+   Offsets are from the board's padding box, which starts at stage (1122, 312)
+   because the walnut frame is a 12-unit border: 3 and 38 units in from there
+   puts slot 1 at the design note's (1125, 350), and 132-wide slots 22 apart
+   put slots 2 and 3 at 1279 and 1433. `--u` is the stage unit, so the three
+   land on the same spot at every shell width, like every other Prop here. */
+.cinema-board .board-slots { position: absolute; left: calc(var(--u) * 3); top: calc(var(--u) * 38); display: flex; gap: calc(var(--u) * 22); }
+/* Every Poster is the same stock, so nine originals read as one set: cream
+   paper, a deckled margin, and a genre stripe in the shelf's own body colour
+   that says which shelf it came from long after the shelf is out of mind. The
+   painted art is ticket 36's; until it lands the frame holds that Film's
+   genre ground with a low horizon and a soft vignette, which is the shared
+   composition rule the delivered artwork also follows. */
+.cinema-poster { position: relative; flex: 0 0 auto; width: calc(var(--u) * 132); height: calc(var(--u) * 196); padding: 0; border: 0; background: #f1e6cf; box-shadow: 0 calc(var(--u) * 6) calc(var(--u) * 16) #00000055; cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1); }
+.cinema-poster[data-shelf="comedy"] { --stripe: #f2c14e; --ground: #d9a441; --horizon: #8a4f2b; }
+.cinema-poster[data-shelf="romance"] { --stripe: #e86f8f; --ground: #6e1f2e; --horizon: #2d6d61; }
+.cinema-poster[data-shelf="horror"] { --stripe: #3e2a4f; --ground: #26234f; --horizon: #4a6b34; }
+.cinema-poster .poster-stripe { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 6); height: calc(var(--u) * 10); background: var(--stripe); }
+.cinema-poster .poster-ground { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 20); bottom: calc(var(--u) * 34); background: linear-gradient(var(--ground) 0 72%, var(--horizon) 72%); box-shadow: inset 0 0 calc(var(--u) * 26) calc(var(--u) * 10) #00000044; }
+/* The caption is DOM text, never drawn into the artwork: that is what keeps a
+   Poster bilingual and free of generated lettering. Two lines of 13-unit type
+   sit inside the design note's 28-unit strip, which is what the longest titles
+   need — "Eat Drink Man Woman", "In the Mood for Love" — while the Chinese
+   titles, none longer than five characters, stay on one. */
+.cinema-poster .poster-caption { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); bottom: calc(var(--u) * 4); height: calc(var(--u) * 28); display: grid; place-items: center; color: #2b2230; font-size: calc(var(--u) * 13); line-height: 1.05; text-align: center; text-wrap: balance; overflow: hidden; }
+/* Two brass pins at the top corners, pressed in as the Poster unrolls. */
+.cinema-poster .poster-pin { position: absolute; top: calc(var(--u) * -5); width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f7e2a6, #9a7a3a); box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 5) #00000077; animation: poster-pin-push .18s .32s backwards; }
+.cinema-poster .poster-pin:nth-of-type(1) { left: calc(var(--u) * 8); }
+.cinema-poster .poster-pin:nth-of-type(2) { right: calc(var(--u) * 8); }
+.cinema-poster:hover, .cinema-poster:focus-visible { outline: none; box-shadow: 0 calc(var(--u) * 10) calc(var(--u) * 26) #000000aa; }
+.cinema-poster:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+@keyframes poster-unroll { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes poster-pin-push { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
+/* While his arm is in a bay its tubes rattle, which is the whole of what the
+   rummage Beat looks like until the Boy's own frames are drawn. */
+.cinema-shelf.is-rummaging .shelf-body { animation: shelf-rummage .18s steps(2, end) infinite; }
+@keyframes shelf-rummage { from { translate: 0 0; } 50% { translate: calc(var(--u) * 1) calc(var(--u) * -1); } to { translate: 0 0; } }
 
 /* P12-P14: the beanbags and the reel cabinet the projector stands on. */
 .cinema-beanbag { z-index: 800; border-radius: 48% 52% 44% 56% / 62% 58% 42% 38%; }
@@ -422,7 +461,12 @@ html.dialog-open { overflow: hidden; }
 .projector-motor:hover .motor-cap, .projector-motor[aria-pressed="true"] .motor-cap { box-shadow: 0 0 calc(var(--u) * 40) calc(var(--u) * 8) #d9483b99; }
 .projector-motor:focus-visible { outline: 3px solid #d9483b; outline-offset: 3px; border-radius: 50%; }
 
-.motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap { transition: none; }
+.motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap, .motion-off .cinema-poster { transition: none; }
+/* Motion off is the visitor's own choice, so the Poster is simply on the wall:
+   the unroll, the pins and the shelf's rattle all resolve to their end state.
+   A system reduced-motion request is covered by the block above instead. */
+.motion-off .cinema-poster, .motion-off .poster-pin, .motion-off .is-rummaging .shelf-body { animation: none; }
+
 /* 16: the Activity Room — `design/12-activity-room.md`.
 
    Everything below is placed in the Room's 1600 x 900 stage units and turned

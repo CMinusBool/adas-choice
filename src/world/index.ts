@@ -49,3 +49,9 @@ export type { ArrivalSlice, ArrivalState, ArrivalView, BeatId, Box, Costume, Pla
 export { ARRIVAL_SECONDS } from './arrival';
 export type { BreakableId } from './world';
 export { arrivalView, entrywayProps, vaseState } from './world';
+
+// 18: the nine Films, and the rummage that pins three of them to the wall.
+export type { Film, FilmId } from './films';
+export { filmById, filmsOn } from './films';
+export type { CinemaStep } from './cinema';
+export { cinemaStep, openShelf, pinnedPosters, rummagingShelf } from './world';

@@ -25,6 +25,10 @@ const zhHant = {
   projectorMotorStart: '讓放映機空轉', projectorMotorStop: '停下放映機',
   projectorGateEmpty: '還沒有膠卷。先選一部片。',
   // end 17
+  // 18: what a pinned Poster offers. The Film's own title comes from
+  // `src/world/films.ts` and is bilingual there; this is the rest of its name.
+  posterExpandHint: '展開海報',
+  // end 18
   activitiesTitle: '活動室',
   // 16: the Activity Room — `activitiesSoon` retired with the Room's build.
   activitiesLede: '三件事，隔著螢幕也能一起做。挑一件，今晚就開始。',
@@ -115,6 +119,9 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     projectorMotorStart: 'Let the projector run', projectorMotorStop: 'Stop the projector',
     projectorGateEmpty: 'No reel yet. Choose a Film first.',
     // end 17
+    // 18
+    posterExpandHint: 'Expand the Poster',
+    // end 18
     activitiesTitle: 'The Activity Room',
     // 16: the Activity Room
     activitiesLede: 'Three things you can do together through a screen. Pick one and start tonight.',
