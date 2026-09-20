@@ -57,3 +57,20 @@ export function withActivityChosen(activities: ActivitiesSlice, activity: Activi
   if (activities.chosen === activity && activities.open === null) return activities;
   return { open: null, chosen: activity };
 }
+
+/**
+ * The Room after the visitor takes tonight's pick back.
+ *
+ * Choosing swaps the Boy and the Girl for a painted tableau at that station,
+ * and this is the way back out of it — ticket 43's "closing it brings them
+ * back", which had no implementation until ticket 50 found it missing. Picking
+ * a *different* activity is not that exit: it moves the tableau rather than
+ * clearing it, so without this the two of them were gone for the whole visit
+ * after the first pick.
+ *
+ * It does not open anything. The card the visitor decided from is long gone by
+ * now, and un-deciding is not a reason to go back and read it again.
+ */
+export function withActivityCleared(activities: ActivitiesSlice): ActivitiesSlice {
+  return activities.chosen === null ? activities : { ...activities, chosen: null };
+}

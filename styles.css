@@ -704,6 +704,15 @@ html.dialog-open { overflow: hidden; }
 .stage[data-stage="activities"] .prop { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); padding: 0; border: 0; pointer-events: none; }
 /* Four controls, and only four: the door, the three stations, the boombox. */
 .stage[data-stage="activities"] .a-door, .stage[data-stage="activities"] .a-station, .stage[data-stage="activities"] .a-boombox { pointer-events: auto; cursor: pointer; }
+/* 50: and nothing decorative may sit in front of one of them. This stage
+   turns `pointer-events` back on for the Room as a whole, so anything in it
+   that is not a `.prop` inherits `auto` - including the Boy and the Girl, who
+   arrived here in ticket 43 and stand on marks over the hunt station. The Boy
+   was intercepting its clicks outright. `#room-games .stage` has carried this
+   exact guard since ticket 45; the Cinema Room and the Entryway never needed
+   one because their stages leave `pointer-events: none` standing. The cats are
+   unaffected: a cat is a real button with a name, never `aria-hidden`. */
+.stage[data-stage="activities"] [aria-hidden="true"] { pointer-events: none; }
 .stage[data-stage="activities"] :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 
 .a-cornice { background: linear-gradient(#36443F, #2b3733); }
@@ -829,6 +838,11 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 .activity-close:hover { background: #ffffff0f; }
 .motion-off .activity-pick, .motion-off .activity-close { transition: none; }
 .activity-chosen-note { margin: 1rem 0 0; font-size: .9375rem; color: var(--muted); }
+/* 50: taking tonight's pick back. Quieter than `.activity-pick`, because
+   un-deciding is a way out and not the thing the Room is offering. */
+.activity-unpick { margin: .5rem 0 0; min-height: 44px; padding: .5rem 1rem; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; font-size: .9375rem; transition: background-color .2s, color .2s; }
+.activity-unpick:hover { background: #ffffff0f; color: var(--ink); }
+.motion-off .activity-unpick { transition: none; }
 .activity-scrim { display: none; }
 
 @media (min-width: 1080px) {

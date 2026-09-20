@@ -24,6 +24,7 @@ import {
 import {
   createActivities,
   withActivityChosen,
+  withActivityCleared,
   withCardClosed,
   withCardOpened,
   type ActivitiesSlice,
@@ -233,6 +234,9 @@ export type WorldEvent =
   | { readonly type: 'activity-card-opened'; readonly activity: ActivityId }
   | { readonly type: 'activity-card-closed' }
   | { readonly type: 'activity-chosen'; readonly activity: ActivityId }
+  // 50: and putting it back, which is what brings the Boy and the Girl out
+  // from behind the tableau that replaced them.
+  | { readonly type: 'activity-unchosen' }
   // 18: cinema — a bookshelf clicked or activated. `now` is the clock the
   // errand's Beats are timed against; it is the same reading the ticks carry,
   // because the model is never allowed to ask what time it is.
@@ -528,13 +532,16 @@ export function advance(world: World, event: WorldEvent): World {
     // 16: the Activity Room
     case 'activity-card-opened':
     case 'activity-card-closed':
-    case 'activity-chosen': {
+    case 'activity-chosen':
+    case 'activity-unchosen': {
       const activities =
         event.type === 'activity-card-opened'
           ? withCardOpened(world.activities, event.activity)
           : event.type === 'activity-card-closed'
             ? withCardClosed(world.activities)
-            : withActivityChosen(world.activities, event.activity);
+            : event.type === 'activity-unchosen'
+              ? withActivityCleared(world.activities)
+              : withActivityChosen(world.activities, event.activity);
       return activities === world.activities ? world : { ...world, activities };
     }
     // 45: the Game Room's three Portals. Every one of these is about a wall

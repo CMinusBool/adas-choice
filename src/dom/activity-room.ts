@@ -72,6 +72,7 @@ export const mountActivityRoom = (dispatch: Dispatch): Painter => {
   const steps = [...byId<HTMLOListElement>('activity-card-steps').querySelectorAll('li')];
   const extra = byId('activity-card-extra');
   const note = byId('activity-chosen-note');
+  const unpick = byId<HTMLButtonElement>('activity-unpick');
   // The scrim only covers the stage on a wide shell; under 1080 px the card is
   // an ordinary block below it and the Room stays live behind nothing at all.
   const wideLayout = matchMedia(WIDE_LAYOUT);
@@ -97,6 +98,10 @@ export const mountActivityRoom = (dispatch: Dispatch): Painter => {
     playSfx('timer-ding');
     dispatch({ type: 'activity-chosen', activity: open });
   });
+  // 50: and back out again. Choosing swaps the Boy and the Girl for a tableau,
+  // and until this existed nothing anywhere cleared `chosen`, so the two of
+  // them left the Room for the rest of the visit on the first pick.
+  unpick.addEventListener('click', () => dispatch({ type: 'activity-unchosen' }));
   // Escape closes the card wherever focus is, which is what a dialog owes the
   // keyboard even when it is not modal.
   document.addEventListener('keydown', event => {
@@ -113,6 +118,9 @@ export const mountActivityRoom = (dispatch: Dispatch): Painter => {
     if (painted && painted.open === next.open && painted.chosen === next.chosen && painted.language === next.language) return;
     const opening = next.open !== null && painted?.open !== next.open;
     const closing = next.open === null && painted !== null && painted.open !== null;
+    // 50: the pick going back takes its own button off the page with it, so
+    // something has to catch the focus that was standing on it.
+    const unpicked = next.chosen === null && painted !== null && painted.chosen !== null ? painted.chosen : null;
     painted = next;
     const words = copy[world.language];
 
@@ -129,6 +137,7 @@ export const mountActivityRoom = (dispatch: Dispatch): Painter => {
     for (const tableau of tableaux) tableau.hidden = tableau.dataset.tableau !== next.chosen;
     stage.classList.toggle('has-tableau', next.chosen !== null);
     note.hidden = next.chosen === null;
+    unpick.hidden = next.chosen === null;
 
     // Inert rather than merely covered: what the scrim hides from the pointer
     // it has to hide from the keyboard too.
@@ -153,6 +162,13 @@ export const mountActivityRoom = (dispatch: Dispatch): Painter => {
     if (closing) {
       opener?.focus({ preventScroll: true });
       opener = null;
+    }
+    // Back to the station that had been picked, which is both where the
+    // decision was made and the obvious place to make it again. Only when the
+    // focus was really on the button that has just gone: clearing the pick
+    // from anywhere else must not yank the page around.
+    if (unpicked && (document.activeElement === unpick || document.activeElement === document.body)) {
+      stations.find(station => station.dataset.activity === unpicked)?.focus({ preventScroll: true });
     }
   };
 };

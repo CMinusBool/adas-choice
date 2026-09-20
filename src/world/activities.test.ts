@@ -121,3 +121,37 @@ describe('choosing an activity for tonight', () => {
     expect(advance(chosen, { type: 'activity-chosen', activity: 'map' })).toBe(chosen);
   });
 });
+
+/**
+ * Putting the pick back, which is ticket 43's third acceptance criterion —
+ * "closing it brings them back".
+ *
+ * Choosing an activity replaces the Boy and the Girl with a painted tableau
+ * (`.has-tableau` in `src/dom/activity-room.ts`), and until this existed there
+ * was no way back: `withActivityChosen` only ever set, so the two of them were
+ * gone for the rest of the visit the moment anything was picked. Changing the
+ * pick to another station was the only exit, and that keeps a tableau up.
+ */
+describe('putting tonight\'s pick back', () => {
+  const arrive = () => createWorld(plainArrival);
+  const choose = (world = arrive(), activity: 'draw' | 'hunt' | 'map' = 'draw') =>
+    advance(world, { type: 'activity-chosen', activity });
+  const unchoose = (world: ReturnType<typeof arrive>) => advance(world, { type: 'activity-unchosen' });
+
+  it('gives the Room back when the visitor changes their mind entirely', () => {
+    expect(chosenActivity(unchoose(choose(arrive(), 'hunt')))).toBe(null);
+  });
+
+  it('leaves the card alone: putting the pick back is not opening anything', () => {
+    expect(openActivity(unchoose(choose(arrive(), 'draw')))).toBe(null);
+  });
+
+  it('can be picked again afterwards, so this is a toggle and not a one-way door', () => {
+    expect(chosenActivity(choose(unchoose(choose(arrive(), 'map')), 'map'))).toBe('map');
+  });
+
+  it('costs no repaint when nothing was picked in the first place', () => {
+    const nothing = arrive();
+    expect(advance(nothing, { type: 'activity-unchosen' })).toBe(nothing);
+  });
+});
