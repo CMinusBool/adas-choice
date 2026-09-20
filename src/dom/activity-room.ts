@@ -72,6 +72,9 @@ export const mountActivityRoom = (dispatch: Dispatch): Painter => {
   const steps = [...byId<HTMLOListElement>('activity-card-steps').querySelectorAll('li')];
   const extra = byId('activity-card-extra');
   const note = byId('activity-chosen-note');
+  // The scrim only covers the stage on a wide shell; under 1080 px the card is
+  // an ordinary block below it and the Room stays live behind nothing at all.
+  const wideLayout = matchMedia('(min-width: 1080px)');
 
   /** The station the open card belongs to, so focus can go back where it came from. */
   let opener: HTMLButtonElement | null = null;
@@ -127,6 +130,9 @@ export const mountActivityRoom = (dispatch: Dispatch): Painter => {
     stage.classList.toggle('has-tableau', next.chosen !== null);
     note.hidden = next.chosen === null;
 
+    // Inert rather than merely covered: what the scrim hides from the pointer
+    // it has to hide from the keyboard too.
+    stage.inert = next.open !== null && wideLayout.matches;
     scrim.hidden = next.open === null;
     card.hidden = next.open === null;
     if (next.open) {

@@ -315,7 +315,7 @@ html.dialog-open { overflow: hidden; }
    door back to the Entryway — nothing shrinks below the legibility floor. */
 .stage[data-stage="activities"] { container-type: inline-size; min-width: 880px; max-width: none; margin: 0; overflow: hidden; border-radius: 14px; background: #4E6560; pointer-events: auto; }
 
-.stage[data-stage="activities"] .prop { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); padding: 0; border: 0; background: none; pointer-events: none; }
+.stage[data-stage="activities"] .prop { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); padding: 0; border: 0; pointer-events: none; }
 /* Four controls, and only four: the door, the three stations, the boombox. */
 .stage[data-stage="activities"] .a-door, .stage[data-stage="activities"] .a-station, .stage[data-stage="activities"] .a-boombox { pointer-events: auto; cursor: pointer; }
 .stage[data-stage="activities"] :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
@@ -359,7 +359,11 @@ html.dialog-open { overflow: hidden; }
 .a-desk-lamp { background: linear-gradient(to right, transparent 0 44%, #8a6f4a 44% 56%, transparent 56%), radial-gradient(ellipse 52% 26% at 50% 14%, #B98552 0 100%, transparent), radial-gradient(ellipse 70% 30% at 50% 96%, #FFD9A8 0 100%, transparent); }
 
 .a-chalkboard { display: grid; align-items: center; padding-inline: calc(14cqw / 16); border-radius: calc(4cqw / 16); background: linear-gradient(#36443F, #2F3A35); box-shadow: inset 0 0 0 calc(3cqw / 16) #5C3F2C; }
-.a-chalk { font-size: calc(26cqw / 16); line-height: 1; color: #EADCC2; opacity: .88; transition: opacity .2s, text-shadow .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a-chalk { font-size: calc(26cqw / 16); line-height: 1.08; text-align: center; color: #EADCC2; opacity: .88; transition: opacity .2s, text-shadow .2s; overflow: hidden; }
+/* The design note sizes the chalk for the Traditional Chinese names, which are
+   four to seven characters. The English ones run to thirty-one, so they take a
+   smaller hand over two lines rather than being cut off at the slate.s edge. */
+html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 .a-chalkboard[data-chosen] .a-chalk { opacity: 1; }
 /* The chalk tick the chosen station's board gains at its right end. */
 .a-chalkboard[data-chosen]::after { content: "✓"; position: absolute; right: calc(12cqw / 16); top: 50%; transform: translateY(-50%); font-size: calc(26cqw / 16); line-height: 1; color: #EADCC2; }
@@ -371,7 +375,7 @@ html.dialog-open { overflow: hidden; }
 .stage[data-stage="activities"]:has(.a-station[data-activity="map"]:focus-visible) .a-chalkboard[data-chalkboard="map"] .a-chalk { opacity: 1; text-shadow: 0 0 calc(10cqw / 16) #eadcc288; }
 
 /* A station is a transparent rectangle: what lights up is the furniture under it. */
-.a-station { border-radius: calc(10cqw / 16); transition: background-color .2s, box-shadow .2s; }
+.a-station { border-radius: calc(10cqw / 16); background: transparent; transition: background-color .2s, box-shadow .2s; }
 .a-station:hover, .a-station:focus-visible { background: #f2b85a14; box-shadow: inset 0 0 0 calc(2cqw / 16) #F2B85A66, 0 0 calc(34cqw / 16) #f2b85a2e; }
 .a-station[data-chosen] { background: #f2b85a12; box-shadow: inset 0 0 0 calc(2cqw / 16) #F2B85A99, 0 0 calc(26cqw / 16) #f2b85a26; }
 .motion-off .a-station, .motion-off .a-door, .motion-off .a-chalk { transition: none; }
@@ -387,7 +391,7 @@ html.dialog-open { overflow: hidden; }
 .a-tea { border-radius: 0 0 calc(6cqw / 16) calc(6cqw / 16); background: #EADCC2; }
 .a-crate { background: repeating-linear-gradient(to bottom, #b98552 0 calc(14cqw / 16), #a3703f calc(14cqw / 16) calc(18cqw / 16)); }
 
-.a-boombox { display: block; }
+.a-boombox { display: block; background: transparent; }
 .a-boombox-body { position: absolute; left: 5.7%; top: 13.3%; width: 88.6%; height: 80%; border-radius: calc(8cqw / 16); background: linear-gradient(#45464a, #3A3B3E); box-shadow: inset 0 0 0 calc(3cqw / 16) #B9B4AC; }
 .a-boombox-speaker { position: absolute; top: 31.3%; width: 36.6%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #2a2b2e 0 38%, #4a4b4f 39% 100%); box-shadow: inset 0 0 0 calc(2cqw / 16) #B9B4AC; }
 .a-boombox-speaker.left { left: 10.8%; }
@@ -420,17 +424,17 @@ html.dialog-open { overflow: hidden; }
 /* §5.2, the activity card. Below the stage at page type by default; over the
    stage on a wide shell, where there is room for it without hiding the Room. */
 .activity-card { margin-top: 1.4rem; padding: 1.4rem 1.5rem; border: 1px solid var(--line); border-left: 6px solid #C9922F; border-radius: 12px; background: var(--surface); }
-.activity-card-title { margin: 0; font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.5rem); line-height: 1.25; }
+.activity-card-title { margin: 0; font-size: clamp(1.5rem, .968rem + 2.27vw, 2.5rem); line-height: 1.25; }
 .activity-card-title:focus-visible { outline-offset: 3px; }
-.activity-card-line { margin: .5rem 0 0; font-size: clamp(1rem, .95rem + .3vw, 1.1875rem); color: #e1d6de; }
-.activity-card-meta { display: grid; grid-template-columns: auto 1fr; gap: .3rem 1rem; margin: 1.1rem 0 0; font-size: clamp(1rem, .95rem + .2vw, 1.0625rem); }
-.activity-card-meta dt { font-size: clamp(.875rem, .85rem + .1vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
+.activity-card-line { margin: .5rem 0 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
+.activity-card-meta { display: grid; grid-template-columns: auto 1fr; gap: .3rem 1rem; margin: 1.1rem 0 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); }
+.activity-card-meta dt { font-size: clamp(.9375rem, .8375rem + .426vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
 .activity-card-meta dd { margin: 0; color: #e1d6de; }
-.activity-card-label { margin: 1.1rem 0 .35rem; font-size: clamp(.875rem, .85rem + .1vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
-.activity-card-steps { margin: 0; padding-left: 1.3rem; font-size: clamp(1rem, .95rem + .3vw, 1.1875rem); color: #e1d6de; }
+.activity-card-label { margin: 1.1rem 0 .35rem; font-size: clamp(.9375rem, .8375rem + .426vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
+.activity-card-steps { margin: 0; padding-left: 1.3rem; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
 .activity-card-steps li + li { margin-top: .35rem; }
-.activity-card-extra { margin: .5rem 0 0; font-size: clamp(.9375rem, .9rem + .2vw, 1.0625rem); color: var(--muted); }
-.activity-card-why { margin: 0; font-size: clamp(1rem, .95rem + .3vw, 1.1875rem); color: #e1d6de; }
+.activity-card-extra { margin: .5rem 0 0; font-size: clamp(1rem, .9rem + .35vw, 1.125rem); color: var(--muted); }
+.activity-card-why { margin: 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
 .activity-card-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.3rem; }
 .activity-pick, .activity-close { min-height: 44px; padding: .6rem 1.1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; transition: filter .2s, background-color .2s; }
 .activity-pick { border: 0; background: var(--pink); color: var(--bg); font-weight: 650; }
