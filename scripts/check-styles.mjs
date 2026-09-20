@@ -11,6 +11,14 @@
 //      `:root:not(.motion-on)`. Motion is opt-outable, not merely off: the
 //      visitor who turns animation on deliberately must still get it, and an
 //      unscoped rule silently takes that away.
+//   3. A rule that moves a Door leaf under the pointer says which Door state it
+//      applies to. The leaf's angle is the model's answer, painted onto its
+//      Room's stage as `data-door`; a hover or focus rule for the same leaf
+//      carries an extra component and sits later in the file, so it beats that
+//      answer. Ticket 51: pointing at a Door mid-entrance snapped the leaf the
+//      Girl was holding open from -68deg back to -20deg with the cats still
+//      running through it, and the Cinema Room's door swung on hover although
+//      the rule was written for the Game Room's alone.
 //
 // Both are string rules, so the checker is a pure function over the source and
 // `scripts/check-styles.test.mjs` exercises it against fixtures rather than
@@ -101,6 +109,30 @@ function selectorsIn(css, clean, from, to) {
   return found;
 }
 
+/** A Door leaf, in either of the two names the apartment's markup gives one. */
+const DOOR_LEAF = /\.(?:a-)?door-leaf\b/;
+
+/** The visitor's pointer or focus on the link a leaf hangs inside. */
+const POINTED_AT = /:hover\b|:focus(?:-visible|-within)?\b/;
+
+/** A selector that says which Door state it is talking about. */
+const DOOR_STATE = /\[data-door[\]=]/;
+
+/** Does this rule move the leaf, rather than outline or light it? */
+const SWINGS = /(^|[;{\s])transform\s*:/;
+
+/** Every rule in the sheet that holds declarations, with its line. */
+function rulesIn(css, clean) {
+  const found = [];
+  for (const match of clean.matchAll(/([^{}]*)\{([^{}]*)\}/g)) {
+    const selector = match[1];
+    const offset = selector.search(/\S/);
+    if (offset === -1) continue;
+    found.push({ text: selector.trim(), body: match[2], line: lineOf(css, match.index + offset) });
+  }
+  return found;
+}
+
 /**
  * What is wrong with a stylesheet, and how many reduced-motion blocks it has.
  *
@@ -138,6 +170,17 @@ export function checkStylesheet(css) {
           problems.push(`line ${selector.line}: "${one}" is inside a prefers-reduced-motion block but is not scoped to ${MOTION_SCOPE}.`);
         }
       }
+    }
+  }
+
+  for (const rule of rulesIn(css, clean)) {
+    if (!SWINGS.test(rule.body)) continue;
+    for (const part of rule.text.split(',')) {
+      const one = part.trim();
+      if (!DOOR_LEAF.test(one) || !POINTED_AT.test(one) || DOOR_STATE.test(one)) continue;
+      problems.push(
+        `line ${rule.line}: "${one}" swings a Door leaf under the pointer without saying which Door state it applies to, so it beats the leaf the Cast is holding open. Scope it with [data-door="closed"].`,
+      );
     }
   }
 

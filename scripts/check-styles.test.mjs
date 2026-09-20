@@ -13,6 +13,12 @@
 // `:root:not(.motion-on)` is a convention nothing else enforces. An unscoped
 // one takes away the visitor's explicit "play it anyway", which is the whole
 // point of keeping motion opt-outable rather than merely off.
+//
+// Ticket 51 adds a third. A Door leaf takes its angle from the model, through
+// `data-door` on its Room's stage, and a hover rule for the same leaf that does
+// not say which Door state it applies to wins on specificity and order — so
+// pointing at a Door during an entrance snapped the leaf the Girl was holding
+// open back to its hover angle while the cats were still running through it.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -77,7 +83,27 @@ test('the stylesheet reports how many reduced-motion blocks it found, so a lost 
   assert.equal(checkStylesheet(css).reducedMotionBlocks, 1);
 });
 
-test("the apartment's own styles.css passes both rules", () => {
+test('a Door leaf swung under the pointer without a Door state is reported', () => {
+  const problems = problemsIn('.stage a:hover .door-leaf { transform: perspective(600px) rotateY(-20deg); }\n');
+  assert.equal(problems.length, 1);
+  assert.match(problems[0], /\.door-leaf/);
+  assert.match(problems[0], /data-door/);
+});
+
+test('the same rule scoped to a shut Door is accepted', () => {
+  const css = '.stage[data-door="closed"] .prop-door:hover .door-leaf { transform: rotateY(-20deg); }\n';
+  assert.deepEqual(problemsIn(css), []);
+});
+
+test('a Door leaf rule that does not move the leaf is left alone', () => {
+  assert.deepEqual(problemsIn('.cinema-door:focus-visible .door-leaf { outline: 3px solid pink; }\n'), []);
+});
+
+test('the Activity Room’s own leaf is held to the same rule', () => {
+  assert.equal(problemsIn('.stage a:hover .a-door-leaf { transform: rotateY(-20deg); }\n').length, 1);
+});
+
+test("the apartment's own styles.css passes all three rules", () => {
   const css = readFileSync(fileURLToPath(new URL('../styles.css', import.meta.url)), 'utf8');
   const report = checkStylesheet(css);
   assert.deepEqual(report.problems, []);
