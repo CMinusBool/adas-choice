@@ -599,12 +599,19 @@ export function startRoomArrival(arrival: RoomArrivalSlice): RoomArrivalSlice {
  * anywhere. An Actor still crossing the floor keeps walking and arrives under
  * its own steam, which is what "both walk to their home marks and settle" asks
  * for. Being cut short is the other ending, and it is `settleRoomArrival`.
+ *
+ * 51: and it ends **silent**, as `finishArrival` and `settleRoomArrival` both
+ * do. The window this catches up on is time the visitor did not watch — a
+ * background tab comes back to one tick covering the whole entrance — so its
+ * sounds are not owed to them. They cannot be left on the slice either: an
+ * ending is not `playing`, so no later tick ever drains them, and the painter
+ * plays whatever it finds here on every single paint.
  */
 function endRoomArrival(
   arrival: RoomArrivalSlice,
 ): { readonly arrival: RoomArrivalSlice; readonly cues: readonly ArrivalCue[] } {
   const cues = roomCues(arrival, arrival.seconds, ROOM_ARRIVAL_SECONDS);
-  return { arrival: { ...arrival, state: 'done', seconds: ROOM_ARRIVAL_SECONDS, sfx: sfxOf(cues) }, cues };
+  return { arrival: { ...arrival, state: 'done', seconds: ROOM_ARRIVAL_SECONDS, sfx: [] }, cues };
 }
 
 /** The entrance one tick on, and everything that happened during that tick. */
