@@ -42,3 +42,10 @@ export { attendedShelf, isSeated } from './world';
 export type { ActivitiesSlice, ActivityId } from './activities';
 export { ACTIVITY_IDS } from './activities';
 export { chosenActivity, openActivity } from './world';
+// 14: the Entryway — the Room's geometry, its Props and its arrival.
+export type { EntrywayPropId, EntrywayProps, VaseState } from './entryway';
+export { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';
+export type { ArrivalSlice, ArrivalState, ArrivalView, BeatId, Box, Costume, PlayingBeat } from './arrival';
+export { ARRIVAL_SECONDS } from './arrival';
+export type { BreakableId } from './world';
+export { arrivalView, entrywayProps, vaseState } from './world';

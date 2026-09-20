@@ -981,3 +981,106 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   }
   .motion-off .deck-slot .bay { transition: none; }
 }
+
+/* 14: the Entryway. One appended block, so this ticket adds lines rather than
+   editing the ones the other Rooms are landing beside.
+
+   Everything on this stage is placed in stage units and nothing in pixels:
+   `--x / --y / --w / --h` are the design note's own numbers and the rules below
+   are the only place they become percentages. `--z` is a Prop's base line on the
+   stage, which is what interleaves it with the Cast, whose `z-index` is
+   `round(y)` off their feet — so the monstera at 880 is in front of everybody
+   and the wall Props at 452-512 are behind them.
+
+   Every colour is `design/10-entryway.md` §4.4's. All of it is a placeholder
+   for tickets 31 and 33: the `eb-` rules are the backdrop shot S01 drawn in CSS
+   and go the day that image lands. */
+.entryway-pan { overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
+/* The stage fits the Room's width and the viewport's height, and below a
+   rendered 880px it keeps 880 and the hallway pans, starting at the front door. */
+.entryway-stage { min-width: 880px; max-width: min(100%, calc((100dvh - 19rem) * 16 / 9)); background: none; }
+.entryway-stage .at { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); }
+.stage-caption { max-width: 52ch; margin: 1rem auto 0; text-align: center; }
+
+/* The painted hallway: the backdrop shot, until there is one. */
+.eb-cornice { background: #3E3038; }
+.eb-wall { background: radial-gradient(ellipse at 59% 12%, #6E5665, #5B4653 62%, #47363F); }
+.eb-skirting { background: #3A2A22; }
+.eb-floor { background: repeating-linear-gradient(180deg, #8A6647, #8A6647 10px, #A37E5A 10px, #A37E5A 11px); }
+.eb-runner { background: repeating-linear-gradient(90deg, #B76E85, #B76E85 14px, #E8C6D2 14px, #E8C6D2 26px, #4A3340 26px, #4A3340 34px); opacity: .92; }
+.eb-doorframe { background: #4A3327; border-radius: 3px 3px 0 0; }
+.eb-stairwell { background: linear-gradient(180deg, #2B3550, #1F2740); box-shadow: inset 0 18px 30px -12px #FFD9A8; }
+.eb-mat { background: #6B5A3E; border: 2px solid #4B3F2B; }
+.eb-rail, .eb-hook { background: #C9A25E; }
+.eb-hook { border-radius: 0 0 50% 50%; }
+.eb-bench, .eb-table { background: #6E4C33; border-radius: 2px; }
+.eb-legs { background: linear-gradient(90deg, #5C3F2C 0 8%, transparent 8% 92%, #5C3F2C 92%); }
+.eb-photo { background: #C9A25E; border: 4px solid #8A6647; }
+.eb-cord { background: #3E3038; }
+.eb-lamp { background: #C9A25E; border-radius: 0 0 50% 50% / 0 0 100% 100%; box-shadow: 0 18px 60px 20px #ffd9a81f; }
+.eb-clock { background: #EAD9C2; border: 3px solid #6E4C33; border-radius: 50%; }
+.eb-door { background: #4A3327; border-radius: 4px 4px 0 0; }
+.eb-leaf { border-radius: 3px 3px 0 0; }
+.eb-leaf-games { background: #3F6B7A; }
+.eb-leaf-cinema { background: #5A3350; }
+.eb-leaf-activities { background: #B08A3E; }
+.eb-porthole { background: #1F1A24; border: 3px solid #3E3038; border-radius: 50%; }
+.eb-tag { position: absolute; right: .5rem; bottom: .5rem; z-index: 900; }
+
+/* The Props the arrival moves. */
+.entryway-stage .prop { border: 0; padding: 0; }
+/* The leaf sorts at 600 shut and 665 open, so the Cast appears from behind it
+   as it swings in — which is why `--z` is set here and not in the markup. */
+.prop-front-door { --z: 600; background: #4A3327; border-right: 3px solid #C9A25E; transform-origin: left center; transition: transform .6s ease; }
+.prop-front-door.is-open { --z: 665; transform: perspective(900px) rotateY(-62deg); }
+.prop-girl-coat { background: #7B4159; border-radius: 40% 40% 18% 18% / 18% 18% 10% 10%; }
+.prop-boy-parka { background: #3F5A46; border-radius: 40% 40% 18% 18% / 18% 18% 10% 10%; }
+.prop-backpack { display: grid; place-items: center; background: #4F6B72; border-radius: 12%; box-shadow: inset 0 0 0 4px #2F4248; }
+.backpack-window { width: 62%; height: 70%; border-radius: 50%; background: radial-gradient(circle at 30% 45%, #EDE6DE 0 16%, transparent 16%), radial-gradient(circle at 55% 45%, #B08A6A 0 16%, transparent 16%), radial-gradient(circle at 78% 45%, #C3CE68 0 16%, transparent 16%), #23303A; }
+.prop-backpack.is-open .backpack-window { background: #16202A; }
+.prop-monstera { background: radial-gradient(ellipse at 30% 28%, #3F6B4A 0 42%, transparent 44%), radial-gradient(ellipse at 66% 12%, #356044 0 34%, transparent 36%), linear-gradient(180deg, transparent 72%, #A8562F 72%); }
+.prop-vase { background: linear-gradient(180deg, #D9B98A 0 58%, #C98B96 58%); border-radius: 30% 30% 45% 45% / 10% 10% 22% 22%; }
+.prop-vase-broken { background: repeating-linear-gradient(72deg, #C98B96 0 9px, transparent 9px 20px), linear-gradient(90deg, #D9B98A 0 40%, transparent 40%); }
+
+/* The hall radio, which is the Room's Music Source. Its hit box is the whole
+   Prop — 120 x 87 stage units, which stays above 44 CSS px down to the 880 floor. */
+.prop-radio { background: transparent; cursor: pointer; }
+.radio-body { position: absolute; left: 12.5%; top: 19.5%; width: 75%; height: 69%; border-radius: 8%; background: #EAD9C2; box-shadow: inset 0 0 0 3px #6E4C33; }
+.radio-dial { position: absolute; left: 8%; top: 22%; width: 34%; height: 56%; border-radius: 50%; background: #6A4B22; transition: background .25s, box-shadow .25s; }
+.radio-grille { position: absolute; right: 8%; top: 22%; width: 44%; height: 56%; border-radius: 6%; background: repeating-linear-gradient(90deg, #8A6647 0 2px, #EAD9C2 2px 5px); }
+.prop-radio[aria-pressed="true"] .radio-dial { background: #F2B85A; box-shadow: 0 0 14px 6px #f2b85a66; }
+.radio-notes { position: absolute; inset: auto 0 62% 0; display: none; justify-content: space-around; color: var(--pink); font-size: 1rem; line-height: 1; }
+.prop-radio[aria-pressed="true"] .radio-notes { display: flex; }
+.radio-notes span { animation: hall-notes 2.4s ease-in-out infinite; }
+.radio-notes span:nth-child(2) { animation-delay: .8s; }
+.radio-notes span:nth-child(3) { animation-delay: 1.6s; }
+@keyframes hall-notes { 0% { opacity: 0; transform: translateY(0); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-260%); } }
+
+/* The three doors: transparent rectangles over the painted frames, with the
+   plaque as the visible label. Hover and focus are CSS alone — no ajar artwork. */
+.entryway-stage .doors { position: absolute; inset: 0; display: block; margin: 0; gap: 0; }
+.entryway-stage .door, .prop-radio { pointer-events: auto; }
+.entryway-stage .door { display: block; min-height: 0; padding: 0; border: 0; border-radius: 4px 4px 0 0; background: transparent; font-size: inherit; font-weight: inherit; transition: transform .25s, box-shadow .25s; }
+.entryway-stage .door:hover, .entryway-stage .door:focus-visible { background: transparent; transform: translateY(-3px); box-shadow: 0 0 34px 10px #f5a3c52e; }
+.door-plaque { position: absolute; left: 7.8%; top: 45%; width: 84.4%; height: 11%; display: grid; place-items: center; border-radius: 8px; background: #1b1620d9; color: var(--ink); font-size: clamp(.7rem, 1.35cqw, 1.05rem); font-weight: 650; letter-spacing: .02em; transition: background .25s, color .25s; }
+.entryway-stage .door:hover .door-plaque, .entryway-stage .door:focus-visible .door-plaque { background: var(--pink); color: #2a1520; }
+.entryway-stage { container-type: inline-size; }
+/* An Actor a Beat is drawing gives way to it, so the two are never both on. */
+.actor.is-acted { display: none; }
+/* 14: the arrival's Beat layers, placed and stepped by `src/dom/entryway.ts`.
+   None is declared yet — ticket 33 adds one `data-beat` layer per sheet. */
+.entryway-stage [data-beat] { background-repeat: no-repeat; }
+
+/* Motion is opt-outable, and the arrival is motion: with it off the front door
+   is simply open or shut, the radio's note glyphs are not rendered at all, and
+   the lit dial alone carries the Music Source's state. */
+.motion-off .prop-front-door, .motion-off .entryway-stage .door, .motion-off .radio-dial { transition: none; }
+.motion-off .radio-notes { display: none; }
+@media (prefers-reduced-motion: reduce) { :root:not(.motion-on) .radio-notes { display: none; } }
+
+@media (max-width: 1079px) {
+  /* The stage is already at its 880px floor here, so the pan is doing the work
+     and the caption comes back to the Room's own measure. */
+  .entryway-stage { max-width: none; }
+  .stage-caption { text-align: left; margin-inline: 0; }
+}

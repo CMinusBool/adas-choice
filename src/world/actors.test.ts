@@ -73,21 +73,25 @@ describe('an Actor crossing a Room', () => {
   });
 
   it('walks around what stands between it and the goal instead of through it', () => {
-    // Both ends sit in the back strip of the Entryway floor, with the hall
-    // furniture between them: a straight line would cross it, so the walk has
-    // to come forward around the front of it and back again.
-    const sent = advance(createWorld(plainArrival), {
-      type: 'actor-sent',
-      actor: 'boy',
-      goal: { x: 1380, y: 660 },
-    });
-    let deepest = 0;
+    // The doorway is a tongue of floor 36 units deep reaching back to the mat,
+    // with the wall and the bench beside it (ticket 14's §3.2). A straight line
+    // from the mat to the far end of the hall would cross that wall, so the
+    // walk has to come down out of the doorway first and turn there.
+    const inTheDoorway = advance(createWorld(plainArrival), { type: 'motion-toggled' });
+    const onTheMat = advance(inTheDoorway, { type: 'actor-sent', actor: 'boy', goal: { x: 170, y: 612 } });
+    const moving = advance(onTheMat, { type: 'motion-toggled' });
+    expect(boy(moving).at).toEqual({ x: 170, y: 612 });
+
+    const sent = advance(moving, { type: 'actor-sent', actor: 'boy', goal: { x: 1380, y: 660 } });
+    let furthestInTheDoorway = 0;
     const arrived = runUntil(sent, world => {
-      deepest = Math.max(deepest, boy(world).at.y);
+      const at = boy(world).at;
+      if (at.y < 640) furthestInTheDoorway = Math.max(furthestInTheDoorway, at.x);
       return !boy(world).moving;
     });
     expect(boy(arrived).at).toEqual({ x: 1380, y: 660 });
-    expect(deepest).toBeGreaterThan(760);
+    // He is out of the doorway before its jamb at x 300, not through the wall.
+    expect(furthestInTheDoorway).toBeLessThan(310);
   });
 
   it('reports progress climbing from nothing to the whole route', () => {
@@ -160,18 +164,17 @@ describe('staying on the floor', () => {
     expect(longest).toBeGreaterThan(10);
   });
 
-  it('sets the demonstration Actor walking across the Entryway on its own', () => {
+  it('stands the whole Cast on the Entryway floor and nowhere else', () => {
+    // Ticket 14 replaced ticket 07's demonstration patrol with the Entryway's
+    // settled tableau: everybody is home, on the floor, and at rest. Where each
+    // of them stands is that Room's business, and `arrival.test.ts` covers it.
     const world = createWorld(plainArrival);
-    expect(boy(world).room).toBe('entryway');
-    expect(boy(world).moving).toBe(false);
-
-    const walking = runUntil(world, next => boy(next).moving);
-    const start = boy(walking).at;
-    const later = run(walking, 1000);
-    expect(boy(later).at).not.toEqual(start);
-    expect(isWalkable('entryway', boy(later).at)).toBe(true);
-    expect(actorsIn(later, 'entryway').map(actor => actor.id)).toEqual(['boy']);
-    expect(actorsIn(later, 'cinema')).toEqual([]);
+    expect(actorsIn(world, 'entryway').map(actor => actor.id)).toEqual(['boy', 'girl', 'mica', 'mira', 'luna']);
+    for (const actor of actorsIn(world, 'entryway')) {
+      expect(isWalkable('entryway', actor.at)).toBe(true);
+      expect(actor.moving).toBe(false);
+    }
+    expect(actorsIn(world, 'cinema')).toEqual([]);
   });
 
   it('pulls a goal outside the walkable area back onto it', () => {
@@ -307,7 +310,9 @@ describe('an Actor when the apartment is not allowed to move', () => {
 
   it('walks again once a reduced-motion visitor turns motion on deliberately', () => {
     const playing = advance(createWorld(askedForStillness), { type: 'motion-toggled' });
-    expect(boy(runUntil(playing, world => boy(world).moving)).cycle).toBe('walk');
+    const sent = advance(playing, { type: 'actor-sent', actor: 'boy', goal: { x: 1380, y: 690 } });
+    expect(boy(sent).moving).toBe(true);
+    expect(boy(run(sent, 200)).cycle).toBe('walk');
   });
 });
 
@@ -327,11 +332,9 @@ describe('the world the DOM layer is handed back', () => {
     expect(advance(walking, { type: 'actor-tick', now: clock })).toBe(walking);
   });
 
-  it('is the same world when the Actor sent is not in the apartment yet', () => {
-    const world = createWorld(plainArrival);
-    expect(actorView(world, 'mica')).toBe(null);
-    expect(advance(world, { type: 'actor-sent', actor: 'mica', goal: { x: 400, y: 700 } })).toBe(world);
-  });
+  // Sending an Actor the apartment has not placed changes nothing. The Cast is
+  // all home from world creation now, so the case where one of them is missing
+  // is the Entryway's empty hall: `arrival.test.ts` covers it.
 });
 
 describe('the dice the Cast is given', () => {

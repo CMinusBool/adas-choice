@@ -55,23 +55,107 @@
     <main class="apartment" id="apartment">
       <section class="room" id="room-entryway" data-room="entryway" aria-labelledby="entryway-title">
         <h1 class="room-title" id="entryway-title" data-room-title tabindex="-1" data-i18n="entrywayTitle">玄關</h1>
-        <p class="room-lede" data-i18n="entrywayLede">外套先掛著。三扇門通往其他房間，想去哪一間都可以。</p>
-        <!-- 06: audio — this Room's Music Source, a placeholder Prop until the Room is designed. -->
-        <div class="music-source-row">
-          <button class="music-source" type="button" data-music-source="entryway" aria-pressed="false" hidden>
-            <span class="music-note" aria-hidden="true">♪</span>
-            <span data-music-source-label>播放房間音樂</span>
-            <span class="placeholder-tag" data-i18n="placeholder">暫代</span>
-          </button>
+        <!--
+          14: the Entryway, laid out to `design/10-entryway.md` §3.
+
+          The stage is no longer `aria-hidden`: the three door links and the
+          Music Source stand on it, over the painted doors and the painted
+          radio, so the decorative layers carry `aria-hidden` one at a time
+          instead. Every box is in stage units (1600 x 900) and turned into a
+          percentage of the stage by `--x / --y / --w / --h`; `--z` is the
+          Prop's base line, which is how a Prop interleaves with the Cast's own
+          `z-index: round(y)`.
+
+          Everything inside `.entryway-backdrop` and `.entryway-props` is drawn
+          in CSS, standing in for the artwork of tickets 31 and 33: the
+          backdrop is shot S01 and each Prop is a shot of its own. When those
+          land, each placeholder becomes an element with a `data-still` and
+          this scenery goes.
+        -->
+        <div class="entryway-pan">
+          <div class="stage entryway-stage" data-stage="entryway">
+            <div class="entryway-backdrop" aria-hidden="true">
+              <div class="at eb-cornice" style="--x:0;--y:0;--w:1600;--h:36"></div>
+              <div class="at eb-wall" style="--x:0;--y:36;--w:1600;--h:549"></div>
+              <div class="at eb-skirting" style="--x:0;--y:585;--w:1600;--h:15"></div>
+              <div class="at eb-floor" style="--x:0;--y:600;--w:1600;--h:300"></div>
+              <div class="at eb-runner" style="--x:560;--y:690;--w:740;--h:130"></div>
+              <div class="at eb-doorframe" style="--x:70;--y:236;--w:200;--h:364"></div>
+              <div class="at eb-stairwell" style="--x:84;--y:250;--w:172;--h:350"></div>
+              <div class="at eb-mat" style="--x:100;--y:602;--w:160;--h:38"></div>
+              <div class="at eb-rail" style="--x:380;--y:300;--w:190;--h:16"></div>
+              <div class="at eb-hook" style="--x:396;--y:316;--w:8;--h:8"></div>
+              <div class="at eb-hook" style="--x:446;--y:316;--w:8;--h:8"></div>
+              <div class="at eb-hook" style="--x:496;--y:316;--w:8;--h:8"></div>
+              <div class="at eb-hook" style="--x:546;--y:316;--w:8;--h:8"></div>
+              <div class="at eb-bench" style="--x:300;--y:512;--w:270;--h:18"></div>
+              <div class="at eb-legs" style="--x:312;--y:530;--w:246;--h:70"></div>
+              <div class="at eb-door" style="--x:600;--y:236;--w:180;--h:364"></div>
+              <div class="at eb-leaf eb-leaf-games" style="--x:614;--y:250;--w:152;--h:350"></div>
+              <div class="at eb-photo" style="--x:870;--y:260;--w:100;--h:100"></div>
+              <div class="at eb-cord" style="--x:949;--y:36;--w:2;--h:74"></div>
+              <div class="at eb-lamp" style="--x:900;--y:110;--w:100;--h:62"></div>
+              <div class="at eb-table" style="--x:840;--y:452;--w:220;--h:18"></div>
+              <div class="at eb-legs" style="--x:852;--y:470;--w:196;--h:130"></div>
+              <div class="at eb-door" style="--x:1120;--y:236;--w:180;--h:364"></div>
+              <div class="at eb-leaf eb-leaf-cinema" style="--x:1134;--y:250;--w:152;--h:350"></div>
+              <div class="at eb-porthole" style="--x:1190;--y:310;--w:40;--h:40"></div>
+              <div class="at eb-clock" style="--x:1315;--y:280;--w:70;--h:70"></div>
+              <div class="at eb-door" style="--x:1400;--y:236;--w:180;--h:364"></div>
+              <div class="at eb-leaf eb-leaf-activities" style="--x:1414;--y:250;--w:152;--h:350"></div>
+              <span class="placeholder-tag eb-tag" data-i18n="placeholder">暫代</span>
+            </div>
+            <!--
+              14: the Props the arrival moves. `src/dom/entryway.ts` shows and
+              hides these off the world model's own Prop states; none of them
+              is announced, because each one is either scenery or a thing the
+              visitor watches happen.
+            -->
+            <div class="entryway-props" aria-hidden="true">
+              <div class="at prop prop-front-door" data-prop="frontDoor" style="--x:84;--y:250;--w:172;--h:350"></div>
+              <div class="at prop prop-girl-coat" data-prop="girlCoat" style="--x:400;--y:324;--w:100;--h:148;--z:472" hidden></div>
+              <div class="at prop prop-boy-parka" data-prop="boyParka" style="--x:450;--y:324;--w:100;--h:158;--z:482" hidden></div>
+              <div class="at prop prop-backpack" data-prop="backpack" style="--x:310;--y:424;--w:100;--h:88;--z:512" hidden><span class="backpack-window"></span></div>
+              <div class="at prop prop-monstera" style="--x:1430;--y:560;--w:170;--h:320;--z:880"></div>
+            </div>
+            <!--
+              14: the Room's Breakable (§4.2). Míca's alone, never focusable,
+              and never broken by the visitor — ticket 09 decides when she
+              reaches for it. Two elements rather than one, so whichever is
+              standing is the one assistive technology is told about.
+            -->
+            <div class="at prop prop-vase" data-prop="vaseIntact" role="img" aria-label="玄關桌上插著乾燥花的花瓶" data-i18n-aria="vaseIntact" style="--x:975;--y:300;--w:75;--h:152;--z:452"></div>
+            <div class="at prop prop-vase-broken" data-prop="vaseBroken" role="img" aria-label="摔碎的花瓶，乾燥花散了一地" data-i18n-aria="vaseBroken" style="--x:950;--y:622;--w:150;--h:50;--z:672" hidden></div>
+            <!--
+              14: the three doors, now transparent rectangles over the painted
+              door frames rather than a row of cards below the Room. They are
+              ordinary links, so the back button still works and nothing calls
+              `pushState`, and they are live all through the arrival.
+            -->
+            <nav class="doors" aria-label="通往其他房間的門" data-i18n-aria="doorsLabel">
+              <a class="at door" href="#/games" style="--x:600;--y:236;--w:180;--h:364;--z:600"><span class="door-plaque" data-i18n="doorGames">遊戲室</span></a>
+              <a class="at door" href="#/cinema" style="--x:1120;--y:236;--w:180;--h:364;--z:600"><span class="door-plaque" data-i18n="doorCinema">放映室</span></a>
+              <a class="at door" href="#/activities" style="--x:1400;--y:236;--w:180;--h:364;--z:600"><span class="door-plaque" data-i18n="doorActivities">活動室</span></a>
+            </nav>
+            <!-- 06: audio — this Room's Music Source is the hall radio (§4.1),
+                 standing on the hall table where the backdrop paints it. -->
+            <button class="at prop prop-radio" type="button" data-music-source="entryway" aria-pressed="false" style="--x:840;--y:375;--w:120;--h:87;--z:462" hidden>
+              <span class="radio-body" aria-hidden="true"><span class="radio-dial"></span><span class="radio-grille"></span></span>
+              <span class="radio-notes" aria-hidden="true"><span>♪</span><span>♪</span><span>♪</span></span>
+              <span class="sr-only" data-i18n="entrywayRadio">玄關的收音機</span>
+              <span class="sr-only" data-music-source-label>播放房間音樂</span>
+            </button>
+            <!-- 14: the arrival's box and duet Beats (§6.4). The painter plays
+                 whichever the model names and skips one with no layer here,
+                 which is every one of them until ticket 33 drops the sheets in;
+                 the Cast then simply walks the arrival rather than acting it. -->
+            <div class="beats" data-beats="entryway" aria-hidden="true"></div>
+          </div>
         </div>
-        <!-- end 06 -->
-        <nav class="doors" aria-label="通往其他房間的門" data-i18n-aria="doorsLabel">
-          <a class="door" href="#/games"><span class="door-name" data-i18n="doorGames">遊戲室</span><span class="door-arrow" aria-hidden="true">→</span></a>
-          <a class="door" href="#/cinema"><span class="door-name" data-i18n="doorCinema">放映室</span><span class="door-arrow" aria-hidden="true">→</span></a>
-          <a class="door" href="#/activities"><span class="door-name" data-i18n="doorActivities">活動室</span><span class="door-arrow" aria-hidden="true">→</span></a>
-        </nav>
-        <!-- 07: actors — the Room's stage, a 16:9 canvas of 1600 x 900 units the Cast walks on. -->
-        <div class="stage" data-stage="entryway" aria-hidden="true"></div>
+        <p class="room-lede stage-caption" data-i18n="entrywayLede">外套先掛著。三扇門通往其他房間，想去哪一間都可以。</p>
+        <!-- 14: the arrival as one sentence, from first paint, and not a live
+             region — a visitor who cannot watch it is told what happened. -->
+        <p class="sr-only" data-i18n="arrivalDescription">他們回到家了：他背著裝了三隻貓的背包，幫她脫下大衣，貓咪一隻一隻跳出來。</p>
       </section>
       <section class="room" id="room-games" data-room="games" aria-labelledby="page-title" hidden>
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>

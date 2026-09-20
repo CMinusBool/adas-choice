@@ -85,8 +85,13 @@ const zhHant = {
   // end 06
   // 15: the Game Room's own Props — the boombox Music Source and Luna's snow globe.
   gamesBoombox: '遊戲室的手提音響', gamesBoomboxStart: '放卡帶', gamesBoomboxStop: '停下卡帶',
-  globeIntact: '一顆雪花球', globeBroken: '被貓推下去的雪花球，玻璃碎了，水也灑在地板上'
+  globeIntact: '一顆雪花球', globeBroken: '被貓推下去的雪花球，玻璃碎了，水也灑在地板上',
   // end 15
+  // 14: the Entryway
+  entrywayRadio: '玄關的收音機',
+  vaseIntact: '玄關桌上插著乾燥花的花瓶', vaseBroken: '摔碎的花瓶，乾燥花散了一地',
+  arrivalDescription: '他們回到家了：他背著裝了三隻貓的背包，幫她脫下大衣，貓咪一隻一隻跳出來。'
+  // end 14
 };
 
 /** Every piece of copy on the page. Both dictionaries carry the same keys. */
@@ -170,7 +175,12 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     // end 06
     // 15: the Game Room
     gamesBoombox: 'The boombox in the Game Room', gamesBoomboxStart: 'Put the tape on', gamesBoomboxStop: 'Stop the tape',
-    globeIntact: 'A snow globe', globeBroken: 'A snow globe the cat pushed off: the glass is broken and the water has spilled across the floor'
+    globeIntact: 'A snow globe', globeBroken: 'A snow globe the cat pushed off: the glass is broken and the water has spilled across the floor',
     // end 15
+    // 14: the Entryway
+    entrywayRadio: 'The hall radio',
+    vaseIntact: 'A vase of dried grasses on the hall table', vaseBroken: 'The vase in pieces, its dried grasses scattered across the floor',
+    arrivalDescription: 'They are home. He carries the three cats in a backpack and helps her out of her coat, and the cats climb out one by one.'
+    // end 14
   }
 };

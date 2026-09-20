@@ -1,4 +1,6 @@
 import { CINEMA_MARKS } from './cinema'; // 17: the Cinema Room's marks
+// 14: the Entryway's floor and marks are the design note's, written down once.
+import { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';
 import type { RoomId } from './rooms';
 import { clampInto, containsPoint, distance, routeLength, routeThrough, type Point, type Polygon } from './stage';
 
@@ -43,23 +45,12 @@ const MAX_STEP_MS = 100;
 /**
  * Where an Actor may stand in each Room, as a polygon in stage units.
  *
- * The Entryway's floor is the one designed here, because it is where this
- * ticket's walk happens: a band of floor with the hall furniture standing in
- * the middle of its back edge, so crossing the Room is a route that has to bend
- * rather than a straight line. The other three are plain bands until each
+ * The Entryway's floor is its design note's (§3.2), kept in `entryway.ts` with
+ * the rest of that Room's geometry. The other three are plain bands until each
  * Room's design pass gives them their real furniture.
  */
 const WALKABLE: Record<RoomId, Polygon> = {
-  entryway: [
-    { x: 120, y: 620 },
-    { x: 640, y: 620 },
-    { x: 640, y: 760 },
-    { x: 960, y: 760 },
-    { x: 960, y: 620 },
-    { x: 1480, y: 620 },
-    { x: 1480, y: 860 },
-    { x: 120, y: 860 },
-  ],
+  entryway: ENTRYWAY_WALKABLE,
   // The Game Room's floor: a band across the front, with one notch cut from its
   // bottom edge for the low table's footprint, so a cat never walks into the
   // foreground Prop that would hide it. The poufs are deliberately not cut out —
@@ -150,8 +141,8 @@ interface ActorState {
   readonly distance: number;
   /**
    * Goals this Actor walks between in turn, taking the next one each time it
-   * arrives. This ticket's demonstration walk is one of these; an Actor with an
-   * empty patrol stands still until something sends it somewhere.
+   * arrives. A Room's `Home` may hand one out; an Actor with an empty patrol
+   * stands still until something sends it somewhere.
    */
   readonly patrol: readonly Point[];
 }
@@ -327,6 +318,42 @@ export function settleActors(slice: ActorsSlice): ActorsSlice {
   return { ...slice, actors, lastTick: null };
 }
 
+// 14: the Entryway
+/**
+ * Put an Actor somewhere, at once, with no walking and no route.
+ *
+ * What the arrival's script does when a figure simply appears — the Girl in the
+ * doorway, a cat landing off the end of the bench — and the only way an Actor
+ * that is not in the apartment yet gets into it. A mark outside the Room's
+ * walkable area is pulled onto it, exactly as a goal is.
+ */
+export function placeActor(slice: ActorsSlice, id: ActorId, room: RoomId, at: Point, facing: Facing): ActorsSlice {
+  const placed = clampInto(WALKABLE[room], at);
+  const existing = slice.actors.find(actor => actor.id === id);
+  const next: ActorState = existing
+    ? { ...standing(existing, placed, facing), room }
+    : { id, room, at: placed, facing, cycle: 'idle', route: [], distance: 0, patrol: STILL };
+  return {
+    ...slice,
+    actors: existing ? slice.actors.map(actor => (actor.id === id ? next : actor)) : [...slice.actors, next],
+  };
+}
+
+// 14: the Entryway
+/**
+ * The Cast with everyone standing in one Room taken out of the apartment.
+ *
+ * The Entryway's arrival opens on an empty hall, and an empty hall is the
+ * absence of the Cast rather than a flag on it: an Actor nobody has placed has
+ * no position to paint and no answer to give, which is already what
+ * `actorView` says about one.
+ */
+export function clearRoom(slice: ActorsSlice, room: RoomId): ActorsSlice {
+  const actors = slice.actors.filter(actor => actor.room !== room);
+  return actors.length === slice.actors.length ? slice : { ...slice, actors, lastTick: null };
+}
+
+// 17: the Cinema Room, ticket 14's Entryway
 /**
  * Where an Actor belongs in a Room: its mark, its facing, and what it does
  * there once it has arrived.
@@ -348,20 +375,22 @@ const STILL: readonly Point[] = [];
  *
  * This is the whole of "the Cast is in the Room the visitor is in": a Room
  * names the Actors it puts on its floor, and walking in puts them there. The
- * Entryway's entry is ticket 07's demonstration walk, which is a home like any
+ * Entryway's entry is ticket 14's settled tableau, which is a home like any
  * other; the Cinema Room seats the two of them in their beanbags. A Room with
  * no entry here is one whose design pass has not given the Cast anywhere to be.
  */
 const HOMES: Partial<Record<RoomId, Partial<Record<ActorId, Home>>>> = {
+  // 14: the Entryway, design note §5.4 — the two of them in the coat corner and
+  // the three cats on their landing marks. This is the Room at rest: what a
+  // visitor who never sees the arrival is shown, and where the arrival, when it
+  // plays, walks everybody back to. Nobody patrols: ticket 07's demonstration
+  // walk was this entry before ticket 14 gave the hallway its real Cast.
   entryway: {
-    boy: {
-      at: { x: 220, y: 690 },
-      facing: 'right',
-      patrol: [
-        { x: 1380, y: 690 },
-        { x: 220, y: 690 },
-      ],
-    },
+    boy: { at: ENTRYWAY_MARKS.BS, facing: 'left' },
+    girl: { at: ENTRYWAY_MARKS.GS, facing: 'right' },
+    mica: { at: ENTRYWAY_MARKS.EMica, facing: 'left' },
+    mira: { at: ENTRYWAY_MARKS.EMira, facing: 'right' },
+    luna: { at: ENTRYWAY_MARKS.ELuna, facing: 'left' },
   },
   // 17: the Cinema Room — the visitor walks in on the two of them already sat
   // down in front of the screen, each turned a little towards the other.
