@@ -74,3 +74,7 @@ export { expandedPoster, posterDetails } from './world';
 // forwards, one step at a time, and never back the way it came.
 export { REEL_STEPS } from './cinema';
 export { cinemaNeedsClock, loadedReel, rollingFilm } from './world';
+
+// 40: the one question the page's frame loop asks the model, in place of the
+// three slices the Actors painter used to read for itself.
+export { apartmentNeedsClock } from './world';

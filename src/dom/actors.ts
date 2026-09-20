@@ -4,25 +4,15 @@ import {
   STAGE_HEIGHT,
   STAGE_WIDTH,
   actorView,
-  actorsIn,
-  arrivalView, // 14: the Entryway
-  catSfx, // 08: the cats
-  cinemaNeedsClock, // 20: the Cinema Room's Bumper
-  isBeingPetted,
-  isCat,
-  motionIsOn,
-  pettingBeat,
+  apartmentNeedsClock,
   type ActorId,
   type ActorView,
-  type CatId,
-  type CatsSlice,
   type CycleId,
   type Facing,
   type RoomId,
   type World,
 } from '../world';
 import { byId, type Dispatch, type Painter } from './painter';
-import { playSfx } from './sound'; // 08: the cats
 
 /**
  * Paint the Cast.
@@ -32,6 +22,10 @@ import { playSfx } from './sound'; // 08: the cats
  * moving at all. This file turns that into a sprite standing on a stage. It
  * chooses no routes, holds no positions of its own, and asks for the time only
  * so it can hand it back to the model on a tick.
+ *
+ * A cat is an Actor crossing a floor like any other and is painted here like
+ * any other; everything `world.cats` decides — the fuss, its Beat, the meows —
+ * is `src/dom/cats.ts`, because that is its own slice.
  *
  * The Cycles themselves are declared in `index.html` rather than assembled from
  * strings here, which is what gets them preloaded and checked into the build.
@@ -110,21 +104,6 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
         moving: false,
       };
     });
-
-  // 08: the three cats are the one part of the Cast the visitor can reach.
-  // Each is a real `<button>` in `index.html`, so Enter, Space and a tap all
-  // arrive here as one click and the focus ring is the browser's; the order
-  // Tab visits them in is the order they were written, which is the order the
-  // painter appends them to a stage in. The model decides what a fuss means.
-  const petLayers = new Map<string, HTMLElement>(
-    [...byId('apartment').querySelectorAll<HTMLElement>('[data-beat]')].map(layer => [layer.dataset.beat!, layer]),
-  );
-  for (const sprite of sprites) {
-    if (!isCat(sprite.id)) continue;
-    sprite.element.addEventListener('click', () => {
-      dispatch({ type: 'cat-petted', cat: sprite.id as CatId, now: performance.now() });
-    });
-  }
 
   /**
    * The sheet this Actor should be painted from, and whether it has to be
@@ -220,25 +199,15 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
   /**
    * Is there anything for the clock to do?
    *
-   * Only while the Room the visitor is in has something to do, that Room's
-   * stage is on screen, the tab is in front, and the visitor has not asked the
-   * apartment to hold still. Anything else and the loop stops outright rather
-   * than running to discover there is nothing to draw.
-   *
-   * 14: an arrival still playing counts as something to do even with nobody in
-   * the Room, because an empty hall is where it starts: the Cast comes through
-   * the door on the same clock that would otherwise have stopped waiting for it.
+   * Two facts, and only one of them is this painter's. The browser alone knows
+   * whether the tab is in front and whether this Room's stage is on screen;
+   * everything else — the Cast, the arrival, a Film on the Cinema Room's
+   * screen — is one question the model answers, so no painter decides the
+   * clock on behalf of a slice that is not its own.
    */
   function needsClock() {
-    const room = world.rooms.current;
-    if (document.hidden || !onScreen.has(room)) return false;
-    // 20: a Film on the Cinema Room's screen is the one thing in the apartment
-    // that still runs on the clock while motion is off. It is not the
-    // apartment moving: it is four seconds of Bumper with its own music, which
-    // §10.3 keeps whole under reduced motion and only simplifies inside.
-    if (cinemaNeedsClock(world)) return true;
-    if (!motionIsOn(world)) return false;
-    return actorsIn(world, room).length > 0 || arrivalView(world).state === 'playing';
+    if (document.hidden || !onScreen.has(world.rooms.current)) return false;
+    return apartmentNeedsClock(world);
   }
 
   function startClock() {
@@ -327,40 +296,8 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
     startClock();
   });
 
-  // 08: the cats. The slice changes identity on the tick that names a meow and
-  // again on the one that forgets it, so watching it plays each one exactly
-  // once — and a repaint from a sheet finishing its load replays nothing.
-  let heard: CatsSlice | null = null;
-
-  /**
-   * Play the petting Beat over a cat, if a sheet for it has been delivered.
-   *
-   * Named by the model and skipped when `index.html` declares no layer for it,
-   * which is ticket 14's arrangement for the arrival: the fuss then degrades to
-   * the cat stopping where she is rather than to a cat that vanishes. Nothing
-   * here invents a `data-sheet` for a file that is not on disk.
-   */
-  function playPetting(sprite: Sprite, view: ActorView): boolean {
-    const layer = petLayers.get(pettingBeat(sprite.id as CatId));
-    if (!layer) return false;
-    const width = sprite.height * (sprite.showing?.aspect ?? 1);
-    const style = layer.style;
-    style.setProperty('--x', String(view.at.x - width / 2));
-    style.setProperty('--y', String(view.at.y - sprite.height));
-    style.setProperty('--w', String(width));
-    style.setProperty('--h', String(sprite.height));
-    style.setProperty('--z', String(Math.round(view.at.y)));
-    if (layer.parentElement !== sprite.element.parentElement) sprite.element.parentElement?.append(layer);
-    layer.hidden = false;
-    return true;
-  }
-
   function paint(next: World) {
     world = next;
-    if (next.cats !== heard) {
-      heard = next.cats;
-      for (const name of catSfx(next)) playSfx(name);
-    }
     for (const sprite of sprites) {
       const view = actorView(world, sprite.id);
       const resolved = view && resolve(sprite, view.cycle, view.facing);
@@ -372,20 +309,6 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
       show(sprite, resolved.layer);
       place(sprite, view, resolved.mirrored);
       sprite.moving = view.moving;
-      // 08: a cat being fussed over. The class is what the stylesheet reads;
-      // the Beat, if one has been drawn, stands in for the sprite as the
-      // arrival's Beats do for the Cast they draw.
-      if (!isCat(sprite.id)) continue;
-      const petted = isBeingPetted(world, sprite.id as CatId);
-      sprite.element.classList.toggle('is-petted', petted);
-      // `is-fussed` rather than the arrival's `is-acted`, because the Entryway
-      // painter owns that one and the two must never argue over a cat.
-      const acted = petted && playPetting(sprite, view);
-      sprite.element.classList.toggle('is-fussed', acted);
-      if (!acted) {
-        const layer = petLayers.get(pettingBeat(sprite.id as CatId));
-        if (layer) layer.hidden = true;
-      }
     }
     startClock();
   }

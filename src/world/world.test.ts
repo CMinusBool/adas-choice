@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  actorsIn,
   advance,
+  apartmentNeedsClock,
   breakableState,
   createWorld,
   isCurrentRoom,
@@ -190,6 +192,33 @@ describe('a Breakable, once it has gone over', () => {
     // all, exactly like the very first visit above: session storage is
     // per-tab, so this is the same call and the same answer.
     expect(breakableState(createWorld(plainArrival), 'entryway-vase')).toBe('intact');
+  });
+});
+
+/**
+ * 40: the page's frame loop asks the model one question.
+ *
+ * It used to read three slices for itself — the Cast, the arrival and the
+ * Cinema Room — from inside the Actors painter, which is one painter deciding
+ * the clock for three slices. What is left to the page is what the browser
+ * alone can know: a hidden tab, a stage scrolled off the screen.
+ */
+describe('whether the page needs to keep a frame clock running', () => {
+  it('runs while the Room the visitor is in has Actors in it and may move', () => {
+    const home = createWorld({ ...plainArrival, arrived: true });
+    expect(actorsIn(home, 'entryway').length).toBeGreaterThan(0);
+    expect(apartmentNeedsClock(home)).toBe(true);
+  });
+
+  it('stops once the apartment has been asked to hold still', () => {
+    const still = createWorld({ ...plainArrival, arrived: true, reducedMotion: true });
+    expect(apartmentNeedsClock(still)).toBe(false);
+  });
+
+  it('runs through the arrival even though the hall it opens on is empty', () => {
+    const arriving = advance(createWorld(plainArrival), { type: 'arrival-started' });
+    expect(actorsIn(arriving, 'entryway')).toEqual([]);
+    expect(apartmentNeedsClock(arriving)).toBe(true);
   });
 });
 

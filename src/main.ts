@@ -1,6 +1,7 @@
 import { mountActivityRoom } from './dom/activity-room'; // 16: the Activity Room
 import { mountActors } from './dom/actors'; // 07: actors
 import { mountBreakables, readStoredBroken } from './dom/breakables'; // 09: the Breakables
+import { mountCats } from './dom/cats'; // 08: the cats
 import { mountCinemaRoom } from './dom/cinema-room'; // 17: the Cinema Room
 import { mountEntryway, readStoredArrival } from './dom/entryway'; // 14: the Entryway
 import { mountGameRoom } from './dom/game-room';
@@ -51,6 +52,9 @@ const mounts: Mount[] = [
   mountActivityRoom, // 16: the Activity Room
   mountSound, // 06: audio
   mountActors, // 07: actors — the Cast stands on top of whatever the Room laid down.
+  // 08: the cats slice, after the Cast, because the petting Beat stands in for
+  // a cat the painter above has just placed and takes its box from her.
+  mountCats,
   // 14: the Entryway, after the Cast, because the arrival's Beats stand in for
   // Actors the painter above has just placed.
   mountEntryway,

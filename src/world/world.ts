@@ -741,6 +741,26 @@ export function cinemaNeedsClock(world: World): boolean {
 }
 
 /**
+ * Is there anything at all for the page's frame clock to do?
+ *
+ * The model's whole half of that question, in one answer, so the painter that
+ * owns the frame loop asks once instead of reading three slices for itself.
+ * What is left to the page is only what the browser alone can know: a tab in
+ * the background, a stage scrolled off the screen.
+ *
+ * 07: the Cast's Cycles play while the Room the visitor is in has anyone in it
+ * and the apartment is allowed to move. 14: an arrival still playing counts
+ * even with nobody in the Room, because an empty hall is where it starts.
+ * 20: and a Film on the Cinema Room's screen counts however still the visitor
+ * asked the apartment to be.
+ */
+export function apartmentNeedsClock(world: World): boolean {
+  if (cinemaNeedsClock(world)) return true;
+  if (!motionIsOn(world)) return false;
+  return actorsIn(world, world.rooms.current).length > 0 || arrivalView(world).state === 'playing';
+}
+
+/**
  * Is this Actor sitting in its beanbag in front of the screen?
  *
  * True of the Boy and the Girl while they are in the Cinema Room, standing

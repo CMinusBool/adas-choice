@@ -7,6 +7,7 @@ import {
   actorView,
   actorsIn,
   advance,
+  apartmentNeedsClock,
   attendedShelf,
   cinemaNeedsClock,
   cinemaStep,
@@ -689,11 +690,15 @@ describe('choosing a Film, and the reel he fetches for it', () => {
       // to: nothing else here has anywhere to be. A Film does.
       const chosen = advance(stillWallUp(), { type: 'cinema-film-chosen', film: 'knives-out', now: clock });
       expect(cinemaNeedsClock(chosen)).toBe(true);
+      // And through the one question the frame loop actually asks, which is
+      // where a Room's clock-wait has to survive to be worth anything.
+      expect(apartmentNeedsClock(chosen)).toBe(true);
 
       const slated = runUntil(chosen, next => cinemaStep(next) === 'slate', 20000);
       // The slate holds until somebody ends it, so there is nothing left to
       // wait for and the loop may stop again.
       expect(cinemaNeedsClock(slated)).toBe(false);
+      expect(apartmentNeedsClock(slated)).toBe(false);
     });
   });
 });
