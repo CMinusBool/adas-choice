@@ -180,13 +180,30 @@ describe.each(ROOMS)('the arrival of the %s Room', room => {
   it('waits behind the loading screen when the page opens on this Room', () => {
     // Opening the page on a Room is not walking through its Door: the page
     // says when the loading screen has gone, and that is when it plays.
+    // 51: and the Room waits **empty**. The page cannot lift its loading
+    // screen and dispatch the same frame, so a Room that holds its Cast while
+    // the entrance is `pending` is a Room the visitor sees settled — all five
+    // of them standing on their marks — and then sees emptied when it starts.
+    // A Room is not found already settled, not even for 400 ms.
     const opened = createWorld({ ...visitor, hash: `#/${room}` });
     expect(roomArrivalState(opened)).toBe('pending');
-    expect(actorsIn(opened, room)).toHaveLength(5);
+    expect(actorsIn(opened, room)).toEqual([]);
 
     const shown = advance(opened, { type: 'arrival-started' });
     expect(roomArrivalState(shown)).toBe('playing');
     expect(actorsIn(shown, room)).toEqual([]);
+  });
+
+  it('walks the Cast to their own marks after opening on this Room', () => {
+    // The marks are the Room's own — `HOMES` and `CAT_MARKS` — and they are
+    // taken down as the entrance is made rather than as it starts, because by
+    // the time it starts the Room it would read them off is empty.
+    const opened = createWorld({ ...visitor, hash: `#/${room}` });
+    const playing = advance(opened, { type: 'arrival-started' });
+    const settled = advance(playing, { type: 'visitor-input' });
+    expect(actorsIn(settled, room)).toHaveLength(5);
+    standsOnItsMark(settled, room, 'boy');
+    standsOnItsMark(settled, room, 'girl');
   });
 
   it('is over before it is watched in a Room whose stage is not on the screen', () => {
