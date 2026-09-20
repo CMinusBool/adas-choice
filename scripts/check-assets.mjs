@@ -373,10 +373,11 @@ export function paletteReport(image, colours, distance = TOLERANCES.paletteDista
 }
 
 function parseArguments(args) {
-  const options = { paths: [], json: false, nonFatal: false, palette: null, frames: null, columns: null, frame: null, actor: null };
+  const options = { paths: [], json: false, nonFatal: false, beat: false, palette: null, frames: null, columns: null, frame: null, actor: null };
   for (let index = 0; index < args.length; index++) {
     const argument = args[index];
     if (argument === '--json') options.json = true;
+    else if (argument === '--beat') options.beat = true;
     else if (argument === '--non-fatal') options.nonFatal = true;
     else if (argument === '--palette') options.palette = args[++index];
     else if (argument === '--frames') options.frames = Number(args[++index]);
@@ -388,6 +389,28 @@ function parseArguments(args) {
       options.frame = { width: Number(match[1]), height: Number(match[2]) };
     } else if (argument.startsWith('--')) throw new Error(`Unknown option ${argument}.`);
     else options.paths.push(argument);
+  }
+  // Everything `--beat` cannot mean. A Beat is not declared anywhere the script
+  // can read, so nothing about it may be inferred: it is named, measured and
+  // shaped on the command line or it is not checked.
+  if (options.beat) {
+    if (options.paths.length === 0) {
+      throw new Error(
+        '--beat needs the sheets to check named on the command line: index.html declares Cycles, not Beats.',
+      );
+    }
+    if (options.frames === null || options.columns === null) {
+      throw new Error('--beat needs --frames and --columns; a Beat inherits no grid from index.html.');
+    }
+    if (options.actor) {
+      throw new Error(
+        `--actor names a Cycle's frame box (${Object.keys(FRAME_BOXES).join(' or ')}), which a Beat does not use; ` +
+          'pass --frame <width>x<height> instead.',
+      );
+    }
+    if (!options.frame) {
+      throw new Error('--beat needs --frame <width>x<height>: a Beat has no standard frame box to fall back on.');
+    }
   }
   return options;
 }

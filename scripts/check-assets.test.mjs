@@ -31,6 +31,7 @@ import {
   decodeSheet,
   frameBoxForActor,
   monotonic,
+  parseArguments,
   readDeclarations,
 } from './check-assets.mjs';
 
@@ -363,6 +364,43 @@ test('no hint for a sheet that passes, nor for one already checked as a Beat', (
 test('a Beat run records which contract was applied, and a Cycle run does not', () => {
   assert.equal(check(buildBeat(), { beat: true }).stats.contract, 'beat');
   assert.equal('contract' in check(buildSheet()).stats, false);
+});
+
+const BEAT_ARGS = ['--beat', 'beat.png', '--frames', '8', '--columns', '4', '--frame', '360x360'];
+
+test('--beat is off by default and on when asked for', () => {
+  assert.equal(parseArguments(['public/assets/actors/boy-walk-right.png']).beat, false);
+  const options = parseArguments(BEAT_ARGS);
+  assert.equal(options.beat, true);
+  assert.deepEqual(options.paths, ['beat.png']);
+  assert.deepEqual(options.frame, { width: 360, height: 360 });
+});
+
+test('--beat with no sheet named is refused: index.html declares Cycles, not Beats', () => {
+  assert.throws(() => parseArguments(['--beat', '--frames', '8', '--columns', '4', '--frame', '360x360']), {
+    message: /--beat needs the sheets? to check.*index\.html declares Cycles/s,
+  });
+});
+
+test('--beat without a frame box is refused, because a Beat has no standard one', () => {
+  assert.throws(() => parseArguments(['--beat', 'beat.png', '--frames', '8', '--columns', '4']), {
+    message: /--beat needs --frame <width>x<height>/,
+  });
+});
+
+test('--beat without --frames and --columns is refused', () => {
+  assert.throws(() => parseArguments(['--beat', 'beat.png', '--columns', '4', '--frame', '360x360']), {
+    message: /--beat needs --frames and --columns/,
+  });
+  assert.throws(() => parseArguments(['--beat', 'beat.png', '--frames', '8', '--frame', '360x360']), {
+    message: /--beat needs --frames and --columns/,
+  });
+});
+
+test('--beat with --actor is refused: --actor is a Cycle frame box by another name', () => {
+  assert.throws(() => parseArguments([...BEAT_ARGS, '--actor', 'mira']), {
+    message: /--actor names a Cycle's frame box/,
+  });
 });
 
 // --- the two real generations, when they are on disk ---------------------------
