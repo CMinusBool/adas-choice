@@ -410,4 +410,32 @@ describe('the Cast in whichever Room the visitor is in', () => {
     // than that are two sprites that do not touch.
     expect(Math.abs(who(world, 'boy').at.x - who(world, 'girl').at.x)).toBeGreaterThan(105);
   });
+
+  it('stands the Boy and the Girl on the rug in the Activity Room', () => {
+    // H-Boy and H-Girl, §4.3: he is 2 units below her, so he sorts in front.
+    const world = walkInto(createWorld(plainArrival), 'activities');
+    expect(who(world, 'boy').at).toEqual({ x: 868, y: 744 });
+    expect(who(world, 'boy').facing).toBe('left');
+    expect(who(world, 'girl').at).toEqual({ x: 762, y: 742 });
+    expect(who(world, 'girl').facing).toBe('right');
+    for (const id of ['boy', 'girl'] as const) {
+      expect(who(world, id).moving).toBe(false);
+      expect(isWalkable('activities', who(world, id).at)).toBe(true);
+    }
+    // The note's own reading of those two marks: sprites spanning x 818-918 and
+    // x 710-815 do not overlap.
+    expect(who(world, 'boy').at.x - who(world, 'girl').at.x).toBeGreaterThan(105);
+    expect(who(world, 'boy').at.y).toBeGreaterThan(who(world, 'girl').at.y);
+  });
+
+  it('puts the whole Cast in the Activity Room', () => {
+    const world = walkInto(createWorld(plainArrival), 'activities');
+    expect([...actorsIn(world, 'activities')].map(actor => actor.id).sort()).toEqual([
+      'boy',
+      'girl',
+      'luna',
+      'mica',
+      'mira',
+    ]);
+  });
 });

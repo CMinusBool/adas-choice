@@ -435,6 +435,16 @@ const HOMES: Partial<Record<RoomId, Partial<Record<ActorId, Home>>>> = {
     boy: { at: { x: 940, y: 795 }, facing: 'left' },
     girl: { at: { x: 560, y: 800 }, facing: 'right' },
   },
+  // 43: the Activity Room, `design/12-activity-room.md` §4.3 — H-Boy and
+  // H-Girl, the two of them standing on the rug and turned towards each other.
+  // He is two units below her so he sorts in front, and neither of them ever
+  // walks in this Room: choosing an activity replaces both sprites with that
+  // station's tableau, which is `.has-tableau` in `src/dom/activity-room.ts`
+  // rather than anything the model has to know about.
+  activities: {
+    boy: { at: { x: 868, y: 744 }, facing: 'left' },
+    girl: { at: { x: 762, y: 742 }, facing: 'right' },
+  },
 };
 
 function atHome(id: ActorId, room: RoomId, home: Home): ActorState {
