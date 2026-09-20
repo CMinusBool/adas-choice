@@ -505,10 +505,26 @@ export function tickCats(
  * is no Beat to play and no clock to end one, so the visitor gets the meow and
  * the cat is not held anywhere — which is what an apartment asked to hold still
  * should do with an animation, and still leaves the fuss worth making.
+ *
+ * Whatever she had in mind is a mark, and a fuss ends it: a hand on her is
+ * exactly as good a reason to forget a knock as walking out of the Room is
+ * (`arriveCats` below). It has to clear `knocking` as well as `goal`, because
+ * the tick reads "not moving, still knocking, nothing timed yet" as arrival at
+ * the mark — so a knock left standing while she is held under a hand halfway
+ * across the floor would bring her Breakable down from there.
  */
 export function petCats(slice: CatsSlice, cat: CatId, now: number, motionOn: boolean): CatsSlice {
   const minds = slice.minds.map(mind =>
-    mind.id === cat ? { ...mind, goal: null, restUntil: null, pettedUntil: motionOn ? now + PETTING_MS : null } : mind,
+    mind.id === cat
+      ? {
+          ...mind,
+          goal: null,
+          knocking: null,
+          knockUntil: null,
+          restUntil: null,
+          pettedUntil: motionOn ? now + PETTING_MS : null,
+        }
+      : mind,
   );
   return { minds, sfx: [meowOf(cat)] };
 }
