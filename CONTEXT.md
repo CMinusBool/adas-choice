@@ -18,6 +18,13 @@ The Room the visitor arrives in, containing the front door the Cast enters throu
 apartment's hub, but it is a real place with furniture, not a menu overlaid on one.
 _Avoid_: main menu, lobby, hub, home
 
+**Stage**:
+A Room's logical canvas: 1600 x 900 units, origin top-left, x right, y down, held by
+`<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS. Walkable areas,
+Props, doors and Actor positions are all written in stage units, so the same numbers mean the
+same place at every screen width. Every Room has exactly one.
+_Avoid_: canvas, viewport, board, pixels
+
 **Scene**:
 A per-game animated sprite loop on a Game Room card. Reserved to its existing meaning — a
 Scene lives inside a Room and is never a synonym for one.
@@ -38,6 +45,13 @@ _Avoid_: destructible
 The five characters who inhabit the apartment: the Boy, the Girl, Míca, Mira and Luna. Their
 appearance is fixed by the Character Sheet.
 
+**Actor**:
+A Cast member as the world model moves it: a position on a Room's Stage, a facing, and a Cycle
+being played. The position is the Actor's feet — the bottom-centre of its sprite — and depth is a
+y-sort against the Props around it. "Cast" is who they are; "Actor" is the moving thing the model
+travels across a Stage and the DOM layer paints.
+_Avoid_: sprite, entity, character (for the moving thing)
+
 **Boy** / **Girl**:
 The two people. The Boy is slim and taller, with a brown side-swept undercut and browline
 glasses; the Girl is shorter and athletic, with a black ponytail. Established by the existing
@@ -56,8 +70,8 @@ The black cat — solid black, short fine coat, a short tail about half the leng
 two's, and green-yellow eyes where theirs are pale. Adult, the largest of the three and the
 softest built, and the only cat who stands taller than 66 stage units to the shoulder: she is 72.
 She is an Actor as of 2026-09-20 — `ActorId`, `.cycle` layers and validated placeholder frames —
-and rides in the pet backpack with the other two. Her roaming, her meow and her petting Beat are
-ticket 08's; her Breakable is the Game Room's.
+and rides in the pet backpack with the other two. She roams, meows and can be petted like the
+other two, and the Game Room's snow globe is her Breakable.
 
 **Character Sheet**:
 The frozen reference artwork and written description that fixes a Cast member's identity.
@@ -94,6 +108,15 @@ _Avoid_: card, thumbnail, cover
 The original studio intro — logo animation and its own music — that plays on the projector
 before a Film's title card. Invented for this page; it belongs to no real studio.
 _Avoid_: intro, ident, logo
+
+### The activities
+
+**Activity**:
+One of the three things the Activity Room proposes the two people do together over a video call.
+Like a Film it is a recommendation with its own details — what it involves, what it needs, roughly
+how long — and unlike a Film there is nothing to fetch or play: choosing one marks it as tonight's
+and nothing else happens.
+_Avoid_: game (a game is a Game Room card), idea, suggestion
 
 ### Sound
 

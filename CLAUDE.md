@@ -23,11 +23,17 @@ node --test worker/test/*.test.mjs
 npm run build
 ```
 
-`npm test` is Vitest over `src/**/*.test.ts`. `npm run build` is the acceptance run: it runs
-`npm run typecheck`, bundles into `dist/`, then `scripts/assert-built-page.mjs` fails unless the
-built page still carries the Traditional Chinese default (`lang="zh-Hant"`), ships `.nojekyll`, and
-resolves every local URL it references. `npm run typecheck` alone is the fast inner-loop check; it
-is two passes — the whole project, then `src/world/` again under `tsconfig.world.json`.
+`npm test` is `npm run typecheck`, then Vitest over `src/**/*.test.ts`, then `node --test` over the
+checkers in `scripts/` (`check-assets`, `check-styles`, and the three under `scripts/art/`). The
+typecheck runs first on purpose: a duplicate copy key (TS1117) and two `switch` cases sharing a `}`
+both landed during COOP-001 and were found by a later merge, because the fast loop was not
+typechecking. `npm run typecheck` alone is still the fastest inner-loop check; it is two passes —
+the whole project, then `src/world/` again under `tsconfig.world.json`.
+
+`npm run build` is the acceptance run: typecheck, bundle into `dist/`, then
+`scripts/assert-built-page.mjs` fails unless the built page still carries the Traditional Chinese
+default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it references, then
+`scripts/check-assets.mjs --non-fatal` reports on the Cycle sheets.
 
 ## Layout
 
@@ -35,10 +41,13 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   page the bundler rewrites; every other URL there is passed through untouched.
 - `src/main.ts` — the DOM layer's composition root: it builds the world once, mounts the painters
   in `src/dom/` and re-runs them on every change. Deliberately untested.
-- `src/dom/` — one painter per slice of the world (`language`, `motion`, `rooms`, `game-room`,
-  `loading`), each a `Mount` that wires its listeners once and returns a `Painter`. A new slice is a new file
-  plus one entry in `src/main.ts`'s `mounts` list, not a branch inside an existing painter.
-  `src/dom/painter.ts` holds that contract and `byId`.
+- `src/dom/` — one painter per slice of the world, each a `Mount` that wires its listeners once and
+  returns a `Painter`. A new slice is a new file plus one entry in `src/main.ts`'s `mounts` list,
+  not a branch inside an existing painter. `src/dom/painter.ts` holds that contract and `byId`.
+  Today, in mount order: `loading`, `language`, `motion`, `rooms`, `game-room`, `game-stage`,
+  `cinema-room`, `activity-room`, `sound`, `actors`, `entryway`, `breakables`. The order is load
+  bearing at both ends — `loading` first so the shell leaves `inert` before the router moves focus,
+  `actors` after the Rooms so the Cast stands on top of whatever the Room laid down.
 - `src/copy.ts` — both copy dictionaries, typed against each other.
 - `src/world/` — the world model: pure TypeScript, no DOM and no browser APIs. This is the one
   seam, and the only thing tested. `src/world/index.ts` is its whole public surface; the DOM layer
@@ -59,7 +68,16 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
 
 - **Both languages, always.** Copy lives twice: the dictionaries in `src/copy.ts` and the
   Traditional Chinese first-paint markup in `index.html`. Change one, change the other in the same
-  commit. Traditional Chinese is the default; English is the toggle.
+  commit. Traditional Chinese is the default; English is the toggle. The hook is the pair of
+  attributes `src/dom/language.ts` sweeps — `data-i18n` onto `textContent`, `data-i18n-aria` onto
+  `aria-label`, `data-i18n-alt` onto `alt` — so a string is bilingual by carrying one of them and a
+  key in both dictionaries, and `tsc` fails until the second dictionary has the key. A string with
+  no hook is either painter-owned (the painter reads `copy` itself) or a proper noun; there is no
+  third case. **Every Room's markup carries its own zh-Hant first paint, not only the Entryway's.**
+  The spec asked for the opposite once no-JS was retired; three Room builds followed this file
+  instead, and ticket 21 settled it here rather than stripping ~80 text nodes out of the markup —
+  the duplication is typed and mechanically swept, and index.html stays readable as the record of
+  what the page says. Reversing it is mechanical if that is ever wanted.
 - **Routing is the browser's.** Four Rooms at `#/entryway`, `#/games`, `#/cinema`, `#/activities`;
   a Room id is its route's path word. Doors are ordinary `<a href="#/cinema">` links, so the back
   button works without a history stack. Never `pushState` (ADR 0001). An unreadable hash is
@@ -96,8 +114,8 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   `index.html`, so a sheet sitting in `public/assets/actors/` with no layer naming it is neither
   preloaded nor checked. **Luna, the third cat, was in exactly that state until 2026-09-20** and is
   not any more: she has her `.cycle` layers, her `ActorId` and her row in `ACTOR_SHAPES`, so her
-  placeholders preload and validate like everyone else's. What she still lacks is behaviour — the
-  roaming, the meow and the petting Beat are ticket 08's, and her Breakable is the Game Room's. She
+  placeholders preload and validate like everyone else's. She roams, meows and can be petted
+  like the other two, and the Game Room's snow globe is her Breakable. She
   stands slightly taller than the other two, `data-height="144"` against their `132`, which is her
   Character Sheet's 24 bible units to the shoulder against their 22. What is in the repository is
   **placeholders**
@@ -147,6 +165,20 @@ is two passes — the whole project, then `src/world/` again under `tsconfig.wor
   percentages of the stage. An Actor's position is its feet — the bottom-centre of its sprite —
   and depth is a y-sort. Furnish a Room by placing things on its stage in stage units; never in
   pixels.
+- **Furnishing a Room.** A Prop is a box in stage units — `--x/--y/--w/--h`, turned into
+  percentages of the stage by `left: calc(var(--x) / 16 * 1%)` and its three siblings — over a CSS
+  placeholder surface, so dropping artwork in swaps the surface and keeps the box. Its `--z` is its
+  sort key, and it has to be one, because `src/dom/actors.ts` gives every Actor
+  `z-index: round(y)` and the two interleave so an Actor can pass behind a shelf; a stage is
+  `isolation: isolate` to keep those keys local to their Room. A stage that holds a control — a
+  door link, a Music Source button — cannot itself be `aria-hidden` or `pointer-events: none`;
+  those move to its decorative children. And the Cast is declared per Room in one table, `HOMES`
+  in `src/world/actors.ts`, placed by `gatherInto(slice, room)`: a Room says who is in it rather
+  than writing placement code.
+  **The four Rooms spell the box rule four ways** and that is drift, not design:
+  `.entryway-stage .at`, `#room-games .stage [data-box]`, `.stage-cinema .cinema-prop` and
+  `.stage[data-stage="activities"] .prop` all carry the identical arithmetic. Worth one selector
+  the next time a Room is touched; not worth a rewrite on its own.
 - **Relative paths only** — the site has to work from a repository subpath, which is why Vite's
   `base` is `'./'`. Never introduce a root-absolute URL that survives the build.
 - **No framework.** Rooms are absolutely-positioned DOM sprites driven by `requestAnimationFrame`.
