@@ -33,24 +33,29 @@ import { createMotion, toggleMotion, withReducedMotion, type MotionSlice } from 
 import { ENTRYWAY, parseRoute, type RoomId } from './rooms';
 // 17: cinema — the Cinema Room's own marks and shelves.
 // 18: and the errand that fetches Posters off one of them.
-import {
-  CINEMA_MARKS,
-  boyMark,
-  createCinema,
-  expandedPosterOf,
-  isOnMark,
-  openShelfOf,
-  readableFilmOf,
-  seatOf,
-  settleCinema,
-  stepCinema,
-  tickPoster,
-  withAttendedPoster,
-  withAttendedShelf,
-  withChosenShelf,
-  type CinemaShelf,
-  type CinemaSlice,
-  type CinemaStep,
+import {
+  CINEMA_MARKS,
+  boyMark,
+  cinemaAwaitsClock,
+  createCinema,
+  expandedPosterOf,
+  isOnMark,
+  loadedReelOf,
+  openShelfOf,
+  readableFilmOf,
+  rollingFilmOf,
+  seatOf,
+  settleCinema,
+  stepCinema,
+  tickPoster,
+  withAttendedPoster,
+  withAttendedShelf,
+  withChosenFilm,
+  withChosenShelf,
+  withGateToggled,
+  type CinemaShelf,
+  type CinemaSlice,
+  type CinemaStep,
 } from './cinema';
 // 18: films. 19: and the details one of them reads out when its Poster opens.
 import type { Film, FilmId } from './films';
@@ -185,7 +190,15 @@ export type WorldEvent =
   // 19: cinema — the pinned Poster the visitor's pointer or focus is on, or
   // `null` for none. Hover and focus are the same report, because they are the
   // same thing happening: the visitor is looking at that Poster.
-  | { readonly type: 'cinema-poster-attended'; readonly film: FilmId | null; readonly now: number };
+  | { readonly type: 'cinema-poster-attended'; readonly film: FilmId | null; readonly now: number }
+  // 20: cinema — the details card's primary action. This is the explicit act
+  // the whole evening turns on: he goes for the reel and the Film tier is
+  // allowed to make a sound, which is why nothing before it ever plays one.
+  | { readonly type: 'cinema-film-chosen'; readonly film: FilmId; readonly now: number }
+  // 20: cinema — the projector's gate lever, the machine's other affordance.
+  // It says nothing about what it wants done: a Film on the screen is stopped
+  // and a threaded reel is rolled, and which of the two is the model's answer.
+  | { readonly type: 'projector-gate-toggled'; readonly now: number };
 
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
@@ -246,7 +259,10 @@ export function advance(world: World, event: WorldEvent): World {
         // so the wall they come back to shows the Posters he went to fetch.
         cinema: settleCinema(world.cinema),
       };
-      return entering === ENTRYWAY ? moved : withArrivalOver(moved);
+      // 20: and a Film that was rolling falls silent on the way out, because
+      // the Bumper is a Cinema Room moment rather than something that follows
+      // the visitor down the hall.
+      return runCinema(entering === ENTRYWAY ? moved : withArrivalOver(moved), null);
     }
     case 'room-transition-finished': {
       if (world.rooms.transition === 'settled') return world;
@@ -358,10 +374,26 @@ export function advance(world: World, event: WorldEvent): World {
     }
     // 19: cinema — a Poster looked at. Nothing else in the Room moves for it:
     // the expansion is the Poster's own, and the Boy stays where he is.
-    case 'cinema-poster-attended': {
-      if (world.rooms.current !== 'cinema') return world;
-      const cinema = withAttendedPoster(world.cinema, event.film, event.now, motionIsOn(world));
-      return cinema === world.cinema ? world : { ...world, cinema };
+    case 'cinema-poster-attended': {
+      if (world.rooms.current !== 'cinema') return world;
+      const cinema = withAttendedPoster(world.cinema, event.film, event.now, motionIsOn(world));
+      return cinema === world.cinema ? world : { ...world, cinema };
+    }
+    // 20: cinema — a Film chosen. He hurries to the cabinet for its reel, and
+    // the Room's one state machine carries him from there to the Bumper.
+    case 'cinema-film-chosen': {
+      if (world.rooms.current !== 'cinema') return world;
+      const cinema = withChosenFilm(world.cinema, event.film);
+      if (cinema === world.cinema) return world;
+      const actors = sendActor(world.actors, 'boy', CINEMA_MARKS.cabinet, 'run', motionIsOn(world));
+      return runCinema({ ...world, cinema, actors }, event.now);
+    }
+    // 20: cinema — the gate lever. Nobody moves for it: the reel is already
+    // threaded, so this only starts or stops the picture on the screen.
+    case 'projector-gate-toggled': {
+      if (world.rooms.current !== 'cinema') return world;
+      const cinema = withGateToggled(world.cinema, event.now);
+      return cinema === world.cinema ? world : runCinema({ ...world, cinema }, event.now);
     }
     // 16: the Activity Room
     case 'activity-card-opened':
@@ -398,30 +430,50 @@ export function advance(world: World, event: WorldEvent): World {
  * motion preference changing, a shelf chosen. Keeping them behind one function
  * is what stops a caller remembering only half of that.
  */
-function runCinema(world: World, now: number | null): World {
-  const ran = runErrand(world, now);
-  if (ran.rooms.current !== 'cinema') return ran;
-  const cinema = tickPoster(ran.cinema, now, motionIsOn(ran));
-  return cinema === ran.cinema ? ran : { ...ran, cinema };
-}
-
-function runErrand(world: World, now: number | null): World {
-  if (world.rooms.current !== 'cinema' || world.cinema.step === 'seated') return world;
-  const motionOn = motionIsOn(world);
-  let next = world;
-  // The errand is nine steps long, so a loop that has not settled by twice that
-  // is one that never will; the bound is a guard, not a schedule.
-  for (let turn = 0; turn < 24; turn += 1) {
-    const boy = findActorView(next.actors, 'boy');
-    if (!boy) return next;
-    const progress = stepCinema(next.cinema, { at: boy.at, moving: boy.moving }, now, motionOn);
-    if (progress.slice === next.cinema && progress.sendBoyTo === null) return next;
-    const actors = progress.sendBoyTo
-      ? sendActor(next.actors, 'boy', progress.sendBoyTo, 'walk', motionOn)
-      : next.actors;
-    next = { ...next, cinema: progress.slice, actors };
-  }
-  return next;
+function runCinema(world: World, now: number | null): World {
+  const ran = runErrand(world, now);
+  // 20: a picture on the screen is the Film tier playing, and the model is
+  // what says so. It sits between the two because the errand is what starts
+  // and stops the picture, and because a Film has to fall silent even in the
+  // one case the line below returns early on: the Room the visitor just left.
+  const sounded = withFilmSound(ran);
+  if (sounded.rooms.current !== 'cinema') return sounded;
+  const cinema = tickPoster(sounded.cinema, now, motionIsOn(sounded));
+  return cinema === sounded.cinema ? sounded : { ...sounded, cinema };
+}
+
+/**
+ * The world with the Film tier matching what is on the screen.
+ *
+ * Ticket 06 modelled the tier and left it to be switched on by whatever
+ * started a Film; this is that. Nothing in the DOM layer has to remember to
+ * report it, which matters because §9's rule about the Room Music hangs off
+ * the same flag and a forgotten report would be two clatters at once.
+ */
+function withFilmSound(world: World): World {
+  const rolling = world.rooms.current === 'cinema' && rollingFilmOf(world.cinema) !== null;
+  const audio = withFilmAudio(world.audio, rolling);
+  return audio === world.audio ? world : { ...world, audio };
+}
+
+function runErrand(world: World, now: number | null): World {
+  if (world.rooms.current !== 'cinema' || world.cinema.step === 'seated') return world;
+  const motionOn = motionIsOn(world);
+  let next = world;
+  // The two sequences are fifteen steps between them, so a loop that has not
+  // settled by twice that is one that never will; the bound is a guard, not a
+  // schedule.
+  for (let turn = 0; turn < 32; turn += 1) {
+    const boy = findActorView(next.actors, 'boy');
+    if (!boy) return next;
+    const progress = stepCinema(next.cinema, { at: boy.at, moving: boy.moving }, now, motionOn);
+    if (progress.slice === next.cinema && progress.sendBoyTo === null) return next;
+    const actors = progress.sendBoyTo
+      ? sendActor(next.actors, 'boy', progress.sendBoyTo, progress.cycle, motionOn)
+      : next.actors;
+    next = { ...next, cinema: progress.slice, actors };
+  }
+  return next;
 }
 
 // 05: loading
@@ -482,8 +534,13 @@ export function isMusicSourceOn(world: World, room: RoomId): boolean {
  * The per-Room form of the music tier, for the adapter holding one track per
  * Room: only the Room the visitor is in is ever allowed to play.
  */
-export function isRoomMusicAudible(world: World, room: RoomId): boolean {
-  return isCurrentRoom(world, room) && isAudible(world, 'music');
+export function isRoomMusicAudible(world: World, room: RoomId): boolean {
+  // 20, §9: a Film rolling in this Room takes the Room Music with it. The
+  // Cinema Room's music *is* the projector's clatter and the Bumper carries
+  // its own bed of it, so the two would beat against each other; the Music
+  // Source stays switched on underneath and comes back when the reel stops.
+  if (isCurrentRoom(world, room) && world.audio.filmPlaying) return false;
+  return isCurrentRoom(world, room) && isAudible(world, 'music');
 }
 // end 06
 
@@ -576,8 +633,44 @@ export function expandedPoster(world: World): FilmId | null {
  * year, the pairing, the premise, the reason and the link — so the panel reads
  * the dictionary rather than being told what to say.
  */
-export function posterDetails(world: World): Film | null {
-  return readableFilmOf(world.cinema);
+export function posterDetails(world: World): Film | null {
+  return readableFilmOf(world.cinema);
+}
+
+// 20: cinema — the projector, the reel in it, and what it is throwing.
+/**
+ * The Film whose reel is threaded, or `null` for an empty machine.
+ *
+ * The gate lever's whole state: with no reel it is the design note's `idle`
+ * and says so, and with one it offers to roll — including long after the Film
+ * has been stopped, because the reel stays on the spindle.
+ */
+export function loadedReel(world: World): FilmId | null {
+  return loadedReelOf(world.cinema);
+}
+
+/**
+ * The Film on the screen right now, or `null` for a dark one.
+ *
+ * Non-null from the first frame of the Bumper to the last of the slate, and it
+ * carries the Film itself, so the title card reads both titles and the year
+ * out of the same table the Poster did, and the genre it takes its title cue
+ * from is the shelf the Film came off.
+ */
+export function rollingFilm(world: World): Film | null {
+  return isCurrentRoom(world, 'cinema') ? rollingFilmOf(world.cinema) : null;
+}
+
+/**
+ * Is the Cinema Room waiting on the clock?
+ *
+ * The one fact the page's frame loop cannot work out from the Cast: a Film
+ * runs at its own length however the visitor feels about motion (§10.3), so
+ * the loop that stops when the apartment holds still has to keep turning
+ * while the Bumper and the title card play.
+ */
+export function cinemaNeedsClock(world: World): boolean {
+  return isCurrentRoom(world, 'cinema') && cinemaAwaitsClock(world.cinema);
 }
 
 /**
