@@ -415,8 +415,11 @@ html.dialog-open { overflow: hidden; }
 .cinema-poster .poster-stripe { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 6); height: calc(var(--u) * 10); background: var(--stripe); }
 .cinema-poster .poster-ground { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 20); bottom: calc(var(--u) * 34); background: linear-gradient(var(--ground) 0 72%, var(--horizon) 72%); box-shadow: inset 0 0 calc(var(--u) * 26) calc(var(--u) * 10) #00000044; }
 /* The caption is DOM text, never drawn into the artwork: that is what keeps a
-   Poster bilingual and free of generated lettering. */
-.cinema-poster .poster-caption { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); bottom: calc(var(--u) * 4); height: calc(var(--u) * 28); display: grid; place-items: center; color: #2b2230; font-size: calc(var(--u) * 17); line-height: 1.15; text-align: center; overflow: hidden; }
+   Poster bilingual and free of generated lettering. Two lines of 13-unit type
+   sit inside the design note's 28-unit strip, which is what the longest titles
+   need — "Eat Drink Man Woman", "In the Mood for Love" — while the Chinese
+   titles, none longer than five characters, stay on one. */
+.cinema-poster .poster-caption { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); bottom: calc(var(--u) * 4); height: calc(var(--u) * 28); display: grid; place-items: center; color: #2b2230; font-size: calc(var(--u) * 13); line-height: 1.05; text-align: center; text-wrap: balance; overflow: hidden; }
 /* Two brass pins at the top corners, pressed in as the Poster unrolls. */
 .cinema-poster .poster-pin { position: absolute; top: calc(var(--u) * -5); width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f7e2a6, #9a7a3a); box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 5) #00000077; animation: poster-pin-push .18s .32s backwards; }
 .cinema-poster .poster-pin:nth-of-type(1) { left: calc(var(--u) * 8); }
