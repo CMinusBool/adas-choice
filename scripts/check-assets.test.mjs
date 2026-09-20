@@ -22,6 +22,7 @@ import { join } from 'node:path';
 
 import { encodePng } from './png.mjs';
 import {
+  CYCLE_ONLY_RULES,
   FRAME_BOXES,
   TOLERANCES,
   actorFromFile,
@@ -257,6 +258,37 @@ test('every sheet index.html declares passes the validator as it stands today', 
     });
     assert.equal(result.ok, true, `${relative}: ${result.failures.map(f => `${f.rule}: ${f.message}`).join('; ')}`);
   }
+});
+
+// --- the Beat contract: the same sheet rules, minus the four a Beat breaks ------
+
+/**
+ * A sheet that breaks every Cycle-only rule at once and no other: the figure
+ * grows, lifts off the floor and walks across its own frames, which is what a
+ * Beat is for. Nothing here touches a frame edge or a spare cell.
+ */
+function buildBeat({ frames = 8, columns = 4 } = {}) {
+  return buildSheet({
+    frames,
+    columns,
+    figure: index => ({ width: 40, height: 150 + index * 10, centreOffset: -60 + index * 18, feetUp: index * 5 }),
+  });
+}
+
+test('the four Cycle-only rules are exactly the ones a Beat is excused', () => {
+  assert.deepEqual([...CYCLE_ONLY_RULES].sort(), ['centre', 'drift', 'feet', 'height-variance']);
+});
+
+test('a Beat fails the Cycle contract on the four rules and nothing else', () => {
+  const result = check(buildBeat());
+  assert.equal(result.ok, false);
+  assert.deepEqual([...new Set(rules(result))].sort(), ['centre', 'drift', 'feet', 'height-variance']);
+});
+
+test('the same Beat passes under beat: true', () => {
+  const result = check(buildBeat(), { beat: true });
+  assert.deepEqual(result.failures, []);
+  assert.equal(result.ok, true);
 });
 
 // --- the two real generations, when they are on disk ---------------------------
