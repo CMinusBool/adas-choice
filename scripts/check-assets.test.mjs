@@ -14,7 +14,9 @@
 //   CHECK_ASSETS_FIXTURES=/path/to/dir node --test scripts/check-assets.test.mjs
 //
 // where the directory holds `candidate-sheet.png` and `v2/candidate-sheet.png`.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
@@ -22,13 +24,16 @@ import { join } from 'node:path';
 
 import { encodePng } from './png.mjs';
 import {
+  CYCLE_ONLY_RULES,
   FRAME_BOXES,
   TOLERANCES,
   actorFromFile,
+  beatHint,
   checkSheet,
   decodeSheet,
   frameBoxForActor,
   monotonic,
+  parseArguments,
   readDeclarations,
 } from './check-assets.mjs';
 
@@ -257,6 +262,188 @@ test('every sheet index.html declares passes the validator as it stands today', 
     });
     assert.equal(result.ok, true, `${relative}: ${result.failures.map(f => `${f.rule}: ${f.message}`).join('; ')}`);
   }
+});
+
+// --- the Beat contract: the same sheet rules, minus the four a Beat breaks ------
+
+/**
+ * A sheet that breaks every Cycle-only rule at once and no other: the figure
+ * grows, lifts off the floor and walks across its own frames, which is what a
+ * Beat is for. Nothing here touches a frame edge or a spare cell.
+ */
+function buildBeat({ frames = 8, columns = 4 } = {}) {
+  return buildSheet({
+    frames,
+    columns,
+    figure: index => ({ width: 40, height: 150 + index * 10, centreOffset: -60 + index * 18, feetUp: index * 5 }),
+  });
+}
+
+test('the four Cycle-only rules are exactly the ones a Beat is excused', () => {
+  assert.deepEqual([...CYCLE_ONLY_RULES].sort(), ['centre', 'drift', 'feet', 'height-variance']);
+});
+
+test('a Beat fails the Cycle contract on the four rules and nothing else', () => {
+  const result = check(buildBeat());
+  assert.equal(result.ok, false);
+  assert.deepEqual([...new Set(rules(result))].sort(), ['centre', 'drift', 'feet', 'height-variance']);
+});
+
+test('the same Beat passes under beat: true', () => {
+  const result = check(buildBeat(), { beat: true });
+  assert.deepEqual(result.failures, []);
+  assert.equal(result.ok, true);
+});
+
+test('a Beat of the wrong size still fails on dimensions', () => {
+  const result = check(buildBeat(), { beat: true, columns: 2 });
+  assert.deepEqual(rules(result), ['dimensions']);
+  assert.match(result.failures[0].message, /is 768x640; 8 frames of 192x320 in 2 columns needs 384x1280/);
+});
+
+test('a Beat that declares no grid still fails on grid', () => {
+  const result = check(buildBeat(), { beat: true, frames: 0 });
+  assert.deepEqual(rules(result), ['grid']);
+});
+
+test('an RGB Beat still fails the rgba rule', () => {
+  assert.deepEqual(rules(check(buildBeat(), { beat: true, colourType: 2 })), ['rgba']);
+});
+
+test('a Beat that is one soft ramp still fails the alpha-binary rule', () => {
+  const sheet = buildBeat();
+  for (let index = 0; index < sheet.image.width * sheet.image.height; index += 4) {
+    sheet.image.data[index * 4 + 3] = 200;
+  }
+  // The ramp paints every fourth pixel, edges included, so edge-bleed rides along.
+  assert.equal(rules(check(sheet, { beat: true }))[0], 'alpha-binary');
+});
+
+test('colour under a transparent pixel of a Beat still fails the residue rule', () => {
+  const sheet = buildBeat();
+  sheet.image.data[0] = 12; // alpha is still 0 here.
+  assert.deepEqual(rules(check(sheet, { beat: true })), ['colour-residue']);
+});
+
+test('an empty frame in a Beat still fails the content rule', () => {
+  const sheet = buildBeat({ frames: 7 });
+  sheet.frames = 8;
+  const result = check(sheet, { beat: true });
+  assert.deepEqual(rules(result), ['content']);
+  assert.match(result.failures[0].message, /frame 8 is empty/);
+});
+
+test('a Beat frame touching its right edge still fails the edge-bleed rule', () => {
+  const sheet = buildSheet({
+    figure: index => (index === 3 ? { width: 180, height: 200, centreOffset: 6 } : { width: 40, height: 150 + index * 10 }),
+  });
+  const result = check(sheet, { beat: true });
+  assert.deepEqual(rules(result), ['edge-bleed']);
+  assert.match(result.failures[0].message, /frame 4 touches the frame's right edge/);
+});
+
+test('content in a spare cell of a Beat still fails the spare-cell rule', () => {
+  const sheet = buildBeat();
+  sheet.frames = 7;
+  assert.deepEqual(rules(check(sheet, { beat: true })), ['spare-cell']);
+});
+
+test('a default run that only broke Cycle-only rules is told --beat exists', () => {
+  const hint = beatHint(check(buildBeat()));
+  assert.match(hint, /--beat/);
+});
+
+test('no hint when the sheet would fail under --beat too', () => {
+  // rgba is a sprite-sheet rule, so --beat would not save this one.
+  assert.equal(beatHint(check(buildBeat(), { colourType: 2 })), null);
+});
+
+test('no hint for a sheet that passes, nor for one already checked as a Beat', () => {
+  assert.equal(beatHint(check(buildSheet())), null);
+  assert.equal(beatHint(check(buildBeat(), { beat: true })), null);
+});
+
+test('a Beat run records which contract was applied, and a Cycle run does not', () => {
+  assert.equal(check(buildBeat(), { beat: true }).stats.contract, 'beat');
+  assert.equal('contract' in check(buildSheet()).stats, false);
+});
+
+const BEAT_ARGS = ['--beat', 'beat.png', '--frames', '8', '--columns', '4', '--frame', '360x360'];
+
+test('--beat is off by default and on when asked for', () => {
+  assert.equal(parseArguments(['public/assets/actors/boy-walk-right.png']).beat, false);
+  const options = parseArguments(BEAT_ARGS);
+  assert.equal(options.beat, true);
+  assert.deepEqual(options.paths, ['beat.png']);
+  assert.deepEqual(options.frame, { width: 360, height: 360 });
+});
+
+test('--beat with no sheet named is refused: index.html declares Cycles, not Beats', () => {
+  assert.throws(() => parseArguments(['--beat', '--frames', '8', '--columns', '4', '--frame', '360x360']), {
+    message: /--beat needs the sheets? to check.*index\.html declares Cycles/s,
+  });
+});
+
+test('--beat without a frame box is refused, because a Beat has no standard one', () => {
+  assert.throws(() => parseArguments(['--beat', 'beat.png', '--frames', '8', '--columns', '4']), {
+    message: /--beat needs --frame <width>x<height>/,
+  });
+});
+
+test('--beat without --frames and --columns is refused', () => {
+  assert.throws(() => parseArguments(['--beat', 'beat.png', '--columns', '4', '--frame', '360x360']), {
+    message: /--beat needs --frames and --columns/,
+  });
+  assert.throws(() => parseArguments(['--beat', 'beat.png', '--frames', '8', '--frame', '360x360']), {
+    message: /--beat needs --frames and --columns/,
+  });
+});
+
+test('--beat with --actor is refused: --actor is a Cycle frame box by another name', () => {
+  assert.throws(() => parseArguments([...BEAT_ARGS, '--actor', 'mira']), {
+    // It must name the values --actor really takes, not the two frame-box shapes behind them.
+    message: /--actor names a Cycle's frame box \(boy, girl, mica, mira, luna\)/,
+  });
+});
+
+// --- the command line, end to end, over a Beat written to a temp file ----------
+
+/** Run the script the way a person would, and hand back what they would see. */
+function runCli(args) {
+  const run = spawnSync(process.execPath, [join(root, 'scripts', 'check-assets.mjs'), ...args], { encoding: 'utf8' });
+  return { status: run.status, out: `${run.stdout}${run.stderr}` };
+}
+
+test('the command line checks a Beat under --beat and refuses it under neither', t => {
+  const directory = mkdtempSync(join(tmpdir(), 'beat-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const frame = { width: 120, height: 160 };
+  const sheet = buildSheet({
+    frames: 8,
+    columns: 4,
+    frame,
+    figure: index => ({ width: 20, height: 70 + index * 6, centreOffset: -40 + index * 11, feetUp: index * 4 }),
+  });
+  const path = join(directory, 'mira-startle-right.png');
+  writeFileSync(path, encodePng(sheet.image));
+  const grid = ['--frames', '8', '--columns', '4', '--frame', '120x160'];
+
+  const beat = runCli(['--beat', path, ...grid]);
+  assert.equal(beat.status, 0, beat.out);
+  assert.match(beat.out, /^PASS/m);
+  assert.match(beat.out, /1\/1 sheets pass the Beat contract\./);
+
+  const cycle = runCli([path, ...grid]);
+  assert.equal(cycle.status, 1, cycle.out);
+  assert.match(cycle.out, /^FAIL/m);
+  assert.match(cycle.out, /re-run with --beat/);
+  assert.match(cycle.out, /1 sheets pass the Cycle contract\./);
+});
+
+test('the command line refuses --beat with nothing to check', () => {
+  const refused = runCli(['--beat', '--frames', '8', '--columns', '4', '--frame', '120x160']);
+  assert.equal(refused.status, 1);
+  assert.match(refused.out, /check-assets: --beat needs the sheets to check/);
 });
 
 // --- the two real generations, when they are on disk ---------------------------

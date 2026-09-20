@@ -1,4 +1,4 @@
-// Mechanical acceptance for Cycle sheets.
+// Mechanical acceptance for Cycle sheets, and with `--beat`, for Beat sheets.
 //
 // A generator cannot be trusted to hit the Cycle contract, and a human looking
 // at a strip cannot see that a figure is three pixels off the floor. So "done"
@@ -10,10 +10,21 @@
 //   node scripts/check-assets.mjs <path> ...          # named sheets
 //   node scripts/check-assets.mjs --json              # machine-readable, for the orchestrator
 //   node scripts/check-assets.mjs --palette art/characters/v2/palette.json
+//   node scripts/check-assets.mjs --beat <path> --frames N --columns N --frame WxH
 //
 // A path that `index.html` declares inherits that layer's `data-frames` and
 // `data-columns`; any other path needs `--frames N --columns N` and either
 // `--actor <boy|girl|mica|mira|luna>` or `--frame <W>x<H>`.
+//
+// `--beat` checks a **Beat** instead: the same sprite-sheet rules, minus the
+// four in `CYCLE_ONLY_RULES` that a Beat breaks on purpose by moving its figure
+// inside the frame. It is a second, smaller contract for a different kind of
+// sheet; the Cycle contract the default mode enforces is unchanged. A Beat is
+// declared nowhere this script can read, so `--beat` infers nothing: it needs
+// its sheets, its grid and its frame box named, and refuses `--actor` (which is
+// a Cycle frame box by another name) and a bare invocation (which would sweep
+// `index.html`, where only Cycles are declared). A default run whose every
+// failure is Cycle-only prints a line saying the mode exists.
 //
 // `--non-fatal` reports and exits 0. `npm run build` runs it that way for now,
 // because every sheet in the repository today is a placeholder; it becomes fatal
@@ -63,6 +74,20 @@ export const TOLERANCES = {
   /** RGB distance at which an opaque pixel counts as "near" a bible colour, for `--palette`. */
   paletteDistance: 40,
 };
+
+/**
+ * The four rules a Beat is excused, and the only difference between the two contracts.
+ *
+ * A Beat is a one-off scripted animation tied to the moment it happens to —
+ * searching a bookshelf, knocking a Breakable down — so it moves its figure
+ * inside the frame, which is the whole point of it and which no Cycle may do.
+ * Everything else a sprite sheet must be is still true of a Beat: the
+ * grid, the colour type, binary alpha, no colour under transparent pixels, no
+ * empty declared frame, no bleed into a neighbour, no content in a spare cell.
+ * So `--beat` drops exactly these four and keeps the other seven. The Cycle
+ * contract is not relaxed by their existing; see CLAUDE.md.
+ */
+export const CYCLE_ONLY_RULES = Object.freeze(['feet', 'centre', 'height-variance', 'drift']);
 
 /** The two frame boxes the Cycle contract defines, and who gets which. */
 export const FRAME_BOXES = {
@@ -166,14 +191,23 @@ function monotonic(values) {
 }
 
 /**
- * Check one decoded sheet against the Cycle contract.
+ * Check one decoded sheet against the Cycle contract, or with `beat`, the Beat one.
  *
  * Returns every violation it finds, in a fixed rule order, so a caller can print
  * the first one and a JSON consumer can have them all.
+ *
+ * `beat` drops the four rules in `CYCLE_ONLY_RULES` and changes nothing else:
+ * every measurement is still taken and still reported in `stats`, so a Beat's
+ * feet and centre offsets are there to read — they just do not fail it. The
+ * default call is untouched down to the shape of `stats`, which `--json` prints.
  */
-export function checkSheet({ name, image, colourType, depth, frames, columns, frame, tolerances = TOLERANCES }) {
+export function checkSheet({ name, image, colourType, depth, frames, columns, frame, beat = false, tolerances = TOLERANCES }) {
   const failures = [];
-  const fail = (rule, message) => failures.push({ rule, message });
+  const excused = beat ? new Set(CYCLE_ONLY_RULES) : null;
+  const fail = (rule, message) => {
+    if (excused?.has(rule)) return;
+    failures.push({ rule, message });
+  };
   const rows = Math.ceil(frames / columns);
   const stats = {
     name,
@@ -186,6 +220,8 @@ export function checkSheet({ name, image, colourType, depth, frames, columns, fr
     colourType,
     depth,
   };
+  // Only under `--beat`: a default run's `stats` keeps the shape `--json` has always printed.
+  if (beat) stats.contract = 'beat';
 
   if (!(frames >= 1 && columns >= 1)) {
     fail('grid', `declares ${frames} frames in ${columns} columns, which is not a grid`);
@@ -308,6 +344,23 @@ export function checkSheet({ name, image, colourType, depth, frames, columns, fr
   return { name, ok: failures.length === 0, failures, stats };
 }
 
+/**
+ * The line to print when a failed Cycle run looks like a Beat run in the wrong mode.
+ *
+ * Returns null unless *every* failure is a Cycle-only rule — a sheet that also
+ * broke a sprite-sheet rule would fail under `--beat` as well, and pointing at
+ * the mode there would send the reader the wrong way. Null for a result that
+ * already came from a Beat run, so nothing suggests a flag that is already on.
+ */
+export function beatHint(result) {
+  if (result.ok || result.stats?.contract === 'beat') return null;
+  if (!result.failures.every(failure => CYCLE_ONLY_RULES.includes(failure.rule))) return null;
+  return (
+    'every failure above is a Cycle-only rule. If this is a Beat rather than a Cycle, ' +
+    'a Beat moves its figure inside the frame on purpose: re-run with --beat.'
+  );
+}
+
 /** How much of the drawing sits near each of an Actor's bible colours. Printed, never failed on. */
 export function paletteReport(image, colours, distance = TOLERANCES.paletteDistance) {
   const near = Object.fromEntries(Object.keys(colours).map(key => [key, 0]));
@@ -332,10 +385,11 @@ export function paletteReport(image, colours, distance = TOLERANCES.paletteDista
 }
 
 function parseArguments(args) {
-  const options = { paths: [], json: false, nonFatal: false, palette: null, frames: null, columns: null, frame: null, actor: null };
+  const options = { paths: [], json: false, nonFatal: false, beat: false, palette: null, frames: null, columns: null, frame: null, actor: null };
   for (let index = 0; index < args.length; index++) {
     const argument = args[index];
     if (argument === '--json') options.json = true;
+    else if (argument === '--beat') options.beat = true;
     else if (argument === '--non-fatal') options.nonFatal = true;
     else if (argument === '--palette') options.palette = args[++index];
     else if (argument === '--frames') options.frames = Number(args[++index]);
@@ -347,6 +401,28 @@ function parseArguments(args) {
       options.frame = { width: Number(match[1]), height: Number(match[2]) };
     } else if (argument.startsWith('--')) throw new Error(`Unknown option ${argument}.`);
     else options.paths.push(argument);
+  }
+  // Everything `--beat` cannot mean. A Beat is not declared anywhere the script
+  // can read, so nothing about it may be inferred: it is named, measured and
+  // shaped on the command line or it is not checked.
+  if (options.beat) {
+    if (options.paths.length === 0) {
+      throw new Error(
+        '--beat needs the sheets to check named on the command line: index.html declares Cycles, not Beats.',
+      );
+    }
+    if (options.frames === null || options.columns === null) {
+      throw new Error('--beat needs --frames and --columns; a Beat inherits no grid from index.html.');
+    }
+    if (options.actor) {
+      throw new Error(
+        `--actor names a Cycle's frame box (${Object.keys(ACTOR_SHAPES).join(', ')}), which a Beat does not use; ` +
+          'pass --frame <width>x<height> instead.',
+      );
+    }
+    if (!options.frame) {
+      throw new Error('--beat needs --frame <width>x<height>: a Beat has no standard frame box to fall back on.');
+    }
   }
   return options;
 }
@@ -417,6 +493,7 @@ function main(args) {
       frames: target.frames,
       columns: target.columns,
       frame,
+      beat: options.beat,
     });
     result.stats.actor = actor;
     if (palette) {
@@ -438,6 +515,8 @@ function main(args) {
           : `  ${result.stats.intermediateAlpha} soft-alpha px (${(result.stats.intermediateAlphaFraction * 100).toFixed(2)}%)`;
       if (result.ok) console.log(`PASS  ${result.name}  ${result.stats.frames} frames${alpha}`);
       else console.log(`FAIL  ${result.name}  ${result.failures[0].rule}: ${result.failures[0].message}`);
+      const hint = beatHint(result);
+      if (hint) console.log(`      ${hint}`);
       if (result.stats.paletteNearPercent) {
         console.log(
           `      palette: ${Object.entries(result.stats.paletteNearPercent)
@@ -446,7 +525,9 @@ function main(args) {
         );
       }
     }
-    console.log(`${results.length - failed.length}/${results.length} sheets pass the Cycle contract.`);
+    console.log(
+      `${results.length - failed.length}/${results.length} sheets pass the ${options.beat ? 'Beat' : 'Cycle'} contract.`,
+    );
   }
 
   if (!failed.length) return 0;

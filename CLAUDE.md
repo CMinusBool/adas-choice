@@ -104,7 +104,9 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   see `docs/adr/0004-the-game-room-is-portals.md`. Nothing in code depends on the frame being
   square — `.scene-sprite` writes the grid as `background-size: 400% 300%`, and
   `check-assets.mjs` deliberately skips scene sprites — so the shape lives here and in the
-  three `width`/`height` attributes on the `.game-art` images in `index.html`.
+  three `width`/`height` attributes on the `.game-art` images in `index.html`. (A Scene sprite is
+  still skipped; it is an Actor's **Beat** that `check-assets.mjs --beat` checks, described under
+  "Cycle assets travel as a set too" below.)
   **The contract changed; the assets have not.** The six files in `public/assets/` are still the
   square ones — 480x480 GIFs and posters, 1920x1440 sheets — and will be until the art lane
   delivers (tickets 41 and 34). The markup already declares `width="360" height="576"`, so the
@@ -151,6 +153,21 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   Cycle — which `npm run build` runs as a report and which any delivered sheet must still pass.
   **Those rules are not relaxed.** They are geometry, they cost nothing to run, and they have
   never been what a generation failed on.
+  **A Beat is checked by the same script under `--beat`**, and a Beat is not a Cycle: it is a
+  one-off scripted animation tied to the moment it happens to — searching a bookshelf, knocking a
+  Breakable down — so its figure moves inside the frame, which is the whole point of it and which
+  no Cycle may do. So `node scripts/check-assets.mjs --beat <sheet> --frames N
+  --columns N --frame WxH` runs the seven rules any sprite sheet must pass — the grid, 8-bit RGBA,
+  binary alpha, no colour under a transparent pixel, no empty declared frame, no bleed into a
+  neighbouring frame, no content in a spare cell — and drops the four that are the Cycle contract
+  proper: feet on the bottom edge, centring, height variance and drift. That is a **second, smaller
+  contract for a different kind of sheet, not a loosening of the first one**: the default mode is
+  byte-for-byte what it was, every Cycle rule above still fails a Cycle, and nothing about a Beat is
+  inferred — `--beat` refuses `--actor`, refuses a missing `--frame`, and refuses a bare invocation,
+  because `index.html` declares Cycles and no Beat is declared anywhere the script can read. A
+  default run that fails only on the four says so and names `--beat`. Ticket 52 added this after
+  three art tickets in a row hit the unsatisfiable criterion "every sprite sheet passes
+  `check-assets.mjs`" and reported a Beat's grid and alpha by eye instead.
 - **Generated art lives in the main checkout, never in a worktree.** Raw generations go to
   `art/generated/<NN>-<slug>/` in the primary checkout — `illustrator` has no worktree and no
   branch, so that is where they land — and the frames actually chosen are committed under
