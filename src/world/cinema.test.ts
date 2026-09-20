@@ -82,6 +82,44 @@ describe('the Films each bookshelf holds', () => {
     expect(film.title).toEqual({ 'zh-Hant': '鋒迴路轉', en: 'Knives Out' });
     expect(film.year).toBe(2019);
   });
+
+  // 19: what the details panel reads out once a Poster has finished expanding.
+  // Every string is the research note's, verbatim, in both languages.
+  it('gives every Film a premise and a reason to watch in both languages', () => {
+    for (const shelf of CINEMA_SHELVES) {
+      for (const id of filmsOn(shelf)) {
+        const film = filmById(id);
+        for (const language of ['zh-Hant', 'en'] as const) {
+          expect(film.premise[language].length).toBeGreaterThan(10);
+          expect(film.reason[language].length).toBeGreaterThan(10);
+        }
+        expect(film.premise['zh-Hant']).not.toBe(film.premise.en);
+        expect(film.reason['zh-Hant']).not.toBe(film.reason.en);
+      }
+    }
+  });
+
+  it('records which way round each Film is watched, five one way and four the other', () => {
+    const pairings = CINEMA_SHELVES.flatMap(shelf => filmsOn(shelf).map(id => filmById(id).pairing));
+    expect(pairings.filter(pairing => pairing === 'zh-audio-en-subs')).toHaveLength(5);
+    expect(pairings.filter(pairing => pairing === 'en-audio-zh-subs')).toHaveLength(4);
+    expect(filmById('knives-out').pairing).toBe('en-audio-zh-subs');
+    expect(filmById('mr-vampire').pairing).toBe('zh-audio-en-subs');
+  });
+
+  it('links every Film to the one official page that verified its pairing', () => {
+    const links = new Set<string>();
+    for (const shelf of CINEMA_SHELVES) {
+      for (const id of filmsOn(shelf)) {
+        const link = filmById(id).link;
+        expect(link.startsWith('https://tv.apple.com/')).toBe(true);
+        links.add(link);
+      }
+    }
+    // One page each: a link shared by two Films would send a visitor to the
+    // wrong film, which no amount of copy could rescue.
+    expect(links.size).toBe(9);
+  });
 });
 
 describe('the Cinema Room floor', () => {
