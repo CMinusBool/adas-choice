@@ -365,6 +365,11 @@ html.dialog-open { overflow: hidden; }
   /* The deck hangs out of the top, and the controls have to be clickable. */
   overflow: visible;
   pointer-events: auto;
+  /* The sort keys below run up to 890 and the Cast's `round(y)` up to 900, so
+     the stage is its own stacking context: a Prop sorts against the Room's
+     other Props and the Cast, and never against the loading screen, the skip
+     link or anything else on the page. */
+  isolation: isolate;
 }
 #room-games .stage [aria-hidden="true"] { pointer-events: none; }
 
@@ -433,8 +438,10 @@ html.dialog-open { overflow: hidden; }
   border: calc(14 * var(--u)) solid var(--oak);
   border-radius: calc(8 * var(--u));
   box-shadow: inset 0 0 0 calc(2 * var(--u)) var(--oak-line);
-  /* The bay interior, behind the cards. */
-  background: #150F14;
+  /* The 24-unit gaps between the bays are the joinery between them, so the
+     unit reads as three bays rather than one long recess; the interior proper
+     is behind each card, and only the narrow layout ever shows it (.bay). */
+  background: linear-gradient(to bottom, #835C3A, var(--oak));
 }
 /* The bulb strip along each bay's top inner edge, and its wash over the card's
    top third. CSS, not artwork, because the bays resize. */
@@ -474,13 +481,26 @@ html.dialog-open { overflow: hidden; }
     var(--oak);
   box-shadow: inset 0 calc(-3 * var(--u)) 0 #3A2A22, 0 calc(6 * var(--u)) calc(18 * var(--u)) #0006;
 }
+/* The pole stands at x 1470 with its foot on the floor line, and the shade
+   hangs over it from the arc; the arc itself is behind the shade at this size,
+   so it is not drawn. Offsets are stage units from the box's own corner. */
 .prop-lamp {
   background:
-    /* the shade */
-    linear-gradient(to bottom, #EAD9C2, #D3BE9F) no-repeat 8% 0 / 74% 14%,
-    /* the arc, reaching left from the pole */
-    linear-gradient(to right, transparent 0 78%, var(--brass) 78% 92%, transparent 92%) no-repeat 0 0 / 100% 12%,
-    linear-gradient(to right, transparent 0 78%, var(--brass) 78% 92%, transparent 92%) no-repeat 0 0 / 100% 100%;
+    linear-gradient(to bottom, var(--brass), #A8823F)
+      no-repeat calc(75.5 * var(--u)) calc(54 * var(--u)) / calc(9 * var(--u)) calc(340 * var(--u)),
+    radial-gradient(closest-side, var(--brass) 0 100%, transparent 100%)
+      no-repeat calc(52 * var(--u)) calc(382 * var(--u)) / calc(56 * var(--u)) calc(12 * var(--u));
+}
+.prop-lamp::after {
+  content: "";
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 0;
+  height: calc(54 * var(--u));
+  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) calc(9 * var(--u)) calc(9 * var(--u));
+  background: linear-gradient(to bottom, #EAD9C2, #D3BE9F 76%, var(--bulb) 76%);
+  box-shadow: 0 calc(18 * var(--u)) calc(46 * var(--u)) #ffd9a82e;
 }
 .prop-pouf {
   border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
@@ -578,25 +598,34 @@ html.dialog-open { overflow: hidden; }
 
 /* G15: Luna's snow globe, the only Breakable in this Room. Ticket 09 swaps the
    two states over; nothing here is clickable, and the visitor cannot break it. */
+/* 60 x 64 units: 50 x 54 px at the reference width and 13 px across at the
+   narrow shell, which is why it is a distinct silhouette on a stand rather
+   than a detail among others. */
 .prop-globe {
   background:
-    /* the dome, with one cool highlight and the little house inside */
-    radial-gradient(closest-side at 34% 30%, #ffffff8c 0 12%, transparent 14%) no-repeat 0 0 / 100% 72%,
-    radial-gradient(closest-side, #E8A0BE00 0 58%, transparent 58%) no-repeat 50% 40% / 40% 26%,
-    radial-gradient(closest-side, #F6E7CF 0 44%, #9FC9D6b3 44% 92%, #7FB0C0 92%) no-repeat 50% 0 / 100% 72%,
-    /* the turned stand */
-    linear-gradient(to bottom, #4A3320, #33210F) no-repeat 50% 100% / 82% 30%;
+    radial-gradient(closest-side, #ffffffb3 0 55%, transparent 60%)
+      no-repeat calc(13 * var(--u)) calc(9 * var(--u)) / calc(13 * var(--u)) calc(9 * var(--u)),
+    linear-gradient(to bottom, #F6E7CF 0 62%, #C2705E 62%)
+      no-repeat calc(24 * var(--u)) calc(26 * var(--u)) / calc(13 * var(--u)) calc(14 * var(--u)),
+    radial-gradient(closest-side, #A9CFDAd9 0 90%, #7FB0C0 90%)
+      no-repeat 0 0 / calc(60 * var(--u)) calc(46 * var(--u)),
+    linear-gradient(to bottom, #5C3F2C 0 40%, #33210F 40%)
+      no-repeat calc(13 * var(--u)) calc(46 * var(--u)) / calc(34 * var(--u)) calc(18 * var(--u));
 }
+/* 120 x 46 units, anchored bottom-left at (1210, 692). */
 .prop-globe-broken {
   background:
-    /* the wet patch soaking into the planks */
-    radial-gradient(closest-side, #5A3E2Bcc 0 70%, transparent 100%) no-repeat 50% 78% / 100% 52%,
-    /* the shards */
-    conic-gradient(from .58turn, #B9D3DCcc 0 6%, transparent 6%) no-repeat 22% 40% / 26% 44%,
-    conic-gradient(from .05turn, #D6E7EEcc 0 7%, transparent 7%) no-repeat 68% 34% / 30% 48%,
-    /* the stand on its side, and the little house loose beside it */
-    linear-gradient(to right, #4A3320, #33210F) no-repeat 6% 84% / 30% 30%,
-    radial-gradient(closest-side, #F6E7CF 0 80%, transparent 80%) no-repeat 84% 80% / 22% 34%;
+    conic-gradient(from .56turn, #C6DCE4cc 0 7%, transparent 7%)
+      no-repeat calc(38 * var(--u)) calc(8 * var(--u)) / calc(22 * var(--u)) calc(22 * var(--u)),
+    conic-gradient(from .04turn, #E2EFF4cc 0 8%, transparent 8%)
+      no-repeat calc(74 * var(--u)) calc(4 * var(--u)) / calc(26 * var(--u)) calc(26 * var(--u)),
+    linear-gradient(to right, #5C3F2C, #33210F)
+      no-repeat calc(6 * var(--u)) calc(28 * var(--u)) / calc(34 * var(--u)) calc(14 * var(--u)),
+    radial-gradient(closest-side, #F6E7CF 0 80%, transparent 80%)
+      no-repeat calc(96 * var(--u)) calc(24 * var(--u)) / calc(20 * var(--u)) calc(18 * var(--u)),
+    /* the dark wet patch soaking into the planks, glitter stranded in it */
+    radial-gradient(closest-side, #4A3226e6 0 62%, #4A322680 62%, transparent 100%)
+      no-repeat 50% 100% / 100% calc(30 * var(--u));
 }
 
 /* G6: the door back to the Entryway — the Entryway's own Game door, seen from
