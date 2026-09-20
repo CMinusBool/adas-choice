@@ -533,7 +533,16 @@
       </section>
       <section class="room" id="room-activities" data-room="activities" aria-labelledby="activities-title" hidden>
         <!--
-          16: the Activity Room, built from `design/12-activity-room.md`; 35: its art drop.
+          16: the Activity Room, built from `design/12-activity-room.md`; 35: its art drop;
+          53: the drop's fourteen URLs, moved here from `styles.css`.
+
+          Each Prop names its own surface in `data-still`, which `src/dom/artwork.ts` turns into
+          the `--still` the stylesheet paints with. That attribute is the page's one declaration
+          of an asset: `src/dom/loading.ts` sweeps it into the preload set, so the apartment waits
+          for this Room's furniture, and `scripts/assert-built-page.mjs` sweeps it too, so a URL
+          that would 404 in `dist/` fails the build. Ticket 35 wrote these fourteen as
+          a `background-image` rule in `styles.css` instead, where neither sweep could see it
+          and the Room was furnished but never preloaded.
 
           Every Prop is placed in stage units — `--x`, `--y`, `--w`, `--h` are the design note's
           §4.1 boxes and `--z` its base line, which `styles.css` turns into percentages of the
@@ -555,39 +564,39 @@
                      rug, window and its dusk courtyard, pendant, and the bare door frame at L8.
                      The leaf is not drawn into it; it swings, so it is its own asset (A-S11)
                      layered on top. -->
-                <div class="prop a-backdrop" aria-hidden="true" style="--x:0;--y:0;--w:1600;--h:900;--z:1"></div>
+                <div class="prop a-backdrop" aria-hidden="true" data-still="assets/activity-room/backdrop.png" style="--x:0;--y:0;--w:1600;--h:900;--z:1"></div>
                 <!-- L8: the door back to the Entryway. An ordinary hash link; routing is the browser's. -->
                 <a class="prop a-door" href="#/entryway" style="--x:60;--y:256;--w:180;--h:364;--z:620" aria-label="回到玄關" data-i18n-aria="backToEntryway">
-                  <span class="a-door-leaf" aria-hidden="true"></span>
+                  <span class="a-door-leaf" aria-hidden="true" data-still="assets/activity-room/door-leaf.png"></span>
                 </a>
                 <!-- L20, A-S05: the world map, on the wall and always behind the Cast. -->
-                <div class="prop a-map" aria-hidden="true" style="--x:1160;--y:120;--w:360;--h:272;--z:392"></div>
+                <div class="prop a-map" aria-hidden="true" data-still="assets/activity-room/map.png" style="--x:1160;--y:120;--w:360;--h:272;--z:392"></div>
                 <!-- The Blind Portrait's station: L9-L12, A-S02. -->
                 <!-- 35: A-S02, one group image - table, leaning sketchpad, loose paper, clamp lamp. -->
-                <div class="prop a-table" aria-hidden="true" style="--x:320;--y:320;--w:380;--h:300;--z:620"></div>
+                <div class="prop a-table" aria-hidden="true" data-still="assets/activity-room/table.png" style="--x:320;--y:320;--w:380;--h:300;--z:620"></div>
                 <!-- L13, A-S06 / A-S07: Mira's Breakable. Ticket 09 owns the knock and the state;
                      both Props stand here so that ticket only has to flip which one is hidden. -->
-                <div class="prop a-mug" data-breakable="activity-pencil-mug" data-breakable-state="intact" role="img" aria-label="一只裝滿鉛筆的馬克杯" data-i18n-aria="pencilMugIntact" style="--x:630;--y:400;--w:50;--h:72;--z:621"></div>
-                <div class="prop a-mug-broken" data-breakable="activity-pencil-mug" data-breakable-state="broken" role="img" aria-label="摔成兩半的馬克杯，鉛筆滾了一地" data-i18n-aria="pencilMugBroken" style="--x:560;--y:786;--w:160;--h:46;--z:832" hidden></div>
+                <div class="prop a-mug" data-still="assets/activity-room/mug-intact.png" data-breakable="activity-pencil-mug" data-breakable-state="intact" role="img" aria-label="一只裝滿鉛筆的馬克杯" data-i18n-aria="pencilMugIntact" style="--x:630;--y:400;--w:50;--h:72;--z:621"></div>
+                <div class="prop a-mug-broken" data-still="assets/activity-room/mug-broken.png" data-breakable="activity-pencil-mug" data-breakable-state="broken" role="img" aria-label="摔成兩半的馬克杯，鉛筆滾了一地" data-i18n-aria="pencilMugBroken" style="--x:560;--y:786;--w:160;--h:46;--z:832" hidden></div>
                 <!-- The Treasure Hunt's station: L14-L19, A-S03. -->
                 <!-- 35: A-S03, one group image - shelf, timer, basket of finds, boxes, album, stopwatch. -->
-                <div class="prop a-shelf" aria-hidden="true" style="--x:752;--y:296;--w:356;--h:324;--z:620"></div>
+                <div class="prop a-shelf" aria-hidden="true" data-still="assets/activity-room/shelf.png" style="--x:752;--y:296;--w:356;--h:324;--z:620"></div>
                 <!-- Take Me Somewhere's station: L21-L24, A-S04. -->
                 <!-- 35: A-S04, one group image - desk, globe, atlas, pin jar, postcard tin, desk lamp. -->
-                <div class="prop a-desk" aria-hidden="true" style="--x:1180;--y:384;--w:380;--h:236;--z:620"></div>
+                <div class="prop a-desk" aria-hidden="true" data-still="assets/activity-room/desk.png" style="--x:1180;--y:384;--w:380;--h:236;--z:620"></div>
                 <!-- C1-C3: the chalkboards. DOM text on a CSS slate, never drawn into the art. -->
                 <div class="prop a-chalkboard" data-chalkboard="draw" aria-hidden="true" style="--x:330;--y:570;--w:270;--h:48;--z:622"><span class="a-chalk" data-i18n="activityDrawName">盲畫大賽</span></div>
                 <div class="prop a-chalkboard" data-chalkboard="hunt" aria-hidden="true" style="--x:790;--y:570;--w:270;--h:48;--z:622"><span class="a-chalk" data-i18n="activityHuntName">三十秒尋寶</span></div>
                 <div class="prop a-chalkboard" data-chalkboard="map" aria-hidden="true" style="--x:1200;--y:570;--w:270;--h:48;--z:622"><span class="a-chalk" data-i18n="activityMapName">帶我去一個地方</span></div>
                 <!-- The three tableaux, A-S12-A-S14: a painted still replaces the Cast once an
                      activity is chosen. Art landed on ticket 35; the boxes are unchanged. -->
-                <div class="prop a-tableau" data-tableau="draw" aria-hidden="true" style="--x:290;--y:520;--w:460;--h:260;--z:780" hidden></div>
-                <div class="prop a-tableau" data-tableau="hunt" aria-hidden="true" style="--x:710;--y:372;--w:440;--h:380;--z:752" hidden></div>
-                <div class="prop a-tableau" data-tableau="map" aria-hidden="true" style="--x:1130;--y:352;--w:420;--h:400;--z:752" hidden></div>
+                <div class="prop a-tableau" data-tableau="draw" aria-hidden="true" data-still="assets/activity-room/tableau-draw.png" style="--x:290;--y:520;--w:460;--h:260;--z:780" hidden></div>
+                <div class="prop a-tableau" data-tableau="hunt" aria-hidden="true" data-still="assets/activity-room/tableau-hunt.png" style="--x:710;--y:372;--w:440;--h:380;--z:752" hidden></div>
+                <div class="prop a-tableau" data-tableau="map" aria-hidden="true" data-still="assets/activity-room/tableau-map.png" style="--x:1130;--y:352;--w:420;--h:400;--z:752" hidden></div>
                 <!-- L25, A-S08: the call corner. Scenery — the Room saying, without a word, that
                      all three of these are things you can do while apart. -->
                 <!-- 35: A-S08, one group image - the folding stool, the laptop, the tea. -->
-                <div class="prop a-call-corner" aria-hidden="true" style="--x:150;--y:626;--w:184;--h:216;--z:842"></div>
+                <div class="prop a-call-corner" aria-hidden="true" data-still="assets/activity-room/call-corner.png" style="--x:150;--y:626;--w:184;--h:216;--z:842"></div>
                 <!-- The three stations (§5.1): one transparent button over each group and its
                      chalkboard. The painter owns their accessible names, because the chosen one
                      gains a suffix the `data-i18n-aria` sweep knows nothing about. -->
@@ -598,11 +607,11 @@
                      replacing the placeholder row. `data-label-start` / `data-label-stop` give it
                      its own painted label instead of the generic one. -->
                 <!-- 35: A-S09, one off/on two-cell image behind the control; the crate is baked in. -->
-                <div class="prop a-boombox-art" aria-hidden="true" style="--x:1372;--y:660;--w:186;--h:186;--z:846"></div>
+                <div class="prop a-boombox-art" aria-hidden="true" data-still="assets/activity-room/boombox.png" style="--x:1372;--y:660;--w:186;--h:186;--z:846"></div>
                 <button class="prop a-boombox" type="button" data-music-source="activities" data-label-start="boomboxStart" data-label-stop="boomboxStop" aria-pressed="false" style="--x:1360;--y:660;--w:210;--h:120;--z:847" hidden>
                   <span class="sr-only" data-i18n="activityBoombox">角落的手提音響</span>
                   <span class="sr-only" data-music-source-label>音響還沒有音樂</span>
-                  <span class="a-boombox-window"><span class="a-reel left"></span><span class="a-reel right"></span></span>
+                  <span class="a-boombox-window"><span class="a-reel left" data-still="assets/activity-room/cassette-reel.png"></span><span class="a-reel right" data-still="assets/activity-room/cassette-reel.png"></span></span>
                   <span class="a-boombox-notes" aria-hidden="true"><span>♪</span><span>♪</span><span>♪</span></span>
                 </button>
               </div>
