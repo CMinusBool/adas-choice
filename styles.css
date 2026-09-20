@@ -333,6 +333,10 @@ html.dialog-open { overflow: hidden; }
    Props the visitor can actually use take theirs back. */
 .stage-cinema a.cinema-prop, .stage-cinema button.cinema-prop { pointer-events: auto; }
 .stage-cinema button.cinema-prop { padding: 0; border: 0; background: none; cursor: pointer; }
+/* 19: a Poster is a `.cinema-poster`, not a `.cinema-prop`, so it was left
+   behind by the rule above and took no pointer events at all — reachable by
+   keyboard and by nothing else. An expansion the pointer drives needs them. */
+.stage-cinema button.cinema-poster { pointer-events: auto; }
 
 /* P1-P3, P5, P6: the empty Room. */
 .cinema-cornice { position: absolute; left: 0; right: 0; top: 6.7%; height: calc(var(--u) * 6); background: #6b5344; }
@@ -500,7 +504,7 @@ html.dialog-open { overflow: hidden; }
    them share; the stage hands it the width and the margin it used to hold. */
 .cinema-room { position: relative; width: 100%; max-width: 64rem; margin: 2.2rem auto 0; }
 .cinema-room .stage { margin: 0; max-width: none; }
-.poster-details { margin-top: 1.4rem; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-left: 6px solid var(--stripe, var(--pink)); border-radius: 12px; background: var(--surface); font-size: clamp(1rem, .92rem + .34vw, 1.125rem); animation: poster-details-in .15s ease-out; }
+.poster-details { margin-top: 1.4rem; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-left: 6px solid var(--stripe, var(--pink)); border-radius: 12px; background: linear-gradient(var(--surface), var(--surface)) #241c26; font-size: clamp(1rem, .92rem + .34vw, 1.125rem); animation: poster-details-in .15s ease-out; }
 /* The Film's genre stripe, again: the card came off the same shelf. */
 .poster-details[data-shelf="comedy"] { --stripe: #f2c14e; }
 .poster-details[data-shelf="romance"] { --stripe: #e86f8f; }
@@ -522,7 +526,10 @@ html.dialog-open { overflow: hidden; }
 @media (min-width: 1080px) {
   /* (540,280)-(1030,640) in stage units: left of the board, clear of slot 1
      expanded, and over shelves that are inert while a Poster is open. */
-  .poster-details { position: absolute; left: 33.75%; top: 31.1%; width: 30.6%; max-height: 46%; margin: 0; z-index: 910; overflow-y: auto; overscroll-behavior: contain; font-size: .8125rem; box-shadow: 0 24px 80px #000a; }
+  .poster-details { position: absolute; left: 33.75%; top: 24%; width: 31.5%; max-height: 66%; margin: 0; z-index: 910; overflow-y: auto; overscroll-behavior: contain; font-size: .8125rem; box-shadow: 0 24px 80px #000a; }
+  /* A shelf the card is lying over cannot be clicked through it: the visitor
+     is reading a Film, not choosing a genre (§4.6). */
+  .cinema-room:has(.poster-details:not([hidden])) .cinema-shelf { pointer-events: none; }
 }
 
 .motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap, .motion-off .cinema-poster, .motion-off .poster-spill, .motion-off .details-link, .motion-off .details-close { transition: none; }
