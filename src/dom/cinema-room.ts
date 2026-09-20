@@ -5,8 +5,10 @@ import {
   cinemaStep,
   expandedPoster,
   filmById,
+  loadedReel,
   pinnedPosters,
   posterDetails,
+  rollingFilm,
   rummagingShelf,
   type CinemaShelf,
   type CinemaStep,
@@ -16,7 +18,7 @@ import {
   type World,
 } from '../world';
 import type { Dispatch, Painter } from './painter';
-import { playSfx } from './sound';
+import { playSfx, setFilmAudio } from './sound';
 
 /**
  * Paint the Cinema Room's bookshelves and the Posters he pins up.
@@ -30,9 +32,15 @@ import { playSfx } from './sound';
  * `src/world/cinema.ts`'s answers, which is why the whole behaviour is testable
  * without a browser.
  *
- * The projector's two affordances need nothing here either: the motor switch is
- * a `data-music-source` Prop that `src/dom/sound.ts` already binds, and its film
- * gate stays disabled until ticket 20 gives it a reel to roll.
+ * 20: the projector's second affordance is bound here. The motor switch stays
+ * `src/dom/sound.ts`'s — it is a `data-music-source` Prop like any other — but
+ * the gate lever is this Room's, and so is what it rolls: the sequence from the
+ * cabinet to the slate is `src/world/cinema.ts`'s to decide, and this file only
+ * reports the two clicks that start it and paints whichever step came back.
+ *
+ * The sounds are called by the section 9 names and nothing is registered for
+ * them yet: ticket 39 makes the files, and until it does the registry no-ops
+ * and the Room plays the Bumper in silence.
  */
 
 /**
@@ -179,6 +187,30 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
   }
 
   detailsPart('.details-close')?.addEventListener('click', close);
+
+  // 20: the card's primary action, and the projector's gate lever.
+  //
+  // Both carry `performance.now()`, the clock every other report in this Room
+  // carries, because the model may never ask the time itself — and the reel
+  // sequence has four Beats and two projected ones to time against it.
+  const film = document.querySelector<HTMLElement>('.cinema-film');
+  const filmPart = (part: string) => film?.querySelector<HTMLElement>(part) ?? null;
+  const bumper = filmPart('.bumper');
+  const card = filmPart('.film-card');
+  const slateLink = filmPart('.film-slate-link') as HTMLAnchorElement | null;
+  const dim = document.querySelector<HTMLElement>('.cinema-dim');
+  const beam = document.querySelector<HTMLElement>('.cinema-beam');
+  const gate = document.querySelector<HTMLButtonElement>('[data-projector-gate]');
+
+  detailsPart('.details-choose')?.addEventListener('click', () => {
+    // The card is only ever showing one Film, and it is the one being chosen.
+    if (paintedDetails) dispatch({ type: 'cinema-film-chosen', film: paintedDetails.id, now: performance.now() });
+  });
+
+  // The lever is a real `<button>` throughout rather than a disabled one, so it
+  // keeps its Tab stop and can say why it is doing nothing; `aria-disabled` is
+  // the state, and the model is what refuses the click.
+  gate?.addEventListener('click', () => dispatch({ type: 'projector-gate-toggled', now: performance.now() }));
   // Escape is the keyboard's way out of both, and the card's close button is
   // its visible twin for a pointer that has no hover to give up.
   for (const element of [slots, details]) {
@@ -283,6 +315,50 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
     if (details) details.dataset.shelf = film.shelf;
   }
 
+  /**
+   * What each step of the reel sequence sounds like as it is entered.
+   *
+   * Section 9's names. Nothing is registered for them yet — ticket 39 makes
+   * the files — so each of these is a call into a registry that no-ops, and
+   * the Room runs the whole sequence silently until it lands.
+   */
+  const REEL_SFX: Partial<Record<CinemaStep, readonly string[]>> = {
+    searching: ['cabinet-open', 'reel-rattle'],
+    loading: ['reel-load'],
+  };
+
+  /**
+   * Write the Film's title card, in both languages and with its year.
+   *
+   * The same two titles the Poster and the card carried, out of the same
+   * table: a Film says its name in one place in this codebase.
+   */
+  function paintCard(rolling: Film, language: Language) {
+    const other: Language = language === 'zh-Hant' ? 'en' : 'zh-Hant';
+    const main = filmPart('.film-title-main');
+    const beneath = filmPart('.film-title-other');
+    if (main) {
+      main.textContent = rolling.title[language];
+      main.lang = language;
+    }
+    if (beneath) {
+      beneath.textContent = rolling.title[other];
+      beneath.lang = other;
+    }
+    const year = filmPart('.film-year');
+    if (year) year.textContent = String(rolling.year);
+    if (slateLink) slateLink.href = rolling.link;
+  }
+
+  /** The studio's own wordmark: the current language large, the other beneath. */
+  function paintWordmark(language: Language) {
+    const other: Language = language === 'zh-Hant' ? 'en' : 'zh-Hant';
+    const beneath = filmPart('.bumper-name-other');
+    if (!beneath) return;
+    beneath.textContent = copy[other].studioName;
+    beneath.lang = other;
+  }
+
   let paintedAttention: CinemaShelf | null | undefined;
   let paintedRummage: CinemaShelf | null | undefined;
   let paintedStep: CinemaStep | undefined;
@@ -290,6 +366,9 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
   let paintedLanguage: Language | undefined;
   let paintedExpanded: FilmId | null | undefined;
   let paintedDetails: Film | null | undefined;
+  let paintedReel: FilmId | null | undefined;
+  let paintedRolling: Film | null | undefined;
+  let paintedFilmStep: CinemaStep | undefined;
 
   return (world: World) => {
     const attended = attendedShelf(world);
@@ -309,6 +388,8 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
     // in. Ticket 39 delivers the file; until then the registry no-ops.
     if (paintedStep !== step) {
       if (step === 'rummaging') playSfx('shelf-rummage');
+      // 20: and the same for the reel sequence's own two Beats.
+      for (const name of REEL_SFX[step] ?? []) playSfx(name);
       paintedStep = step;
     }
 
@@ -329,11 +410,56 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
     }
 
     // The details, which the model keeps back until the expansion has finished.
-    const film = posterDetails(world);
-    if (details && (paintedDetails !== film || paintedLanguage !== world.language)) {
-      paintedDetails = film;
-      details.hidden = film === null;
-      if (film) paintDetails(film, world.language);
+    const details_ = posterDetails(world);
+    if (details && (paintedDetails !== details_ || paintedLanguage !== world.language)) {
+      paintedDetails = details_;
+      details.hidden = details_ === null;
+      if (details_) paintDetails(details_, world.language);
+    }
+
+    // 20: the gate lever. Empty, it says so; loaded, it offers to roll; and
+    // while the picture is up it offers to stop — three states off one fact.
+    const reel = loadedReel(world);
+    const rolling = rollingFilm(world);
+    if (gate && (paintedReel !== reel || paintedRolling !== rolling || paintedLanguage !== world.language)) {
+      const words = copy[world.language];
+      const label = reel === null ? words.projectorGateEmpty : rolling ? words.projectorGateStop : words.projectorGateStart;
+      gate.setAttribute('aria-disabled', String(reel === null));
+      gate.setAttribute('aria-pressed', String(rolling !== null));
+      gate.setAttribute('aria-label', label);
+      // The first-paint markup names a copy key for this label; now that it
+      // changes with the reel, this painter owns it and the sweep must not
+      // overwrite it on the next language change.
+      delete gate.dataset.i18nAria;
+      paintedReel = reel;
+    }
+
+    // What the projector is throwing. The Bumper is shown by being un-hidden,
+    // so it restarts whenever the reel is rolled again — which is exactly what
+    // the model asks for: pulling the lever plays the ident from the top.
+    const showingBumper = rolling !== null && step === 'bumper';
+    if (film && (paintedRolling !== rolling || paintedFilmStep !== step || paintedLanguage !== world.language)) {
+      film.hidden = rolling === null;
+      if (dim) dim.hidden = rolling === null;
+      if (beam) beam.hidden = rolling === null;
+      if (bumper) bumper.hidden = !showingBumper;
+      if (card) card.hidden = rolling === null || showingBumper;
+      // §10.4: the card gains the link only once it has become the slate.
+      if (slateLink) slateLink.hidden = step !== 'slate';
+      if (rolling) {
+        paintWordmark(world.language);
+        paintCard(rolling, world.language);
+      }
+      // The Bumper's own music, and then the genre's title cue, which holds
+      // over the slate. Both are Film-tier names section 9 gives; ticket 39
+      // delivers the files and until then the registry no-ops.
+      if (paintedRolling !== rolling || paintedFilmStep !== step) {
+        if (rolling === null) setFilmAudio(null);
+        else if (step === 'bumper') setFilmAudio('bumper');
+        else if (step === 'title') setFilmAudio(`title-${rolling.shelf}`);
+      }
+      paintedRolling = rolling;
+      paintedFilmStep = step;
     }
 
     paintedLanguage = world.language;
