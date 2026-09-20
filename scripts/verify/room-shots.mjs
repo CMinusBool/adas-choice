@@ -100,8 +100,27 @@ const FIT_VIEWPORTS = [
   { width: 390, height: 844 },
 ];
 
-/** How long the rAF check watches an Actor for. Two seconds is a patrol leg's worth. */
+/** How long the rAF check watches an Actor for, at minimum. Two seconds is a patrol leg's worth. */
 const MOTION_WINDOW_MS = 2000;
+
+/**
+ * How long the full-motion pass keeps polling before giving up on ever seeing movement.
+ *
+ * Diagnosed on ticket 55: the Entryway's 11.9 s arrival is held still for the first ~2 s
+ * after `SETTLED` — the door-opening beat — so a window that closes at 2 s samples only
+ * the hold and reports "nothing moved" for a Room whose Arrival hasn't started walking
+ * yet. 6 s is the figure that reproduced real movement when this was diagnosed. `WATCH`
+ * polls for movement rather than sleeping through the whole span and stops the moment it
+ * sees any, so this ceiling is paid only by a Room that never moves at all — every other
+ * Room exits on its first or second poll, at close to `MOTION_WINDOW_MS` cost as before.
+ * The reduced-motion pass is not given this cap: nothing is ever supposed to move there,
+ * so there is nothing to wait longer for, and it keeps `MOTION_WINDOW_MS`'s cost exactly
+ * as it was.
+ */
+const MOTION_CAP_MS = 6000;
+
+/** How often the full-motion pass re-checks for movement while it waits. */
+const MOTION_POLL_MS = 100;
 
 /** Movement under this many CSS pixels over the window is noise, not a walk. */
 const MOVED_PX = 1;
@@ -359,8 +378,18 @@ const SETTLED = () => {
  * moving. Before opening the window, this also gives the Cast up to `attachTimeoutMs` to
  * attach — capped well under `windowMs` so a Room that genuinely has no Actors on its
  * stage does not hang, it just samples an empty stage as it always could.
+ *
+ * Sampling itself (ticket 55) polls for movement rather than sleeping for one fixed
+ * span: it re-reads every `pollMs` and stops as soon as any Actor has moved more than
+ * `movedPx`, up to `capMs`. A Room whose Arrival is already walking when the window
+ * opens — every Room but the Entryway — exits on an early poll at close to the old
+ * fixed-window cost; a Room held still for a beat before it starts (the Entryway's
+ * door-opening hold) gets the rest of `capMs` to prove it eventually moves. A Room that
+ * never moves, playing or reduced, pays the full `capMs` exactly as it paid the full
+ * `windowMs` before — the poll changes when a positive answer arrives, not the cost of
+ * a negative one.
  */
-const WATCH = async ({ room, windowMs }) => {
+const WATCH = async ({ room, windowMs, capMs, pollMs, movedPx }) => {
   const stage = document.querySelector(`[data-stage="${room}"]`);
   const query = () => (stage ? [...stage.querySelectorAll('.actor')] : []);
   const read = () =>
@@ -382,9 +411,22 @@ const WATCH = async ({ room, windowMs }) => {
   };
   requestAnimationFrame(count);
   const before = read();
-  await new Promise(resolve => setTimeout(resolve, windowMs));
+  const distance = current =>
+    before.length === 0
+      ? 0
+      : Math.max(...before.map((start, index) => {
+          const end = current[index] ?? start;
+          return Math.abs(end.x - start.x) + Math.abs(end.y - start.y);
+        }));
+  const cap = Math.max(capMs ?? windowMs, windowMs, pollMs);
+  const deadline = Date.now() + cap;
+  let after = before;
+  while (Date.now() < deadline) {
+    await new Promise(resolve => setTimeout(resolve, pollMs));
+    after = read();
+    if (distance(after) > movedPx) break;
+  }
   watching = false;
-  const after = read();
   const moved = before.map((start, index) => {
     const end = after[index] ?? start;
     return {
@@ -484,7 +526,15 @@ async function walkRoutes(context, { baseUrl, routes, outDir, ticket, reduced, w
       );
       if (!roomShown) throw new Error(`the ${route} Room never became the standing one`);
 
-      result.watch = await page.evaluate(WATCH, { room: route, windowMs: MOTION_WINDOW_MS });
+      result.watch = await page.evaluate(WATCH, {
+        room: route,
+        windowMs: MOTION_WINDOW_MS,
+        // Only the full-motion pass gets the longer ceiling: reduced motion is never
+        // supposed to move, so there is nothing worth waiting longer to see.
+        capMs: reduced ? MOTION_WINDOW_MS : MOTION_CAP_MS,
+        pollMs: MOTION_POLL_MS,
+        movedPx: MOVED_PX,
+      });
       result.lang = result.watch.lang;
       result.moving = result.watch.maxPx > MOVED_PX;
 
