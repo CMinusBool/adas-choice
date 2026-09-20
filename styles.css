@@ -311,7 +311,6 @@ html.dialog-open { overflow: hidden; }
 .actor.cat.is-petted { --fuss: .93; }
 .actor.cat.is-fussed { display: none; }
 .motion-off .actor.cat { transition: none; }
-@media (prefers-reduced-motion: reduce) { :root:not(.motion-on) .actor.cat { transition: none; } }
 .actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
 
 

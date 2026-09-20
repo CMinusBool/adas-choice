@@ -1,5 +1,5 @@
 import { isRoomPainted, type World } from '../world';
-import { byId, type Painter } from './painter';
+import { WIDE_LAYOUT, byId, type Painter } from './painter';
 
 /**
  * The Game Room's wall unit: where the deck of cards hangs, and how much room
@@ -21,9 +21,6 @@ import { byId, type Painter } from './painter';
  * `src/dom/game-room.ts`'s answer and stays there; this only reads the class it
  * writes, so that in the narrow layout the matching empty bay can light up.
  */
-
-/** The boundary `src/dom/game-room.ts` already watches, for the same reason. */
-const WIDE_LAYOUT = '(min-width: 1080px)';
 
 export const mountGameStage = (): Painter => {
   const scene = byId('games-scene');

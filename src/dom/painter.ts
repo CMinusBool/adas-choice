@@ -24,6 +24,16 @@ export type Painter = (world: World) => void;
  */
 export type Mount = (dispatch: Dispatch, initial: World) => Painter;
 
+/**
+ * The shell's one layout boundary, as `styles.css` writes it.
+ *
+ * The page turns wide at 1080 px, and three painters have to know when it has:
+ * the Game Room's card behaviour, the deck its stage rehouses, and the
+ * Activity Room's scrim. One string, so a breakpoint moved in the stylesheet
+ * is moved in one place on this side of it too.
+ */
+export const WIDE_LAYOUT = '(min-width: 1080px)';
+
 /** `index.html` guarantees these ids, so a miss is a bug rather than a state. */
 export function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   return document.getElementById(id) as T;

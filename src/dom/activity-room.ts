@@ -1,6 +1,6 @@
 import { copy, type CopyKey } from '../copy';
 import { chosenActivity, openActivity, type ActivityId, type Language, type World } from '../world';
-import { byId, type Dispatch, type Painter } from './painter';
+import { WIDE_LAYOUT, byId, type Dispatch, type Painter } from './painter';
 import { playSfx } from './sound';
 
 /**
@@ -74,7 +74,7 @@ export const mountActivityRoom = (dispatch: Dispatch): Painter => {
   const note = byId('activity-chosen-note');
   // The scrim only covers the stage on a wide shell; under 1080 px the card is
   // an ordinary block below it and the Room stays live behind nothing at all.
-  const wideLayout = matchMedia('(min-width: 1080px)');
+  const wideLayout = matchMedia(WIDE_LAYOUT);
 
   /** The station the open card belongs to, so focus can go back where it came from. */
   let opener: HTMLButtonElement | null = null;

@@ -1,7 +1,7 @@
 import { copy, type CopyKey } from '../copy';
 import { isCurrentRoom, motionIsOn, type Language, type World } from '../world';
 import { prefersReducedMotion } from './motion';
-import { byId, type Dispatch, type Painter } from './painter';
+import { WIDE_LAYOUT, byId, type Dispatch, type Painter } from './painter';
 
 type GameKey = 'tango' | 'lovers' | 'heavenly';
 
@@ -59,7 +59,7 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
   const config: AdaConfig = window.ADA_CONFIG ?? { inviteEndpoint: '', turnstileSiteKey: '' };
   const notificationsReady = /^https:\/\/[a-z0-9.-]+\.workers\.dev\/invite$/.test(config.inviteEndpoint || '') && /^[A-Za-z0-9_-]{10,100}$/.test(config.turnstileSiteKey || '');
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
-  const wideLayout = matchMedia('(min-width: 1080px)');
+  const wideLayout = matchMedia(WIDE_LAYOUT);
   let active: HTMLElement | null = null;
   let scrolledCard: HTMLElement | null = null;
   let scrollFrame = 0;

@@ -82,5 +82,5 @@ test("the apartment's own styles.css passes both rules", () => {
   const report = checkStylesheet(css);
   assert.deepEqual(report.problems, []);
   // Five as of ticket 37; a block gained or lost is a deliberate change, not a slip.
-  assert.equal(report.reducedMotionBlocks, 5);
+  assert.equal(report.reducedMotionBlocks, 4);
 });

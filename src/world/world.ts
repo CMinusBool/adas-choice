@@ -80,7 +80,6 @@ import { createAudio, isMusicSourceSwitchedOn, withFilmAudio, withInteraction, w
 import type { Point } from './stage';
 // 14: the Entryway — the arrival, and the Room's Props and its Breakable.
 import {
-  ARRIVAL_SECONDS,
   createArrival,
   finishArrival,
   propsAt,
@@ -896,5 +895,3 @@ function withBreakableBroken(world: World, breakable: BreakableId): World {
   return { ...world, broken: new Set(world.broken).add(breakable) };
 }
 
-/** How long the Entryway's arrival runs, for anything that has to wait it out. */
-export { ARRIVAL_SECONDS };

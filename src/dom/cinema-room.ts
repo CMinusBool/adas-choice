@@ -446,11 +446,11 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
     }
 
     // The details, which the model keeps back until the expansion has finished.
-    const details_ = posterDetails(world);
-    if (details && (paintedDetails !== details_ || paintedLanguage !== world.language)) {
-      paintedDetails = details_;
-      details.hidden = details_ === null;
-      if (details_) paintDetails(details_, world.language);
+    const readable = posterDetails(world);
+    if (details && (paintedDetails !== readable || paintedLanguage !== world.language)) {
+      paintedDetails = readable;
+      details.hidden = readable === null;
+      if (readable) paintDetails(readable, world.language);
     }
 
     // 20: the gate lever. Empty, it says so; loaded, it offers to roll; and
