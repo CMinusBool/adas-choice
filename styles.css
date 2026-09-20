@@ -289,12 +289,27 @@ html.dialog-open { overflow: hidden; }
   border-radius: 14px;
   background: linear-gradient(to bottom, #2f2631 0 6.7%, var(--wall) 6.7% 71.1%, var(--floor) 71.1%);
 }
-.stage-cinema .cinema-prop {
+/* A Prop is a box in stage units, turned into percentages of the stage - the
+   same arithmetic `src/dom/actors.ts` does for an Actor's feet point. All four
+   Rooms spelled these five declarations out separately until ticket 50; they
+   were identical in all four, and a selector list keeps each part its own
+   specificity, so nothing about the cascade changed when they were folded
+   together. What stays behind in each Room below is only what that Room
+   genuinely differs on: its z-index, its resets, its pointer-events. */
+.entryway-stage .at,
+#room-games .stage [data-box],
+.stage-cinema .cinema-prop,
+.stage[data-stage="activities"] .prop {
   position: absolute;
-  left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%);
-  width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%);
-  z-index: 640;
+  left: calc(var(--x) / 16 * 1%);
+  top: calc(var(--y) / 9 * 1%);
+  width: calc(var(--w) / 16 * 1%);
+  height: calc(var(--h) / 9 * 1%);
 }
+
+/* Every Cinema Prop sorts at one depth; the Room has no Prop the Cast walks
+   behind, so it needs no per-Prop key. */
+.stage-cinema .cinema-prop { z-index: 640; }
 /* The stage swallows pointer events so the Cast never blocks a click; the
    Props the visitor can actually use take theirs back. */
 .stage-cinema a.cinema-prop, .stage-cinema button.cinema-prop { pointer-events: auto; }
@@ -701,7 +716,7 @@ html.dialog-open { overflow: hidden; }
    door back to the Entryway — nothing shrinks below the legibility floor. */
 .stage[data-stage="activities"] { container-type: inline-size; min-width: 880px; max-width: none; margin: 0; overflow: hidden; border-radius: 14px; background: #4E6560; pointer-events: auto; }
 
-.stage[data-stage="activities"] .prop { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); padding: 0; border: 0; pointer-events: none; }
+.stage[data-stage="activities"] .prop { z-index: var(--z, 0); padding: 0; border: 0; pointer-events: none; }
 /* Four controls, and only four: the door, the three stations, the boombox. */
 .stage[data-stage="activities"] .a-door, .stage[data-stage="activities"] .a-station, .stage[data-stage="activities"] .a-boombox { pointer-events: auto; cursor: pointer; }
 /* 50: and nothing decorative may sit in front of one of them. This stage
@@ -922,18 +937,8 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 /* The stage clips, so a ring hung 5 px off a Portal would be cut in half. */
 #room-games .stage :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 
-/* A box in stage units, turned into percentages of the stage — the same
-   arithmetic `src/dom/actors.ts` does for a feet point. */
-#room-games .stage [data-box] {
-  position: absolute;
-  left: calc(var(--x) / 16 * 1%);
-  top: calc(var(--y) / 9 * 1%);
-  width: calc(var(--w) / 16 * 1%);
-  height: calc(var(--h) / 9 * 1%);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
+/* This Room writes each box's sort key inline on the element itself. */
+#room-games .stage [data-box] { margin: 0; padding: 0; border: 0; }
 
 /* G2-G5, G20: the backdrop. One image once ticket 34 lands (S01); three bands
    and two shapes until then. */
@@ -1464,7 +1469,7 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 /* The stage fits the Room's width and the viewport's height, and below a
    rendered 880px it keeps 880 and the hallway pans, starting at the front door. */
 .entryway-stage { min-width: 880px; max-width: min(100%, calc((100dvh - 19rem) * 16 / 9)); background: none; }
-.entryway-stage .at { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); }
+.entryway-stage .at { z-index: var(--z, 0); }
 .stage-caption { max-width: 52ch; margin: 1rem auto 0; text-align: center; }
 
 /* The painted hallway: the backdrop shot, until there is one. */

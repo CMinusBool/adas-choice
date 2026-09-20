@@ -189,9 +189,15 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   Game Room, 3.44 in the Activity Room and 3.60 in the Cinema Room — but being **cut short** does
   place everybody, on the marks the Arrival took down when the Door opened.
   The Entryway's own 11.9s arrival is a different thing and is unchanged: it is the Cast coming in
-  from outside, played once. Because a Door has to open, **a door leaf is a separate transparent
-  asset and every Room backdrop is drawn with an empty doorway** — a leaf painted into the backdrop
-  at a fixed angle cannot be one anybody opens.
+  from outside, played once. Because a Door has to open, **a door leaf must be a separate
+  transparent asset and every Room backdrop must be drawn with an empty doorway** — a leaf painted
+  into the backdrop at a fixed angle cannot be one anybody opens. **That is the contract every art
+  ticket is written to, and it is not what is on disk yet**: today the leaves are CSS placeholders
+  that swing, and the backdrops are the CSS placeholders tickets 15 to 17 shipped, which still
+  carry their doorways painted in. Nothing is wrong with the code — `src/dom/arrival.ts` already
+  swings a leaf through `data-door`, so an art drop replaces a surface and keeps the behaviour.
+  The rule stands as written for every delivery; the **shipped** state is placeholders, and the
+  art lane (tickets 31, 32, 41, 42) is where it stops being one.
 - **Every Room has a stage**: a 16:9 logical canvas of 1600 x 900 units, origin top-left, x right,
   y down, held by `<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS.
   Walkable areas, Props, doors and Actor positions are all written in those units, so the same
@@ -209,10 +215,24 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   those move to its decorative children. And the Cast is declared per Room in one table, `HOMES`
   in `src/world/actors.ts`, placed by `gatherInto(slice, room)`: a Room says who is in it rather
   than writing placement code.
-  **The four Rooms spell the box rule four ways** and that is drift, not design:
-  `.entryway-stage .at`, `#room-games .stage [data-box]`, `.stage-cinema .cinema-prop` and
-  `.stage[data-stage="activities"] .prop` all carry the identical arithmetic. Worth one selector
-  the next time a Room is touched; not worth a rewrite on its own.
+  **The four Rooms still name their Props four ways** — `.entryway-stage .at`,
+  `#room-games .stage [data-box]`, `.stage-cinema .cinema-prop` and
+  `.stage[data-stage="activities"] .prop` — but since ticket 50 the **arithmetic is written
+  once**, in a four-part selector list, and each Room's own rule keeps only what it really
+  differs on: the Entryway and the Activity Room sort on `--z`, the Cinema Room sorts every Prop
+  at a flat 640, the Game Room writes each key inline. A selector list gives each part its own
+  specificity, so folding them changed no cascade — checked by comparing the computed
+  `position`/`left`/`top`/`width`/`height`/`z-index` of all 480 Prop boxes across four Rooms and
+  four widths before and after. Renaming the four hooks to one is a separate, markup-wide job and
+  is still not worth doing on its own.
+  **What is not shared is `pointer-events`, and it is load bearing.** A stage that holds no
+  control keeps the global `pointer-events: none` and lets its handful of real controls take
+  theirs back — the Cinema Room and the Entryway. A stage that turns `pointer-events: auto` back
+  on for the Room as a whole **must** then put it back to `none` for everything `aria-hidden`,
+  or the Cast blocks clicks on whatever it is standing in front of. `#room-games .stage` has had
+  that guard since ticket 45; the Activity Room went without one until ticket 50, where the Boy
+  was found intercepting every click on the hunt station he stands over. Cats are never
+  `aria-hidden` — a cat is a real button with a name — so the guard never costs a petting.
 - **Relative paths only** — the site has to work from a repository subpath, which is why Vite's
   `base` is `'./'`. Never introduce a root-absolute URL that survives the build.
 - **No framework.** Rooms are absolutely-positioned DOM sprites driven by `requestAnimationFrame`.
