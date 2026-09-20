@@ -424,6 +424,17 @@ const HOMES: Partial<Record<RoomId, Partial<Record<ActorId, Home>>>> = {
     boy: { at: CINEMA_MARKS.boySeat, facing: 'left' },
     girl: { at: CINEMA_MARKS.girlSeat, facing: 'right' },
   },
+  // 43: the Game Room, `design/11-game-room.md` §4.3.1 — the *interim* marks.
+  // Their real homes are seated on the poufs, and the seated stills S09 and S10
+  // do not exist: a standing placeholder dropped on a seated mark clips through
+  // the pouf and reads as broken rather than as unfinished. So the two of them
+  // stand beside their poufs instead, which is a home like any other, and the
+  // poufs G17 and G18 stay visible. When the stills land these two marks become
+  // the seated ones — (620, 780) and (880, 775) — and §4.3.1 is deleted.
+  games: {
+    boy: { at: { x: 940, y: 795 }, facing: 'left' },
+    girl: { at: { x: 560, y: 800 }, facing: 'right' },
+  },
 };
 
 function atHome(id: ActorId, room: RoomId, home: Home): ActorState {
