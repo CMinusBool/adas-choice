@@ -1,1142 +1,1142 @@
-@charset "UTF-8";
-:root {
-  color-scheme: dark;
-  --bg: #121013; --surface: #1c191d; --ink: #f6f0f3; --muted: #b9adb6;
-  --quiet: #998d97; --line: #373038; --pink: #f5a3c5; --pink-bright: #ff78b0;
-  font-family: "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-  font-synthesis: none; font-size: 16px; line-height: 1.6;
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
-body { margin: 0; background: radial-gradient(ellipse at 82% 0, #49233725, transparent 43%), var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; overflow-x: clip; }
-button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-button { font: inherit; }
-a { color: inherit; }
-button svg { flex-shrink: 0; }
-::selection { background: var(--pink); color: var(--bg); }
-[hidden] { display: none !important; }
-.page-shell { width: min(1440px, calc(100% - 96px)); margin-inline: auto; }
-.site-header { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; min-height: 102px; border-bottom: 1px solid var(--line); }
-.wordmark { display: inline-flex; align-items: center; gap: .7rem; min-height: 44px; text-decoration: none; font-weight: 750; letter-spacing: -.065em; font-size: 1.55rem; white-space: nowrap; }
-.wordmark-dot { color: var(--pink); }
-.brand-heart { width: 28px; height: 32px; fill: var(--pink); overflow: visible; transform-origin: 50% 60%; }
-.heart-shine { fill: none; stroke: #fff4fa; stroke-width: 1.7; stroke-linecap: round; }
-.wordmark:hover .brand-heart, .wordmark:focus-visible .brand-heart { animation: heartbeat 1.15s ease-in-out infinite; }
-@keyframes heartbeat { 0%,45%,100% { transform: scale(1) rotate(-7deg); } 14% { transform: scale(1.16) rotate(-7deg); } 28% { transform: scale(1.04) rotate(-7deg); } 36% { transform: scale(1.1) rotate(-7deg); } }
-.header-actions { display: flex; align-items: center; gap: .65rem; }
-.language-toggle, .motion-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 100px; font-size: .875rem; line-height: 1.2; background: #211b21; color: var(--ink); cursor: pointer; transition: border-color .25s, background .25s; }
-.language-toggle:hover, .motion-toggle:hover { background: #35232e; border-color: var(--pink); }
-.language-toggle svg, .motion-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.language-toggle svg { color: var(--pink); }
-.motion-toggle { background: transparent; color: var(--muted); }
-.motion-toggle .play-icon { display: none; }
-.motion-off .motion-toggle .pause-icon { display: none; }
-.motion-off .motion-toggle .play-icon { display: block; }
-
-/* One Room is in the flow at a time; the Room being left is lifted out of it so
-   the entering Room does not wait for it, and put back by `hidden` once its
-   animation ends. The model decides whether that animation runs at all. */
-.apartment { position: relative; }
-.room { display: block; }
-.room.is-leaving { position: absolute; inset: 0 0 auto; width: 100%; pointer-events: none; animation: room-leave .32s ease-in both; }
-.room.is-entering { animation: room-enter .45s cubic-bezier(.22,.75,.2,1) both; }
-@keyframes room-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-@keyframes room-leave { from { opacity: 1; } to { opacity: 0; transform: translateY(-12px); } }
-.room-title { margin: 0 0 1.1rem; font-size: clamp(2.3rem, 4vw, 3.4rem); line-height: 1.2; font-weight: 740; letter-spacing: -.05em; }
-.room-title:focus { outline: none; }
-.room-lede { max-width: 46ch; margin: 0; color: var(--muted); font-size: 1.0625rem; line-height: 1.8; }
-#room-entryway, #room-cinema, #room-activities { padding: 2.8rem 0 2.6rem; }
-.room-exit { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; margin-top: 1.6rem; color: var(--muted); text-decoration: none; font-size: .9375rem; }
-.room-exit:hover { color: var(--pink); }
-.exit-arrow { color: var(--pink); }
-.doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 2.4rem; }
-.door { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 96px; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); text-decoration: none; font-size: 1.25rem; font-weight: 650; transition: border-color .3s, background .3s, transform .3s; }
-.door:hover, .door:focus-visible { border-color: var(--pink); background: #2a1f27; transform: translateY(-3px); }
-.door-arrow { color: var(--pink); font-size: 1.4rem; }
-.motion-off .door { transition: none; }
-
-.intro { padding: 2.8rem 0 2.6rem; }
-.eyebrow { display: flex; align-items: center; gap: .7rem; margin: 0 0 1rem; color: var(--pink); font-size: .8125rem; letter-spacing: .16em; font-weight: 600; }
-.eyebrow-line { width: 23px; height: 1px; background: currentColor; }
-h1 { display: flex; align-items: baseline; flex-wrap: wrap; margin: 0 0 1.15rem; font-size: clamp(2.7rem, 4.5vw, 4.25rem); line-height: 1.2; font-weight: 740; letter-spacing: -.06em; }
-html[lang="en"] h1 { column-gap: .22em; }
-html[lang="zh-Hant"] h1 { letter-spacing: -.035em; }
-.title-accent { color: var(--pink); }
-.title-spark { width: .4em; height: .55em; margin-left: .27em; fill: var(--pink); align-self: center; }
-.intro-description { color: var(--muted); margin: 0; font-size: 1.0625rem; line-height: 1.8; }
-
-/* A shared media height keeps horizontal expansion from cropping vertically. */
-.games { --scene-size: clamp(310px, 29vw, 410px); display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap: 20px; align-items: stretch; transition: grid-template-columns .75s cubic-bezier(.22,.75,.2,1); }
-.game-wrap { position: relative; display: flex; min-width: 0; container-type: inline-size; container-name: card; }
-.game-wrap.is-active { z-index: 3; }
-.game-card { display: flex; flex-direction: column; position: relative; width: 100%; min-width: 0; text-decoration: none; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); transition: filter 1.15s ease, border-color .5s, box-shadow .5s; isolation: isolate; }
-.tango { --accent: #f2aacd; }
-.lovers { --accent: #ff93c2; }
-.heavenly { --accent: #edb6d7; }
-.game-wrap.is-active .game-card { border-color: var(--pink); box-shadow: 0 12px 45px #0004, 0 0 25px #fb80b50d; }
-.card-media { height: var(--scene-size); width: 100%; position: relative; flex-shrink: 0; background: #292029; border-radius: 19px 19px 0 0; overflow: hidden; isolation: isolate; }
-.scene-backdrop { position: absolute; inset: -25px; background-position: center; background-size: cover; filter: blur(18px) brightness(.65); transform: scale(1.12); opacity: .8; }
-.scene-frame { position: absolute; left: 50%; top: 50%; width: var(--scene-size); height: var(--scene-size); transform: translate(-50%, -50%); }
-.scene-frame picture, .game-art { display: block; width: 100%; height: 100%; }
-.game-art { object-fit: cover; }
-.scene-sprite { position: absolute; inset: 0; background-size: 400% 300%; background-repeat: no-repeat; }
-.scene-frame.has-sprite .game-art { opacity: 0; }
-.image-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, #14101970, transparent 26%, transparent 68%, #151017c4); }
-.media-topline { position: absolute; inset: 1rem 1rem auto; display: flex; justify-content: flex-end; align-items: center; gap: .5rem; }
-.category { border: 1px solid #ffffff38; background: #17121c9c; backdrop-filter: blur(12px); border-radius: 100px; color: #fff5fa; }
-.category { padding: .4rem .7rem; font-size: .8125rem; line-height: 1.6; }
-.scene-caption { position: absolute; left: 1.2rem; right: 1.2rem; bottom: 1.15rem; display: flex; align-items: center; gap: .5rem; color: #fff5fa; font-size: .8125rem; letter-spacing: .055em; text-shadow: 0 1px 8px #000; }
-.caption-dot { flex: 0 0 5px; height: 5px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 8px #ff87b7b3; }
-.card-copy { display: flex; flex-direction: column; flex: 1; padding: 1.5rem 1.4rem 0; min-width: 0; }
-.pick-line { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem .6rem; margin-bottom: .8rem; }
-.pick-label { color: var(--accent); font-size: .875rem; font-weight: 650; letter-spacing: .04em; }
-.player-count { font-size: .875rem; color: var(--muted); white-space: nowrap; }
-h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 690; line-height: 1.22; letter-spacing: -.035em; min-height: 2.44em; overflow-wrap: break-word; }
-.game-details { max-height: 650px; opacity: 1; transition: opacity .3s ease, max-height .65s ease; }
-.game-description { margin: 0 0 1.3rem; font-size: 1rem; line-height: 1.75; color: #d0c6ce; }
-.why-pick { padding-top: 1.05rem; border-top: 1px solid var(--line); }
-.detail-label { display: block; color: var(--quiet); font-weight: 650; font-size: .875rem; letter-spacing: .06em; margin-bottom: .4rem; }
-.why-pick p { font-size: 1rem; line-height: 1.75; margin: 0; color: #c4b8c1; }
-.setup { margin-top: auto; padding: 1.25rem 0; }
-.setup p { margin: 0; font-size: .875rem; line-height: 1.75; overflow-wrap: anywhere; color: #e1d6de; }
-.setup p.setup-note { color: var(--muted); font-size: .875rem; margin-top: .15rem; }
-.card-action { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem 0; border-top: 1px solid var(--line); color: var(--accent); font-weight: 600; font-size: .9375rem; }
-.action-heart { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; font-size: 1.75rem; line-height: 1; font-weight: 400; transition: transform .3s; }
-.game-card:hover .action-heart, .game-card:focus-visible .action-heart { transform: scale(1.18) rotate(-9deg); }
-.particle-field { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.game-particle { position: absolute; display: block; pointer-events: none; will-change: transform, opacity; filter: drop-shadow(0 0 5px currentColor); }
-.game-particle svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.game-particle.bit { font-family: monospace; font-weight: 700; font-size: 16px; line-height: 1; }
-.site-footer { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding: 1.6rem 0 2rem; border-top: 1px solid var(--line); font-size: .8125rem; color: var(--quiet); }
-.site-footer > span:first-child { color: var(--muted); }
-.footer-heart { font-size: 1.2rem; color: var(--pink); vertical-align: -.06em; padding-right: .2rem; }
-:focus-visible { outline: 2px solid var(--pink); outline-offset: 5px; }
-.skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 20; padding: .7rem 1rem; border-radius: 8px; background: var(--pink); color: var(--bg); transform: translateY(-200%); }
-.skip-link:focus { transform: translateY(0); }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-@media (min-width: 1080px) {
-  .games[data-active="tango"] { grid-template-columns: minmax(0,1.5fr) minmax(0,.75fr) minmax(0,.75fr); }
-  .games[data-active="lovers"] { grid-template-columns: minmax(0,.75fr) minmax(0,1.5fr) minmax(0,.75fr); }
-  .games[data-active="heavenly"] { grid-template-columns: minmax(0,.75fr) minmax(0,.75fr) minmax(0,1.5fr); }
-  .game-wrap.is-muted .game-card { filter: grayscale(1) brightness(.82); }
-  .game-wrap.is-muted .game-details { max-height: 0; opacity: 0; overflow: hidden; }
-  .game-wrap.is-muted .category { opacity: 0; }
-  .game-wrap.is-muted .scene-caption { opacity: .4; }
-  .category, .scene-caption { transition: opacity .5s; }
-}
-@container card (max-width: 300px) {
-  .card-copy { padding-inline: 1.1rem; }
-  h2 { font-size: 1.5rem; }
-  .pick-line { flex-direction: column; }
-}
-@media (max-width: 1199px) and (min-width: 1080px) {
-  .page-shell { width: calc(100% - 64px); }
-  .games { gap: 16px; }
-  .card-copy { padding-inline: 1.1rem; }
-}
-@media (max-width: 1079px) {
-  .page-shell { width: min(680px, calc(100% - 48px)); }
-  .site-header { min-height: 88px; }
-  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.4rem 0 2rem; }
-  .room-title { font-size: clamp(2.2rem, 6vw, 3rem); }
-  .doors { grid-template-columns: 1fr; gap: 14px; margin-top: 2rem; }
-  h1 { font-size: clamp(2.6rem, 6.4vw, 3.8rem); }
-  .games { grid-template-columns: 1fr; gap: 28px; --scene-size: min(680px, calc(100vw - 48px)); }
-  .card-copy { padding: 1.6rem 1.6rem 0; }
-  h2 { min-height: auto; font-size: 1.9rem; }
-  .game-description, .why-pick p { font-size: 1rem; }
-  .pick-label, .player-count, .category { font-size: .875rem; }
-  .setup p { font-size: .9375rem; }
-  .site-footer { flex-wrap: wrap; gap: .4rem; margin-top: 2rem; }
-}
-@media (max-width: 540px) {
-  .page-shell { width: auto; margin-left: max(20px, env(safe-area-inset-left)); margin-right: max(20px, env(safe-area-inset-right)); }
-  .site-header { min-height: 82px; padding-top: env(safe-area-inset-top); gap: .7rem; }
-  .wordmark { font-size: 1.25rem; letter-spacing: -.065em; gap: .35rem; }
-  .brand-heart { width: 23px; height: 27px; }
-  .header-actions { gap: .45rem; }
-  .language-toggle { padding-inline: .75rem; font-size: .8125rem; gap: .35rem; }
-  .language-toggle svg { width: 16px; }
-  .motion-toggle { width: 44px; padding: 0; }
-  #motion-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.1rem 0 1.9rem; }
-  .room-title { font-size: clamp(1.9rem, 8vw, 2.6rem); margin-bottom: .9rem; }
-  .room-lede { font-size: 1rem; line-height: 1.85; max-width: 33ch; }
-  .door { min-height: 84px; padding: 1rem 1.2rem; font-size: 1.125rem; border-radius: 18px; }
-  .eyebrow { font-size: .75rem; letter-spacing: .12em; margin-bottom: .85rem; }
-  h1 { font-size: clamp(2.15rem, 8.5vw, 2.9rem); line-height: 1.3; margin-bottom: .8rem; }
-  html[lang="en"] h1 { max-width: 390px; column-gap: .2em; }
-  .intro-description { font-size: 1rem; line-height: 1.85; max-width: 31ch; }
-  .games { --scene-size: calc(100vw - 40px); gap: 24px; }
-  .game-card { border-radius: 18px; }
-  .card-media { border-radius: 17px 17px 0 0; }
-  .card-copy { padding: 1.3rem 1.25rem 0; }
-  .media-topline { inset: .9rem .9rem auto; }
-  .scene-caption { left: 1.05rem; right: 1.05rem; font-size: .75rem; }
-  .category { font-size: .8125rem; }
-  h2 { font-size: 1.75rem; margin-bottom: .85rem; }
-  .game-description { margin-bottom: 1.15rem; }
-  .card-action { min-height: 65px; }
-  .site-footer { padding-bottom: max(1.75rem, env(safe-area-inset-bottom)); font-size: .75rem; }
-}
-@media (max-width: 359px) {
-  .page-shell { margin-inline: 14px; }
-  .wordmark { font-size: 1.1rem; }
-  .brand-heart { width: 20px; }
-  .language-toggle svg { display: none; }
-  .games { --scene-size: calc(100vw - 28px); }
-}
-@media (hover: none) {
-  .game-card:active { border-color: var(--pink); }
-}
-/* The system's reduced-motion request holds from the first paint, before any
-   script runs, and keeps holding unless the visitor turns motion on with the
-   control themselves: `src/dom/motion.ts` paints `motion-on` on <html> for that
-   one case, and nothing else lifts this. The `motion-off` rules below are the
-   other direction and stand on their own. */
-@media (prefers-reduced-motion: reduce) {
-  :root:not(.motion-on) { scroll-behavior: auto; }
-  :root:not(.motion-on), :root:not(.motion-on) *, :root:not(.motion-on) *::before, :root:not(.motion-on) *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
-.motion-off { scroll-behavior: auto; }
-.motion-off .brand-heart { animation: none !important; }
-.motion-off .games, .motion-off .game-card, .motion-off .game-details, .motion-off .action-heart { transition: none; }
-.motion-off .particle-field { display: none; }
-
-html.dialog-open { overflow: hidden; }
-.game-card[role="button"] { cursor: pointer; }
-.choice-dialog { width: min(460px, calc(100% - 32px)); max-height: calc(100dvh - 32px); padding: 2rem; margin: auto; border: 1px solid #82536e; border-radius: 28px; background: #241c26; color: var(--ink); box-shadow: 0 24px 100px #000a; overflow-y: auto; overscroll-behavior: contain; }
-.choice-dialog::backdrop { background: #0c090fbb; backdrop-filter: blur(8px); }
-.choice-dialog[open] { animation: invitation-in .3s ease-out; }
-@keyframes invitation-in { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
-.dialog-close { position: absolute; top: .65rem; right: .65rem; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.65rem; cursor: pointer; }
-.dialog-close:hover { color: var(--pink); background: #ffffff08; }
-.dialog-art { position: relative; width: 112px; margin: .2rem auto 1.1rem; }
-.dialog-art img { display: block; width: 112px; height: 112px; border-radius: 25px; border: 1px solid #b9719a; transform: rotate(-4deg); }
-.dialog-art > span { position: absolute; right: -12px; bottom: -7px; display: grid; place-items: center; width: 38px; height: 38px; background: var(--pink); color: #321727; border: 4px solid #241c26; border-radius: 50%; font-size: 1.5rem; }
-.dialog-eyebrow { margin: 0 0 .35rem; text-align: center; color: var(--pink); font-size: .75rem; letter-spacing: .13em; }
-.dialog-title { min-height: 0; margin: 0; text-align: center; font-size: 1.8rem; line-height: 1.35; }
-.dialog-game { margin: .5rem 0 1.4rem; color: var(--muted); text-align: center; font-size: 1rem; line-height: 1.4; }
-.dialog-options { display: grid; gap: 1rem; }
-.dialog-steam, .dialog-invite { display: flex; align-items: center; justify-content: center; gap: .65rem; width: 100%; min-height: 50px; padding: .8rem 1rem; border-radius: 14px; text-decoration: none; font-weight: 650; font-size: 1rem; line-height: 1.4; }
-.dialog-steam { color: #e8d6e4; background: #19141c; border: 1px solid #554050; }
-.dialog-steam:hover { border-color: var(--pink); }
-.dialog-invite { border: 1px solid var(--pink); background: var(--pink); color: #301824; cursor: pointer; }
-.dialog-invite:hover:not(:disabled) { background: #ffbad9; }
-.dialog-invite:disabled { opacity: .5; cursor: not-allowed; }
-.dialog-invite > span:first-child { font-size: 1.35rem; }
-.privacy-consent { display: flex; gap: .65rem; padding: .9rem; border: 1px solid #483242; background: #1d161f; border-radius: 12px; color: #d8c4d3; font-size: .875rem; line-height: 1.55; cursor: pointer; }
-.privacy-consent input { width: 19px; height: 19px; flex: 0 0 19px; margin: .15rem 0 0; accent-color: var(--pink); }
-.privacy-note { color: var(--quiet); font-size: .75rem; line-height: 1.5; margin: .65rem .15rem .8rem; }
-.honey-field { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-.turnstile-widget { min-width: 0; margin: .7rem 0; }
-.invite-status { min-height: 1.5em; margin: .85rem 0 0; text-align: center; color: var(--pink); font-size: .875rem; line-height: 1.5; }
-.invite-status[data-state="error"] { color: #ffb2bc; }
-@media (max-width: 540px) {
-  .choice-dialog { padding: 1.6rem 1.2rem 1.2rem; border-radius: 24px; }
-  .dialog-art, .dialog-art img { width: 88px; height: 88px; }
-  .dialog-title { font-size: 1.65rem; }
-  .game-wrap.is-scroll-active .game-card { border-color: #bf7396; box-shadow: 0 0 24px #f589b412; }
-  .game-particle { filter: none; }
-}
-.motion-off .choice-dialog { animation: none; }
-
-/* 05: loading — the arrival screen. It covers the apartment until the model says
-   every declared asset has settled, and everything behind it is `inert` until the
-   same moment. The fill is a CSS transition, so the reduced-motion query above
-   zeroes its travel; the sheen is decoration, and stops with the motion control. */
-.loading-screen { position: fixed; inset: 0; z-index: 30; display: grid; align-content: center; justify-items: center; gap: 1.1rem; padding: 2rem; background: radial-gradient(ellipse at 50% 32%, #4923373d, transparent 58%), var(--bg); text-align: center; }
-.loading-screen:focus { outline: none; }
-.loading-title { margin: 0; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 740; letter-spacing: -.045em; }
-.loading-track { position: relative; width: min(340px, 100%); height: 9px; border: 1px solid var(--line); border-radius: 100px; background: #2b2430; overflow: hidden; }
-.loading-fill { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), var(--pink-bright)); transform: scaleX(0); transform-origin: left; transition: transform .35s ease-out; }
-.loading-track::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #ffffff1f, transparent); transform: translateX(-100%); animation: loading-sheen 1.9s ease-in-out infinite; }
-@keyframes loading-sheen { to { transform: translateX(100%); } }
-.motion-off .loading-track::after { animation: none; opacity: 0; }
-.loading-percent { margin: -.4rem 0 0; color: var(--pink); font-size: .8125rem; font-variant-numeric: tabular-nums; letter-spacing: .08em; }
-.loading-note { max-width: 34ch; margin: 0; color: var(--muted); font-size: .9375rem; line-height: 1.7; }
-
-/* 06: audio — the header sound control and the Rooms' Music Source placeholders.
-   One appended block, and the control repeats the toggle styling rather than
-   joining the selector lists above, so this ticket adds lines instead of editing
-   the ones another ticket is landing beside. */
-.sound-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 100px; font-size: .875rem; line-height: 1.2; background: transparent; color: var(--muted); cursor: pointer; transition: border-color .25s, background .25s, color .25s; }
-.sound-toggle:hover { background: #35232e; border-color: var(--pink); }
-.sound-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.sound-toggle .sound-off-icon, .sound-toggle[aria-pressed="true"] .sound-on-icon { display: none; }
-.sound-toggle[aria-pressed="true"] .sound-off-icon { display: block; }
-.sound-toggle[aria-pressed="true"] { color: var(--pink); }
-
-/* A Music Source is a Prop in the Room, so it is dashed and tagged for as long
-   as it is a placeholder standing in for one. The design tickets replace it. */
-.music-source-row { margin-top: 1.6rem; }
-.music-source { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; padding: .5rem .9rem; border: 1px dashed var(--line); border-radius: 100px; background: transparent; color: var(--muted); font-size: .875rem; line-height: 1.2; cursor: pointer; transition: border-color .25s, color .25s; }
-.music-source:hover, .music-source:focus-visible { border-color: var(--pink); color: var(--ink); }
-.music-source[aria-pressed="true"] { border-style: solid; border-color: var(--pink); color: var(--ink); }
-.music-note { color: var(--pink); font-size: 1.05rem; line-height: 1; }
-.placeholder-tag { padding: .1rem .4rem; border-radius: 6px; background: #2a2230; color: var(--quiet); font-size: .6875rem; letter-spacing: .04em; }
-.motion-off .sound-toggle, .motion-off .music-source { transition: none; }
-
-@media (max-width: 540px) {
-  /* Three controls beside the wordmark now: the sound control keeps its icon
-     and gives up its words, exactly as the motion control does at this width. */
-  .sound-toggle { width: 44px; padding: 0; }
-  #sound-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .music-source-row { margin-top: 1.3rem; }
-}
-@media (max-width: 359px) {
-  /* Where the language toggle gives up its icon, the sound control gives up the
-     room around its own, so the header still fits on one line. */
-  .sound-toggle { width: 38px; }
-}
-
-/* 07: actors — the stage each Room lays its Cast out on, and the Cast itself.
-   The stage is deliberately bare: it is a 16:9 canvas of 1600 x 900 units and
-   nothing else until each Room's design pass furnishes it. */
-.stage { position: relative; width: 100%; max-width: 64rem; margin: 2.2rem auto 0; aspect-ratio: 16 / 9; pointer-events: none; background: linear-gradient(to bottom, transparent 62%, #f589b40a); }
-/* The Cast waits in here until the model puts an Actor in a Room, so a parked
-   Actor needs no state of its own: the container is what hides it. */
-.cast { display: none; }
-/* `left` and `top` are the Actor's feet in stage units turned into percentages
-   of the stage, and the translate lifts the sprite so its feet land there. */
-.actor { position: absolute; transform: translate(-50%, -100%) scaleX(var(--flip, 1)) scaleY(var(--fuss, 1)); transform-origin: bottom center; }
-/* 08: the three cats are the only part of the Cast the visitor can reach, so
-   they are real buttons — the focus ring, Enter and Space are the browser's,
-   and Tab visits them in the order `index.html` writes them. The stage takes
-   no pointer events, so a cat has to ask for them back. */
-.actor.cat { padding: 0; border: 0; background: none; font: inherit; color: inherit; pointer-events: auto; cursor: pointer; border-radius: 8px; transition: transform .18s ease-out; }
-.actor.cat:focus-visible { outline: 3px solid var(--pink); outline-offset: 5px; }
-/* Being fussed over, until a petting Beat is drawn for one: she settles on to
-   her paws under the hand. A Beat that does exist stands in for the sprite. */
-.actor.cat.is-petted { --fuss: .93; }
-.actor.cat.is-fussed { display: none; }
-.motion-off .actor.cat { transition: none; }
-@media (prefers-reduced-motion: reduce) { :root:not(.motion-on) .actor.cat { transition: none; } }
-.actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
-
-
-/* 17: the Cinema Room.
-
-   The Room is furnished in stage units: every Prop carries `--x --y --w --h`
-   in `index.html` and the rule below turns them into percentages of the
-   1600 x 900 stage, so one set of numbers serves the markup, the walkable
-   polygon in `src/world/actors.ts` and the Cast's marks alike. `--u` is one
-   stage unit as a length, for the type, borders and radii inside a Prop.
-
-   All of it is drawn in CSS. Ticket 32 is generating this Room's artwork and
-   ticket 36 lands it; until then nothing here names a file, so the built page
-   has no URL that could 404. */
-.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.stage-cinema {
-  --u: .0625cqw;
-  --wall: #3a2f3b; --floor: #4a3730; --cream: #efe6d6; --walnut: #5a3f31;
-  container-type: inline-size;
-  overflow: hidden;
-  border-radius: 14px;
-  background: linear-gradient(to bottom, #2f2631 0 6.7%, var(--wall) 6.7% 71.1%, var(--floor) 71.1%);
-}
-.stage-cinema .cinema-prop {
-  position: absolute;
-  left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%);
-  width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%);
-  z-index: 640;
-}
-/* The stage swallows pointer events so the Cast never blocks a click; the
-   Props the visitor can actually use take theirs back. */
-.stage-cinema a.cinema-prop, .stage-cinema button.cinema-prop { pointer-events: auto; }
-.stage-cinema button.cinema-prop { padding: 0; border: 0; background: none; cursor: pointer; }
-
-/* P1-P3, P5, P6: the empty Room. */
-.cinema-cornice { position: absolute; left: 0; right: 0; top: 6.7%; height: calc(var(--u) * 6); background: #6b5344; }
-.cinema-floor { position: absolute; left: 0; right: 0; top: 71.1%; bottom: 0; background: repeating-linear-gradient(90deg, #4a3730 0 calc(var(--u) * 76), #43312b calc(var(--u) * 76) calc(var(--u) * 80)); }
-.cinema-rug { border-radius: 50% / 40%; background: radial-gradient(ellipse at 50% 50%, #7a4a52, #5d3a3c 62%, #4d3134); opacity: .9; }
-.cinema-sconce { border-radius: calc(var(--u) * 6); background: linear-gradient(#c79a4e, #8a6a34); box-shadow: 0 0 calc(var(--u) * 150) calc(var(--u) * 60) #ffca8033; }
-.cinema-screen .screen-case { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--u) * 20); border-radius: calc(var(--u) * 4); background: #17141a; }
-.cinema-screen .screen-sheet { position: absolute; left: calc(var(--u) * 10); top: calc(var(--u) * 20); width: calc(var(--u) * 400); height: calc(var(--u) * 225); background: linear-gradient(#efe6d6, #e2d6c2); box-shadow: inset 0 0 calc(var(--u) * 40) #00000022; }
-.cinema-screen .screen-cord { position: absolute; left: calc(var(--u) * 408); top: calc(var(--u) * 245); width: calc(var(--u) * 4); height: calc(var(--u) * 35); background: #d8cbb6; }
-
-/* P4: the door, with the hallway leaking round it. */
-.cinema-door { border-radius: calc(var(--u) * 6); background: var(--walnut); box-shadow: 0 0 calc(var(--u) * 40) #ffca8022; transition: box-shadow .25s; }
-.cinema-door .door-leaf { position: absolute; inset: calc(var(--u) * 15); border-radius: calc(var(--u) * 4); background: linear-gradient(100deg, #ffd9a0 0 12%, #6a4a39 12%); }
-.cinema-door:hover, .cinema-door:focus-visible { box-shadow: 0 0 calc(var(--u) * 90) #ffca8066; outline: none; }
-.cinema-door:focus-visible .door-leaf { outline: 3px solid var(--pink); outline-offset: 2px; }
-
-/* P7-P9: the three shelves. Colour, crown silhouette and ornament each say the
-   genre on their own, so any one of them surviving a small screen is enough. */
-.cinema-shelf { z-index: 640; overflow: visible; transition: filter .2s; }
-/* `--glow` is the rim light a shelf comes up in. It is the trim colour, except
-   on the horror shelf, whose trim is nearly black: there it is the candle's
-   sick green, which is that shelf's own colour in the design note's table. */
-.cinema-shelf[data-shelf="comedy"] { --body: #f2c14e; --trim: #e39b2d; --cap: #e8703a; --glow: #e39b2d; }
-.cinema-shelf[data-shelf="romance"] { --body: #e86f8f; --trim: #b8405e; --cap: #f5a3c5; --glow: #f5a3c5; }
-.cinema-shelf[data-shelf="horror"] { --body: #3e2a4f; --trim: #1f1528; --cap: #14101a; --glow: #8fd14f; transform: rotate(-4deg); transform-origin: bottom center; }
-.cinema-shelf .shelf-body { position: absolute; inset: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 8); padding: calc(var(--u) * 12) calc(var(--u) * 10) calc(var(--u) * 52); background: var(--body); border: calc(var(--u) * 6) solid var(--trim); }
-.cinema-shelf .cubby { flex: 1; background: repeating-linear-gradient(90deg, var(--cap) 0 calc(var(--u) * 9), #00000055 calc(var(--u) * 9) calc(var(--u) * 12), var(--cap) calc(var(--u) * 12) calc(var(--u) * 21), #00000055 calc(var(--u) * 21) calc(var(--u) * 24)), #2a2028; }
-.cinema-shelf[data-shelf="comedy"] .shelf-body { border-radius: calc(var(--u) * 30) calc(var(--u) * 30) calc(var(--u) * 6) calc(var(--u) * 6); }
-.cinema-shelf[data-shelf="romance"] .shelf-body { border-radius: calc(var(--u) * 6); }
-.cinema-shelf[data-shelf="horror"] .shelf-body { clip-path: polygon(50% 0, 100% 10%, 100% 100%, 0 100%, 0 10%); }
-/* The crown ornament stands clear of the shelf and never rises above y 180. */
-.cinema-shelf .shelf-ornament { position: absolute; left: 0; right: 0; bottom: 100%; height: calc(var(--u) * 80); }
-.shelf-ornament > span { position: absolute; }
-.shelf-ornament .balloon { width: calc(var(--u) * 26); height: calc(var(--u) * 32); border-radius: 50%; background: #f2c14e; box-shadow: 0 calc(var(--u) * 16) 0 calc(var(--u) * -14) #e39b2d; }
-.shelf-ornament .balloon:nth-child(1) { left: calc(var(--u) * 6); top: 0; }
-.shelf-ornament .balloon:nth-child(2) { left: calc(var(--u) * 32); top: calc(var(--u) * -6); background: #e8703a; }
-.shelf-ornament .balloon:nth-child(3) { left: calc(var(--u) * 58); top: calc(var(--u) * 2); background: #f6d98a; }
-.shelf-ornament .popcorn { right: calc(var(--u) * 4); bottom: 0; width: calc(var(--u) * 42); height: calc(var(--u) * 34); border-radius: calc(var(--u) * 4) calc(var(--u) * 4) calc(var(--u) * 10) calc(var(--u) * 10); background: repeating-linear-gradient(90deg, #e8524a 0 calc(var(--u) * 7), #f6efe4 calc(var(--u) * 7) calc(var(--u) * 14)); box-shadow: 0 calc(var(--u) * -6) 0 calc(var(--u) * -3) #f6efe4; }
-/* Romance: a heart cut into the crown, roses and a string of warm lights. */
-.shelf-ornament .roses { left: 50%; bottom: 0; translate: -50% 0; width: calc(var(--u) * 46); height: calc(var(--u) * 38); border-radius: calc(var(--u) * 6) calc(var(--u) * 6) calc(var(--u) * 16) calc(var(--u) * 16); background: radial-gradient(circle at 30% 30%, #d5304f calc(var(--u) * 9), transparent 0), radial-gradient(circle at 68% 26%, #ef5570 calc(var(--u) * 8), transparent 0), linear-gradient(#3f6b46, #2c4b31); }
-.shelf-ornament .fairy-lights { left: 0; right: 0; bottom: calc(var(--u) * -4); height: calc(var(--u) * 6); background: repeating-linear-gradient(90deg, #ffd9a0 0 calc(var(--u) * 5), transparent calc(var(--u) * 5) calc(var(--u) * 16)); }
-.cinema-shelf[data-shelf="romance"] .shelf-body::before { content: ""; position: absolute; left: 50%; top: calc(var(--u) * -34); translate: -50% 0; width: calc(var(--u) * 44); height: calc(var(--u) * 40); background: var(--trim); clip-path: path("M22 40C22 40 0 24 0 12A11 11 0 0 1 22 8 11 11 0 0 1 44 12C44 24 22 40 22 40Z"); }
-/* Horror: a green candle flame, a skull and a talisman slip, red marks only. */
-.shelf-ornament .candle { left: calc(var(--u) * 20); bottom: 0; width: calc(var(--u) * 14); height: calc(var(--u) * 46); background: #cdbfae; box-shadow: 0 0 calc(var(--u) * 70) calc(var(--u) * 14) #8fd14f33; }
-.shelf-ornament .candle::after { content: ""; position: absolute; left: 50%; bottom: 100%; translate: -50% 0; width: calc(var(--u) * 12); height: calc(var(--u) * 20); border-radius: 50% 50% 40% 40%; background: #8fd14f; }
-.shelf-ornament .skull { right: calc(var(--u) * 14); bottom: 0; width: calc(var(--u) * 28); height: calc(var(--u) * 26); border-radius: 50% 50% 40% 40%; background: #ddd4c6; }
-.shelf-ornament .talisman { right: calc(var(--u) * -10); bottom: calc(var(--u) * -20); width: calc(var(--u) * 16); height: calc(var(--u) * 46); background: repeating-linear-gradient(#f1d163 0 calc(var(--u) * 10), #c8392f calc(var(--u) * 10) calc(var(--u) * 13)); }
-/* P21: the brass plaque on each plinth, muted until the shelf is attended. */
-.cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--u) * 12); width: calc(var(--u) * 100); padding: calc(var(--u) * 2) 0; border-radius: calc(var(--u) * 4); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--u) * 20); line-height: 1.2; text-align: center; opacity: .78; transition: opacity .2s; }
-.cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--u) * 30) var(--glow)) brightness(1.08); outline: none; }
-.cinema-shelf:hover .shelf-plaque, .cinema-shelf:focus-visible .shelf-plaque, .cinema-shelf.is-attended .shelf-plaque { opacity: 1; }
-.cinema-shelf:focus-visible .shelf-body { outline: 3px solid var(--pink); outline-offset: 3px; }
-
-/* P10: the felt board, bare until he pins Posters to it. */
-.cinema-board { display: grid; place-items: center; padding: calc(var(--u) * 12); border: calc(var(--u) * 12) solid var(--walnut); background: #4a3a3f; }
-.cinema-board .board-pin { position: absolute; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f0d18a, #9a7a3a); }
-.cinema-board .board-pin:nth-child(1) { left: 12%; top: 14%; }
-.cinema-board .board-pin:nth-child(2) { right: 18%; bottom: 20%; }
-.cinema-board .board-ghost { position: absolute; left: 34%; top: 16%; width: calc(var(--u) * 132); height: calc(var(--u) * 196); background: #ffffff0b; }
-.cinema-board .board-empty { position: relative; margin: 0; max-width: calc(var(--u) * 330); color: #c8b9bd; font-size: calc(var(--u) * 26); line-height: 1.6; text-align: center; }
-
-/* 18: P11, the three Poster slots.
-
-   Offsets are from the board's padding box, which starts at stage (1122, 312)
-   because the walnut frame is a 12-unit border: 3 and 38 units in from there
-   puts slot 1 at the design note's (1125, 350), and 132-wide slots 22 apart
-   put slots 2 and 3 at 1279 and 1433. `--u` is the stage unit, so the three
-   land on the same spot at every shell width, like every other Prop here. */
-.cinema-board .board-slots { position: absolute; left: calc(var(--u) * 3); top: calc(var(--u) * 38); display: flex; gap: calc(var(--u) * 22); }
-/* Every Poster is the same stock, so nine originals read as one set: cream
-   paper, a deckled margin, and a genre stripe in the shelf's own body colour
-   that says which shelf it came from long after the shelf is out of mind. The
-   painted art is ticket 36's; until it lands the frame holds that Film's
-   genre ground with a low horizon and a soft vignette, which is the shared
-   composition rule the delivered artwork also follows. */
-.cinema-poster { position: relative; flex: 0 0 auto; width: calc(var(--u) * 132); height: calc(var(--u) * 196); padding: 0; border: 0; background: #f1e6cf; box-shadow: 0 calc(var(--u) * 6) calc(var(--u) * 16) #00000055; cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1); }
-.cinema-poster[data-shelf="comedy"] { --stripe: #f2c14e; --ground: #d9a441; --horizon: #8a4f2b; }
-.cinema-poster[data-shelf="romance"] { --stripe: #e86f8f; --ground: #6e1f2e; --horizon: #2d6d61; }
-.cinema-poster[data-shelf="horror"] { --stripe: #3e2a4f; --ground: #26234f; --horizon: #4a6b34; }
-.cinema-poster .poster-stripe { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 6); height: calc(var(--u) * 10); background: var(--stripe); }
-.cinema-poster .poster-ground { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 20); bottom: calc(var(--u) * 34); background: linear-gradient(var(--ground) 0 72%, var(--horizon) 72%); box-shadow: inset 0 0 calc(var(--u) * 26) calc(var(--u) * 10) #00000044; }
-/* The caption is DOM text, never drawn into the artwork: that is what keeps a
-   Poster bilingual and free of generated lettering. Two lines of 13-unit type
-   sit inside the design note's 28-unit strip, which is what the longest titles
-   need — "Eat Drink Man Woman", "In the Mood for Love" — while the Chinese
-   titles, none longer than five characters, stay on one. */
-.cinema-poster .poster-caption { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); bottom: calc(var(--u) * 4); height: calc(var(--u) * 28); display: grid; place-items: center; color: #2b2230; font-size: calc(var(--u) * 13); line-height: 1.05; text-align: center; text-wrap: balance; overflow: hidden; }
-/* Two brass pins at the top corners, pressed in as the Poster unrolls. */
-.cinema-poster .poster-pin { position: absolute; top: calc(var(--u) * -5); width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f7e2a6, #9a7a3a); box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 5) #00000077; animation: poster-pin-push .18s .32s backwards; }
-.cinema-poster .poster-pin:nth-of-type(1) { left: calc(var(--u) * 8); }
-.cinema-poster .poster-pin:nth-of-type(2) { right: calc(var(--u) * 8); }
-.cinema-poster:hover, .cinema-poster:focus-visible { outline: none; box-shadow: 0 calc(var(--u) * 10) calc(var(--u) * 26) #000000aa; }
-.cinema-poster:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
-@keyframes poster-unroll { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
-@keyframes poster-pin-push { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
-/* While his arm is in a bay its tubes rattle, which is the whole of what the
-   rummage Beat looks like until the Boy's own frames are drawn. */
-.cinema-shelf.is-rummaging .shelf-body { animation: shelf-rummage .18s steps(2, end) infinite; }
-@keyframes shelf-rummage { from { translate: 0 0; } 50% { translate: calc(var(--u) * 1) calc(var(--u) * -1); } to { translate: 0 0; } }
-
-/* P12-P14: the beanbags and the reel cabinet the projector stands on. */
-.cinema-beanbag { z-index: 800; border-radius: 48% 52% 44% 56% / 62% 58% 42% 38%; }
-.beanbag-girl { background: radial-gradient(circle at 38% 30%, #3a9bb5, #287f98 60%, #1d5f72); }
-.beanbag-boy { background: radial-gradient(circle at 38% 30%, #e5836f, #d76451 60%, #a64535); }
-.cinema-cabinet { z-index: 830; border-radius: calc(var(--u) * 5); background: linear-gradient(#6a4a39, #4c342a); border: calc(var(--u) * 4) solid #3a2820; }
-.cinema-cabinet .cabinet-knob { position: absolute; right: 12%; top: 46%; width: calc(var(--u) * 10); height: calc(var(--u) * 10); border-radius: 50%; background: #c79a4e; }
-
-/* P15-P17: the projector, and its two affordances. */
-.cinema-projector { z-index: 831; }
-.cinema-projector .projector-body { position: absolute; left: 0; bottom: 0; width: calc(var(--u) * 110); height: calc(var(--u) * 80); border-radius: calc(var(--u) * 8); background: linear-gradient(#4b4a52, #2a282f); }
-.cinema-projector .projector-spindle { position: absolute; top: 0; width: calc(var(--u) * 40); height: calc(var(--u) * 40); border-radius: 50%; border: calc(var(--u) * 5) solid #6d6b76; }
-.cinema-projector .projector-spindle:nth-child(1) { left: calc(var(--u) * 10); }
-.cinema-projector .projector-spindle:nth-child(2) { left: calc(var(--u) * 58); }
-.cinema-projector .projector-lens { position: absolute; left: calc(var(--u) * -6); bottom: calc(var(--u) * 46); width: calc(var(--u) * 26); height: calc(var(--u) * 22); border-radius: calc(var(--u) * 4); background: #23212a; box-shadow: inset 0 0 0 calc(var(--u) * 3) #6d6b76; }
-/* Both controls pad their hit area out to the 44 CSS px floor without moving
-   the painted Prop, which is smaller than a fingertip at every shell width. */
-.projector-gate::before, .projector-motor::before { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: max(100%, 44px); height: max(100%, 44px); }
-/* High on the machine, cream, and dim: the mouth a reel goes into. Ticket 20
-   enables it, and until then it says so rather than pretending. */
-.stage-cinema button.projector-gate { z-index: 832; border-radius: calc(var(--u) * 6); border: calc(var(--u) * 4) dashed #efe6d680; background: #efe6d611; cursor: not-allowed; }
-.projector-gate:focus-visible { outline: 3px solid var(--cream); outline-offset: 2px; }
-/* Low on the base plate, red, and a switch: the Room's Music Source. */
-.projector-motor { z-index: 833; display: grid; place-items: center; }
-.projector-motor .motor-cap { width: calc(var(--u) * 20); height: calc(var(--u) * 20); border-radius: 50%; background: radial-gradient(circle at 34% 30%, #f07a6e, #d9483b 60%, #8e2a21); transition: box-shadow .2s; }
-.projector-motor .motor-plate { position: absolute; right: calc(var(--u) * -18); bottom: calc(var(--u) * -2); color: #f0d18a; font-size: calc(var(--u) * 22); line-height: 1; }
-.projector-motor:hover .motor-cap, .projector-motor[aria-pressed="true"] .motor-cap { box-shadow: 0 0 calc(var(--u) * 40) calc(var(--u) * 8) #d9483b99; }
-.projector-motor:focus-visible { outline: 3px solid #d9483b; outline-offset: 3px; border-radius: 50%; }
-
-.motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap, .motion-off .cinema-poster { transition: none; }
-/* Motion off is the visitor's own choice, so the Poster is simply on the wall:
-   the unroll, the pins and the shelf's rattle all resolve to their end state.
-   A system reduced-motion request is covered by the block above instead. */
-.motion-off .cinema-poster, .motion-off .poster-pin, .motion-off .is-rummaging .shelf-body { animation: none; }
-
-/* 16: the Activity Room — `design/12-activity-room.md`.
-
-   Everything below is placed in the Room's 1600 x 900 stage units and turned
-   into percentages of the stage here, so the same numbers mean the same place
-   at every width: `--x / 16 * 1%` is x / 1600 as a percentage, `--y / 9 * 1%`
-   is y / 900. The stage is a container, so `1cqw / 16` is one stage unit of
-   type — which is how a 26-unit chalk hand stays 26 units wide on a phone.
-
-   Every surface is a placeholder for the shot §7 names for it. The colours are
-   the Room palette in §3 so that the placeholder reads as the Room it will be;
-   ticket 35 replaces each one with an image and keeps the box. */
-.activity-room { position: relative; width: 100%; max-width: min(100%, calc((100dvh - 15rem) * 16 / 9)); margin: 2.2rem auto 0; }
-.activity-stage-area { position: relative; }
-.stage-pan { width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border-radius: 14px; }
-/* Below 880 px the stage keeps its width and the Room pans, starting at the
-   door back to the Entryway — nothing shrinks below the legibility floor. */
-.stage[data-stage="activities"] { container-type: inline-size; min-width: 880px; max-width: none; margin: 0; overflow: hidden; border-radius: 14px; background: #4E6560; pointer-events: auto; }
-
-.stage[data-stage="activities"] .prop { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); padding: 0; border: 0; pointer-events: none; }
-/* Four controls, and only four: the door, the three stations, the boombox. */
-.stage[data-stage="activities"] .a-door, .stage[data-stage="activities"] .a-station, .stage[data-stage="activities"] .a-boombox { pointer-events: auto; cursor: pointer; }
-.stage[data-stage="activities"] :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
-
-.a-cornice { background: linear-gradient(#36443F, #2b3733); }
-.a-wall { background: radial-gradient(ellipse 40% 70% at 35% 12%, #5c756f, transparent 70%), #4E6560; }
-.a-skirting { background: #2F3A35; }
-.a-floor { background: repeating-linear-gradient(to bottom, #A98457 0 calc(9cqw / 16 * 3), #C09A6A calc(9cqw / 16 * 3) calc(9cqw / 16 * 3.4)); }
-.a-rug { border-radius: calc(8cqw / 16); background: linear-gradient(to bottom, #C9922F 0 22%, #EADCC2 22% 34%, #6F8578 34% 66%, #EADCC2 66% 78%, #C9922F 78% 100%); opacity: .95; }
-.a-window { border: calc(6cqw / 16) solid #E4D6BC; border-radius: calc(4cqw / 16); background: radial-gradient(circle at 72% 58%, #FFD9A8 0 6%, transparent 7%), linear-gradient(#22293f, #2B3550); }
-.a-sill { border-radius: calc(3cqw / 16); background: #E4D6BC; }
-.a-cord { background: #36443F; }
-.a-pendant { border-radius: 50%; background: radial-gradient(circle at 40% 30%, #fff6e4, #EADCC2 70%); box-shadow: 0 0 calc(80cqw / 16) calc(20cqw / 16) #ffd9a82e; }
-
-.a-door { display: block; border-radius: calc(4cqw / 16) calc(4cqw / 16) 0 0; background: #5C3F2C; transition: filter .2s, transform .2s; }
-.a-door-leaf { position: absolute; left: 7.8%; top: 3.8%; width: 84.4%; height: 96.2%; border-radius: calc(3cqw / 16) calc(3cqw / 16) 0 0; background: linear-gradient(to right, #9d7a34, #B08A3E 30%, #c09a4c); }
-.a-door-tag { position: absolute; left: 33.3%; top: 34.1%; width: 33.3%; height: 16.5%; border-radius: 50% 50% 46% 46%; background: #EADCC2; opacity: .8; transition: opacity .2s; }
-.a-door:hover, .a-door:focus-visible { transform: translateY(calc(-3cqw / 16)); filter: brightness(1.1); }
-.a-door:hover .a-door-tag, .a-door:focus-visible .a-door-tag { opacity: 1; }
-
-.a-map { border-radius: calc(3cqw / 16); background: radial-gradient(circle at 28% 44%, #8FB4B0 0 14%, transparent 15%), radial-gradient(circle at 62% 38%, #8FB4B0 0 18%, transparent 19%), radial-gradient(circle at 78% 68%, #8FB4B0 0 11%, transparent 12%), #EADCC2; box-shadow: 0 calc(4cqw / 16) calc(10cqw / 16) #0003; }
-.a-map::after { content: ""; position: absolute; left: 30%; top: 42%; width: 34%; height: 0; border-top: calc(2cqw / 16) solid #C8462F; transform: rotate(14deg); }
-
-.a-table, .a-desk { background: linear-gradient(#c79b68 0 12%, transparent 12%), linear-gradient(to right, transparent 0 4%, #B98D5C 4% 12%, transparent 12% 88%, #B98D5C 88% 96%, transparent 96%), linear-gradient(transparent 0 58%, #a87f4e 58% 64%, transparent 64%); }
-.a-pad { border-radius: calc(2cqw / 16); background: radial-gradient(circle at 42% 42%, #9a8a74 0 4%, transparent 5%), radial-gradient(circle at 60% 40%, #9a8a74 0 4%, transparent 5%), #EADCC2; box-shadow: inset 0 0 0 calc(2cqw / 16) #cbbb9e; }
-.a-paper { background: #f3ead6; }
-.a-clamp-lamp { background: linear-gradient(to right, transparent 0 40%, #3b332c 40% 52%, transparent 52%), radial-gradient(ellipse 60% 22% at 50% 92%, #FFD9A8 0 100%, transparent); }
-.a-mug { background: linear-gradient(to right, #c9b04a 0 8%, #D76451 12% 20%, #6F8578 24% 32%, #3b5f8f 36% 44%, #C8462F 48% 56%, #8a6f4a 60% 68%, transparent 72%) 0 0 / 100% 42% no-repeat, linear-gradient(#D76451 0 12%, #EADCC2 12% 100%) 0 42% / 100% 58% no-repeat; border-radius: 0 0 calc(8cqw / 16) calc(8cqw / 16); }
-.a-mug-broken { background: linear-gradient(115deg, transparent 0 8%, #EADCC2 8% 34%, transparent 34% 40%, #D76451 40% 46%, #EADCC2 46% 62%, transparent 62%), linear-gradient(to right, #c9b04a 0 14%, transparent 14% 22%, #6F8578 22% 38%, transparent 38% 46%, #3b5f8f 46% 62%, transparent 62% 70%, #8a6f4a 70% 86%, transparent 86%) 0 70% / 100% 18% no-repeat; }
-
-.a-shelf { background: linear-gradient(to bottom, #E4D6BC 0 4.6%, transparent 4.6% 35.4%, #E4D6BC 35.4% 40%, transparent 40% 69.2%, #E4D6BC 69.2% 73.8%, transparent 73.8% 95.4%, #E4D6BC 95.4% 100%), linear-gradient(to right, #E4D6BC 0 3%, transparent 3% 97%, #E4D6BC 97% 100%), #3f524d55; }
-.a-timer { border-radius: 50% 50% calc(6cqw / 16) calc(6cqw / 16); background: radial-gradient(circle at 50% 46%, #f4efe6 0 34%, transparent 35%), #C8462F; }
-.a-basket { border-radius: 0 0 calc(10cqw / 16) calc(10cqw / 16); background: repeating-linear-gradient(to right, #C2A06A 0 calc(6cqw / 16), #a9874f calc(6cqw / 16) calc(11cqw / 16)); }
-.a-finds { background: radial-gradient(circle at 18% 70%, #F2B85A 0 22%, transparent 23%), radial-gradient(circle at 52% 60%, #B9B4AC 0 20%, transparent 21%), radial-gradient(circle at 84% 66%, #c9a13f 0 18%, transparent 19%); }
-.a-boxes { background: linear-gradient(to right, #b98552 0 31%, transparent 31% 34%, #a97b4c 34% 65%, transparent 65% 68%, #c29a63 68% 100%); }
-.a-storage { border-radius: calc(3cqw / 16); background: linear-gradient(#cdbb9c 0 18%, #b6a488 18% 100%); }
-.a-stopwatch { background: linear-gradient(#B9B4AC 0 62%, transparent 62%) 50% 0 / 22% 100% no-repeat, radial-gradient(circle at 50% 82%, #B9B4AC 0 44%, transparent 45%); }
-
-.a-globe { border-radius: 50% 50% 46% 46%; background: radial-gradient(circle at 38% 34%, #a8c8c4 0 18%, transparent 19%), radial-gradient(circle at 66% 62%, #a8c8c4 0 14%, transparent 15%), #8FB4B0; box-shadow: inset 0 calc(-6cqw / 16) calc(8cqw / 16) #0003, 0 calc(4cqw / 16) 0 #B98552; }
-.a-atlas { border-radius: calc(2cqw / 16); background: linear-gradient(to right, #EADCC2 0 46%, #cbbb9e 46% 54%, #EADCC2 54% 100%); }
-.a-desk-lamp { background: linear-gradient(to right, transparent 0 44%, #8a6f4a 44% 56%, transparent 56%), radial-gradient(ellipse 52% 26% at 50% 14%, #B98552 0 100%, transparent), radial-gradient(ellipse 70% 30% at 50% 96%, #FFD9A8 0 100%, transparent); }
-
-.a-chalkboard { display: grid; align-items: center; padding-inline: calc(14cqw / 16); border-radius: calc(4cqw / 16); background: linear-gradient(#36443F, #2F3A35); box-shadow: inset 0 0 0 calc(3cqw / 16) #5C3F2C; }
-.a-chalk { font-size: calc(26cqw / 16); line-height: 1.08; text-align: center; color: #EADCC2; opacity: .88; transition: opacity .2s, text-shadow .2s; overflow: hidden; }
-/* The design note sizes the chalk for the Traditional Chinese names, which are
-   four to seven characters. The English ones run to thirty-one, so they take a
-   smaller hand over two lines rather than being cut off at the slate.s edge. */
-html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
-.a-chalkboard[data-chosen] .a-chalk { opacity: 1; }
-/* The chalk tick the chosen station's board gains at its right end. */
-.a-chalkboard[data-chosen]::after { content: "✓"; position: absolute; right: calc(12cqw / 16); top: 50%; transform: translateY(-50%); font-size: calc(26cqw / 16); line-height: 1; color: #EADCC2; }
-.stage[data-stage="activities"]:has(.a-station[data-activity="draw"]:hover) .a-chalkboard[data-chalkboard="draw"] .a-chalk,
-.stage[data-stage="activities"]:has(.a-station[data-activity="draw"]:focus-visible) .a-chalkboard[data-chalkboard="draw"] .a-chalk,
-.stage[data-stage="activities"]:has(.a-station[data-activity="hunt"]:hover) .a-chalkboard[data-chalkboard="hunt"] .a-chalk,
-.stage[data-stage="activities"]:has(.a-station[data-activity="hunt"]:focus-visible) .a-chalkboard[data-chalkboard="hunt"] .a-chalk,
-.stage[data-stage="activities"]:has(.a-station[data-activity="map"]:hover) .a-chalkboard[data-chalkboard="map"] .a-chalk,
-.stage[data-stage="activities"]:has(.a-station[data-activity="map"]:focus-visible) .a-chalkboard[data-chalkboard="map"] .a-chalk { opacity: 1; text-shadow: 0 0 calc(10cqw / 16) #eadcc288; }
-
-/* A station is a transparent rectangle: what lights up is the furniture under it. */
-.a-station { border-radius: calc(10cqw / 16); background: transparent; transition: background-color .2s, box-shadow .2s; }
-.a-station:hover, .a-station:focus-visible { background: #f2b85a14; box-shadow: inset 0 0 0 calc(2cqw / 16) #F2B85A66, 0 0 calc(34cqw / 16) #f2b85a2e; }
-.a-station[data-chosen] { background: #f2b85a12; box-shadow: inset 0 0 0 calc(2cqw / 16) #F2B85A99, 0 0 calc(26cqw / 16) #f2b85a26; }
-.motion-off .a-station, .motion-off .a-door, .motion-off .a-chalk { transition: none; }
-
-.a-tableau { border-radius: calc(10cqw / 16); background: linear-gradient(#eadcc21f, #eadcc20f), repeating-linear-gradient(135deg, #eadcc214 0 calc(10cqw / 16), transparent calc(10cqw / 16) calc(20cqw / 16)); box-shadow: inset 0 0 0 calc(2cqw / 16) #eadcc23d; animation: activity-tableau-in .25s ease-out; }
-@keyframes activity-tableau-in { from { opacity: 0; } to { opacity: 1; } }
-.motion-off .a-tableau { animation: none; }
-/* The tableau replaces the two of them; the cats stay where they are. */
-.stage[data-stage="activities"].has-tableau .actor[data-actor="boy"], .stage[data-stage="activities"].has-tableau .actor[data-actor="girl"] { display: none; }
-
-.a-laptop { border-radius: calc(4cqw / 16) calc(4cqw / 16) 0 0; background: radial-gradient(circle at 84% 12%, #7fd48a 0 5%, transparent 6%), linear-gradient(#DCE8F0, #c3d4e0); box-shadow: 0 0 calc(30cqw / 16) #dce8f033, inset 0 0 0 calc(4cqw / 16) #B9B4AC; }
-.a-stool { background: linear-gradient(to right, transparent 0 6%, #8a6f4a 6% 16%, transparent 16% 84%, #8a6f4a 84% 94%, transparent 94%), linear-gradient(#B9B4AC 0 18%, transparent 18%); }
-.a-tea { border-radius: 0 0 calc(6cqw / 16) calc(6cqw / 16); background: #EADCC2; }
-.a-crate { background: repeating-linear-gradient(to bottom, #b98552 0 calc(14cqw / 16), #a3703f calc(14cqw / 16) calc(18cqw / 16)); }
-
-.a-boombox { display: block; background: transparent; }
-.a-boombox-body { position: absolute; left: 5.7%; top: 13.3%; width: 88.6%; height: 80%; border-radius: calc(8cqw / 16); background: linear-gradient(#45464a, #3A3B3E); box-shadow: inset 0 0 0 calc(3cqw / 16) #B9B4AC; }
-.a-boombox-speaker { position: absolute; top: 31.3%; width: 36.6%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #2a2b2e 0 38%, #4a4b4f 39% 100%); box-shadow: inset 0 0 0 calc(2cqw / 16) #B9B4AC; }
-.a-boombox-speaker.left { left: 10.8%; }
-.a-boombox-speaker.right { right: 10.8%; }
-.a-boombox-window { position: absolute; left: 39.2%; top: 33.3%; width: 21.5%; height: 33.3%; display: flex; align-items: center; justify-content: space-around; border-radius: calc(2cqw / 16); background: #1f2022; box-shadow: inset 0 0 0 calc(2cqw / 16) #B9B4AC; }
-.a-reel { width: 38%; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(#B9B4AC 0 12%, #55565a 12% 33%, #B9B4AC 33% 45%, #55565a 45% 66%, #B9B4AC 66% 78%, #55565a 78% 100%); }
-.a-boombox-dial { position: absolute; left: 10.8%; bottom: 8%; width: 78.4%; height: 14%; border-radius: calc(3cqw / 16); background: #2a2b2e; box-shadow: inset 0 0 0 calc(2cqw / 16) #6c6d71; }
-.a-boombox-notes { position: absolute; left: 12%; top: 8%; width: 24%; height: 60%; opacity: 0; }
-.a-boombox-notes span { position: absolute; bottom: 0; font-size: calc(26cqw / 16); line-height: 1; color: var(--pink); }
-.a-boombox-notes span:nth-child(2) { left: 38%; }
-.a-boombox-notes span:nth-child(3) { left: 72%; }
-.a-boombox:hover .a-boombox-body, .a-boombox:focus-visible .a-boombox-body { filter: brightness(1.12); }
-/* On: the dial lights, the reels turn, three notes drift up from the left speaker. */
-.a-boombox[aria-pressed="true"] .a-boombox-dial { background: linear-gradient(#F2B85A, #d59a3c); box-shadow: 0 0 calc(24cqw / 16) #f2b85a77, inset 0 0 0 calc(2cqw / 16) #6c6d71; }
-.a-boombox[aria-pressed="true"] .a-reel { animation: activity-reel 3s linear infinite; }
-.a-boombox[aria-pressed="true"] .a-reel.left { animation-duration: 2.6s; }
-.a-boombox[aria-pressed="true"] .a-boombox-notes { opacity: 1; }
-.a-boombox[aria-pressed="true"] .a-boombox-notes span { animation: activity-note 2.4s ease-out infinite; }
-.a-boombox[aria-pressed="true"] .a-boombox-notes span:nth-child(2) { animation-delay: .8s; }
-.a-boombox[aria-pressed="true"] .a-boombox-notes span:nth-child(3) { animation-delay: 1.6s; }
-@keyframes activity-reel { to { transform: rotate(360deg); } }
-@keyframes activity-note { from { transform: translateY(0); opacity: 0; } 25% { opacity: .9; } to { transform: translateY(calc(-90cqw / 16)); opacity: 0; } }
-/* Motion off: the lit dial alone carries the state. */
-.motion-off .a-boombox .a-reel, .motion-off .a-boombox .a-boombox-notes span { animation: none; }
-.motion-off .a-boombox[aria-pressed="true"] .a-boombox-notes { opacity: 0; }
-@media (prefers-reduced-motion: reduce) {
-  :root:not(.motion-on) .a-boombox[aria-pressed="true"] .a-boombox-notes { opacity: 0; }
-}
-
-/* §5.2, the activity card. Below the stage at page type by default; over the
-   stage on a wide shell, where there is room for it without hiding the Room. */
-.activity-card { margin-top: 1.4rem; padding: 1.4rem 1.5rem; border: 1px solid var(--line); border-left: 6px solid #C9922F; border-radius: 12px; background: var(--surface); }
-.activity-card-title { margin: 0; font-size: clamp(1.5rem, .968rem + 2.27vw, 2.5rem); line-height: 1.25; }
-.activity-card-title:focus-visible { outline-offset: 3px; }
-.activity-card-line { margin: .5rem 0 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
-.activity-card-meta { display: grid; grid-template-columns: auto 1fr; gap: .3rem 1rem; margin: 1.1rem 0 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); }
-.activity-card-meta dt { font-size: clamp(.9375rem, .8375rem + .426vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
-.activity-card-meta dd { margin: 0; color: #e1d6de; }
-.activity-card-label { margin: 1.1rem 0 .35rem; font-size: clamp(.9375rem, .8375rem + .426vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
-.activity-card-steps { margin: 0; padding-left: 1.3rem; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
-.activity-card-steps li + li { margin-top: .35rem; }
-.activity-card-extra { margin: .5rem 0 0; font-size: clamp(1rem, .9rem + .35vw, 1.125rem); color: var(--muted); }
-.activity-card-why { margin: 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
-.activity-card-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.3rem; }
-.activity-pick, .activity-close { min-height: 44px; padding: .6rem 1.1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; transition: filter .2s, background-color .2s; }
-.activity-pick { border: 0; background: var(--pink); color: var(--bg); font-weight: 650; }
-.activity-pick:hover { filter: brightness(1.08); }
-.activity-close { border: 1px solid var(--line); background: transparent; color: var(--ink); }
-.activity-close:hover { background: #ffffff0f; }
-.motion-off .activity-pick, .motion-off .activity-close { transition: none; }
-.activity-chosen-note { margin: 1rem 0 0; font-size: .9375rem; color: var(--muted); }
-.activity-scrim { display: none; }
-
-@media (min-width: 1080px) {
-  /* (400,160)-(1200,620) in stage units, over a scrim across the whole stage. */
-  .activity-scrim { display: block; position: absolute; inset: 0; z-index: 900; border-radius: 14px; background: rgba(24, 32, 30, .55); animation: activity-fade-in .15s ease-out; }
-  .activity-card { position: absolute; left: 25%; top: 17.8%; width: 50%; bottom: 31.1%; z-index: 910; margin: 0; overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 24px 80px #000a; animation: activity-fade-in .15s ease-out; }
-  .motion-off .activity-scrim, .motion-off .activity-card { animation: none; }
-}
-@keyframes activity-fade-in { from { opacity: 0; } to { opacity: 1; } }
-
-/* 15: the Game Room — a den at night, and the three cards are its three lit
-   bays. Design note 11. Nothing above this block changes: the cards, their
-   Scenes, their expansion and the Invitation are the shipped page's, and this
-   builds a room around them.
-
-   Two rules here are the apartment's, not this Room's: every Prop element
-   carries `z-index: <its sort key>` (§3.3), which is how Props interleave with
-   `src/dom/actors.ts`'s `z-index: round(y)` with no wrapper layers; and a stage
-   that holds controls cannot be `aria-hidden` wholesale, so the attribute and
-   `pointer-events: none` move to its decorative children.
-
-   Every Prop below is a CSS placeholder standing in its exact §4.1 box. Ticket
-   34 drops the artwork; until then nothing here names a file that is not on
-   disk, because the loading screen waits for every URL the markup declares. */
-
-#games-scene {
-  /* The stage's rendered width, measured by `src/dom/game-stage.ts`. The
-     fallback is the page shell at its widest, so the Room has the right
-     proportions on the paint before the first measurement lands. */
-  --stage-width: min(1440px, calc(100vw - 96px));
-  /* One stage unit. 1600 of them across, 900 down. */
-  --u: calc(var(--stage-width) / 1600);
-  --deck-height: 0px;
-  /* The deck's bottom edge is pinned to stage y 380; whatever does not fit
-     between y 0 and there hangs above the stage, and this section carries the
-     wall for it to hang on (§3.4). */
-  --deck-overhang: max(0px, calc(var(--deck-height) - 380 * var(--u)));
-  --wall: #2E4A55;
-  --oak: #7A5636;
-  --oak-line: #4A3320;
-  --brass: #C9A25E;
-  --bulb: #FFD9A8;
-  position: relative;
-  margin-top: 1.5rem;
-  /* The cornice sits at the top of this padding, and the overhang fills it. */
-  padding-top: calc(var(--deck-overhang) + 60px);
-  /* The backdrop's top 200 units are flat wall in this exact colour, so the
-     join between the DOM wall and the painted one is invisible. */
-  background: linear-gradient(to bottom, #27414B, var(--wall) 55%);
-}
-#games-scene .cornice {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: calc(40 * var(--u));
-  background: #22343C;
-  border-bottom: calc(6 * var(--u)) solid #3D5B66;
-}
-
-/* This Room is width-driven and scrolls: the deck's height comes from DOM type,
-   which does not scale with the stage, so a stage capped to the viewport height
-   would shrink the room out from under the cards (§3.5). */
-#room-games { padding-bottom: 2.4rem; }
-#room-games .intro { padding: 1.8rem 0 1.4rem; }
-#room-games .stage {
-  max-width: none;
-  margin: 0;
-  background: none;
-  /* The deck hangs out of the top, and the controls have to be clickable. */
-  overflow: visible;
-  pointer-events: auto;
-  /* The sort keys below run up to 890 and the Cast's `round(y)` up to 900, so
-     the stage is its own stacking context: a Prop sorts against the Room's
-     other Props and the Cast, and never against the loading screen, the skip
-     link or anything else on the page. */
-  isolation: isolate;
-}
-#room-games .stage [aria-hidden="true"] { pointer-events: none; }
-
-/* A box in stage units, turned into percentages of the stage — the same
-   arithmetic `src/dom/actors.ts` does for a feet point. */
-#room-games .stage [data-box] {
-  position: absolute;
-  left: calc(var(--x) / 16 * 1%);
-  top: calc(var(--y) / 9 * 1%);
-  width: calc(var(--w) / 16 * 1%);
-  height: calc(var(--h) / 9 * 1%);
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-/* G2-G5, G20: the backdrop. One image once ticket 34 lands (S01); three bands
-   and two shapes until then. */
-.stage-backdrop {
-  background:
-    radial-gradient(60% 22% at 90% 86%, #FFD9A82e, transparent 70%),
-    linear-gradient(to bottom,
-      var(--wall) 0 62%, #29424C 62% 68.889%,
-      #3A2A22 68.889% 71.111%,
-      #8A6647 71.111% 100%);
-}
-.prop-rug {
-  border-radius: calc(10 * var(--u));
-  background: linear-gradient(to bottom,
-    #4A3340 0 16%, #287F98 16% 23%, #4A3340 23% 68%, #B76E85 68% 75%, #4A3340 75% 100%);
-}
-.prop-cat-bed {
-  border-radius: 50%;
-  background: radial-gradient(closest-side, #6E4A56 0 52%, #B76E85 52% 100%);
-}
-
-/* G9, G10: the ledge the bays stand on, and the pink the Room borrows from the
-   page. The LED is always on, and steps back while a bay is selected so the
-   bay wins. */
-.prop-ledge {
-  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) 0 0;
-  background: linear-gradient(to bottom, #93693F, #6A4A2E);
-  box-shadow: 0 calc(8 * var(--u)) calc(16 * var(--u)) calc(-4 * var(--u)) #0007;
-}
-.prop-led {
-  background: var(--pink);
-  box-shadow: 0 0 calc(26 * var(--u)) calc(5 * var(--u)) #f5a3c555;
-  transition: opacity .5s;
-}
-#room-games .stage:has(.games[data-active]) .prop-led { opacity: .4; }
-
-/* G7, G8: the wall unit. The deck is the joinery's three bays, so the casework
-   is drawn on the deck's own box and grows with it. */
-.deck-slot {
-  position: absolute;
-  left: 18.75%;
-  width: 67.5%;
-  bottom: 57.7778%;
-  z-index: 381;
-}
-.deck-slot::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: calc(-20 * var(--u)) calc(-20 * var(--u)) calc(-22 * var(--u));
-  border: calc(14 * var(--u)) solid var(--oak);
-  border-radius: calc(8 * var(--u));
-  box-shadow: inset 0 0 0 calc(2 * var(--u)) var(--oak-line);
-  /* The 24-unit gaps between the bays are the joinery between them, so the
-     unit reads as three bays rather than one long recess; the interior proper
-     is behind each card, and only the narrow layout ever shows it (.bay). */
-  background: linear-gradient(to bottom, #835C3A, var(--oak));
-}
-/* The bulb strip along each bay's top inner edge, and its wash over the card's
-   top third. CSS, not artwork, because the bays resize. */
-.deck-slot .game-wrap::before,
-.deck-slot .bay::before {
-  content: "";
-  position: absolute;
-  z-index: 4;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: calc(6 * var(--u));
-  background: var(--bulb);
-  box-shadow: 0 calc(9 * var(--u)) calc(26 * var(--u)) #ffd9a833;
-  pointer-events: none;
-  transition: opacity .5s, background .5s, box-shadow .5s;
-}
-.deck-slot .game-wrap::after {
-  content: "";
-  position: absolute;
-  z-index: 4;
-  inset: 0 0 67% 0;
-  background: linear-gradient(to bottom, #ffd9a826, transparent);
-  pointer-events: none;
-  transition: opacity .5s;
-}
-.motion-off .deck-slot .game-wrap::before,
-.motion-off .deck-slot .game-wrap::after,
-.motion-off .deck-slot .bay::before { transition: none; }
-
-/* G11-G16, G19: the sideboard and what stands on it, the lamp, and the table
-   that is the front edge of the doll's house. */
-.prop-sideboard {
-  border-radius: calc(4 * var(--u));
-  background:
-    linear-gradient(to bottom, #8C6440 0 15%, var(--oak) 15% 100%),
-    var(--oak);
-  box-shadow: inset 0 calc(-3 * var(--u)) 0 #3A2A22, 0 calc(6 * var(--u)) calc(18 * var(--u)) #0006;
-}
-/* The pole stands at x 1470 with its foot on the floor line, and the shade
-   hangs over it from the arc; the arc itself is behind the shade at this size,
-   so it is not drawn. Offsets are stage units from the box's own corner. */
-.prop-lamp {
-  background:
-    linear-gradient(to bottom, var(--brass), #A8823F)
-      no-repeat calc(75.5 * var(--u)) calc(54 * var(--u)) / calc(9 * var(--u)) calc(340 * var(--u)),
-    radial-gradient(closest-side, var(--brass) 0 100%, transparent 100%)
-      no-repeat calc(52 * var(--u)) calc(382 * var(--u)) / calc(56 * var(--u)) calc(12 * var(--u));
-}
-.prop-lamp::after {
-  content: "";
-  position: absolute;
-  left: 9%;
-  right: 9%;
-  top: 0;
-  height: calc(54 * var(--u));
-  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) calc(9 * var(--u)) calc(9 * var(--u));
-  background: linear-gradient(to bottom, #EAD9C2, #D3BE9F 76%, var(--bulb) 76%);
-  box-shadow: 0 calc(18 * var(--u)) calc(46 * var(--u)) #ffd9a82e;
-}
-.prop-pouf {
-  border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
-  box-shadow: inset 0 calc(-6 * var(--u)) calc(10 * var(--u)) #0000004d;
-}
-.prop-pouf-girl { background: radial-gradient(closest-side at 42% 28%, #35A0BE, #287F98); }
-.prop-pouf-boy { background: radial-gradient(closest-side at 42% 28%, #E8806E, #D76451); }
-.prop-table {
-  border-radius: calc(6 * var(--u));
-  background:
-    /* a pink mug and a cream one, and a bowl of crisps */
-    radial-gradient(closest-side, #E8A0BE 0 92%, transparent 92%) no-repeat 22% 16% / calc(46 * var(--u)) calc(30 * var(--u)),
-    radial-gradient(closest-side, #EAD9C2 0 92%, transparent 92%) no-repeat 42% 16% / calc(46 * var(--u)) calc(30 * var(--u)),
-    radial-gradient(closest-side, #D9A55E 0 92%, transparent 92%) no-repeat 72% 18% / calc(80 * var(--u)) calc(34 * var(--u)),
-    linear-gradient(to bottom, #6E4C35 0 34%, #5C3F2C 34% 100%);
-  box-shadow: 0 calc(-4 * var(--u)) calc(16 * var(--u)) #0006;
-}
-
-/* G12: the boombox, and this Room's Music Source. The whole machine is the
-   control, so the hit box is padded out to 44 px at every width and the label
-   lives in a `.sr-only` span. */
-.prop-boombox {
-  background: none;
-  cursor: pointer;
-  /* The painted box is 68 x 38 px at the narrow shell, so the hit area is grown
-     around it rather than the artwork being made unreadably large. */
-  outline-offset: calc(3 * var(--u));
-}
-.prop-boombox::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: max(44px, 100%);
-  height: max(44px, 100%);
-  transform: translate(-50%, -50%);
-}
-.boombox-body {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: 1fr 1.15fr 1fr;
-  align-items: center;
-  gap: calc(5 * var(--u));
-  padding: calc(8 * var(--u));
-  border-radius: calc(7 * var(--u));
-  background: linear-gradient(to bottom, #4A4F55, #3B3F44);
-  box-shadow: inset 0 0 0 calc(2 * var(--u)) #2A2D31;
-}
-.boombox-grille {
-  height: 72%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, #8F959C 0 34%, #B9BEC4 34% 100%);
-}
-.boombox-window {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  height: 58%;
-  border-radius: calc(3 * var(--u));
-  background: #1B1E21;
-  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #2A2D31;
-}
-.spindle {
-  width: calc(14 * var(--u));
-  height: calc(14 * var(--u));
-  border-radius: 50%;
-  border: calc(3 * var(--u)) solid #5A6068;
-  /* The teeth, so a turning spindle reads as turning. */
-  background: conic-gradient(#5A6068 0 12%, transparent 12% 38%, #5A6068 38% 50%, transparent 50% 88%, #5A6068 88% 100%);
-}
-.boombox-keys {
-  position: absolute;
-  left: 22%;
-  right: 22%;
-  bottom: calc(4 * var(--u));
-  height: calc(7 * var(--u));
-  border-radius: calc(2 * var(--u));
-  background: repeating-linear-gradient(to right, #D9483B 0 14%, #3B3F44 14% 20%);
-}
-/* On: the window lights, the pilot glows, the spindles turn. The lit window
-   alone carries the state, so with motion off nothing is lost. */
-.prop-boombox[aria-pressed="true"] .boombox-window {
-  background: linear-gradient(to bottom, #F2B85A, #C98F33);
-  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #2A2D31, 0 0 calc(14 * var(--u)) #f2b85a66;
-}
-.prop-boombox[aria-pressed="true"] .spindle {
-  animation: spindle-turn .9s linear infinite;
-  border-color: #6B4C1E;
-}
-.prop-boombox[aria-pressed="true"] .spindle:last-child { animation-duration: 1.4s; }
-@keyframes spindle-turn { to { transform: rotate(1turn); } }
-.motion-off .spindle { animation: none !important; }
-
-/* G15: Luna's snow globe, the only Breakable in this Room. Ticket 09 swaps the
-   two states over; nothing here is clickable, and the visitor cannot break it. */
-/* 60 x 64 units: 50 x 54 px at the reference width and 13 px across at the
-   narrow shell, which is why it is a distinct silhouette on a stand rather
-   than a detail among others. */
-.prop-globe {
-  background:
-    radial-gradient(closest-side, #ffffffb3 0 55%, transparent 60%)
-      no-repeat calc(13 * var(--u)) calc(9 * var(--u)) / calc(13 * var(--u)) calc(9 * var(--u)),
-    linear-gradient(to bottom, #F6E7CF 0 62%, #C2705E 62%)
-      no-repeat calc(24 * var(--u)) calc(26 * var(--u)) / calc(13 * var(--u)) calc(14 * var(--u)),
-    radial-gradient(closest-side, #A9CFDAd9 0 90%, #7FB0C0 90%)
-      no-repeat 0 0 / calc(60 * var(--u)) calc(46 * var(--u)),
-    linear-gradient(to bottom, #5C3F2C 0 40%, #33210F 40%)
-      no-repeat calc(13 * var(--u)) calc(46 * var(--u)) / calc(34 * var(--u)) calc(18 * var(--u));
-}
-/* 120 x 46 units, anchored bottom-left at (1210, 692). */
-.prop-globe-broken {
-  background:
-    conic-gradient(from .56turn, #C6DCE4cc 0 7%, transparent 7%)
-      no-repeat calc(38 * var(--u)) calc(8 * var(--u)) / calc(22 * var(--u)) calc(22 * var(--u)),
-    conic-gradient(from .04turn, #E2EFF4cc 0 8%, transparent 8%)
-      no-repeat calc(74 * var(--u)) calc(4 * var(--u)) / calc(26 * var(--u)) calc(26 * var(--u)),
-    linear-gradient(to right, #5C3F2C, #33210F)
-      no-repeat calc(6 * var(--u)) calc(28 * var(--u)) / calc(34 * var(--u)) calc(14 * var(--u)),
-    radial-gradient(closest-side, #F6E7CF 0 80%, transparent 80%)
-      no-repeat calc(96 * var(--u)) calc(24 * var(--u)) / calc(20 * var(--u)) calc(18 * var(--u)),
-    /* the dark wet patch soaking into the planks, glitter stranded in it */
-    radial-gradient(closest-side, #4A3226e6 0 62%, #4A322680 62%, transparent 100%)
-      no-repeat 50% 100% / 100% calc(30 * var(--u));
-}
-
-/* G6: the door back to the Entryway — the Entryway's own Game door, seen from
-   this side. The text `.room-exit` at the top of the Room leads out too; §8.3
-   asks the owner whether both should stay. */
-.prop-door {
-  border-radius: calc(4 * var(--u)) calc(4 * var(--u)) 0 0;
-  background: linear-gradient(to bottom, #6B4A34, #5C3F2C);
-  box-shadow: inset 0 0 0 calc(3 * var(--u)) #4A3320;
-  /* The hallway light in the gap. */
-  overflow: hidden;
-  transition: box-shadow .35s;
-}
-.prop-door .door-leaf {
-  position: absolute;
-  left: 7.8%;
-  right: 7.8%;
-  top: 4%;
-  bottom: 0;
-  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) 0 0;
-  background: linear-gradient(to right, #FFE2B4 0 6%, #3F6B7A 6% 100%);
-  transform-origin: left center;
-  transform: perspective(600px) rotateY(-12deg);
-  transition: transform .35s;
-}
-.prop-door:hover, .prop-door:focus-visible {
-  box-shadow: inset 0 0 0 calc(3 * var(--u)) #4A3320, 0 0 calc(24 * var(--u)) #ffd9a840;
-}
-.prop-door:hover .door-leaf, .prop-door:focus-visible .door-leaf {
-  transform: perspective(600px) rotateY(-20deg);
-}
-.motion-off .prop-door, .motion-off .prop-door .door-leaf { transition: none; }
-
-/* The wide layout: the deck is in the wall unit and the three bays are the
-   three cards. A bay is 344 stage units wide neutral, and the gap between two
-   is 24 units — 2.2222 % of the deck's 1080. */
-@media (min-width: 1080px) {
-  .deck-slot .games {
-    --scene-size: calc(344 * var(--u));
-    gap: 2.2222%;
-  }
-  .deck-slot .bay { display: none; }
-  .deck-slot .game-wrap.is-active::before {
-    background: color-mix(in srgb, var(--bulb) 45%, var(--pink));
-    box-shadow: 0 calc(9 * var(--u)) calc(32 * var(--u)) #ffb0d24d;
-  }
-  .deck-slot .game-wrap.is-muted::before,
-  .deck-slot .game-wrap.is-muted::after { opacity: .35; }
-}
-
-/* The narrow layout: the deck leaves the stage for the flow below it, exactly
-   as the page has always shown it, and the bays stay behind empty and lit —
-   the games are off the shelf and in your hands. The bay matching the card
-   being read warms to pink while the other two dim (§3.5). */
-@media (max-width: 1079px) {
-  #games-scene { margin-top: 1.2rem; }
-  .deck-slot { top: 0; }
-  .deck-flow { margin-top: 1.8rem; }
-  .deck-slot .bay {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 31.852%;
-    border-radius: calc(4 * var(--u));
-    background: linear-gradient(to bottom, #150F14, #1E1620);
-    transition: box-shadow .5s;
-  }
-  .deck-slot .bay[data-bay="lovers"] { left: 34.074%; }
-  .deck-slot .bay[data-bay="heavenly"] { left: 68.148%; }
-  .stage[data-lit-bay] .bay::before { opacity: .35; }
-  .stage[data-lit-bay="tango"] .bay[data-bay="tango"]::before,
-  .stage[data-lit-bay="lovers"] .bay[data-bay="lovers"]::before,
-  .stage[data-lit-bay="heavenly"] .bay[data-bay="heavenly"]::before {
-    opacity: 1;
-    background: var(--pink);
-    box-shadow: 0 calc(9 * var(--u)) calc(30 * var(--u)) #f5a3c54d;
-  }
-  .motion-off .deck-slot .bay { transition: none; }
-}
-
-/* 14: the Entryway. One appended block, so this ticket adds lines rather than
-   editing the ones the other Rooms are landing beside.
-
-   Everything on this stage is placed in stage units and nothing in pixels:
-   `--x / --y / --w / --h` are the design note's own numbers and the rules below
-   are the only place they become percentages. `--z` is a Prop's base line on the
-   stage, which is what interleaves it with the Cast, whose `z-index` is
-   `round(y)` off their feet — so the monstera at 880 is in front of everybody
-   and the wall Props at 452-512 are behind them.
-
-   Every colour is `design/10-entryway.md` §4.4's. All of it is a placeholder
-   for tickets 31 and 33: the `eb-` rules are the backdrop shot S01 drawn in CSS
-   and go the day that image lands. */
-.entryway-pan { overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
-/* The stage fits the Room's width and the viewport's height, and below a
-   rendered 880px it keeps 880 and the hallway pans, starting at the front door. */
-.entryway-stage { min-width: 880px; max-width: min(100%, calc((100dvh - 19rem) * 16 / 9)); background: none; }
-.entryway-stage .at { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); }
-.stage-caption { max-width: 52ch; margin: 1rem auto 0; text-align: center; }
-
-/* The painted hallway: the backdrop shot, until there is one. */
-.eb-cornice { background: #3E3038; }
-.eb-wall { background: radial-gradient(ellipse at 59% 12%, #6E5665, #5B4653 62%, #47363F); }
-.eb-skirting { background: #3A2A22; }
-.eb-floor { background: repeating-linear-gradient(180deg, #8A6647, #8A6647 10px, #A37E5A 10px, #A37E5A 11px); }
-.eb-runner { background: repeating-linear-gradient(90deg, #B76E85, #B76E85 14px, #E8C6D2 14px, #E8C6D2 26px, #4A3340 26px, #4A3340 34px); opacity: .92; }
-.eb-doorframe { background: #4A3327; border-radius: 3px 3px 0 0; }
-.eb-stairwell { background: linear-gradient(180deg, #2B3550, #1F2740); box-shadow: inset 0 18px 30px -12px #FFD9A8; }
-.eb-mat { background: #6B5A3E; border: 2px solid #4B3F2B; }
-.eb-rail, .eb-hook { background: #C9A25E; }
-.eb-hook { border-radius: 0 0 50% 50%; }
-.eb-bench, .eb-table { background: #6E4C33; border-radius: 2px; }
-.eb-legs { background: linear-gradient(90deg, #5C3F2C 0 8%, transparent 8% 92%, #5C3F2C 92%); }
-.eb-photo { background: #C9A25E; border: 4px solid #8A6647; }
-.eb-cord { background: #3E3038; }
-.eb-lamp { background: #C9A25E; border-radius: 0 0 50% 50% / 0 0 100% 100%; box-shadow: 0 18px 60px 20px #ffd9a81f; }
-.eb-clock { background: #EAD9C2; border: 3px solid #6E4C33; border-radius: 50%; }
-.eb-door { background: #4A3327; border-radius: 4px 4px 0 0; }
-.eb-leaf { border-radius: 3px 3px 0 0; }
-.eb-leaf-games { background: #3F6B7A; }
-.eb-leaf-cinema { background: #5A3350; }
-.eb-leaf-activities { background: #B08A3E; }
-.eb-porthole { background: #1F1A24; border: 3px solid #3E3038; border-radius: 50%; }
-.eb-tag { position: absolute; right: .5rem; bottom: .5rem; z-index: 900; }
-
-/* The Props the arrival moves. */
-.entryway-stage .prop { border: 0; padding: 0; }
-/* The leaf sorts at 600 shut and 665 open, so the Cast appears from behind it
-   as it swings in — which is why `--z` is set here and not in the markup. */
-.prop-front-door { --z: 600; background: #4A3327; border-right: 3px solid #C9A25E; transform-origin: left center; transition: transform .6s ease; }
-.prop-front-door.is-open { --z: 665; transform: perspective(900px) rotateY(-62deg); }
-.prop-girl-coat { background: #7B4159; border-radius: 40% 40% 18% 18% / 18% 18% 10% 10%; }
-.prop-boy-parka { background: #3F5A46; border-radius: 40% 40% 18% 18% / 18% 18% 10% 10%; }
-.prop-backpack { display: grid; place-items: center; background: #4F6B72; border-radius: 12%; box-shadow: inset 0 0 0 4px #2F4248; }
-.backpack-window { width: 62%; height: 70%; border-radius: 50%; background: radial-gradient(circle at 30% 45%, #EDE6DE 0 16%, transparent 16%), radial-gradient(circle at 55% 45%, #B08A6A 0 16%, transparent 16%), radial-gradient(circle at 78% 45%, #C3CE68 0 16%, transparent 16%), #23303A; }
-.prop-backpack.is-open .backpack-window { background: #16202A; }
-.prop-monstera { background: radial-gradient(ellipse at 30% 28%, #3F6B4A 0 42%, transparent 44%), radial-gradient(ellipse at 66% 12%, #356044 0 34%, transparent 36%), linear-gradient(180deg, transparent 72%, #A8562F 72%); }
-.prop-vase { background: linear-gradient(180deg, #D9B98A 0 58%, #C98B96 58%); border-radius: 30% 30% 45% 45% / 10% 10% 22% 22%; }
-.prop-vase-broken { background: repeating-linear-gradient(72deg, #C98B96 0 9px, transparent 9px 20px), linear-gradient(90deg, #D9B98A 0 40%, transparent 40%); }
-
-/* The hall radio, which is the Room's Music Source. Its hit box is the whole
-   Prop — 120 x 87 stage units, which stays above 44 CSS px down to the 880 floor. */
-.prop-radio { background: transparent; cursor: pointer; }
-.radio-body { position: absolute; left: 12.5%; top: 19.5%; width: 75%; height: 69%; border-radius: 8%; background: #EAD9C2; box-shadow: inset 0 0 0 3px #6E4C33; }
-.radio-dial { position: absolute; left: 8%; top: 22%; width: 34%; height: 56%; border-radius: 50%; background: #6A4B22; transition: background .25s, box-shadow .25s; }
-.radio-grille { position: absolute; right: 8%; top: 22%; width: 44%; height: 56%; border-radius: 6%; background: repeating-linear-gradient(90deg, #8A6647 0 2px, #EAD9C2 2px 5px); }
-.prop-radio[aria-pressed="true"] .radio-dial { background: #F2B85A; box-shadow: 0 0 14px 6px #f2b85a66; }
-.radio-notes { position: absolute; inset: auto 0 62% 0; display: none; justify-content: space-around; color: var(--pink); font-size: 1rem; line-height: 1; }
-.prop-radio[aria-pressed="true"] .radio-notes { display: flex; }
-.radio-notes span { animation: hall-notes 2.4s ease-in-out infinite; }
-.radio-notes span:nth-child(2) { animation-delay: .8s; }
-.radio-notes span:nth-child(3) { animation-delay: 1.6s; }
-@keyframes hall-notes { 0% { opacity: 0; transform: translateY(0); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-260%); } }
-
-/* The three doors: transparent rectangles over the painted frames, with the
-   plaque as the visible label. Hover and focus are CSS alone — no ajar artwork. */
-.entryway-stage .doors { position: absolute; inset: 0; display: block; margin: 0; gap: 0; }
-.entryway-stage .door, .prop-radio { pointer-events: auto; }
-.entryway-stage .door { display: block; min-height: 0; padding: 0; border: 0; border-radius: 4px 4px 0 0; background: transparent; font-size: inherit; font-weight: inherit; transition: transform .25s, box-shadow .25s; }
-.entryway-stage .door:hover, .entryway-stage .door:focus-visible { background: transparent; transform: translateY(-3px); box-shadow: 0 0 34px 10px #f5a3c52e; }
-.door-plaque { position: absolute; left: 7.8%; top: 45%; width: 84.4%; height: 11%; display: grid; place-items: center; border-radius: 8px; background: #1b1620d9; color: var(--ink); font-size: clamp(.7rem, 1.35cqw, 1.05rem); font-weight: 650; letter-spacing: .02em; transition: background .25s, color .25s; }
-.entryway-stage .door:hover .door-plaque, .entryway-stage .door:focus-visible .door-plaque { background: var(--pink); color: #2a1520; }
-.entryway-stage { container-type: inline-size; }
-/* An Actor a Beat is drawing gives way to it, so the two are never both on. */
-.actor.is-acted { display: none; }
-/* 14: the arrival's Beat layers, placed and stepped by `src/dom/entryway.ts`.
-   None is declared yet — ticket 33 adds one `data-beat` layer per sheet. */
-.entryway-stage [data-beat] { background-repeat: no-repeat; }
-
-/* Motion is opt-outable, and the arrival is motion: with it off the front door
-   is simply open or shut, the radio's note glyphs are not rendered at all, and
-   the lit dial alone carries the Music Source's state. */
-.motion-off .prop-front-door, .motion-off .entryway-stage .door, .motion-off .radio-dial { transition: none; }
-.motion-off .radio-notes { display: none; }
-@media (prefers-reduced-motion: reduce) { :root:not(.motion-on) .radio-notes { display: none; } }
-
-@media (max-width: 1079px) {
-  /* The stage is already at its 880px floor here, so the pan is doing the work
-     and the caption comes back to the Room's own measure. */
-  .entryway-stage { max-width: none; }
-  .stage-caption { text-align: left; margin-inline: 0; }
-}
+@charset "UTF-8";
+:root {
+  color-scheme: dark;
+  --bg: #121013; --surface: #1c191d; --ink: #f6f0f3; --muted: #b9adb6;
+  --quiet: #998d97; --line: #373038; --pink: #f5a3c5; --pink-bright: #ff78b0;
+  font-family: "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-synthesis: none; font-size: 16px; line-height: 1.6;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+body { margin: 0; background: radial-gradient(ellipse at 82% 0, #49233725, transparent 43%), var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button { font: inherit; }
+a { color: inherit; }
+button svg { flex-shrink: 0; }
+::selection { background: var(--pink); color: var(--bg); }
+[hidden] { display: none !important; }
+.page-shell { width: min(1440px, calc(100% - 96px)); margin-inline: auto; }
+.site-header { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; min-height: 102px; border-bottom: 1px solid var(--line); }
+.wordmark { display: inline-flex; align-items: center; gap: .7rem; min-height: 44px; text-decoration: none; font-weight: 750; letter-spacing: -.065em; font-size: 1.55rem; white-space: nowrap; }
+.wordmark-dot { color: var(--pink); }
+.brand-heart { width: 28px; height: 32px; fill: var(--pink); overflow: visible; transform-origin: 50% 60%; }
+.heart-shine { fill: none; stroke: #fff4fa; stroke-width: 1.7; stroke-linecap: round; }
+.wordmark:hover .brand-heart, .wordmark:focus-visible .brand-heart { animation: heartbeat 1.15s ease-in-out infinite; }
+@keyframes heartbeat { 0%,45%,100% { transform: scale(1) rotate(-7deg); } 14% { transform: scale(1.16) rotate(-7deg); } 28% { transform: scale(1.04) rotate(-7deg); } 36% { transform: scale(1.1) rotate(-7deg); } }
+.header-actions { display: flex; align-items: center; gap: .65rem; }
+.language-toggle, .motion-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 100px; font-size: .875rem; line-height: 1.2; background: #211b21; color: var(--ink); cursor: pointer; transition: border-color .25s, background .25s; }
+.language-toggle:hover, .motion-toggle:hover { background: #35232e; border-color: var(--pink); }
+.language-toggle svg, .motion-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.language-toggle svg { color: var(--pink); }
+.motion-toggle { background: transparent; color: var(--muted); }
+.motion-toggle .play-icon { display: none; }
+.motion-off .motion-toggle .pause-icon { display: none; }
+.motion-off .motion-toggle .play-icon { display: block; }
+
+/* One Room is in the flow at a time; the Room being left is lifted out of it so
+   the entering Room does not wait for it, and put back by `hidden` once its
+   animation ends. The model decides whether that animation runs at all. */
+.apartment { position: relative; }
+.room { display: block; }
+.room.is-leaving { position: absolute; inset: 0 0 auto; width: 100%; pointer-events: none; animation: room-leave .32s ease-in both; }
+.room.is-entering { animation: room-enter .45s cubic-bezier(.22,.75,.2,1) both; }
+@keyframes room-enter { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes room-leave { from { opacity: 1; } to { opacity: 0; transform: translateY(-12px); } }
+.room-title { margin: 0 0 1.1rem; font-size: clamp(2.3rem, 4vw, 3.4rem); line-height: 1.2; font-weight: 740; letter-spacing: -.05em; }
+.room-title:focus { outline: none; }
+.room-lede { max-width: 46ch; margin: 0; color: var(--muted); font-size: 1.0625rem; line-height: 1.8; }
+#room-entryway, #room-cinema, #room-activities { padding: 2.8rem 0 2.6rem; }
+.room-exit { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; margin-top: 1.6rem; color: var(--muted); text-decoration: none; font-size: .9375rem; }
+.room-exit:hover { color: var(--pink); }
+.exit-arrow { color: var(--pink); }
+.doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 2.4rem; }
+.door { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 96px; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); text-decoration: none; font-size: 1.25rem; font-weight: 650; transition: border-color .3s, background .3s, transform .3s; }
+.door:hover, .door:focus-visible { border-color: var(--pink); background: #2a1f27; transform: translateY(-3px); }
+.door-arrow { color: var(--pink); font-size: 1.4rem; }
+.motion-off .door { transition: none; }
+
+.intro { padding: 2.8rem 0 2.6rem; }
+.eyebrow { display: flex; align-items: center; gap: .7rem; margin: 0 0 1rem; color: var(--pink); font-size: .8125rem; letter-spacing: .16em; font-weight: 600; }
+.eyebrow-line { width: 23px; height: 1px; background: currentColor; }
+h1 { display: flex; align-items: baseline; flex-wrap: wrap; margin: 0 0 1.15rem; font-size: clamp(2.7rem, 4.5vw, 4.25rem); line-height: 1.2; font-weight: 740; letter-spacing: -.06em; }
+html[lang="en"] h1 { column-gap: .22em; }
+html[lang="zh-Hant"] h1 { letter-spacing: -.035em; }
+.title-accent { color: var(--pink); }
+.title-spark { width: .4em; height: .55em; margin-left: .27em; fill: var(--pink); align-self: center; }
+.intro-description { color: var(--muted); margin: 0; font-size: 1.0625rem; line-height: 1.8; }
+
+/* A shared media height keeps horizontal expansion from cropping vertically. */
+.games { --scene-size: clamp(310px, 29vw, 410px); display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap: 20px; align-items: stretch; transition: grid-template-columns .75s cubic-bezier(.22,.75,.2,1); }
+.game-wrap { position: relative; display: flex; min-width: 0; container-type: inline-size; container-name: card; }
+.game-wrap.is-active { z-index: 3; }
+.game-card { display: flex; flex-direction: column; position: relative; width: 100%; min-width: 0; text-decoration: none; border-radius: 20px; border: 1px solid var(--line); background: var(--surface); transition: filter 1.15s ease, border-color .5s, box-shadow .5s; isolation: isolate; }
+.tango { --accent: #f2aacd; }
+.lovers { --accent: #ff93c2; }
+.heavenly { --accent: #edb6d7; }
+.game-wrap.is-active .game-card { border-color: var(--pink); box-shadow: 0 12px 45px #0004, 0 0 25px #fb80b50d; }
+.card-media { height: var(--scene-size); width: 100%; position: relative; flex-shrink: 0; background: #292029; border-radius: 19px 19px 0 0; overflow: hidden; isolation: isolate; }
+.scene-backdrop { position: absolute; inset: -25px; background-position: center; background-size: cover; filter: blur(18px) brightness(.65); transform: scale(1.12); opacity: .8; }
+.scene-frame { position: absolute; left: 50%; top: 50%; width: var(--scene-size); height: var(--scene-size); transform: translate(-50%, -50%); }
+.scene-frame picture, .game-art { display: block; width: 100%; height: 100%; }
+.game-art { object-fit: cover; }
+.scene-sprite { position: absolute; inset: 0; background-size: 400% 300%; background-repeat: no-repeat; }
+.scene-frame.has-sprite .game-art { opacity: 0; }
+.image-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, #14101970, transparent 26%, transparent 68%, #151017c4); }
+.media-topline { position: absolute; inset: 1rem 1rem auto; display: flex; justify-content: flex-end; align-items: center; gap: .5rem; }
+.category { border: 1px solid #ffffff38; background: #17121c9c; backdrop-filter: blur(12px); border-radius: 100px; color: #fff5fa; }
+.category { padding: .4rem .7rem; font-size: .8125rem; line-height: 1.6; }
+.scene-caption { position: absolute; left: 1.2rem; right: 1.2rem; bottom: 1.15rem; display: flex; align-items: center; gap: .5rem; color: #fff5fa; font-size: .8125rem; letter-spacing: .055em; text-shadow: 0 1px 8px #000; }
+.caption-dot { flex: 0 0 5px; height: 5px; border-radius: 50%; background: var(--pink); box-shadow: 0 0 8px #ff87b7b3; }
+.card-copy { display: flex; flex-direction: column; flex: 1; padding: 1.5rem 1.4rem 0; min-width: 0; }
+.pick-line { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem .6rem; margin-bottom: .8rem; }
+.pick-label { color: var(--accent); font-size: .875rem; font-weight: 650; letter-spacing: .04em; }
+.player-count { font-size: .875rem; color: var(--muted); white-space: nowrap; }
+h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 690; line-height: 1.22; letter-spacing: -.035em; min-height: 2.44em; overflow-wrap: break-word; }
+.game-details { max-height: 650px; opacity: 1; transition: opacity .3s ease, max-height .65s ease; }
+.game-description { margin: 0 0 1.3rem; font-size: 1rem; line-height: 1.75; color: #d0c6ce; }
+.why-pick { padding-top: 1.05rem; border-top: 1px solid var(--line); }
+.detail-label { display: block; color: var(--quiet); font-weight: 650; font-size: .875rem; letter-spacing: .06em; margin-bottom: .4rem; }
+.why-pick p { font-size: 1rem; line-height: 1.75; margin: 0; color: #c4b8c1; }
+.setup { margin-top: auto; padding: 1.25rem 0; }
+.setup p { margin: 0; font-size: .875rem; line-height: 1.75; overflow-wrap: anywhere; color: #e1d6de; }
+.setup p.setup-note { color: var(--muted); font-size: .875rem; margin-top: .15rem; }
+.card-action { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem 0; border-top: 1px solid var(--line); color: var(--accent); font-weight: 600; font-size: .9375rem; }
+.action-heart { display: grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; font-size: 1.75rem; line-height: 1; font-weight: 400; transition: transform .3s; }
+.game-card:hover .action-heart, .game-card:focus-visible .action-heart { transform: scale(1.18) rotate(-9deg); }
+.particle-field { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.game-particle { position: absolute; display: block; pointer-events: none; will-change: transform, opacity; filter: drop-shadow(0 0 5px currentColor); }
+.game-particle svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.game-particle.bit { font-family: monospace; font-weight: 700; font-size: 16px; line-height: 1; }
+.site-footer { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding: 1.6rem 0 2rem; border-top: 1px solid var(--line); font-size: .8125rem; color: var(--quiet); }
+.site-footer > span:first-child { color: var(--muted); }
+.footer-heart { font-size: 1.2rem; color: var(--pink); vertical-align: -.06em; padding-right: .2rem; }
+:focus-visible { outline: 2px solid var(--pink); outline-offset: 5px; }
+.skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 20; padding: .7rem 1rem; border-radius: 8px; background: var(--pink); color: var(--bg); transform: translateY(-200%); }
+.skip-link:focus { transform: translateY(0); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (min-width: 1080px) {
+  .games[data-active="tango"] { grid-template-columns: minmax(0,1.5fr) minmax(0,.75fr) minmax(0,.75fr); }
+  .games[data-active="lovers"] { grid-template-columns: minmax(0,.75fr) minmax(0,1.5fr) minmax(0,.75fr); }
+  .games[data-active="heavenly"] { grid-template-columns: minmax(0,.75fr) minmax(0,.75fr) minmax(0,1.5fr); }
+  .game-wrap.is-muted .game-card { filter: grayscale(1) brightness(.82); }
+  .game-wrap.is-muted .game-details { max-height: 0; opacity: 0; overflow: hidden; }
+  .game-wrap.is-muted .category { opacity: 0; }
+  .game-wrap.is-muted .scene-caption { opacity: .4; }
+  .category, .scene-caption { transition: opacity .5s; }
+}
+@container card (max-width: 300px) {
+  .card-copy { padding-inline: 1.1rem; }
+  h2 { font-size: 1.5rem; }
+  .pick-line { flex-direction: column; }
+}
+@media (max-width: 1199px) and (min-width: 1080px) {
+  .page-shell { width: calc(100% - 64px); }
+  .games { gap: 16px; }
+  .card-copy { padding-inline: 1.1rem; }
+}
+@media (max-width: 1079px) {
+  .page-shell { width: min(680px, calc(100% - 48px)); }
+  .site-header { min-height: 88px; }
+  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.4rem 0 2rem; }
+  .room-title { font-size: clamp(2.2rem, 6vw, 3rem); }
+  .doors { grid-template-columns: 1fr; gap: 14px; margin-top: 2rem; }
+  h1 { font-size: clamp(2.6rem, 6.4vw, 3.8rem); }
+  .games { grid-template-columns: 1fr; gap: 28px; --scene-size: min(680px, calc(100vw - 48px)); }
+  .card-copy { padding: 1.6rem 1.6rem 0; }
+  h2 { min-height: auto; font-size: 1.9rem; }
+  .game-description, .why-pick p { font-size: 1rem; }
+  .pick-label, .player-count, .category { font-size: .875rem; }
+  .setup p { font-size: .9375rem; }
+  .site-footer { flex-wrap: wrap; gap: .4rem; margin-top: 2rem; }
+}
+@media (max-width: 540px) {
+  .page-shell { width: auto; margin-left: max(20px, env(safe-area-inset-left)); margin-right: max(20px, env(safe-area-inset-right)); }
+  .site-header { min-height: 82px; padding-top: env(safe-area-inset-top); gap: .7rem; }
+  .wordmark { font-size: 1.25rem; letter-spacing: -.065em; gap: .35rem; }
+  .brand-heart { width: 23px; height: 27px; }
+  .header-actions { gap: .45rem; }
+  .language-toggle { padding-inline: .75rem; font-size: .8125rem; gap: .35rem; }
+  .language-toggle svg { width: 16px; }
+  .motion-toggle { width: 44px; padding: 0; }
+  #motion-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .intro, #room-entryway, #room-cinema, #room-activities { padding: 2.1rem 0 1.9rem; }
+  .room-title { font-size: clamp(1.9rem, 8vw, 2.6rem); margin-bottom: .9rem; }
+  .room-lede { font-size: 1rem; line-height: 1.85; max-width: 33ch; }
+  .door { min-height: 84px; padding: 1rem 1.2rem; font-size: 1.125rem; border-radius: 18px; }
+  .eyebrow { font-size: .75rem; letter-spacing: .12em; margin-bottom: .85rem; }
+  h1 { font-size: clamp(2.15rem, 8.5vw, 2.9rem); line-height: 1.3; margin-bottom: .8rem; }
+  html[lang="en"] h1 { max-width: 390px; column-gap: .2em; }
+  .intro-description { font-size: 1rem; line-height: 1.85; max-width: 31ch; }
+  .games { --scene-size: calc(100vw - 40px); gap: 24px; }
+  .game-card { border-radius: 18px; }
+  .card-media { border-radius: 17px 17px 0 0; }
+  .card-copy { padding: 1.3rem 1.25rem 0; }
+  .media-topline { inset: .9rem .9rem auto; }
+  .scene-caption { left: 1.05rem; right: 1.05rem; font-size: .75rem; }
+  .category { font-size: .8125rem; }
+  h2 { font-size: 1.75rem; margin-bottom: .85rem; }
+  .game-description { margin-bottom: 1.15rem; }
+  .card-action { min-height: 65px; }
+  .site-footer { padding-bottom: max(1.75rem, env(safe-area-inset-bottom)); font-size: .75rem; }
+}
+@media (max-width: 359px) {
+  .page-shell { margin-inline: 14px; }
+  .wordmark { font-size: 1.1rem; }
+  .brand-heart { width: 20px; }
+  .language-toggle svg { display: none; }
+  .games { --scene-size: calc(100vw - 28px); }
+}
+@media (hover: none) {
+  .game-card:active { border-color: var(--pink); }
+}
+/* The system's reduced-motion request holds from the first paint, before any
+   script runs, and keeps holding unless the visitor turns motion on with the
+   control themselves: `src/dom/motion.ts` paints `motion-on` on <html> for that
+   one case, and nothing else lifts this. The `motion-off` rules below are the
+   other direction and stand on their own. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not(.motion-on) { scroll-behavior: auto; }
+  :root:not(.motion-on), :root:not(.motion-on) *, :root:not(.motion-on) *::before, :root:not(.motion-on) *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+.motion-off { scroll-behavior: auto; }
+.motion-off .brand-heart { animation: none !important; }
+.motion-off .games, .motion-off .game-card, .motion-off .game-details, .motion-off .action-heart { transition: none; }
+.motion-off .particle-field { display: none; }
+
+html.dialog-open { overflow: hidden; }
+.game-card[role="button"] { cursor: pointer; }
+.choice-dialog { width: min(460px, calc(100% - 32px)); max-height: calc(100dvh - 32px); padding: 2rem; margin: auto; border: 1px solid #82536e; border-radius: 28px; background: #241c26; color: var(--ink); box-shadow: 0 24px 100px #000a; overflow-y: auto; overscroll-behavior: contain; }
+.choice-dialog::backdrop { background: #0c090fbb; backdrop-filter: blur(8px); }
+.choice-dialog[open] { animation: invitation-in .3s ease-out; }
+@keyframes invitation-in { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+.dialog-close { position: absolute; top: .65rem; right: .65rem; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 1.65rem; cursor: pointer; }
+.dialog-close:hover { color: var(--pink); background: #ffffff08; }
+.dialog-art { position: relative; width: 112px; margin: .2rem auto 1.1rem; }
+.dialog-art img { display: block; width: 112px; height: 112px; border-radius: 25px; border: 1px solid #b9719a; transform: rotate(-4deg); }
+.dialog-art > span { position: absolute; right: -12px; bottom: -7px; display: grid; place-items: center; width: 38px; height: 38px; background: var(--pink); color: #321727; border: 4px solid #241c26; border-radius: 50%; font-size: 1.5rem; }
+.dialog-eyebrow { margin: 0 0 .35rem; text-align: center; color: var(--pink); font-size: .75rem; letter-spacing: .13em; }
+.dialog-title { min-height: 0; margin: 0; text-align: center; font-size: 1.8rem; line-height: 1.35; }
+.dialog-game { margin: .5rem 0 1.4rem; color: var(--muted); text-align: center; font-size: 1rem; line-height: 1.4; }
+.dialog-options { display: grid; gap: 1rem; }
+.dialog-steam, .dialog-invite { display: flex; align-items: center; justify-content: center; gap: .65rem; width: 100%; min-height: 50px; padding: .8rem 1rem; border-radius: 14px; text-decoration: none; font-weight: 650; font-size: 1rem; line-height: 1.4; }
+.dialog-steam { color: #e8d6e4; background: #19141c; border: 1px solid #554050; }
+.dialog-steam:hover { border-color: var(--pink); }
+.dialog-invite { border: 1px solid var(--pink); background: var(--pink); color: #301824; cursor: pointer; }
+.dialog-invite:hover:not(:disabled) { background: #ffbad9; }
+.dialog-invite:disabled { opacity: .5; cursor: not-allowed; }
+.dialog-invite > span:first-child { font-size: 1.35rem; }
+.privacy-consent { display: flex; gap: .65rem; padding: .9rem; border: 1px solid #483242; background: #1d161f; border-radius: 12px; color: #d8c4d3; font-size: .875rem; line-height: 1.55; cursor: pointer; }
+.privacy-consent input { width: 19px; height: 19px; flex: 0 0 19px; margin: .15rem 0 0; accent-color: var(--pink); }
+.privacy-note { color: var(--quiet); font-size: .75rem; line-height: 1.5; margin: .65rem .15rem .8rem; }
+.honey-field { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.turnstile-widget { min-width: 0; margin: .7rem 0; }
+.invite-status { min-height: 1.5em; margin: .85rem 0 0; text-align: center; color: var(--pink); font-size: .875rem; line-height: 1.5; }
+.invite-status[data-state="error"] { color: #ffb2bc; }
+@media (max-width: 540px) {
+  .choice-dialog { padding: 1.6rem 1.2rem 1.2rem; border-radius: 24px; }
+  .dialog-art, .dialog-art img { width: 88px; height: 88px; }
+  .dialog-title { font-size: 1.65rem; }
+  .game-wrap.is-scroll-active .game-card { border-color: #bf7396; box-shadow: 0 0 24px #f589b412; }
+  .game-particle { filter: none; }
+}
+.motion-off .choice-dialog { animation: none; }
+
+/* 05: loading — the arrival screen. It covers the apartment until the model says
+   every declared asset has settled, and everything behind it is `inert` until the
+   same moment. The fill is a CSS transition, so the reduced-motion query above
+   zeroes its travel; the sheen is decoration, and stops with the motion control. */
+.loading-screen { position: fixed; inset: 0; z-index: 30; display: grid; align-content: center; justify-items: center; gap: 1.1rem; padding: 2rem; background: radial-gradient(ellipse at 50% 32%, #4923373d, transparent 58%), var(--bg); text-align: center; }
+.loading-screen:focus { outline: none; }
+.loading-title { margin: 0; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 740; letter-spacing: -.045em; }
+.loading-track { position: relative; width: min(340px, 100%); height: 9px; border: 1px solid var(--line); border-radius: 100px; background: #2b2430; overflow: hidden; }
+.loading-fill { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--pink), var(--pink-bright)); transform: scaleX(0); transform-origin: left; transition: transform .35s ease-out; }
+.loading-track::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #ffffff1f, transparent); transform: translateX(-100%); animation: loading-sheen 1.9s ease-in-out infinite; }
+@keyframes loading-sheen { to { transform: translateX(100%); } }
+.motion-off .loading-track::after { animation: none; opacity: 0; }
+.loading-percent { margin: -.4rem 0 0; color: var(--pink); font-size: .8125rem; font-variant-numeric: tabular-nums; letter-spacing: .08em; }
+.loading-note { max-width: 34ch; margin: 0; color: var(--muted); font-size: .9375rem; line-height: 1.7; }
+
+/* 06: audio — the header sound control and the Rooms' Music Source placeholders.
+   One appended block, and the control repeats the toggle styling rather than
+   joining the selector lists above, so this ticket adds lines instead of editing
+   the ones another ticket is landing beside. */
+.sound-toggle { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .55rem .95rem; border: 1px solid var(--line); border-radius: 100px; font-size: .875rem; line-height: 1.2; background: transparent; color: var(--muted); cursor: pointer; transition: border-color .25s, background .25s, color .25s; }
+.sound-toggle:hover { background: #35232e; border-color: var(--pink); }
+.sound-toggle svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.sound-toggle .sound-off-icon, .sound-toggle[aria-pressed="true"] .sound-on-icon { display: none; }
+.sound-toggle[aria-pressed="true"] .sound-off-icon { display: block; }
+.sound-toggle[aria-pressed="true"] { color: var(--pink); }
+
+/* A Music Source is a Prop in the Room, so it is dashed and tagged for as long
+   as it is a placeholder standing in for one. The design tickets replace it. */
+.music-source-row { margin-top: 1.6rem; }
+.music-source { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; padding: .5rem .9rem; border: 1px dashed var(--line); border-radius: 100px; background: transparent; color: var(--muted); font-size: .875rem; line-height: 1.2; cursor: pointer; transition: border-color .25s, color .25s; }
+.music-source:hover, .music-source:focus-visible { border-color: var(--pink); color: var(--ink); }
+.music-source[aria-pressed="true"] { border-style: solid; border-color: var(--pink); color: var(--ink); }
+.music-note { color: var(--pink); font-size: 1.05rem; line-height: 1; }
+.placeholder-tag { padding: .1rem .4rem; border-radius: 6px; background: #2a2230; color: var(--quiet); font-size: .6875rem; letter-spacing: .04em; }
+.motion-off .sound-toggle, .motion-off .music-source { transition: none; }
+
+@media (max-width: 540px) {
+  /* Three controls beside the wordmark now: the sound control keeps its icon
+     and gives up its words, exactly as the motion control does at this width. */
+  .sound-toggle { width: 44px; padding: 0; }
+  #sound-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .music-source-row { margin-top: 1.3rem; }
+}
+@media (max-width: 359px) {
+  /* Where the language toggle gives up its icon, the sound control gives up the
+     room around its own, so the header still fits on one line. */
+  .sound-toggle { width: 38px; }
+}
+
+/* 07: actors — the stage each Room lays its Cast out on, and the Cast itself.
+   The stage is deliberately bare: it is a 16:9 canvas of 1600 x 900 units and
+   nothing else until each Room's design pass furnishes it. */
+.stage { position: relative; width: 100%; max-width: 64rem; margin: 2.2rem auto 0; aspect-ratio: 16 / 9; pointer-events: none; background: linear-gradient(to bottom, transparent 62%, #f589b40a); }
+/* The Cast waits in here until the model puts an Actor in a Room, so a parked
+   Actor needs no state of its own: the container is what hides it. */
+.cast { display: none; }
+/* `left` and `top` are the Actor's feet in stage units turned into percentages
+   of the stage, and the translate lifts the sprite so its feet land there. */
+.actor { position: absolute; transform: translate(-50%, -100%) scaleX(var(--flip, 1)) scaleY(var(--fuss, 1)); transform-origin: bottom center; }
+/* 08: the three cats are the only part of the Cast the visitor can reach, so
+   they are real buttons — the focus ring, Enter and Space are the browser's,
+   and Tab visits them in the order `index.html` writes them. The stage takes
+   no pointer events, so a cat has to ask for them back. */
+.actor.cat { padding: 0; border: 0; background: none; font: inherit; color: inherit; pointer-events: auto; cursor: pointer; border-radius: 8px; transition: transform .18s ease-out; }
+.actor.cat:focus-visible { outline: 3px solid var(--pink); outline-offset: 5px; }
+/* Being fussed over, until a petting Beat is drawn for one: she settles on to
+   her paws under the hand. A Beat that does exist stands in for the sprite. */
+.actor.cat.is-petted { --fuss: .93; }
+.actor.cat.is-fussed { display: none; }
+.motion-off .actor.cat { transition: none; }
+@media (prefers-reduced-motion: reduce) { :root:not(.motion-on) .actor.cat { transition: none; } }
+.actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
+
+
+/* 17: the Cinema Room.
+
+   The Room is furnished in stage units: every Prop carries `--x --y --w --h`
+   in `index.html` and the rule below turns them into percentages of the
+   1600 x 900 stage, so one set of numbers serves the markup, the walkable
+   polygon in `src/world/actors.ts` and the Cast's marks alike. `--u` is one
+   stage unit as a length, for the type, borders and radii inside a Prop.
+
+   All of it is drawn in CSS. Ticket 32 is generating this Room's artwork and
+   ticket 36 lands it; until then nothing here names a file, so the built page
+   has no URL that could 404. */
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.stage-cinema {
+  --u: .0625cqw;
+  --wall: #3a2f3b; --floor: #4a3730; --cream: #efe6d6; --walnut: #5a3f31;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 14px;
+  background: linear-gradient(to bottom, #2f2631 0 6.7%, var(--wall) 6.7% 71.1%, var(--floor) 71.1%);
+}
+.stage-cinema .cinema-prop {
+  position: absolute;
+  left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%);
+  width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%);
+  z-index: 640;
+}
+/* The stage swallows pointer events so the Cast never blocks a click; the
+   Props the visitor can actually use take theirs back. */
+.stage-cinema a.cinema-prop, .stage-cinema button.cinema-prop { pointer-events: auto; }
+.stage-cinema button.cinema-prop { padding: 0; border: 0; background: none; cursor: pointer; }
+
+/* P1-P3, P5, P6: the empty Room. */
+.cinema-cornice { position: absolute; left: 0; right: 0; top: 6.7%; height: calc(var(--u) * 6); background: #6b5344; }
+.cinema-floor { position: absolute; left: 0; right: 0; top: 71.1%; bottom: 0; background: repeating-linear-gradient(90deg, #4a3730 0 calc(var(--u) * 76), #43312b calc(var(--u) * 76) calc(var(--u) * 80)); }
+.cinema-rug { border-radius: 50% / 40%; background: radial-gradient(ellipse at 50% 50%, #7a4a52, #5d3a3c 62%, #4d3134); opacity: .9; }
+.cinema-sconce { border-radius: calc(var(--u) * 6); background: linear-gradient(#c79a4e, #8a6a34); box-shadow: 0 0 calc(var(--u) * 150) calc(var(--u) * 60) #ffca8033; }
+.cinema-screen .screen-case { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--u) * 20); border-radius: calc(var(--u) * 4); background: #17141a; }
+.cinema-screen .screen-sheet { position: absolute; left: calc(var(--u) * 10); top: calc(var(--u) * 20); width: calc(var(--u) * 400); height: calc(var(--u) * 225); background: linear-gradient(#efe6d6, #e2d6c2); box-shadow: inset 0 0 calc(var(--u) * 40) #00000022; }
+.cinema-screen .screen-cord { position: absolute; left: calc(var(--u) * 408); top: calc(var(--u) * 245); width: calc(var(--u) * 4); height: calc(var(--u) * 35); background: #d8cbb6; }
+
+/* P4: the door, with the hallway leaking round it. */
+.cinema-door { border-radius: calc(var(--u) * 6); background: var(--walnut); box-shadow: 0 0 calc(var(--u) * 40) #ffca8022; transition: box-shadow .25s; }
+.cinema-door .door-leaf { position: absolute; inset: calc(var(--u) * 15); border-radius: calc(var(--u) * 4); background: linear-gradient(100deg, #ffd9a0 0 12%, #6a4a39 12%); }
+.cinema-door:hover, .cinema-door:focus-visible { box-shadow: 0 0 calc(var(--u) * 90) #ffca8066; outline: none; }
+.cinema-door:focus-visible .door-leaf { outline: 3px solid var(--pink); outline-offset: 2px; }
+
+/* P7-P9: the three shelves. Colour, crown silhouette and ornament each say the
+   genre on their own, so any one of them surviving a small screen is enough. */
+.cinema-shelf { z-index: 640; overflow: visible; transition: filter .2s; }
+/* `--glow` is the rim light a shelf comes up in. It is the trim colour, except
+   on the horror shelf, whose trim is nearly black: there it is the candle's
+   sick green, which is that shelf's own colour in the design note's table. */
+.cinema-shelf[data-shelf="comedy"] { --body: #f2c14e; --trim: #e39b2d; --cap: #e8703a; --glow: #e39b2d; }
+.cinema-shelf[data-shelf="romance"] { --body: #e86f8f; --trim: #b8405e; --cap: #f5a3c5; --glow: #f5a3c5; }
+.cinema-shelf[data-shelf="horror"] { --body: #3e2a4f; --trim: #1f1528; --cap: #14101a; --glow: #8fd14f; transform: rotate(-4deg); transform-origin: bottom center; }
+.cinema-shelf .shelf-body { position: absolute; inset: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 8); padding: calc(var(--u) * 12) calc(var(--u) * 10) calc(var(--u) * 52); background: var(--body); border: calc(var(--u) * 6) solid var(--trim); }
+.cinema-shelf .cubby { flex: 1; background: repeating-linear-gradient(90deg, var(--cap) 0 calc(var(--u) * 9), #00000055 calc(var(--u) * 9) calc(var(--u) * 12), var(--cap) calc(var(--u) * 12) calc(var(--u) * 21), #00000055 calc(var(--u) * 21) calc(var(--u) * 24)), #2a2028; }
+.cinema-shelf[data-shelf="comedy"] .shelf-body { border-radius: calc(var(--u) * 30) calc(var(--u) * 30) calc(var(--u) * 6) calc(var(--u) * 6); }
+.cinema-shelf[data-shelf="romance"] .shelf-body { border-radius: calc(var(--u) * 6); }
+.cinema-shelf[data-shelf="horror"] .shelf-body { clip-path: polygon(50% 0, 100% 10%, 100% 100%, 0 100%, 0 10%); }
+/* The crown ornament stands clear of the shelf and never rises above y 180. */
+.cinema-shelf .shelf-ornament { position: absolute; left: 0; right: 0; bottom: 100%; height: calc(var(--u) * 80); }
+.shelf-ornament > span { position: absolute; }
+.shelf-ornament .balloon { width: calc(var(--u) * 26); height: calc(var(--u) * 32); border-radius: 50%; background: #f2c14e; box-shadow: 0 calc(var(--u) * 16) 0 calc(var(--u) * -14) #e39b2d; }
+.shelf-ornament .balloon:nth-child(1) { left: calc(var(--u) * 6); top: 0; }
+.shelf-ornament .balloon:nth-child(2) { left: calc(var(--u) * 32); top: calc(var(--u) * -6); background: #e8703a; }
+.shelf-ornament .balloon:nth-child(3) { left: calc(var(--u) * 58); top: calc(var(--u) * 2); background: #f6d98a; }
+.shelf-ornament .popcorn { right: calc(var(--u) * 4); bottom: 0; width: calc(var(--u) * 42); height: calc(var(--u) * 34); border-radius: calc(var(--u) * 4) calc(var(--u) * 4) calc(var(--u) * 10) calc(var(--u) * 10); background: repeating-linear-gradient(90deg, #e8524a 0 calc(var(--u) * 7), #f6efe4 calc(var(--u) * 7) calc(var(--u) * 14)); box-shadow: 0 calc(var(--u) * -6) 0 calc(var(--u) * -3) #f6efe4; }
+/* Romance: a heart cut into the crown, roses and a string of warm lights. */
+.shelf-ornament .roses { left: 50%; bottom: 0; translate: -50% 0; width: calc(var(--u) * 46); height: calc(var(--u) * 38); border-radius: calc(var(--u) * 6) calc(var(--u) * 6) calc(var(--u) * 16) calc(var(--u) * 16); background: radial-gradient(circle at 30% 30%, #d5304f calc(var(--u) * 9), transparent 0), radial-gradient(circle at 68% 26%, #ef5570 calc(var(--u) * 8), transparent 0), linear-gradient(#3f6b46, #2c4b31); }
+.shelf-ornament .fairy-lights { left: 0; right: 0; bottom: calc(var(--u) * -4); height: calc(var(--u) * 6); background: repeating-linear-gradient(90deg, #ffd9a0 0 calc(var(--u) * 5), transparent calc(var(--u) * 5) calc(var(--u) * 16)); }
+.cinema-shelf[data-shelf="romance"] .shelf-body::before { content: ""; position: absolute; left: 50%; top: calc(var(--u) * -34); translate: -50% 0; width: calc(var(--u) * 44); height: calc(var(--u) * 40); background: var(--trim); clip-path: path("M22 40C22 40 0 24 0 12A11 11 0 0 1 22 8 11 11 0 0 1 44 12C44 24 22 40 22 40Z"); }
+/* Horror: a green candle flame, a skull and a talisman slip, red marks only. */
+.shelf-ornament .candle { left: calc(var(--u) * 20); bottom: 0; width: calc(var(--u) * 14); height: calc(var(--u) * 46); background: #cdbfae; box-shadow: 0 0 calc(var(--u) * 70) calc(var(--u) * 14) #8fd14f33; }
+.shelf-ornament .candle::after { content: ""; position: absolute; left: 50%; bottom: 100%; translate: -50% 0; width: calc(var(--u) * 12); height: calc(var(--u) * 20); border-radius: 50% 50% 40% 40%; background: #8fd14f; }
+.shelf-ornament .skull { right: calc(var(--u) * 14); bottom: 0; width: calc(var(--u) * 28); height: calc(var(--u) * 26); border-radius: 50% 50% 40% 40%; background: #ddd4c6; }
+.shelf-ornament .talisman { right: calc(var(--u) * -10); bottom: calc(var(--u) * -20); width: calc(var(--u) * 16); height: calc(var(--u) * 46); background: repeating-linear-gradient(#f1d163 0 calc(var(--u) * 10), #c8392f calc(var(--u) * 10) calc(var(--u) * 13)); }
+/* P21: the brass plaque on each plinth, muted until the shelf is attended. */
+.cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--u) * 12); width: calc(var(--u) * 100); padding: calc(var(--u) * 2) 0; border-radius: calc(var(--u) * 4); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--u) * 20); line-height: 1.2; text-align: center; opacity: .78; transition: opacity .2s; }
+.cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--u) * 30) var(--glow)) brightness(1.08); outline: none; }
+.cinema-shelf:hover .shelf-plaque, .cinema-shelf:focus-visible .shelf-plaque, .cinema-shelf.is-attended .shelf-plaque { opacity: 1; }
+.cinema-shelf:focus-visible .shelf-body { outline: 3px solid var(--pink); outline-offset: 3px; }
+
+/* P10: the felt board, bare until he pins Posters to it. */
+.cinema-board { display: grid; place-items: center; padding: calc(var(--u) * 12); border: calc(var(--u) * 12) solid var(--walnut); background: #4a3a3f; }
+.cinema-board .board-pin { position: absolute; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f0d18a, #9a7a3a); }
+.cinema-board .board-pin:nth-child(1) { left: 12%; top: 14%; }
+.cinema-board .board-pin:nth-child(2) { right: 18%; bottom: 20%; }
+.cinema-board .board-ghost { position: absolute; left: 34%; top: 16%; width: calc(var(--u) * 132); height: calc(var(--u) * 196); background: #ffffff0b; }
+.cinema-board .board-empty { position: relative; margin: 0; max-width: calc(var(--u) * 330); color: #c8b9bd; font-size: calc(var(--u) * 26); line-height: 1.6; text-align: center; }
+
+/* 18: P11, the three Poster slots.
+
+   Offsets are from the board's padding box, which starts at stage (1122, 312)
+   because the walnut frame is a 12-unit border: 3 and 38 units in from there
+   puts slot 1 at the design note's (1125, 350), and 132-wide slots 22 apart
+   put slots 2 and 3 at 1279 and 1433. `--u` is the stage unit, so the three
+   land on the same spot at every shell width, like every other Prop here. */
+.cinema-board .board-slots { position: absolute; left: calc(var(--u) * 3); top: calc(var(--u) * 38); display: flex; gap: calc(var(--u) * 22); }
+/* Every Poster is the same stock, so nine originals read as one set: cream
+   paper, a deckled margin, and a genre stripe in the shelf's own body colour
+   that says which shelf it came from long after the shelf is out of mind. The
+   painted art is ticket 36's; until it lands the frame holds that Film's
+   genre ground with a low horizon and a soft vignette, which is the shared
+   composition rule the delivered artwork also follows. */
+.cinema-poster { position: relative; flex: 0 0 auto; width: calc(var(--u) * 132); height: calc(var(--u) * 196); padding: 0; border: 0; background: #f1e6cf; box-shadow: 0 calc(var(--u) * 6) calc(var(--u) * 16) #00000055; cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1); }
+.cinema-poster[data-shelf="comedy"] { --stripe: #f2c14e; --ground: #d9a441; --horizon: #8a4f2b; }
+.cinema-poster[data-shelf="romance"] { --stripe: #e86f8f; --ground: #6e1f2e; --horizon: #2d6d61; }
+.cinema-poster[data-shelf="horror"] { --stripe: #3e2a4f; --ground: #26234f; --horizon: #4a6b34; }
+.cinema-poster .poster-stripe { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 6); height: calc(var(--u) * 10); background: var(--stripe); }
+.cinema-poster .poster-ground { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 20); bottom: calc(var(--u) * 34); background: linear-gradient(var(--ground) 0 72%, var(--horizon) 72%); box-shadow: inset 0 0 calc(var(--u) * 26) calc(var(--u) * 10) #00000044; }
+/* The caption is DOM text, never drawn into the artwork: that is what keeps a
+   Poster bilingual and free of generated lettering. Two lines of 13-unit type
+   sit inside the design note's 28-unit strip, which is what the longest titles
+   need — "Eat Drink Man Woman", "In the Mood for Love" — while the Chinese
+   titles, none longer than five characters, stay on one. */
+.cinema-poster .poster-caption { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); bottom: calc(var(--u) * 4); height: calc(var(--u) * 28); display: grid; place-items: center; color: #2b2230; font-size: calc(var(--u) * 13); line-height: 1.05; text-align: center; text-wrap: balance; overflow: hidden; }
+/* Two brass pins at the top corners, pressed in as the Poster unrolls. */
+.cinema-poster .poster-pin { position: absolute; top: calc(var(--u) * -5); width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f7e2a6, #9a7a3a); box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 5) #00000077; animation: poster-pin-push .18s .32s backwards; }
+.cinema-poster .poster-pin:nth-of-type(1) { left: calc(var(--u) * 8); }
+.cinema-poster .poster-pin:nth-of-type(2) { right: calc(var(--u) * 8); }
+.cinema-poster:hover, .cinema-poster:focus-visible { outline: none; box-shadow: 0 calc(var(--u) * 10) calc(var(--u) * 26) #000000aa; }
+.cinema-poster:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+@keyframes poster-unroll { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes poster-pin-push { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
+/* While his arm is in a bay its tubes rattle, which is the whole of what the
+   rummage Beat looks like until the Boy's own frames are drawn. */
+.cinema-shelf.is-rummaging .shelf-body { animation: shelf-rummage .18s steps(2, end) infinite; }
+@keyframes shelf-rummage { from { translate: 0 0; } 50% { translate: calc(var(--u) * 1) calc(var(--u) * -1); } to { translate: 0 0; } }
+
+/* P12-P14: the beanbags and the reel cabinet the projector stands on. */
+.cinema-beanbag { z-index: 800; border-radius: 48% 52% 44% 56% / 62% 58% 42% 38%; }
+.beanbag-girl { background: radial-gradient(circle at 38% 30%, #3a9bb5, #287f98 60%, #1d5f72); }
+.beanbag-boy { background: radial-gradient(circle at 38% 30%, #e5836f, #d76451 60%, #a64535); }
+.cinema-cabinet { z-index: 830; border-radius: calc(var(--u) * 5); background: linear-gradient(#6a4a39, #4c342a); border: calc(var(--u) * 4) solid #3a2820; }
+.cinema-cabinet .cabinet-knob { position: absolute; right: 12%; top: 46%; width: calc(var(--u) * 10); height: calc(var(--u) * 10); border-radius: 50%; background: #c79a4e; }
+
+/* P15-P17: the projector, and its two affordances. */
+.cinema-projector { z-index: 831; }
+.cinema-projector .projector-body { position: absolute; left: 0; bottom: 0; width: calc(var(--u) * 110); height: calc(var(--u) * 80); border-radius: calc(var(--u) * 8); background: linear-gradient(#4b4a52, #2a282f); }
+.cinema-projector .projector-spindle { position: absolute; top: 0; width: calc(var(--u) * 40); height: calc(var(--u) * 40); border-radius: 50%; border: calc(var(--u) * 5) solid #6d6b76; }
+.cinema-projector .projector-spindle:nth-child(1) { left: calc(var(--u) * 10); }
+.cinema-projector .projector-spindle:nth-child(2) { left: calc(var(--u) * 58); }
+.cinema-projector .projector-lens { position: absolute; left: calc(var(--u) * -6); bottom: calc(var(--u) * 46); width: calc(var(--u) * 26); height: calc(var(--u) * 22); border-radius: calc(var(--u) * 4); background: #23212a; box-shadow: inset 0 0 0 calc(var(--u) * 3) #6d6b76; }
+/* Both controls pad their hit area out to the 44 CSS px floor without moving
+   the painted Prop, which is smaller than a fingertip at every shell width. */
+.projector-gate::before, .projector-motor::before { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: max(100%, 44px); height: max(100%, 44px); }
+/* High on the machine, cream, and dim: the mouth a reel goes into. Ticket 20
+   enables it, and until then it says so rather than pretending. */
+.stage-cinema button.projector-gate { z-index: 832; border-radius: calc(var(--u) * 6); border: calc(var(--u) * 4) dashed #efe6d680; background: #efe6d611; cursor: not-allowed; }
+.projector-gate:focus-visible { outline: 3px solid var(--cream); outline-offset: 2px; }
+/* Low on the base plate, red, and a switch: the Room's Music Source. */
+.projector-motor { z-index: 833; display: grid; place-items: center; }
+.projector-motor .motor-cap { width: calc(var(--u) * 20); height: calc(var(--u) * 20); border-radius: 50%; background: radial-gradient(circle at 34% 30%, #f07a6e, #d9483b 60%, #8e2a21); transition: box-shadow .2s; }
+.projector-motor .motor-plate { position: absolute; right: calc(var(--u) * -18); bottom: calc(var(--u) * -2); color: #f0d18a; font-size: calc(var(--u) * 22); line-height: 1; }
+.projector-motor:hover .motor-cap, .projector-motor[aria-pressed="true"] .motor-cap { box-shadow: 0 0 calc(var(--u) * 40) calc(var(--u) * 8) #d9483b99; }
+.projector-motor:focus-visible { outline: 3px solid #d9483b; outline-offset: 3px; border-radius: 50%; }
+
+.motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap, .motion-off .cinema-poster { transition: none; }
+/* Motion off is the visitor's own choice, so the Poster is simply on the wall:
+   the unroll, the pins and the shelf's rattle all resolve to their end state.
+   A system reduced-motion request is covered by the block above instead. */
+.motion-off .cinema-poster, .motion-off .poster-pin, .motion-off .is-rummaging .shelf-body { animation: none; }
+
+/* 16: the Activity Room — `design/12-activity-room.md`.
+
+   Everything below is placed in the Room's 1600 x 900 stage units and turned
+   into percentages of the stage here, so the same numbers mean the same place
+   at every width: `--x / 16 * 1%` is x / 1600 as a percentage, `--y / 9 * 1%`
+   is y / 900. The stage is a container, so `1cqw / 16` is one stage unit of
+   type — which is how a 26-unit chalk hand stays 26 units wide on a phone.
+
+   Every surface is a placeholder for the shot §7 names for it. The colours are
+   the Room palette in §3 so that the placeholder reads as the Room it will be;
+   ticket 35 replaces each one with an image and keeps the box. */
+.activity-room { position: relative; width: 100%; max-width: min(100%, calc((100dvh - 15rem) * 16 / 9)); margin: 2.2rem auto 0; }
+.activity-stage-area { position: relative; }
+.stage-pan { width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border-radius: 14px; }
+/* Below 880 px the stage keeps its width and the Room pans, starting at the
+   door back to the Entryway — nothing shrinks below the legibility floor. */
+.stage[data-stage="activities"] { container-type: inline-size; min-width: 880px; max-width: none; margin: 0; overflow: hidden; border-radius: 14px; background: #4E6560; pointer-events: auto; }
+
+.stage[data-stage="activities"] .prop { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); padding: 0; border: 0; pointer-events: none; }
+/* Four controls, and only four: the door, the three stations, the boombox. */
+.stage[data-stage="activities"] .a-door, .stage[data-stage="activities"] .a-station, .stage[data-stage="activities"] .a-boombox { pointer-events: auto; cursor: pointer; }
+.stage[data-stage="activities"] :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
+
+.a-cornice { background: linear-gradient(#36443F, #2b3733); }
+.a-wall { background: radial-gradient(ellipse 40% 70% at 35% 12%, #5c756f, transparent 70%), #4E6560; }
+.a-skirting { background: #2F3A35; }
+.a-floor { background: repeating-linear-gradient(to bottom, #A98457 0 calc(9cqw / 16 * 3), #C09A6A calc(9cqw / 16 * 3) calc(9cqw / 16 * 3.4)); }
+.a-rug { border-radius: calc(8cqw / 16); background: linear-gradient(to bottom, #C9922F 0 22%, #EADCC2 22% 34%, #6F8578 34% 66%, #EADCC2 66% 78%, #C9922F 78% 100%); opacity: .95; }
+.a-window { border: calc(6cqw / 16) solid #E4D6BC; border-radius: calc(4cqw / 16); background: radial-gradient(circle at 72% 58%, #FFD9A8 0 6%, transparent 7%), linear-gradient(#22293f, #2B3550); }
+.a-sill { border-radius: calc(3cqw / 16); background: #E4D6BC; }
+.a-cord { background: #36443F; }
+.a-pendant { border-radius: 50%; background: radial-gradient(circle at 40% 30%, #fff6e4, #EADCC2 70%); box-shadow: 0 0 calc(80cqw / 16) calc(20cqw / 16) #ffd9a82e; }
+
+.a-door { display: block; border-radius: calc(4cqw / 16) calc(4cqw / 16) 0 0; background: #5C3F2C; transition: filter .2s, transform .2s; }
+.a-door-leaf { position: absolute; left: 7.8%; top: 3.8%; width: 84.4%; height: 96.2%; border-radius: calc(3cqw / 16) calc(3cqw / 16) 0 0; background: linear-gradient(to right, #9d7a34, #B08A3E 30%, #c09a4c); }
+.a-door-tag { position: absolute; left: 33.3%; top: 34.1%; width: 33.3%; height: 16.5%; border-radius: 50% 50% 46% 46%; background: #EADCC2; opacity: .8; transition: opacity .2s; }
+.a-door:hover, .a-door:focus-visible { transform: translateY(calc(-3cqw / 16)); filter: brightness(1.1); }
+.a-door:hover .a-door-tag, .a-door:focus-visible .a-door-tag { opacity: 1; }
+
+.a-map { border-radius: calc(3cqw / 16); background: radial-gradient(circle at 28% 44%, #8FB4B0 0 14%, transparent 15%), radial-gradient(circle at 62% 38%, #8FB4B0 0 18%, transparent 19%), radial-gradient(circle at 78% 68%, #8FB4B0 0 11%, transparent 12%), #EADCC2; box-shadow: 0 calc(4cqw / 16) calc(10cqw / 16) #0003; }
+.a-map::after { content: ""; position: absolute; left: 30%; top: 42%; width: 34%; height: 0; border-top: calc(2cqw / 16) solid #C8462F; transform: rotate(14deg); }
+
+.a-table, .a-desk { background: linear-gradient(#c79b68 0 12%, transparent 12%), linear-gradient(to right, transparent 0 4%, #B98D5C 4% 12%, transparent 12% 88%, #B98D5C 88% 96%, transparent 96%), linear-gradient(transparent 0 58%, #a87f4e 58% 64%, transparent 64%); }
+.a-pad { border-radius: calc(2cqw / 16); background: radial-gradient(circle at 42% 42%, #9a8a74 0 4%, transparent 5%), radial-gradient(circle at 60% 40%, #9a8a74 0 4%, transparent 5%), #EADCC2; box-shadow: inset 0 0 0 calc(2cqw / 16) #cbbb9e; }
+.a-paper { background: #f3ead6; }
+.a-clamp-lamp { background: linear-gradient(to right, transparent 0 40%, #3b332c 40% 52%, transparent 52%), radial-gradient(ellipse 60% 22% at 50% 92%, #FFD9A8 0 100%, transparent); }
+.a-mug { background: linear-gradient(to right, #c9b04a 0 8%, #D76451 12% 20%, #6F8578 24% 32%, #3b5f8f 36% 44%, #C8462F 48% 56%, #8a6f4a 60% 68%, transparent 72%) 0 0 / 100% 42% no-repeat, linear-gradient(#D76451 0 12%, #EADCC2 12% 100%) 0 42% / 100% 58% no-repeat; border-radius: 0 0 calc(8cqw / 16) calc(8cqw / 16); }
+.a-mug-broken { background: linear-gradient(115deg, transparent 0 8%, #EADCC2 8% 34%, transparent 34% 40%, #D76451 40% 46%, #EADCC2 46% 62%, transparent 62%), linear-gradient(to right, #c9b04a 0 14%, transparent 14% 22%, #6F8578 22% 38%, transparent 38% 46%, #3b5f8f 46% 62%, transparent 62% 70%, #8a6f4a 70% 86%, transparent 86%) 0 70% / 100% 18% no-repeat; }
+
+.a-shelf { background: linear-gradient(to bottom, #E4D6BC 0 4.6%, transparent 4.6% 35.4%, #E4D6BC 35.4% 40%, transparent 40% 69.2%, #E4D6BC 69.2% 73.8%, transparent 73.8% 95.4%, #E4D6BC 95.4% 100%), linear-gradient(to right, #E4D6BC 0 3%, transparent 3% 97%, #E4D6BC 97% 100%), #3f524d55; }
+.a-timer { border-radius: 50% 50% calc(6cqw / 16) calc(6cqw / 16); background: radial-gradient(circle at 50% 46%, #f4efe6 0 34%, transparent 35%), #C8462F; }
+.a-basket { border-radius: 0 0 calc(10cqw / 16) calc(10cqw / 16); background: repeating-linear-gradient(to right, #C2A06A 0 calc(6cqw / 16), #a9874f calc(6cqw / 16) calc(11cqw / 16)); }
+.a-finds { background: radial-gradient(circle at 18% 70%, #F2B85A 0 22%, transparent 23%), radial-gradient(circle at 52% 60%, #B9B4AC 0 20%, transparent 21%), radial-gradient(circle at 84% 66%, #c9a13f 0 18%, transparent 19%); }
+.a-boxes { background: linear-gradient(to right, #b98552 0 31%, transparent 31% 34%, #a97b4c 34% 65%, transparent 65% 68%, #c29a63 68% 100%); }
+.a-storage { border-radius: calc(3cqw / 16); background: linear-gradient(#cdbb9c 0 18%, #b6a488 18% 100%); }
+.a-stopwatch { background: linear-gradient(#B9B4AC 0 62%, transparent 62%) 50% 0 / 22% 100% no-repeat, radial-gradient(circle at 50% 82%, #B9B4AC 0 44%, transparent 45%); }
+
+.a-globe { border-radius: 50% 50% 46% 46%; background: radial-gradient(circle at 38% 34%, #a8c8c4 0 18%, transparent 19%), radial-gradient(circle at 66% 62%, #a8c8c4 0 14%, transparent 15%), #8FB4B0; box-shadow: inset 0 calc(-6cqw / 16) calc(8cqw / 16) #0003, 0 calc(4cqw / 16) 0 #B98552; }
+.a-atlas { border-radius: calc(2cqw / 16); background: linear-gradient(to right, #EADCC2 0 46%, #cbbb9e 46% 54%, #EADCC2 54% 100%); }
+.a-desk-lamp { background: linear-gradient(to right, transparent 0 44%, #8a6f4a 44% 56%, transparent 56%), radial-gradient(ellipse 52% 26% at 50% 14%, #B98552 0 100%, transparent), radial-gradient(ellipse 70% 30% at 50% 96%, #FFD9A8 0 100%, transparent); }
+
+.a-chalkboard { display: grid; align-items: center; padding-inline: calc(14cqw / 16); border-radius: calc(4cqw / 16); background: linear-gradient(#36443F, #2F3A35); box-shadow: inset 0 0 0 calc(3cqw / 16) #5C3F2C; }
+.a-chalk { font-size: calc(26cqw / 16); line-height: 1.08; text-align: center; color: #EADCC2; opacity: .88; transition: opacity .2s, text-shadow .2s; overflow: hidden; }
+/* The design note sizes the chalk for the Traditional Chinese names, which are
+   four to seven characters. The English ones run to thirty-one, so they take a
+   smaller hand over two lines rather than being cut off at the slate.s edge. */
+html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
+.a-chalkboard[data-chosen] .a-chalk { opacity: 1; }
+/* The chalk tick the chosen station's board gains at its right end. */
+.a-chalkboard[data-chosen]::after { content: "✓"; position: absolute; right: calc(12cqw / 16); top: 50%; transform: translateY(-50%); font-size: calc(26cqw / 16); line-height: 1; color: #EADCC2; }
+.stage[data-stage="activities"]:has(.a-station[data-activity="draw"]:hover) .a-chalkboard[data-chalkboard="draw"] .a-chalk,
+.stage[data-stage="activities"]:has(.a-station[data-activity="draw"]:focus-visible) .a-chalkboard[data-chalkboard="draw"] .a-chalk,
+.stage[data-stage="activities"]:has(.a-station[data-activity="hunt"]:hover) .a-chalkboard[data-chalkboard="hunt"] .a-chalk,
+.stage[data-stage="activities"]:has(.a-station[data-activity="hunt"]:focus-visible) .a-chalkboard[data-chalkboard="hunt"] .a-chalk,
+.stage[data-stage="activities"]:has(.a-station[data-activity="map"]:hover) .a-chalkboard[data-chalkboard="map"] .a-chalk,
+.stage[data-stage="activities"]:has(.a-station[data-activity="map"]:focus-visible) .a-chalkboard[data-chalkboard="map"] .a-chalk { opacity: 1; text-shadow: 0 0 calc(10cqw / 16) #eadcc288; }
+
+/* A station is a transparent rectangle: what lights up is the furniture under it. */
+.a-station { border-radius: calc(10cqw / 16); background: transparent; transition: background-color .2s, box-shadow .2s; }
+.a-station:hover, .a-station:focus-visible { background: #f2b85a14; box-shadow: inset 0 0 0 calc(2cqw / 16) #F2B85A66, 0 0 calc(34cqw / 16) #f2b85a2e; }
+.a-station[data-chosen] { background: #f2b85a12; box-shadow: inset 0 0 0 calc(2cqw / 16) #F2B85A99, 0 0 calc(26cqw / 16) #f2b85a26; }
+.motion-off .a-station, .motion-off .a-door, .motion-off .a-chalk { transition: none; }
+
+.a-tableau { border-radius: calc(10cqw / 16); background: linear-gradient(#eadcc21f, #eadcc20f), repeating-linear-gradient(135deg, #eadcc214 0 calc(10cqw / 16), transparent calc(10cqw / 16) calc(20cqw / 16)); box-shadow: inset 0 0 0 calc(2cqw / 16) #eadcc23d; animation: activity-tableau-in .25s ease-out; }
+@keyframes activity-tableau-in { from { opacity: 0; } to { opacity: 1; } }
+.motion-off .a-tableau { animation: none; }
+/* The tableau replaces the two of them; the cats stay where they are. */
+.stage[data-stage="activities"].has-tableau .actor[data-actor="boy"], .stage[data-stage="activities"].has-tableau .actor[data-actor="girl"] { display: none; }
+
+.a-laptop { border-radius: calc(4cqw / 16) calc(4cqw / 16) 0 0; background: radial-gradient(circle at 84% 12%, #7fd48a 0 5%, transparent 6%), linear-gradient(#DCE8F0, #c3d4e0); box-shadow: 0 0 calc(30cqw / 16) #dce8f033, inset 0 0 0 calc(4cqw / 16) #B9B4AC; }
+.a-stool { background: linear-gradient(to right, transparent 0 6%, #8a6f4a 6% 16%, transparent 16% 84%, #8a6f4a 84% 94%, transparent 94%), linear-gradient(#B9B4AC 0 18%, transparent 18%); }
+.a-tea { border-radius: 0 0 calc(6cqw / 16) calc(6cqw / 16); background: #EADCC2; }
+.a-crate { background: repeating-linear-gradient(to bottom, #b98552 0 calc(14cqw / 16), #a3703f calc(14cqw / 16) calc(18cqw / 16)); }
+
+.a-boombox { display: block; background: transparent; }
+.a-boombox-body { position: absolute; left: 5.7%; top: 13.3%; width: 88.6%; height: 80%; border-radius: calc(8cqw / 16); background: linear-gradient(#45464a, #3A3B3E); box-shadow: inset 0 0 0 calc(3cqw / 16) #B9B4AC; }
+.a-boombox-speaker { position: absolute; top: 31.3%; width: 36.6%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #2a2b2e 0 38%, #4a4b4f 39% 100%); box-shadow: inset 0 0 0 calc(2cqw / 16) #B9B4AC; }
+.a-boombox-speaker.left { left: 10.8%; }
+.a-boombox-speaker.right { right: 10.8%; }
+.a-boombox-window { position: absolute; left: 39.2%; top: 33.3%; width: 21.5%; height: 33.3%; display: flex; align-items: center; justify-content: space-around; border-radius: calc(2cqw / 16); background: #1f2022; box-shadow: inset 0 0 0 calc(2cqw / 16) #B9B4AC; }
+.a-reel { width: 38%; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(#B9B4AC 0 12%, #55565a 12% 33%, #B9B4AC 33% 45%, #55565a 45% 66%, #B9B4AC 66% 78%, #55565a 78% 100%); }
+.a-boombox-dial { position: absolute; left: 10.8%; bottom: 8%; width: 78.4%; height: 14%; border-radius: calc(3cqw / 16); background: #2a2b2e; box-shadow: inset 0 0 0 calc(2cqw / 16) #6c6d71; }
+.a-boombox-notes { position: absolute; left: 12%; top: 8%; width: 24%; height: 60%; opacity: 0; }
+.a-boombox-notes span { position: absolute; bottom: 0; font-size: calc(26cqw / 16); line-height: 1; color: var(--pink); }
+.a-boombox-notes span:nth-child(2) { left: 38%; }
+.a-boombox-notes span:nth-child(3) { left: 72%; }
+.a-boombox:hover .a-boombox-body, .a-boombox:focus-visible .a-boombox-body { filter: brightness(1.12); }
+/* On: the dial lights, the reels turn, three notes drift up from the left speaker. */
+.a-boombox[aria-pressed="true"] .a-boombox-dial { background: linear-gradient(#F2B85A, #d59a3c); box-shadow: 0 0 calc(24cqw / 16) #f2b85a77, inset 0 0 0 calc(2cqw / 16) #6c6d71; }
+.a-boombox[aria-pressed="true"] .a-reel { animation: activity-reel 3s linear infinite; }
+.a-boombox[aria-pressed="true"] .a-reel.left { animation-duration: 2.6s; }
+.a-boombox[aria-pressed="true"] .a-boombox-notes { opacity: 1; }
+.a-boombox[aria-pressed="true"] .a-boombox-notes span { animation: activity-note 2.4s ease-out infinite; }
+.a-boombox[aria-pressed="true"] .a-boombox-notes span:nth-child(2) { animation-delay: .8s; }
+.a-boombox[aria-pressed="true"] .a-boombox-notes span:nth-child(3) { animation-delay: 1.6s; }
+@keyframes activity-reel { to { transform: rotate(360deg); } }
+@keyframes activity-note { from { transform: translateY(0); opacity: 0; } 25% { opacity: .9; } to { transform: translateY(calc(-90cqw / 16)); opacity: 0; } }
+/* Motion off: the lit dial alone carries the state. */
+.motion-off .a-boombox .a-reel, .motion-off .a-boombox .a-boombox-notes span { animation: none; }
+.motion-off .a-boombox[aria-pressed="true"] .a-boombox-notes { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  :root:not(.motion-on) .a-boombox[aria-pressed="true"] .a-boombox-notes { opacity: 0; }
+}
+
+/* §5.2, the activity card. Below the stage at page type by default; over the
+   stage on a wide shell, where there is room for it without hiding the Room. */
+.activity-card { margin-top: 1.4rem; padding: 1.4rem 1.5rem; border: 1px solid var(--line); border-left: 6px solid #C9922F; border-radius: 12px; background: var(--surface); }
+.activity-card-title { margin: 0; font-size: clamp(1.5rem, .968rem + 2.27vw, 2.5rem); line-height: 1.25; }
+.activity-card-title:focus-visible { outline-offset: 3px; }
+.activity-card-line { margin: .5rem 0 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
+.activity-card-meta { display: grid; grid-template-columns: auto 1fr; gap: .3rem 1rem; margin: 1.1rem 0 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); }
+.activity-card-meta dt { font-size: clamp(.9375rem, .8375rem + .426vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
+.activity-card-meta dd { margin: 0; color: #e1d6de; }
+.activity-card-label { margin: 1.1rem 0 .35rem; font-size: clamp(.9375rem, .8375rem + .426vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
+.activity-card-steps { margin: 0; padding-left: 1.3rem; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
+.activity-card-steps li + li { margin-top: .35rem; }
+.activity-card-extra { margin: .5rem 0 0; font-size: clamp(1rem, .9rem + .35vw, 1.125rem); color: var(--muted); }
+.activity-card-why { margin: 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
+.activity-card-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.3rem; }
+.activity-pick, .activity-close { min-height: 44px; padding: .6rem 1.1rem; border-radius: 10px; cursor: pointer; font-size: 1rem; transition: filter .2s, background-color .2s; }
+.activity-pick { border: 0; background: var(--pink); color: var(--bg); font-weight: 650; }
+.activity-pick:hover { filter: brightness(1.08); }
+.activity-close { border: 1px solid var(--line); background: transparent; color: var(--ink); }
+.activity-close:hover { background: #ffffff0f; }
+.motion-off .activity-pick, .motion-off .activity-close { transition: none; }
+.activity-chosen-note { margin: 1rem 0 0; font-size: .9375rem; color: var(--muted); }
+.activity-scrim { display: none; }
+
+@media (min-width: 1080px) {
+  /* (400,160)-(1200,620) in stage units, over a scrim across the whole stage. */
+  .activity-scrim { display: block; position: absolute; inset: 0; z-index: 900; border-radius: 14px; background: rgba(24, 32, 30, .55); animation: activity-fade-in .15s ease-out; }
+  .activity-card { position: absolute; left: 25%; top: 17.8%; width: 50%; bottom: 31.1%; z-index: 910; margin: 0; overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 24px 80px #000a; animation: activity-fade-in .15s ease-out; }
+  .motion-off .activity-scrim, .motion-off .activity-card { animation: none; }
+}
+@keyframes activity-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* 15: the Game Room — a den at night, and the three cards are its three lit
+   bays. Design note 11. Nothing above this block changes: the cards, their
+   Scenes, their expansion and the Invitation are the shipped page's, and this
+   builds a room around them.
+
+   Two rules here are the apartment's, not this Room's: every Prop element
+   carries `z-index: <its sort key>` (§3.3), which is how Props interleave with
+   `src/dom/actors.ts`'s `z-index: round(y)` with no wrapper layers; and a stage
+   that holds controls cannot be `aria-hidden` wholesale, so the attribute and
+   `pointer-events: none` move to its decorative children.
+
+   Every Prop below is a CSS placeholder standing in its exact §4.1 box. Ticket
+   34 drops the artwork; until then nothing here names a file that is not on
+   disk, because the loading screen waits for every URL the markup declares. */
+
+#games-scene {
+  /* The stage's rendered width, measured by `src/dom/game-stage.ts`. The
+     fallback is the page shell at its widest, so the Room has the right
+     proportions on the paint before the first measurement lands. */
+  --stage-width: min(1440px, calc(100vw - 96px));
+  /* One stage unit. 1600 of them across, 900 down. */
+  --u: calc(var(--stage-width) / 1600);
+  --deck-height: 0px;
+  /* The deck's bottom edge is pinned to stage y 380; whatever does not fit
+     between y 0 and there hangs above the stage, and this section carries the
+     wall for it to hang on (§3.4). */
+  --deck-overhang: max(0px, calc(var(--deck-height) - 380 * var(--u)));
+  --wall: #2E4A55;
+  --oak: #7A5636;
+  --oak-line: #4A3320;
+  --brass: #C9A25E;
+  --bulb: #FFD9A8;
+  position: relative;
+  margin-top: 1.5rem;
+  /* The cornice sits at the top of this padding, and the overhang fills it. */
+  padding-top: calc(var(--deck-overhang) + 60px);
+  /* The backdrop's top 200 units are flat wall in this exact colour, so the
+     join between the DOM wall and the painted one is invisible. */
+  background: linear-gradient(to bottom, #27414B, var(--wall) 55%);
+}
+#games-scene .cornice {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(40 * var(--u));
+  background: #22343C;
+  border-bottom: calc(6 * var(--u)) solid #3D5B66;
+}
+
+/* This Room is width-driven and scrolls: the deck's height comes from DOM type,
+   which does not scale with the stage, so a stage capped to the viewport height
+   would shrink the room out from under the cards (§3.5). */
+#room-games { padding-bottom: 2.4rem; }
+#room-games .intro { padding: 1.8rem 0 1.4rem; }
+#room-games .stage {
+  max-width: none;
+  margin: 0;
+  background: none;
+  /* The deck hangs out of the top, and the controls have to be clickable. */
+  overflow: visible;
+  pointer-events: auto;
+  /* The sort keys below run up to 890 and the Cast's `round(y)` up to 900, so
+     the stage is its own stacking context: a Prop sorts against the Room's
+     other Props and the Cast, and never against the loading screen, the skip
+     link or anything else on the page. */
+  isolation: isolate;
+}
+#room-games .stage [aria-hidden="true"] { pointer-events: none; }
+
+/* A box in stage units, turned into percentages of the stage — the same
+   arithmetic `src/dom/actors.ts` does for a feet point. */
+#room-games .stage [data-box] {
+  position: absolute;
+  left: calc(var(--x) / 16 * 1%);
+  top: calc(var(--y) / 9 * 1%);
+  width: calc(var(--w) / 16 * 1%);
+  height: calc(var(--h) / 9 * 1%);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* G2-G5, G20: the backdrop. One image once ticket 34 lands (S01); three bands
+   and two shapes until then. */
+.stage-backdrop {
+  background:
+    radial-gradient(60% 22% at 90% 86%, #FFD9A82e, transparent 70%),
+    linear-gradient(to bottom,
+      var(--wall) 0 62%, #29424C 62% 68.889%,
+      #3A2A22 68.889% 71.111%,
+      #8A6647 71.111% 100%);
+}
+.prop-rug {
+  border-radius: calc(10 * var(--u));
+  background: linear-gradient(to bottom,
+    #4A3340 0 16%, #287F98 16% 23%, #4A3340 23% 68%, #B76E85 68% 75%, #4A3340 75% 100%);
+}
+.prop-cat-bed {
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #6E4A56 0 52%, #B76E85 52% 100%);
+}
+
+/* G9, G10: the ledge the bays stand on, and the pink the Room borrows from the
+   page. The LED is always on, and steps back while a bay is selected so the
+   bay wins. */
+.prop-ledge {
+  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) 0 0;
+  background: linear-gradient(to bottom, #93693F, #6A4A2E);
+  box-shadow: 0 calc(8 * var(--u)) calc(16 * var(--u)) calc(-4 * var(--u)) #0007;
+}
+.prop-led {
+  background: var(--pink);
+  box-shadow: 0 0 calc(26 * var(--u)) calc(5 * var(--u)) #f5a3c555;
+  transition: opacity .5s;
+}
+#room-games .stage:has(.games[data-active]) .prop-led { opacity: .4; }
+
+/* G7, G8: the wall unit. The deck is the joinery's three bays, so the casework
+   is drawn on the deck's own box and grows with it. */
+.deck-slot {
+  position: absolute;
+  left: 18.75%;
+  width: 67.5%;
+  bottom: 57.7778%;
+  z-index: 381;
+}
+.deck-slot::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: calc(-20 * var(--u)) calc(-20 * var(--u)) calc(-22 * var(--u));
+  border: calc(14 * var(--u)) solid var(--oak);
+  border-radius: calc(8 * var(--u));
+  box-shadow: inset 0 0 0 calc(2 * var(--u)) var(--oak-line);
+  /* The 24-unit gaps between the bays are the joinery between them, so the
+     unit reads as three bays rather than one long recess; the interior proper
+     is behind each card, and only the narrow layout ever shows it (.bay). */
+  background: linear-gradient(to bottom, #835C3A, var(--oak));
+}
+/* The bulb strip along each bay's top inner edge, and its wash over the card's
+   top third. CSS, not artwork, because the bays resize. */
+.deck-slot .game-wrap::before,
+.deck-slot .bay::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(6 * var(--u));
+  background: var(--bulb);
+  box-shadow: 0 calc(9 * var(--u)) calc(26 * var(--u)) #ffd9a833;
+  pointer-events: none;
+  transition: opacity .5s, background .5s, box-shadow .5s;
+}
+.deck-slot .game-wrap::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 0 0 67% 0;
+  background: linear-gradient(to bottom, #ffd9a826, transparent);
+  pointer-events: none;
+  transition: opacity .5s;
+}
+.motion-off .deck-slot .game-wrap::before,
+.motion-off .deck-slot .game-wrap::after,
+.motion-off .deck-slot .bay::before { transition: none; }
+
+/* G11-G16, G19: the sideboard and what stands on it, the lamp, and the table
+   that is the front edge of the doll's house. */
+.prop-sideboard {
+  border-radius: calc(4 * var(--u));
+  background:
+    linear-gradient(to bottom, #8C6440 0 15%, var(--oak) 15% 100%),
+    var(--oak);
+  box-shadow: inset 0 calc(-3 * var(--u)) 0 #3A2A22, 0 calc(6 * var(--u)) calc(18 * var(--u)) #0006;
+}
+/* The pole stands at x 1470 with its foot on the floor line, and the shade
+   hangs over it from the arc; the arc itself is behind the shade at this size,
+   so it is not drawn. Offsets are stage units from the box's own corner. */
+.prop-lamp {
+  background:
+    linear-gradient(to bottom, var(--brass), #A8823F)
+      no-repeat calc(75.5 * var(--u)) calc(54 * var(--u)) / calc(9 * var(--u)) calc(340 * var(--u)),
+    radial-gradient(closest-side, var(--brass) 0 100%, transparent 100%)
+      no-repeat calc(52 * var(--u)) calc(382 * var(--u)) / calc(56 * var(--u)) calc(12 * var(--u));
+}
+.prop-lamp::after {
+  content: "";
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  top: 0;
+  height: calc(54 * var(--u));
+  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) calc(9 * var(--u)) calc(9 * var(--u));
+  background: linear-gradient(to bottom, #EAD9C2, #D3BE9F 76%, var(--bulb) 76%);
+  box-shadow: 0 calc(18 * var(--u)) calc(46 * var(--u)) #ffd9a82e;
+}
+.prop-pouf {
+  border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
+  box-shadow: inset 0 calc(-6 * var(--u)) calc(10 * var(--u)) #0000004d;
+}
+.prop-pouf-girl { background: radial-gradient(closest-side at 42% 28%, #35A0BE, #287F98); }
+.prop-pouf-boy { background: radial-gradient(closest-side at 42% 28%, #E8806E, #D76451); }
+.prop-table {
+  border-radius: calc(6 * var(--u));
+  background:
+    /* a pink mug and a cream one, and a bowl of crisps */
+    radial-gradient(closest-side, #E8A0BE 0 92%, transparent 92%) no-repeat 22% 16% / calc(46 * var(--u)) calc(30 * var(--u)),
+    radial-gradient(closest-side, #EAD9C2 0 92%, transparent 92%) no-repeat 42% 16% / calc(46 * var(--u)) calc(30 * var(--u)),
+    radial-gradient(closest-side, #D9A55E 0 92%, transparent 92%) no-repeat 72% 18% / calc(80 * var(--u)) calc(34 * var(--u)),
+    linear-gradient(to bottom, #6E4C35 0 34%, #5C3F2C 34% 100%);
+  box-shadow: 0 calc(-4 * var(--u)) calc(16 * var(--u)) #0006;
+}
+
+/* G12: the boombox, and this Room's Music Source. The whole machine is the
+   control, so the hit box is padded out to 44 px at every width and the label
+   lives in a `.sr-only` span. */
+.prop-boombox {
+  background: none;
+  cursor: pointer;
+  /* The painted box is 68 x 38 px at the narrow shell, so the hit area is grown
+     around it rather than the artwork being made unreadably large. */
+  outline-offset: calc(3 * var(--u));
+}
+.prop-boombox::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(44px, 100%);
+  height: max(44px, 100%);
+  transform: translate(-50%, -50%);
+}
+.boombox-body {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  align-items: center;
+  gap: calc(5 * var(--u));
+  padding: calc(8 * var(--u));
+  border-radius: calc(7 * var(--u));
+  background: linear-gradient(to bottom, #4A4F55, #3B3F44);
+  box-shadow: inset 0 0 0 calc(2 * var(--u)) #2A2D31;
+}
+.boombox-grille {
+  height: 72%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #8F959C 0 34%, #B9BEC4 34% 100%);
+}
+.boombox-window {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  height: 58%;
+  border-radius: calc(3 * var(--u));
+  background: #1B1E21;
+  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #2A2D31;
+}
+.spindle {
+  width: calc(14 * var(--u));
+  height: calc(14 * var(--u));
+  border-radius: 50%;
+  border: calc(3 * var(--u)) solid #5A6068;
+  /* The teeth, so a turning spindle reads as turning. */
+  background: conic-gradient(#5A6068 0 12%, transparent 12% 38%, #5A6068 38% 50%, transparent 50% 88%, #5A6068 88% 100%);
+}
+.boombox-keys {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  bottom: calc(4 * var(--u));
+  height: calc(7 * var(--u));
+  border-radius: calc(2 * var(--u));
+  background: repeating-linear-gradient(to right, #D9483B 0 14%, #3B3F44 14% 20%);
+}
+/* On: the window lights, the pilot glows, the spindles turn. The lit window
+   alone carries the state, so with motion off nothing is lost. */
+.prop-boombox[aria-pressed="true"] .boombox-window {
+  background: linear-gradient(to bottom, #F2B85A, #C98F33);
+  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #2A2D31, 0 0 calc(14 * var(--u)) #f2b85a66;
+}
+.prop-boombox[aria-pressed="true"] .spindle {
+  animation: spindle-turn .9s linear infinite;
+  border-color: #6B4C1E;
+}
+.prop-boombox[aria-pressed="true"] .spindle:last-child { animation-duration: 1.4s; }
+@keyframes spindle-turn { to { transform: rotate(1turn); } }
+.motion-off .spindle { animation: none !important; }
+
+/* G15: Luna's snow globe, the only Breakable in this Room. Ticket 09 swaps the
+   two states over; nothing here is clickable, and the visitor cannot break it. */
+/* 60 x 64 units: 50 x 54 px at the reference width and 13 px across at the
+   narrow shell, which is why it is a distinct silhouette on a stand rather
+   than a detail among others. */
+.prop-globe {
+  background:
+    radial-gradient(closest-side, #ffffffb3 0 55%, transparent 60%)
+      no-repeat calc(13 * var(--u)) calc(9 * var(--u)) / calc(13 * var(--u)) calc(9 * var(--u)),
+    linear-gradient(to bottom, #F6E7CF 0 62%, #C2705E 62%)
+      no-repeat calc(24 * var(--u)) calc(26 * var(--u)) / calc(13 * var(--u)) calc(14 * var(--u)),
+    radial-gradient(closest-side, #A9CFDAd9 0 90%, #7FB0C0 90%)
+      no-repeat 0 0 / calc(60 * var(--u)) calc(46 * var(--u)),
+    linear-gradient(to bottom, #5C3F2C 0 40%, #33210F 40%)
+      no-repeat calc(13 * var(--u)) calc(46 * var(--u)) / calc(34 * var(--u)) calc(18 * var(--u));
+}
+/* 120 x 46 units, anchored bottom-left at (1210, 692). */
+.prop-globe-broken {
+  background:
+    conic-gradient(from .56turn, #C6DCE4cc 0 7%, transparent 7%)
+      no-repeat calc(38 * var(--u)) calc(8 * var(--u)) / calc(22 * var(--u)) calc(22 * var(--u)),
+    conic-gradient(from .04turn, #E2EFF4cc 0 8%, transparent 8%)
+      no-repeat calc(74 * var(--u)) calc(4 * var(--u)) / calc(26 * var(--u)) calc(26 * var(--u)),
+    linear-gradient(to right, #5C3F2C, #33210F)
+      no-repeat calc(6 * var(--u)) calc(28 * var(--u)) / calc(34 * var(--u)) calc(14 * var(--u)),
+    radial-gradient(closest-side, #F6E7CF 0 80%, transparent 80%)
+      no-repeat calc(96 * var(--u)) calc(24 * var(--u)) / calc(20 * var(--u)) calc(18 * var(--u)),
+    /* the dark wet patch soaking into the planks, glitter stranded in it */
+    radial-gradient(closest-side, #4A3226e6 0 62%, #4A322680 62%, transparent 100%)
+      no-repeat 50% 100% / 100% calc(30 * var(--u));
+}
+
+/* G6: the door back to the Entryway — the Entryway's own Game door, seen from
+   this side. The text `.room-exit` at the top of the Room leads out too; §8.3
+   asks the owner whether both should stay. */
+.prop-door {
+  border-radius: calc(4 * var(--u)) calc(4 * var(--u)) 0 0;
+  background: linear-gradient(to bottom, #6B4A34, #5C3F2C);
+  box-shadow: inset 0 0 0 calc(3 * var(--u)) #4A3320;
+  /* The hallway light in the gap. */
+  overflow: hidden;
+  transition: box-shadow .35s;
+}
+.prop-door .door-leaf {
+  position: absolute;
+  left: 7.8%;
+  right: 7.8%;
+  top: 4%;
+  bottom: 0;
+  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) 0 0;
+  background: linear-gradient(to right, #FFE2B4 0 6%, #3F6B7A 6% 100%);
+  transform-origin: left center;
+  transform: perspective(600px) rotateY(-12deg);
+  transition: transform .35s;
+}
+.prop-door:hover, .prop-door:focus-visible {
+  box-shadow: inset 0 0 0 calc(3 * var(--u)) #4A3320, 0 0 calc(24 * var(--u)) #ffd9a840;
+}
+.prop-door:hover .door-leaf, .prop-door:focus-visible .door-leaf {
+  transform: perspective(600px) rotateY(-20deg);
+}
+.motion-off .prop-door, .motion-off .prop-door .door-leaf { transition: none; }
+
+/* The wide layout: the deck is in the wall unit and the three bays are the
+   three cards. A bay is 344 stage units wide neutral, and the gap between two
+   is 24 units — 2.2222 % of the deck's 1080. */
+@media (min-width: 1080px) {
+  .deck-slot .games {
+    --scene-size: calc(344 * var(--u));
+    gap: 2.2222%;
+  }
+  .deck-slot .bay { display: none; }
+  .deck-slot .game-wrap.is-active::before {
+    background: color-mix(in srgb, var(--bulb) 45%, var(--pink));
+    box-shadow: 0 calc(9 * var(--u)) calc(32 * var(--u)) #ffb0d24d;
+  }
+  .deck-slot .game-wrap.is-muted::before,
+  .deck-slot .game-wrap.is-muted::after { opacity: .35; }
+}
+
+/* The narrow layout: the deck leaves the stage for the flow below it, exactly
+   as the page has always shown it, and the bays stay behind empty and lit —
+   the games are off the shelf and in your hands. The bay matching the card
+   being read warms to pink while the other two dim (§3.5). */
+@media (max-width: 1079px) {
+  #games-scene { margin-top: 1.2rem; }
+  .deck-slot { top: 0; }
+  .deck-flow { margin-top: 1.8rem; }
+  .deck-slot .bay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 31.852%;
+    border-radius: calc(4 * var(--u));
+    background: linear-gradient(to bottom, #150F14, #1E1620);
+    transition: box-shadow .5s;
+  }
+  .deck-slot .bay[data-bay="lovers"] { left: 34.074%; }
+  .deck-slot .bay[data-bay="heavenly"] { left: 68.148%; }
+  .stage[data-lit-bay] .bay::before { opacity: .35; }
+  .stage[data-lit-bay="tango"] .bay[data-bay="tango"]::before,
+  .stage[data-lit-bay="lovers"] .bay[data-bay="lovers"]::before,
+  .stage[data-lit-bay="heavenly"] .bay[data-bay="heavenly"]::before {
+    opacity: 1;
+    background: var(--pink);
+    box-shadow: 0 calc(9 * var(--u)) calc(30 * var(--u)) #f5a3c54d;
+  }
+  .motion-off .deck-slot .bay { transition: none; }
+}
+
+/* 14: the Entryway. One appended block, so this ticket adds lines rather than
+   editing the ones the other Rooms are landing beside.
+
+   Everything on this stage is placed in stage units and nothing in pixels:
+   `--x / --y / --w / --h` are the design note's own numbers and the rules below
+   are the only place they become percentages. `--z` is a Prop's base line on the
+   stage, which is what interleaves it with the Cast, whose `z-index` is
+   `round(y)` off their feet — so the monstera at 880 is in front of everybody
+   and the wall Props at 452-512 are behind them.
+
+   Every colour is `design/10-entryway.md` §4.4's. All of it is a placeholder
+   for tickets 31 and 33: the `eb-` rules are the backdrop shot S01 drawn in CSS
+   and go the day that image lands. */
+.entryway-pan { overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; }
+/* The stage fits the Room's width and the viewport's height, and below a
+   rendered 880px it keeps 880 and the hallway pans, starting at the front door. */
+.entryway-stage { min-width: 880px; max-width: min(100%, calc((100dvh - 19rem) * 16 / 9)); background: none; }
+.entryway-stage .at { position: absolute; left: calc(var(--x) / 16 * 1%); top: calc(var(--y) / 9 * 1%); width: calc(var(--w) / 16 * 1%); height: calc(var(--h) / 9 * 1%); z-index: var(--z, 0); }
+.stage-caption { max-width: 52ch; margin: 1rem auto 0; text-align: center; }
+
+/* The painted hallway: the backdrop shot, until there is one. */
+.eb-cornice { background: #3E3038; }
+.eb-wall { background: radial-gradient(ellipse at 59% 12%, #6E5665, #5B4653 62%, #47363F); }
+.eb-skirting { background: #3A2A22; }
+.eb-floor { background: repeating-linear-gradient(180deg, #8A6647, #8A6647 10px, #A37E5A 10px, #A37E5A 11px); }
+.eb-runner { background: repeating-linear-gradient(90deg, #B76E85, #B76E85 14px, #E8C6D2 14px, #E8C6D2 26px, #4A3340 26px, #4A3340 34px); opacity: .92; }
+.eb-doorframe { background: #4A3327; border-radius: 3px 3px 0 0; }
+.eb-stairwell { background: linear-gradient(180deg, #2B3550, #1F2740); box-shadow: inset 0 18px 30px -12px #FFD9A8; }
+.eb-mat { background: #6B5A3E; border: 2px solid #4B3F2B; }
+.eb-rail, .eb-hook { background: #C9A25E; }
+.eb-hook { border-radius: 0 0 50% 50%; }
+.eb-bench, .eb-table { background: #6E4C33; border-radius: 2px; }
+.eb-legs { background: linear-gradient(90deg, #5C3F2C 0 8%, transparent 8% 92%, #5C3F2C 92%); }
+.eb-photo { background: #C9A25E; border: 4px solid #8A6647; }
+.eb-cord { background: #3E3038; }
+.eb-lamp { background: #C9A25E; border-radius: 0 0 50% 50% / 0 0 100% 100%; box-shadow: 0 18px 60px 20px #ffd9a81f; }
+.eb-clock { background: #EAD9C2; border: 3px solid #6E4C33; border-radius: 50%; }
+.eb-door { background: #4A3327; border-radius: 4px 4px 0 0; }
+.eb-leaf { border-radius: 3px 3px 0 0; }
+.eb-leaf-games { background: #3F6B7A; }
+.eb-leaf-cinema { background: #5A3350; }
+.eb-leaf-activities { background: #B08A3E; }
+.eb-porthole { background: #1F1A24; border: 3px solid #3E3038; border-radius: 50%; }
+.eb-tag { position: absolute; right: .5rem; bottom: .5rem; z-index: 900; }
+
+/* The Props the arrival moves. */
+.entryway-stage .prop { border: 0; padding: 0; }
+/* The leaf sorts at 600 shut and 665 open, so the Cast appears from behind it
+   as it swings in — which is why `--z` is set here and not in the markup. */
+.prop-front-door { --z: 600; background: #4A3327; border-right: 3px solid #C9A25E; transform-origin: left center; transition: transform .6s ease; }
+.prop-front-door.is-open { --z: 665; transform: perspective(900px) rotateY(-62deg); }
+.prop-girl-coat { background: #7B4159; border-radius: 40% 40% 18% 18% / 18% 18% 10% 10%; }
+.prop-boy-parka { background: #3F5A46; border-radius: 40% 40% 18% 18% / 18% 18% 10% 10%; }
+.prop-backpack { display: grid; place-items: center; background: #4F6B72; border-radius: 12%; box-shadow: inset 0 0 0 4px #2F4248; }
+.backpack-window { width: 62%; height: 70%; border-radius: 50%; background: radial-gradient(circle at 30% 45%, #EDE6DE 0 16%, transparent 16%), radial-gradient(circle at 55% 45%, #B08A6A 0 16%, transparent 16%), radial-gradient(circle at 78% 45%, #C3CE68 0 16%, transparent 16%), #23303A; }
+.prop-backpack.is-open .backpack-window { background: #16202A; }
+.prop-monstera { background: radial-gradient(ellipse at 30% 28%, #3F6B4A 0 42%, transparent 44%), radial-gradient(ellipse at 66% 12%, #356044 0 34%, transparent 36%), linear-gradient(180deg, transparent 72%, #A8562F 72%); }
+.prop-vase { background: linear-gradient(180deg, #D9B98A 0 58%, #C98B96 58%); border-radius: 30% 30% 45% 45% / 10% 10% 22% 22%; }
+.prop-vase-broken { background: repeating-linear-gradient(72deg, #C98B96 0 9px, transparent 9px 20px), linear-gradient(90deg, #D9B98A 0 40%, transparent 40%); }
+
+/* The hall radio, which is the Room's Music Source. Its hit box is the whole
+   Prop — 120 x 87 stage units, which stays above 44 CSS px down to the 880 floor. */
+.prop-radio { background: transparent; cursor: pointer; }
+.radio-body { position: absolute; left: 12.5%; top: 19.5%; width: 75%; height: 69%; border-radius: 8%; background: #EAD9C2; box-shadow: inset 0 0 0 3px #6E4C33; }
+.radio-dial { position: absolute; left: 8%; top: 22%; width: 34%; height: 56%; border-radius: 50%; background: #6A4B22; transition: background .25s, box-shadow .25s; }
+.radio-grille { position: absolute; right: 8%; top: 22%; width: 44%; height: 56%; border-radius: 6%; background: repeating-linear-gradient(90deg, #8A6647 0 2px, #EAD9C2 2px 5px); }
+.prop-radio[aria-pressed="true"] .radio-dial { background: #F2B85A; box-shadow: 0 0 14px 6px #f2b85a66; }
+.radio-notes { position: absolute; inset: auto 0 62% 0; display: none; justify-content: space-around; color: var(--pink); font-size: 1rem; line-height: 1; }
+.prop-radio[aria-pressed="true"] .radio-notes { display: flex; }
+.radio-notes span { animation: hall-notes 2.4s ease-in-out infinite; }
+.radio-notes span:nth-child(2) { animation-delay: .8s; }
+.radio-notes span:nth-child(3) { animation-delay: 1.6s; }
+@keyframes hall-notes { 0% { opacity: 0; transform: translateY(0); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-260%); } }
+
+/* The three doors: transparent rectangles over the painted frames, with the
+   plaque as the visible label. Hover and focus are CSS alone — no ajar artwork. */
+.entryway-stage .doors { position: absolute; inset: 0; display: block; margin: 0; gap: 0; }
+.entryway-stage .door, .prop-radio { pointer-events: auto; }
+.entryway-stage .door { display: block; min-height: 0; padding: 0; border: 0; border-radius: 4px 4px 0 0; background: transparent; font-size: inherit; font-weight: inherit; transition: transform .25s, box-shadow .25s; }
+.entryway-stage .door:hover, .entryway-stage .door:focus-visible { background: transparent; transform: translateY(-3px); box-shadow: 0 0 34px 10px #f5a3c52e; }
+.door-plaque { position: absolute; left: 7.8%; top: 45%; width: 84.4%; height: 11%; display: grid; place-items: center; border-radius: 8px; background: #1b1620d9; color: var(--ink); font-size: clamp(.7rem, 1.35cqw, 1.05rem); font-weight: 650; letter-spacing: .02em; transition: background .25s, color .25s; }
+.entryway-stage .door:hover .door-plaque, .entryway-stage .door:focus-visible .door-plaque { background: var(--pink); color: #2a1520; }
+.entryway-stage { container-type: inline-size; }
+/* An Actor a Beat is drawing gives way to it, so the two are never both on. */
+.actor.is-acted { display: none; }
+/* 14: the arrival's Beat layers, placed and stepped by `src/dom/entryway.ts`.
+   None is declared yet — ticket 33 adds one `data-beat` layer per sheet. */
+.entryway-stage [data-beat] { background-repeat: no-repeat; }
+
+/* Motion is opt-outable, and the arrival is motion: with it off the front door
+   is simply open or shut, the radio's note glyphs are not rendered at all, and
+   the lit dial alone carries the Music Source's state. */
+.motion-off .prop-front-door, .motion-off .entryway-stage .door, .motion-off .radio-dial { transition: none; }
+.motion-off .radio-notes { display: none; }
+@media (prefers-reduced-motion: reduce) { :root:not(.motion-on) .radio-notes { display: none; } }
+
+@media (max-width: 1079px) {
+  /* The stage is already at its 880px floor here, so the pan is doing the work
+     and the caption comes back to the Room's own measure. */
+  .entryway-stage { max-width: none; }
+  .stage-caption { text-align: left; margin-inline: 0; }
+}
