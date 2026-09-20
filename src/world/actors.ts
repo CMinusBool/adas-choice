@@ -1,8 +1,18 @@
+import { CAT_IDS, CAT_MARKS, freeMark, type CatId, type CatPlace } from './cats'; // 08: the cats
 import { CINEMA_MARKS } from './cinema'; // 17: the Cinema Room's marks
 // 14: the Entryway's floor and marks are the design note's, written down once.
 import { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';
 import type { RoomId } from './rooms';
-import { clampInto, containsPoint, distance, routeLength, routeThrough, type Point, type Polygon } from './stage';
+import {
+  STAGE_WIDTH,
+  clampInto,
+  containsPoint,
+  distance,
+  routeLength,
+  routeThrough,
+  type Point,
+  type Polygon,
+} from './stage';
 
 /**
  * The Cast, as things that move.
@@ -456,6 +466,51 @@ export function gatherInto(slice: ActorsSlice, room: RoomId): ActorsSlice {
   return moved ? { ...slice, actors } : slice;
 }
 
+// 08: the cats
+/**
+ * Where each cat in this Room is standing, for the cats to decide between them.
+ *
+ * Only the ones actually in the Room: a cat elsewhere is not in anybody's way,
+ * and the Room the visitor is in is the only one whose floor is being painted.
+ */
+export function catPlaces(slice: ActorsSlice, room: RoomId): readonly CatPlace[] {
+  return slice.actors.flatMap(actor =>
+    actor.room === room && (CAT_IDS as readonly string[]).includes(actor.id)
+      ? [{ id: actor.id as CatId, at: actor.at, moving: actor.route.length > 0 }]
+      : [],
+  );
+}
+
+// 08: the cats
+/**
+ * The three cats, in the Room the visitor just walked into.
+ *
+ * They follow rather than restart: a cat already in this Room is left exactly
+ * where it had got to, and one that was somewhere else comes in and takes a
+ * free mark. Which mark is the dice's, so the Room is found differently laid
+ * out on every visit, and no two of them ever arrive on top of each other
+ * because each arrival counts the ones already standing there.
+ *
+ * The Entryway is the one Room this changes nothing in: `gatherInto` has just
+ * put all three on the landing marks their design note fixes, so all three are
+ * already home and the slice comes back by identity.
+ */
+export function gatherCats(slice: ActorsSlice, room: RoomId): ActorsSlice {
+  let next = slice;
+  for (const id of CAT_IDS) {
+    const standing = next.actors.find(actor => actor.id === id);
+    if (standing && standing.room === room) continue;
+    // Nowhere free is not a reason to leave a cat behind in a Room the visitor
+    // has walked out of. It cannot happen with five marks and two cats already
+    // standing, but a Room re-marked one day with fewer gets its first mark
+    // rather than a missing cat.
+    const mark = freeMark(room, id, catPlaces(next, room), new Map(), next.random) ?? CAT_MARKS[room][0];
+    // A cat that has just come in looks into the Room rather than at the wall.
+    next = placeActor(next, id, room, mark, mark.x > STAGE_WIDTH / 2 ? 'left' : 'right');
+  }
+  return next;
+}
+
 /**
  * The Cast as the visitor finds the apartment.
  *
@@ -463,5 +518,5 @@ export function gatherInto(slice: ActorsSlice, room: RoomId): ActorsSlice {
  * Cast on the floor, and every Room they walk into afterwards does the same.
  */
 export function createActors(random: RandomSource, room: RoomId): ActorsSlice {
-  return gatherInto({ actors: [], lastTick: null, random }, room);
+  return gatherCats(gatherInto({ actors: [], lastTick: null, random }, room), room);
 }

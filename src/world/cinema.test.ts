@@ -117,11 +117,13 @@ describe('walking into the Cinema Room', () => {
 
   it('seats them for a visitor who arrives at the Cinema Room directly', () => {
     const world = createWorld({ ...plainArrival, hash: '#/cinema' });
+    // 08: the three cats come into whichever Room the visitor opens the page
+    // in, so the Room holds the whole Cast; where the cats stand is theirs.
     expect(
       actorsIn(world, 'cinema')
         .map(actor => actor.id)
         .sort(),
-    ).toEqual(['boy', 'girl']);
+    ).toEqual(['boy', 'girl', 'luna', 'mica', 'mira']);
     expect(isSeated(world, 'boy')).toBe(true);
   });
 

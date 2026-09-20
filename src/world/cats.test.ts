@@ -3,14 +3,12 @@ import { describe, expect, it } from 'vitest';
 import {
   CAT_IDS,
   ROOM_IDS,
-  actorView,
   actorsIn,
   advance,
   createWorld,
   roomHash,
   seededRandom,
   type ActorView,
-  type CatId,
   type RoomId,
   type World,
   type WorldInputs,
@@ -45,12 +43,6 @@ function run(world: World, ms: number, step = 16): World {
 /** Walk the visitor into a Room the way a door link does. */
 function walkInto(world: World, room: RoomId): World {
   return advance(world, { type: 'hash-changed', hash: roomHash(room) });
-}
-
-function cat(world: World, id: CatId): ActorView {
-  const view = actorView(world, id);
-  if (!view) throw new Error(`${id} should be in the apartment.`);
-  return view;
 }
 
 function catsIn(world: World, room: RoomId): readonly ActorView[] {
