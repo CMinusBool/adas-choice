@@ -18,6 +18,9 @@ import {
   type World,
   type WorldInputs,
 } from './index';
+// 43: `gatherInto` is the world's own, one level below `index.ts`, and the only
+// place the identity promise every Room change leans on can be read.
+import { createActors, gatherInto, placeActor } from './actors';
 
 /** A visitor arriving with nothing stored, no reduced-motion request, no hash. */
 const plainArrival: WorldInputs = { hash: '', storedLanguage: null, reducedMotion: false };
@@ -437,5 +440,36 @@ describe('the Cast in whichever Room the visitor is in', () => {
       'mica',
       'mira',
     ]);
+  });
+
+  it('puts them back on their marks when the visitor leaves and comes back', () => {
+    // A Room is found the way its design note describes it, not the way the
+    // last visit left it — so wherever he wandered off to is forgotten at the
+    // door. Motion off makes the wander instant; it changes nothing else.
+    const paused = advance(walkInto(createWorld(plainArrival), 'games'), { type: 'motion-toggled' });
+    const wandered = advance(paused, { type: 'actor-sent', actor: 'boy', goal: { x: 300, y: 700 } });
+    expect(who(wandered, 'boy').at).toEqual({ x: 300, y: 700 });
+
+    const back = walkInto(walkInto(wandered, 'activities'), 'games');
+    expect(who(back, 'boy').at).toEqual({ x: 940, y: 795 });
+    expect(who(back, 'girl').at).toEqual({ x: 560, y: 800 });
+  });
+
+  it('hands the Cast back by identity when the Room being entered moved nobody', () => {
+    // What a Room change costs when there is nothing to do: the DOM layer
+    // compares slices by identity and repaints nothing when they match, so a
+    // Room that has just placed its Cast must not place it a second time.
+    for (const room of ROOM_IDS) {
+      const settled = createActors(seededRandom(7), room);
+      expect(gatherInto(settled, room)).toBe(settled);
+    }
+  });
+
+  it('hands back a new Cast when somebody was standing off their mark', () => {
+    const settled = createActors(seededRandom(7), 'activities');
+    const wandered = placeActor(settled, 'girl', 'activities', { x: 1100, y: 800 }, 'left');
+    const gathered = gatherInto(wandered, 'activities');
+    expect(gathered).not.toBe(wandered);
+    expect(gathered.actors.find(actor => actor.id === 'girl')?.at).toEqual({ x: 762, y: 742 });
   });
 });
