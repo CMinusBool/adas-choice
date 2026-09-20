@@ -210,9 +210,18 @@ export async function startServer(repoRoot, name, wanted) {
 
   const declared = configuration.port;
   const declaredUrl = configuration.url ?? `http://localhost:${declared}/`;
-  if (await answers(declaredUrl)) {
-    console.error(`room-shots: ${declaredUrl} already answers; reusing it and leaving it running`);
-    return { baseUrl: declaredUrl, stop: async () => {} };
+  // Reuse only when the caller did not name a port. A server already answering
+  // on the declared one belongs to whoever started it, and on this machine that
+  // is routinely a `vite preview` left running in a *different* worktree — so
+  // reusing it silently measures somebody else's `dist/` and reports the number
+  // as if it came from yours. `--port` is how a caller says "my build, my
+  // server, measured here"; it has to win over the convenience.
+  if (wanted === null || wanted === undefined) {
+    if (await answers(declaredUrl)) {
+      console.error(`room-shots: ${declaredUrl} already answers; reusing it and leaving it running`);
+      console.error('room-shots: that server is serving whatever checkout started it — pass --port to be sure of yours');
+      return { baseUrl: declaredUrl, stop: async () => {} };
+    }
   }
 
   // Windows reserves whole hundred-port ranges for Hyper-V and WinNAT, and a reserved

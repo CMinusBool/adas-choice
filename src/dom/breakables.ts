@@ -73,12 +73,19 @@ export const mountBreakables = (_dispatch: Dispatch, _initial: World): Painter =
     let changed = false;
     for (const id of BREAKABLE_IDS) {
       const state = breakableState(world, id);
-      if (painted.get(id) === state) continue;
+      const previous = painted.get(id);
+      if (previous === state) continue;
       changed = true;
       painted.set(id, state);
       const els = elements.get(id)!;
       const intact = els.find(element => element.dataset.breakableState === 'intact');
-      if (state === 'broken' && motionIsOn(world) && intact) {
+      // Only a Breakable that was standing a moment ago falls. `previous` is
+      // `undefined` on the first paint, which is where a Breakable this tab
+      // broke earlier arrives already broken out of session storage — and
+      // without this guard it fell over again on every single reload, which is
+      // a cat that is not there knocking over something already on the floor.
+      // `src/dom/entryway.ts` guards its own vase the same way.
+      if (state === 'broken' && previous === 'intact' && motionIsOn(world) && intact) {
         intact.addEventListener('animationend', () => swapToState(els, state), { once: true });
         intact.classList.add(FALLING_CLASS);
       } else {
