@@ -507,3 +507,27 @@ describe('expanding a pinned Poster', () => {
     expect(posterDetails(back)).toBe(null);
   });
 });
+
+// 20: the reel, the projector and the Bumper. Choosing a Film sends him to the
+// cabinet to find its reel, he loads it, and the projector plays the studio's
+// Bumper into the Film's title card and then its slate.
+describe('choosing a Film, and the reel he fetches for it', () => {
+  /** The Cinema Room with one shelf's three Posters already on the wall. */
+  function wallUp(shelf: CinemaShelf = 'comedy', world = inTheCinema()): World {
+    const chosen = advance(world, { type: 'cinema-shelf-chosen', shelf, now: clock });
+    return runUntil(chosen, next => cinemaStep(next) === 'seated', 40000);
+  }
+
+  /** The visitor pressing the details card's primary action. */
+  function choose(world: World, film: FilmId): World {
+    return advance(world, { type: 'cinema-film-chosen', film, now: clock });
+  }
+
+  it('sends him to the cabinet to look for that Film’s reel', () => {
+    const chosen = choose(wallUp(), 'knives-out');
+    expect(cinemaStep(chosen)).toBe('fetching');
+
+    const searching = runUntil(chosen, next => cinemaStep(next) === 'searching', 40000);
+    expect(who(searching, 'boy').at).toEqual(CINEMA_MARKS.cabinet);
+  });
+});
