@@ -131,7 +131,11 @@ describe('the three cats following the visitor', () => {
   });
 
   it('brings them into the Room the visitor opens the page in', () => {
-    const world = createWorld({ ...plainArrival, hash: '#/cinema', random: seededRandom(7) });
+    // 51: that Room waits empty behind the loading screen, because its entrance
+    // has not played yet and a Room is not found already settled. The three of
+    // them are in it the moment the entrance is over, however it ended.
+    const opened = createWorld({ ...plainArrival, hash: '#/cinema', random: seededRandom(7) });
+    const world = advance(advance(opened, { type: 'arrival-started' }), { type: 'visitor-input' });
     expect(catsIn(world, 'cinema').map(actor => actor.id)).toEqual([...CAT_IDS]);
   });
 });

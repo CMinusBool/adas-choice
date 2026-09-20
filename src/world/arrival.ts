@@ -560,27 +560,36 @@ function roomCues(arrival: RoomArrivalSlice, from: number, to: number): readonly
  * Door is shut, everyone is on their mark, the Room is found at rest. There is
  * no second code path for a still apartment because there is nothing for one to
  * do.
+ *
+ * 51: an entrance that is going to play carries its marks from the moment it is
+ * made, not from the moment it starts. The two are the same instant for a Door
+ * walked through, but not for a page that opens on a Room: there the page holds
+ * the entrance behind its loading screen, and a Room whose Cast is still
+ * standing in it is a Room the visitor finds settled and then watches blink
+ * out. The marks come down here so that the Room can be emptied here.
  */
-export function createRoomArrival(room: RoomId, over: boolean): RoomArrivalSlice {
+export function createRoomArrival(room: RoomId, over: boolean, marks: ArrivalMarks = {}): RoomArrivalSlice {
   return {
     room,
     state: over ? 'done' : 'pending',
     startedAt: null,
     seconds: over ? ROOM_ARRIVAL_SECONDS : 0,
     sfx: [],
-    marks: {},
+    marks: over ? {} : marks,
   };
 }
 
 /**
- * The entrance, started, with everyone's mark taken down.
+ * The entrance, started.
  *
- * The clock is not set here — the first tick does that, because that is the
- * first time the model is told what time it is.
+ * Nothing but the clock: everyone's mark came down when the entrance was made,
+ * because that is when the Room was emptied. The clock is not set here either —
+ * the first tick does that, because that is the first time the model is told
+ * what time it is.
  */
-export function startRoomArrival(arrival: RoomArrivalSlice, marks: ArrivalMarks): RoomArrivalSlice {
+export function startRoomArrival(arrival: RoomArrivalSlice): RoomArrivalSlice {
   if (arrival.state !== 'pending') return arrival;
-  return { ...arrival, state: 'playing', startedAt: null, seconds: -1, sfx: [], marks };
+  return { ...arrival, state: 'playing', startedAt: null, seconds: -1, sfx: [] };
 }
 
 /**
@@ -614,31 +623,32 @@ export function tickRoomArrival(
 /**
  * The entrance, cut short, and everyone put on their mark at once.
  *
- * What a click, a tap, a key press or a request for stillness means: the
- * outcome of the whole entrance and none of the entering. Nobody is left
- * mid-stride and nothing is half-open, because the Door's state is folded out
- * of a clock that has now run to the end. An entrance still waiting to play
- * never emptied the Room, so there is nothing to catch up.
+ * What a request for stillness, a Room walked out of, or a Room nobody can see
+ * means: the outcome of the whole entrance and none of the entering. Nobody is
+ * left mid-stride and nothing is half-open, because the Door's state is folded
+ * out of a clock that has now run to the end.
+ *
+ * 51: an entrance still waiting to play is settled the same way, because since
+ * this ticket a waiting entrance has already emptied its Room — so leaving it
+ * with no cues would leave a Room with no Cast in it. Its marks were taken down
+ * when it was made, which is exactly what is needed to put everybody back.
  */
 export function settleRoomArrival(
   arrival: RoomArrivalSlice,
 ): { readonly arrival: RoomArrivalSlice; readonly cues: readonly ArrivalCue[] } {
   if (arrival.state === 'done') return { arrival, cues: [] };
-  const cues: readonly ArrivalCue[] =
-    arrival.state === 'pending'
-      ? []
-      : ACTOR_IDS.flatMap(id => {
-          const mark = arrival.marks[id];
-          if (!mark) return [];
-          const settled: ArrivalCue = {
-            at: ROOM_ARRIVAL_SECONDS,
-            kind: 'place',
-            actor: id,
-            mark: mark.at,
-            facing: mark.facing,
-          };
-          return [settled];
-        });
+  const cues: readonly ArrivalCue[] = ACTOR_IDS.flatMap(id => {
+    const mark = arrival.marks[id];
+    if (!mark) return [];
+    const settled: ArrivalCue = {
+      at: ROOM_ARRIVAL_SECONDS,
+      kind: 'place',
+      actor: id,
+      mark: mark.at,
+      facing: mark.facing,
+    };
+    return [settled];
+  });
   return { arrival: { ...arrival, state: 'done', seconds: ROOM_ARRIVAL_SECONDS, sfx: [] }, cues };
 }
 

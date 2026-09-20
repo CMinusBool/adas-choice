@@ -274,6 +274,20 @@ export type WorldEvent =
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
   const arriving = parseRoute(inputs.hash);
+  // 07: actors
+  // 17: the Room the visitor arrives in places its own Cast, so walking
+  // straight in at `#/cinema` still finds the two of them sat down.
+  const cast = createActors(inputs.random ?? seededRandom(DEFAULT_SEED), arriving);
+  // 44: the entrance of whichever Room the page opened on, waiting on the page
+  // to say the loading screen has gone. Opening on the Entryway is not walking
+  // through a Door, so that Room has nothing to play here.
+  // 51: and a Room that has an entrance to play is emptied **now**, with its
+  // marks taken down, rather than when the page finally says the loading screen
+  // has gone. That wait is the page's and it is not short; a Room that keeps
+  // its Cast through it is one the visitor finds settled and then watches blink
+  // out, which is the opposite of arriving.
+  const settled = arriving === ENTRYWAY || inputs.reducedMotion;
+  const roomArrival = createRoomArrival(arriving, settled, settled ? {} : marksIn(cast, arriving));
   return {
     language: resolveLanguage(inputs.storedLanguage),
     motion: createMotion(inputs.reducedMotion),
@@ -283,10 +297,7 @@ export function createWorld(inputs: WorldInputs): World {
     // 06: audio — nothing about sound survives the visit, so it takes no input.
     audio: createAudio(),
     // end 06
-    // 07: actors
-    // 17: the Room the visitor arrives in places its own Cast, so walking
-    // straight in at `#/cinema` still finds the two of them sat down.
-    actors: createActors(inputs.random ?? seededRandom(DEFAULT_SEED), arriving),
+    actors: settled ? cast : clearRoom(cast, arriving),
     // 08: nobody has decided anything yet; the first tick tells them the time.
     cats: createCats(),
     // 17: cinema
@@ -302,10 +313,7 @@ export function createWorld(inputs: WorldInputs): World {
     arrival: createArrival(
       inputs.arrived === true || inputs.reducedMotion || parseRoute(inputs.hash) !== ENTRYWAY,
     ),
-    // 44: and the entrance of whichever Room the page opened on, waiting on the
-    // page to say the loading screen has gone. Opening on the Entryway is not
-    // walking through a Door, so that Room has nothing to play here.
-    roomArrival: createRoomArrival(arriving, arriving === ENTRYWAY || inputs.reducedMotion),
+    roomArrival,
     broken: new Set(inputs.brokenBreakables ?? []),
   };
 }
@@ -580,8 +588,10 @@ export function advance(world: World, event: WorldEvent): World {
  */
 function roamCats(world: World, now: number): World {
   // 44: and it waits on the Room's own entrance too, because until that is
-  // over the three of them are still coming through the door.
-  if (!motionIsOn(world) || world.arrival.state !== 'done' || world.roomArrival.state === 'playing') {
+  // over the three of them are still coming through the door. 51: including one
+  // still waiting behind the loading screen, whose Room is empty — otherwise
+  // three cats decide where to go in a Room they are not standing in.
+  if (!motionIsOn(world) || world.arrival.state !== 'done' || world.roomArrival.state !== 'done') {
     return world;
   }
   const room = world.rooms.current;
@@ -1038,33 +1048,36 @@ function marksIn(slice: ActorsSlice, room: RoomId): ArrivalMarks {
 }
 
 /**
- * The world with the current Room's entrance playing, and the Room emptied.
+ * The world with the current Room's entrance playing.
  *
- * A Room is not found already settled: it opens empty and fills up, and an
- * empty Room is the absence of the Cast rather than a flag on it. Refused
- * unless the entrance is waiting, so nothing replays under a visitor who is
- * already standing in it.
+ * Nothing but the clock starting: the Room was emptied and everybody's mark
+ * taken down when the entrance was **made**, because a Room is not found
+ * already settled — not even for the 400 ms the page waits behind its loading
+ * screen. Refused unless the entrance is waiting, so nothing replays under a
+ * visitor who is already standing in it.
  */
 function withRoomStarted(world: World): World {
   const room = world.rooms.current;
   if (world.roomArrival.room !== room) return world;
-  const started = startRoomArrival(world.roomArrival, marksIn(world.actors, room));
-  if (started === world.roomArrival) return world;
-  return { ...world, roomArrival: started, actors: clearRoom(world.actors, room) };
+  const started = startRoomArrival(world.roomArrival);
+  return started === world.roomArrival ? world : { ...world, roomArrival: started };
 }
 
 /**
  * The world one Door further in, with that Room's entrance about to play.
  *
  * A fresh entrance every time, because a Room is walked into over and over and
- * each entry is its own. With motion off it is made already over, which is the
+ * each entry is its own. Making it is what empties the Room and takes down
+ * everybody's mark; starting it is only the clock, and through a Door the two
+ * are the same instant. With motion off it is made already over, which is the
  * whole of what stillness means here and is why nothing below it needs a
  * second path.
  */
 function withRoomEntered(world: World, room: RoomId): World {
   const over = room === ENTRYWAY || !motionIsOn(world);
-  const entered = { ...world, roomArrival: createRoomArrival(room, over) };
-  return over ? entered : withRoomStarted(entered);
+  if (over) return { ...world, roomArrival: createRoomArrival(room, true) };
+  const entrance = createRoomArrival(room, false, marksIn(world.actors, room));
+  return { ...world, roomArrival: startRoomArrival(entrance), actors: clearRoom(world.actors, room) };
 }
 
 /**

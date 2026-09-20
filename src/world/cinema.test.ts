@@ -173,7 +173,10 @@ describe('walking into the Cinema Room', () => {
   });
 
   it('seats them for a visitor who arrives at the Cinema Room directly', () => {
-    const world = createWorld({ ...plainArrival, hash: '#/cinema' });
+    // 51: the Room they open the page on waits empty until its entrance has
+    // played, so the Cast is read once that is over rather than at creation.
+    const opened = createWorld({ ...plainArrival, hash: '#/cinema' });
+    const world = advance(advance(opened, { type: 'arrival-started' }), { type: 'visitor-input' });
     // 08: the three cats come into whichever Room the visitor opens the page
     // in, so the Room holds the whole Cast; where the cats stand is theirs.
     expect(
