@@ -1,4 +1,5 @@
-import { filmsOn, type FilmId } from './films'; // 18: the Films each shelf holds
+// 18: the Films each shelf holds. 19: and what one of them says for itself.
+import { filmById, filmsOn, type Film, type FilmId } from './films';
 import type { ActorId } from './actors';
 import type { Point } from './stage';
 
@@ -76,6 +77,17 @@ const RUMMAGE_MS = 1800;
 const PIN_MS = 1000;
 
 /**
+ * How long a Poster takes to come out of its frame, in milliseconds.
+ *
+ * The design note's 450 ms: the Poster scales about its centre while its clip
+ * opens, so the characters and props emerge from behind the frame's edges. The
+ * details are not readable until it is over (story 22), which is the only
+ * reason the model counts it at all — the DOM layer would otherwise need no
+ * permission to animate.
+ */
+const EXPAND_MS = 450;
+
+/**
  * Where the rummage has got to.
  *
  * The steps run in this order and never backwards: choosing a shelf starts at
@@ -114,10 +126,27 @@ export interface CinemaSlice {
    * outcome and none of the performance, exactly as a walk is.
    */
   readonly until: number | null;
+  /**
+   * The pinned Poster the visitor's pointer or focus is on, if any.
+   *
+   * One at a time: a Poster is expanded by being looked at, and a visitor can
+   * only look at one thing, so moving to the Poster next door moves the
+   * expansion rather than opening a second.
+   */
+  readonly expanded: FilmId | null;
+  /**
+   * When that Poster has finished coming out of its frame, on the ticks' clock.
+   *
+   * `null` is an expansion with no opening left to do — which is a finished one
+   * and, when the apartment may not move, every one of them from the moment it
+   * starts: the visitor is given the details rather than made to wait out a
+   * performance they asked not to see.
+   */
+  readonly expandedUntil: number | null;
 }
 
 export function createCinema(): CinemaSlice {
-  return { attended: null, step: 'seated', errand: null, pinned: [], until: null };
+  return { attended: null, step: 'seated', errand: null, pinned: [], until: null, expanded: null, expandedUntil: null };
 }
 
 /** The genre whose Posters are on the wall, read off the Posters themselves. */
@@ -148,8 +177,60 @@ export function withChosenShelf(slice: CinemaSlice, shelf: CinemaShelf): CinemaS
  */
 export function settleCinema(slice: CinemaSlice): CinemaSlice {
   const pinned = slice.errand ? filmsOn(slice.errand) : slice.pinned;
-  if (slice.attended === null && slice.step === 'seated' && pinned === slice.pinned) return slice;
-  return { attended: null, step: 'seated', errand: null, pinned, until: null };
+  const settled = slice.attended === null && slice.step === 'seated' && pinned === slice.pinned;
+  // 19: nobody is looking at a Poster in a Room they have walked out of, so the
+  // wall they come back to is the wall, flat, however they left it.
+  if (settled && slice.expanded === null) return slice;
+  return { attended: null, step: 'seated', errand: null, pinned, until: null, expanded: null, expandedUntil: null };
+}
+
+// 19: the Poster expansion.
+
+/**
+ * The Room with a Poster looked at, or with none.
+ *
+ * `film` is what the visitor's pointer or focus is on. Only a Poster that is
+ * actually on the wall can be expanded, so a report about a Film still rolled
+ * up in its bookshelf is a report about nothing and leaves the Room alone.
+ */
+export function withAttendedPoster(
+  slice: CinemaSlice,
+  film: FilmId | null,
+  now: number | null,
+  motionOn: boolean,
+): CinemaSlice {
+  if (film !== null && !slice.pinned.includes(film)) return slice;
+  if (slice.expanded === film) return slice;
+  return { ...slice, expanded: film, expandedUntil: film === null ? null : beatUntil(now, motionOn, EXPAND_MS) };
+}
+
+/**
+ * The Room with the expansion one tick further on.
+ *
+ * The only thing that finishes: an expansion is over when the clock passes it,
+ * or the moment it starts when the apartment is not allowed to move.
+ */
+export function tickPoster(slice: CinemaSlice, now: number | null, motionOn: boolean): CinemaSlice {
+  if (slice.expandedUntil === null) return slice;
+  if (motionOn && !(now !== null && now >= slice.expandedUntil)) return slice;
+  return { ...slice, expandedUntil: null };
+}
+
+/** The Poster coming out of its frame, or already out of it. */
+export function expandedPosterOf(slice: CinemaSlice): FilmId | null {
+  return slice.expanded;
+}
+
+/**
+ * The Film whose details may be read right now, or `null`.
+ *
+ * Story 22, and the whole of what the panel needs: nothing at all until a
+ * Poster has finished expanding, and then that Poster's Film, with its titles,
+ * year, pairing, premise, reason and link on it.
+ */
+export function readableFilmOf(slice: CinemaSlice): Film | null {
+  if (slice.expanded === null || slice.expandedUntil !== null) return null;
+  return filmById(slice.expanded);
 }
 
 /**
@@ -210,8 +291,17 @@ export function stepCinema(
       const shelf = slice.errand;
       if (!shelf || !arrivedAt(boy, CINEMA_MARKS.shelves[shelf])) return WAITING(slice);
       // The wall clears as he reaches in, not when he set off: the Posters that
-      // were up stay up until there is something to replace them with.
-      return WAITING({ ...slice, step: 'rummaging', pinned: [], until: beatUntil(now, motionOn, RUMMAGE_MS) });
+      // were up stay up until there is something to replace them with. 19: an
+      // expanded Poster goes with them — a Poster that has left the wall cannot
+      // still be open on it.
+      return WAITING({
+        ...slice,
+        step: 'rummaging',
+        pinned: [],
+        until: beatUntil(now, motionOn, RUMMAGE_MS),
+        expanded: null,
+        expandedUntil: null,
+      });
     }
     case 'rummaging': {
       if (!beatOver(slice, now, motionOn)) return WAITING(slice);

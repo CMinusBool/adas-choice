@@ -309,6 +309,13 @@
 
           07: this is also the Room's stage, so the Cast walks on it.
         -->
+        <!-- 19: the stage and the details panel share one positioned column,
+             so the panel can sit over the shelves' zone on a wide shell and
+             drop below the stage on a narrow one (design note §4.6) without
+             either of them leaving the Room's own width. The stage keeps its
+             own indentation: the wrapper is a new parent, not a rewrite of
+             the Room. -->
+        <div class="cinema-room">
         <div class="stage stage-cinema" data-stage="cinema">
           <div class="cinema-room-art" aria-hidden="true">
             <span class="cinema-cornice"></span>
@@ -372,6 +379,27 @@
             <span class="visually-hidden" data-music-source-label>讓放映機空轉</span>
           </button>
           <button class="cinema-prop projector-gate" type="button" data-projector-gate aria-disabled="true" style="--x:445;--y:600;--w:100;--h:100" aria-label="還沒有膠卷。先選一部片。" data-i18n-aria="projectorGateEmpty"></button>
+        </div>
+        <!-- 19, §4.6: what an expanded Poster opens onto. The Film's own
+             strings — both titles, the year, the premise and the reason — are
+             per-Film data and come from `src/world/films.ts`, so the only copy
+             keys here are the labels around them. The link's URL is that
+             Film's too, which is why no `href` is written at first paint:
+             `src/dom/cinema-room.ts` sets it with the rest. `aria-live` is how
+             a hover-driven panel reaches a reader who is not hovering:
+             focusing a Poster announces its Film. -->
+        <div class="poster-details" id="poster-details" aria-live="polite" hidden>
+          <h2 class="details-title"><span class="details-title-main"></span><span class="details-title-other"></span></h2>
+          <p class="details-meta"><span class="details-year"></span><span class="details-pairing"></span></p>
+          <h3 class="details-label" data-i18n="detailsPremise">故事</h3>
+          <p class="details-text details-premise"></p>
+          <h3 class="details-label" data-i18n="detailsReason">為什麼值得看</h3>
+          <p class="details-text details-reason"></p>
+          <div class="details-actions">
+            <a class="details-link" target="_blank" rel="noopener" data-i18n="detailsLink">在 Apple TV 找到它</a>
+            <button class="details-close" type="button" data-i18n="detailsClose">收起</button>
+          </div>
+        </div>
         </div>
       </section>
       <section class="room" id="room-activities" data-room="activities" aria-labelledby="activities-title" hidden>

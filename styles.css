@@ -333,6 +333,10 @@ html.dialog-open { overflow: hidden; }
    Props the visitor can actually use take theirs back. */
 .stage-cinema a.cinema-prop, .stage-cinema button.cinema-prop { pointer-events: auto; }
 .stage-cinema button.cinema-prop { padding: 0; border: 0; background: none; cursor: pointer; }
+/* 19: a Poster is a `.cinema-poster`, not a `.cinema-prop`, so it was left
+   behind by the rule above and took no pointer events at all — reachable by
+   keyboard and by nothing else. An expansion the pointer drives needs them. */
+.stage-cinema button.cinema-poster { pointer-events: auto; }
 
 /* P1-P3, P5, P6: the empty Room. */
 .cinema-cornice { position: absolute; left: 0; right: 0; top: 6.7%; height: calc(var(--u) * 6); background: #6b5344; }
@@ -428,6 +432,39 @@ html.dialog-open { overflow: hidden; }
 .cinema-poster:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
 @keyframes poster-unroll { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes poster-pin-push { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
+/* 19: the expansion (§4.4) and what spills out of the frame (§4.3).
+
+   Hover or focus grows the Poster about its own centre over 450 ms, and the
+   characters and props that were tucked behind the frame come out over its
+   edges: `.poster-spill` is clipped to the frame at rest and opens past it as
+   the Poster grows, which is the delivered artwork's own arrangement — one
+   image, clipped flat and unclipped expanded, so the two states cannot drift
+   apart. Until ticket 36 lands that image the spill is three CSS shapes in
+   the Film's genre colours, and it is replaced together with `.poster-ground`
+   rather than separately.
+
+   Slot 3 sits 90 units left of where it would grow to, which is the design
+   note's clamp keeping the widest Poster inside the stage. The scale steps up
+   as the stage narrows (the stage is the container), because a Poster 1.6x a
+   51 px frame is not a Poster anyone can look at. It does not reach the note's
+   220 CSS px floor on a phone: the same section forbids a Poster taller than
+   the stage, and at that width the details card below the stage is what
+   carries the reading. */
+.cinema-poster { transition: scale .45s cubic-bezier(.22, .75, .2, 1), translate .45s cubic-bezier(.22, .75, .2, 1), box-shadow .2s; }
+.cinema-poster.is-expanded { z-index: 20; scale: 1.6; }
+.cinema-poster.is-expanded[data-poster-slot="3"] { translate: calc(var(--u) * -90); }
+@container (max-width: 900px) { .cinema-poster.is-expanded { scale: 2.2; } }
+@container (max-width: 620px) { .cinema-poster.is-expanded { scale: 2.9; } }
+/* Behind the stock, so what is inside the frame stays hidden by it and only
+   what breaks the edge is ever seen. */
+.cinema-poster .poster-spill { position: absolute; inset: 0; z-index: -1; clip-path: inset(0); opacity: 0; pointer-events: none; transition: clip-path .45s cubic-bezier(.22, .75, .2, 1), opacity .2s; }
+.cinema-poster.is-expanded .poster-spill { clip-path: inset(-26% -34%); opacity: 1; }
+.poster-spill > span { position: absolute; box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 8) #00000066; }
+.poster-spill .spill-figure { left: -20%; bottom: 8%; width: 34%; height: 56%; border-radius: 46% 46% 28% 28% / 32% 32% 12% 12%; background: linear-gradient(var(--horizon), var(--ground)); }
+.poster-spill .spill-figure::before { content: ""; position: absolute; left: 50%; top: -17%; translate: -50% 0; width: 52%; aspect-ratio: 1; border-radius: 50%; background: var(--stripe); }
+.poster-spill .spill-prop-a { right: -18%; top: -13%; width: 28%; aspect-ratio: 1; border-radius: 50%; background: var(--stripe); }
+.poster-spill .spill-prop-b { right: -12%; bottom: -9%; width: 34%; height: 15%; border-radius: calc(var(--u) * 6) / 50%; background: var(--horizon); }
+
 /* While his arm is in a bay its tubes rattle, which is the whole of what the
    rummage Beat looks like until the Boy's own frames are drawn. */
 .cinema-shelf.is-rummaging .shelf-body { animation: shelf-rummage .18s steps(2, end) infinite; }
@@ -461,11 +498,45 @@ html.dialog-open { overflow: hidden; }
 .projector-motor:hover .motor-cap, .projector-motor[aria-pressed="true"] .motor-cap { box-shadow: 0 0 calc(var(--u) * 40) calc(var(--u) * 8) #d9483b99; }
 .projector-motor:focus-visible { outline: 3px solid #d9483b; outline-offset: 3px; border-radius: 50%; }
 
-.motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap, .motion-off .cinema-poster { transition: none; }
+/* 19, §4.6: the details card an expanded Poster opens onto. Below the stage at
+   page type by default, and over the shelves' zone on a wide shell, where it
+   is clear of every expanded Poster. `.cinema-room` is the column the two of
+   them share; the stage hands it the width and the margin it used to hold. */
+.cinema-room { position: relative; width: 100%; max-width: 64rem; margin: 2.2rem auto 0; }
+.cinema-room .stage { margin: 0; max-width: none; }
+.poster-details { margin-top: 1.4rem; padding: 1.2rem 1.4rem; border: 1px solid var(--line); border-left: 6px solid var(--stripe, var(--pink)); border-radius: 12px; background: linear-gradient(var(--surface), var(--surface)) #241c26; font-size: clamp(1rem, .92rem + .34vw, 1.125rem); animation: poster-details-in .15s ease-out; }
+/* The Film's genre stripe, again: the card came off the same shelf. */
+.poster-details[data-shelf="comedy"] { --stripe: #f2c14e; }
+.poster-details[data-shelf="romance"] { --stripe: #e86f8f; }
+.poster-details[data-shelf="horror"] { --stripe: #6a4a82; }
+.details-title { margin: 0; font-size: 1.55em; line-height: 1.25; font-weight: 700; }
+/* The other language beneath, smaller and muted, so either reader finds it. */
+.details-title-other { display: block; margin-top: .15rem; font-size: .62em; font-weight: 500; color: var(--muted); }
+.details-meta { display: flex; flex-wrap: wrap; gap: .2rem .6rem; margin: .5rem 0 0; color: var(--muted); font-size: .86em; }
+.details-pairing::before { content: "·"; margin-right: .6rem; }
+.details-label { margin: .95rem 0 .3rem; font-size: .86em; font-weight: 650; letter-spacing: .04em; color: var(--pink); }
+.details-text { margin: 0; color: #e1d6de; line-height: 1.75; }
+.details-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.1rem; }
+.details-link, .details-close { display: inline-flex; align-items: center; min-height: 44px; padding: .55rem 1.1rem; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: filter .2s, background-color .2s; }
+.details-link { border: 0; background: var(--pink); color: var(--bg); font-weight: 650; text-decoration: none; }
+.details-link:hover { filter: brightness(1.08); }
+.details-close { border: 1px solid var(--line); background: transparent; color: var(--ink); }
+.details-close:hover { background: #ffffff0f; }
+@keyframes poster-details-in { from { opacity: 0; } to { opacity: 1; } }
+@media (min-width: 1080px) {
+  /* (540,280)-(1030,640) in stage units: left of the board, clear of slot 1
+     expanded, and over shelves that are inert while a Poster is open. */
+  .poster-details { position: absolute; left: 33.75%; top: 24%; width: 31.5%; max-height: 66%; margin: 0; z-index: 910; overflow-y: auto; overscroll-behavior: contain; font-size: .8125rem; box-shadow: 0 24px 80px #000a; }
+  /* A shelf the card is lying over cannot be clicked through it: the visitor
+     is reading a Film, not choosing a genre (§4.6). */
+  .cinema-room:has(.poster-details:not([hidden])) .cinema-shelf { pointer-events: none; }
+}
+
+.motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap, .motion-off .cinema-poster, .motion-off .poster-spill, .motion-off .details-link, .motion-off .details-close { transition: none; }
 /* Motion off is the visitor's own choice, so the Poster is simply on the wall:
    the unroll, the pins and the shelf's rattle all resolve to their end state.
    A system reduced-motion request is covered by the block above instead. */
-.motion-off .cinema-poster, .motion-off .poster-pin, .motion-off .is-rummaging .shelf-body { animation: none; }
+.motion-off .cinema-poster, .motion-off .poster-pin, .motion-off .poster-details, .motion-off .is-rummaging .shelf-body { animation: none; }
 
 /* 16: the Activity Room — `design/12-activity-room.md`.
 

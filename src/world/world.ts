@@ -37,19 +37,23 @@ import {
   CINEMA_MARKS,
   boyMark,
   createCinema,
+  expandedPosterOf,
   isOnMark,
   openShelfOf,
+  readableFilmOf,
   seatOf,
   settleCinema,
   stepCinema,
+  tickPoster,
+  withAttendedPoster,
   withAttendedShelf,
   withChosenShelf,
   type CinemaShelf,
   type CinemaSlice,
   type CinemaStep,
 } from './cinema';
-// 18: films
-import type { FilmId } from './films';
+// 18: films. 19: and the details one of them reads out when its Poster opens.
+import type { Film, FilmId } from './films';
 // 06: audio
 import { createAudio, isMusicSourceSwitchedOn, withFilmAudio, withInteraction, withMusicSourceToggled, withSoundToggled, type AudioSlice, type AudioTier } from './audio';
 // end 06
@@ -177,7 +181,11 @@ export type WorldEvent =
   // 18: cinema — a bookshelf clicked or activated. `now` is the clock the
   // errand's Beats are timed against; it is the same reading the ticks carry,
   // because the model is never allowed to ask what time it is.
-  | { readonly type: 'cinema-shelf-chosen'; readonly shelf: CinemaShelf; readonly now: number };
+  | { readonly type: 'cinema-shelf-chosen'; readonly shelf: CinemaShelf; readonly now: number }
+  // 19: cinema — the pinned Poster the visitor's pointer or focus is on, or
+  // `null` for none. Hover and focus are the same report, because they are the
+  // same thing happening: the visitor is looking at that Poster.
+  | { readonly type: 'cinema-poster-attended'; readonly film: FilmId | null; readonly now: number };
 
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
@@ -252,7 +260,7 @@ export function advance(world: World, event: WorldEvent): World {
       // 14: pausing motion mid-arrival completes it, the way a walk settles.
       // 18: and an errand in progress ends with its Posters on the wall rather
       // than with the Boy standing at a shelf holding three tubes for ever.
-      return runErrand(withArrivalOver({ ...world, motion, actors }), null);
+      return runCinema(withArrivalOver({ ...world, motion, actors }), null);
     }
     case 'reduced-motion-changed': {
       const motion = withReducedMotion(world.motion, event.reducedMotion);
@@ -262,7 +270,7 @@ export function advance(world: World, event: WorldEvent): World {
       const stilled = { ...world, motion, actors };
       // 14: the arrival is motion, so a system that starts asking for stillness
       // mid-way gets its outcome rather than the rest of it.
-      return runErrand(motion.paused ? withArrivalOver(stilled) : stilled, null);
+      return runCinema(motion.paused ? withArrivalOver(stilled) : stilled, null);
     }
     case 'language-toggled': {
       return { ...world, language: toggleLanguage(world.language) };
@@ -305,7 +313,7 @@ export function advance(world: World, event: WorldEvent): World {
       const ticked = actors === cued.actors ? cued : { ...cued, actors };
       // 18: the same tick is the Cinema Room's clock: the errand's Beats end
       // on it, and so does each leg of the walk it is waiting on.
-      return runErrand(ticked, event.now);
+      return runCinema(ticked, event.now);
     }
     // 07: actors
     // 14: the Entryway
@@ -346,7 +354,14 @@ export function advance(world: World, event: WorldEvent): World {
       if (world.rooms.current !== 'cinema') return world;
       const cinema = withChosenShelf(world.cinema, event.shelf);
       const actors = sendActor(world.actors, 'boy', CINEMA_MARKS.shelves[event.shelf], 'walk', motionIsOn(world));
-      return runErrand({ ...world, cinema, actors }, event.now);
+      return runCinema({ ...world, cinema, actors }, event.now);
+    }
+    // 19: cinema — a Poster looked at. Nothing else in the Room moves for it:
+    // the expansion is the Poster's own, and the Boy stays where he is.
+    case 'cinema-poster-attended': {
+      if (world.rooms.current !== 'cinema') return world;
+      const cinema = withAttendedPoster(world.cinema, event.film, event.now, motionIsOn(world));
+      return cinema === world.cinema ? world : { ...world, cinema };
     }
     // 16: the Activity Room
     case 'activity-card-opened':
@@ -374,6 +389,22 @@ export function advance(world: World, event: WorldEvent): World {
  * loop runs the whole errand out in this one call, which is how the Posters
  * still reach the wall for a visitor who asked the apartment to hold still.
  */
+// 19: cinema
+/**
+ * The Cinema Room's clock, in one call.
+ *
+ * Two things in this Room run on time — the Boy's errand and the expansion of
+ * a Poster — and every moment that reaches one reaches the other: a tick, a
+ * motion preference changing, a shelf chosen. Keeping them behind one function
+ * is what stops a caller remembering only half of that.
+ */
+function runCinema(world: World, now: number | null): World {
+  const ran = runErrand(world, now);
+  if (ran.rooms.current !== 'cinema') return ran;
+  const cinema = tickPoster(ran.cinema, now, motionIsOn(ran));
+  return cinema === ran.cinema ? ran : { ...ran, cinema };
+}
+
 function runErrand(world: World, now: number | null): World {
   if (world.rooms.current !== 'cinema' || world.cinema.step === 'seated') return world;
   const motionOn = motionIsOn(world);
@@ -523,6 +554,30 @@ export function openShelf(world: World): CinemaShelf | null {
  */
 export function rummagingShelf(world: World): CinemaShelf | null {
   return world.cinema.step === 'rummaging' ? world.cinema.errand : null;
+}
+
+// 19: cinema
+/**
+ * The Poster coming out of its frame, or already out of it.
+ *
+ * What the board paints as expanded — one at a time, and never a Poster that
+ * is not on the wall.
+ */
+export function expandedPoster(world: World): FilmId | null {
+  return expandedPosterOf(world.cinema);
+}
+
+/**
+ * The Film whose details may be read right now, or `null`.
+ *
+ * Everything the details panel says, behind one question: it is `null` while a
+ * Poster is still opening, so the panel cannot paint a word before the
+ * expansion has finished, and it carries the Film itself — both titles, the
+ * year, the pairing, the premise, the reason and the link — so the panel reads
+ * the dictionary rather than being told what to say.
+ */
+export function posterDetails(world: World): Film | null {
+  return readableFilmOf(world.cinema);
 }
 
 /**

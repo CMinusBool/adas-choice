@@ -9,16 +9,19 @@ import {
   attendedShelf,
   cinemaStep,
   createWorld,
+  expandedPoster,
   filmById,
   filmsOn,
   isSeated,
   isWalkable,
   openShelf,
   pinnedPosters,
+  posterDetails,
   rummagingShelf,
   type ActorId,
   type ActorView,
   type CinemaShelf,
+  type FilmId,
   type World,
   type WorldInputs,
 } from './index';
@@ -81,6 +84,44 @@ describe('the Films each bookshelf holds', () => {
     const film = filmById('knives-out');
     expect(film.title).toEqual({ 'zh-Hant': '鋒迴路轉', en: 'Knives Out' });
     expect(film.year).toBe(2019);
+  });
+
+  // 19: what the details panel reads out once a Poster has finished expanding.
+  // Every string is the research note's, verbatim, in both languages.
+  it('gives every Film a premise and a reason to watch in both languages', () => {
+    for (const shelf of CINEMA_SHELVES) {
+      for (const id of filmsOn(shelf)) {
+        const film = filmById(id);
+        for (const language of ['zh-Hant', 'en'] as const) {
+          expect(film.premise[language].length).toBeGreaterThan(10);
+          expect(film.reason[language].length).toBeGreaterThan(10);
+        }
+        expect(film.premise['zh-Hant']).not.toBe(film.premise.en);
+        expect(film.reason['zh-Hant']).not.toBe(film.reason.en);
+      }
+    }
+  });
+
+  it('records which way round each Film is watched, five one way and four the other', () => {
+    const pairings = CINEMA_SHELVES.flatMap(shelf => filmsOn(shelf).map(id => filmById(id).pairing));
+    expect(pairings.filter(pairing => pairing === 'zh-audio-en-subs')).toHaveLength(5);
+    expect(pairings.filter(pairing => pairing === 'en-audio-zh-subs')).toHaveLength(4);
+    expect(filmById('knives-out').pairing).toBe('en-audio-zh-subs');
+    expect(filmById('mr-vampire').pairing).toBe('zh-audio-en-subs');
+  });
+
+  it('links every Film to the one official page that verified its pairing', () => {
+    const links = new Set<string>();
+    for (const shelf of CINEMA_SHELVES) {
+      for (const id of filmsOn(shelf)) {
+        const link = filmById(id).link;
+        expect(link.startsWith('https://tv.apple.com/')).toBe(true);
+        links.add(link);
+      }
+    }
+    // One page each: a link shared by two Films would send a visitor to the
+    // wrong film, which no amount of copy could rescue.
+    expect(links.size).toBe(9);
   });
 });
 
@@ -334,5 +375,135 @@ describe('choosing a bookshelf', () => {
     const horror = runUntil(choose('horror', comedy), world => cinemaStep(world) === 'seated', 40000);
     expect(pinnedPosters(horror)).toEqual(filmsOn('horror'));
     expect(openShelf(horror)).toBe('horror');
+  });
+});
+
+// 19: the Poster expansion. Hovering or focusing a pinned Poster opens it out
+// of its frame, and once it has finished opening its Film can be read.
+describe('expanding a pinned Poster', () => {
+  /** The Cinema Room with one shelf's three Posters already on the wall. */
+  function wallUp(shelf: CinemaShelf = 'comedy', world = inTheCinema()): World {
+    const chosen = advance(world, { type: 'cinema-shelf-chosen', shelf, now: clock });
+    return runUntil(chosen, next => cinemaStep(next) === 'seated', 40000);
+  }
+
+  /** A pointer resting on a Poster, a Tab landing on one, or both leaving. */
+  function attend(world: World, film: FilmId | null): World {
+    return advance(world, { type: 'cinema-poster-attended', film, now: clock });
+  }
+
+  it('expands the Poster the visitor’s pointer or focus is on', () => {
+    const wall = wallUp();
+    expect(expandedPoster(wall)).toBe(null);
+
+    const hovered = attend(wall, 'knives-out');
+    expect(expandedPoster(hovered)).toBe('knives-out');
+  });
+
+  it('collapses it again when the pointer and focus both leave', () => {
+    const away = attend(attend(wallUp(), 'knives-out'), null);
+    expect(expandedPoster(away)).toBe(null);
+  });
+
+  it('moves the expansion to the Poster next door rather than opening two', () => {
+    const second = attend(attend(wallUp(), 'knives-out'), 'kung-fu-hustle');
+    expect(expandedPoster(second)).toBe('kung-fu-hustle');
+  });
+
+  it('is the same world when the same Poster is reported twice', () => {
+    const hovered = attend(wallUp(), 'knives-out');
+    expect(attend(hovered, 'knives-out')).toBe(hovered);
+  });
+
+  it('ignores a Film that is not on the wall', () => {
+    // The horror shelf's Posters are rolled up in their bookshelf, so there is
+    // nothing there to hover: a report about one means nothing.
+    const wall = wallUp();
+    expect(attend(wall, 'mr-vampire')).toBe(wall);
+    expect(expandedPoster(wall)).toBe(null);
+  });
+
+  it('ignores a Poster reported from another Room', () => {
+    const elsewhere = createWorld(plainArrival);
+    expect(attend(elsewhere, 'knives-out')).toBe(elsewhere);
+  });
+
+  // Story 22: no text before the expansion has finished.
+  it('keeps the details back until the Poster has finished expanding', () => {
+    const hovered = attend(wallUp(), 'knives-out');
+    expect(expandedPoster(hovered)).toBe('knives-out');
+    expect(posterDetails(hovered)).toBe(null);
+
+    const open = runUntil(hovered, world => posterDetails(world) !== null, 4000);
+    expect(posterDetails(open)?.id).toBe('knives-out');
+  });
+
+  it('reads out the Film’s name, year, premise and reason in both languages', () => {
+    const open = runUntil(attend(wallUp('romance'), 'about-time'), world => posterDetails(world) !== null, 4000);
+    const film = posterDetails(open);
+    expect(film).not.toBe(null);
+    expect(film?.title).toEqual({ 'zh-Hant': '真愛每一天', en: 'About Time' });
+    expect(film?.year).toBe(2013);
+    expect(film?.premise['zh-Hant']).toContain('提姆');
+    expect(film?.premise.en).toContain('time');
+    expect(film?.reason['zh-Hant']).toContain('父親');
+    expect(film?.reason.en).toContain('fathers');
+    expect(film?.pairing).toBe('en-audio-zh-subs');
+  });
+
+  it('takes the details away again with the Poster', () => {
+    const open = runUntil(attend(wallUp(), 'knives-out'), world => posterDetails(world) !== null, 4000);
+    expect(posterDetails(attend(open, null))).toBe(null);
+  });
+
+  it('starts the expansion over when the pointer moves to the Poster next door', () => {
+    const open = runUntil(attend(wallUp(), 'knives-out'), world => posterDetails(world) !== null, 4000);
+    const moved = attend(open, 'kung-fu-hustle');
+    // The second Poster has its own opening to do: its details are not simply
+    // inherited from the one the visitor has just left.
+    expect(posterDetails(moved)).toBe(null);
+    expect(posterDetails(runUntil(moved, world => posterDetails(world) !== null, 4000))?.id).toBe('kung-fu-hustle');
+  });
+
+  it('reads the details straight out when the apartment may not move', () => {
+    // No tick at all: a visitor who asked for stillness is owed the details
+    // rather than 450 ms of a Poster unfolding at them.
+    const still = inTheCinema(createWorld({ ...plainArrival, reducedMotion: true }));
+    const open = attend(wallUp('horror', still), 'get-out');
+    expect(expandedPoster(open)).toBe('get-out');
+    expect(posterDetails(open)?.id).toBe('get-out');
+  });
+
+  it('finishes an expansion in progress when motion is turned off', () => {
+    const hovered = attend(wallUp(), 'knives-out');
+    expect(posterDetails(hovered)).toBe(null);
+
+    const paused = advance(hovered, { type: 'motion-toggled' });
+    expect(expandedPoster(paused)).toBe('knives-out');
+    expect(posterDetails(paused)?.id).toBe('knives-out');
+  });
+
+  it('closes the Poster when he clears the wall to pin another shelf’s', () => {
+    const open = runUntil(attend(wallUp(), 'knives-out'), world => posterDetails(world) !== null, 4000);
+    const rummaging = runUntil(
+      advance(open, { type: 'cinema-shelf-chosen', shelf: 'horror', now: clock }),
+      world => cinemaStep(world) === 'rummaging',
+      40000,
+    );
+    expect(pinnedPosters(rummaging)).toEqual([]);
+    expect(expandedPoster(rummaging)).toBe(null);
+    expect(posterDetails(rummaging)).toBe(null);
+  });
+
+  it('closes the Poster when the visitor walks out of the Room', () => {
+    const open = runUntil(attend(wallUp(), 'knives-out'), world => posterDetails(world) !== null, 4000);
+    const left = advance(open, { type: 'hash-changed', hash: '#/entryway' });
+    expect(expandedPoster(left)).toBe(null);
+
+    // The wall is still up when they come back; nothing on it is open.
+    const back = inTheCinema(left);
+    expect(pinnedPosters(back)).toEqual(filmsOn('comedy'));
+    expect(expandedPoster(back)).toBe(null);
+    expect(posterDetails(back)).toBe(null);
   });
 });
