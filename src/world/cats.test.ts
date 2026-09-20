@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  BREAKABLE_MARK,
-  BREAKABLE_OWNER,
+  BREAKABLE_IDS,
   CAT_CLEARANCE,
   CAT_IDS,
   CAT_MARKS,
@@ -10,6 +9,7 @@ import {
   actorView,
   actorsIn,
   advance,
+  breakableById,
   breakableState,
   catSfx,
   createWorld,
@@ -269,13 +269,28 @@ describe('the marks a Room offers a cat', () => {
 
 describe('a cat and her own Breakable', () => {
   it('gives every Breakable to exactly one cat, and every cat at least one', () => {
-    expect(BREAKABLE_OWNER['entryway-vase']).toBe('mica');
-    expect(BREAKABLE_OWNER['cinema-film-can']).toBe('mica');
-    expect(BREAKABLE_OWNER['cinema-lucky-cat']).toBe('mira');
-    expect(BREAKABLE_OWNER['activity-pencil-mug']).toBe('mira');
-    expect(BREAKABLE_OWNER['snow-globe']).toBe('luna');
+    expect(breakableById('entryway-vase').owner).toBe('mica');
+    expect(breakableById('cinema-film-can').owner).toBe('mica');
+    expect(breakableById('cinema-lucky-cat').owner).toBe('mira');
+    expect(breakableById('activity-pencil-mug').owner).toBe('mira');
+    expect(breakableById('snow-globe').owner).toBe('luna');
     // Never a Breakable with nobody's name on it, and never a cat left out.
-    expect(new Set(Object.values(BREAKABLE_OWNER))).toEqual(new Set(CAT_IDS));
+    expect(new Set(BREAKABLE_IDS.map(id => breakableById(id).owner))).toEqual(new Set(CAT_IDS));
+  });
+
+  /**
+   * The knock mark is the one place a cat stands that the visitor can check
+   * against the Room she is standing in, so it has to be on that Room's floor
+   * — and three of the five are a roam mark the design note already named.
+   */
+  it('stands her on her own Room’s floor to reach for it, and never shares a sound', () => {
+    for (const id of BREAKABLE_IDS) {
+      const breakable = breakableById(id);
+      expect(breakable.id).toBe(id);
+      expect(isWalkable(breakable.room, breakable.mark)).toBe(true);
+      expect(breakable.knockMs).toBeGreaterThan(0);
+    }
+    expect(new Set(BREAKABLE_IDS.map(id => breakableById(id).sfx)).size).toBe(BREAKABLE_IDS.length);
   });
 
   it('occasionally knocks her own Breakable down, with its own breaking sound', () => {
@@ -296,7 +311,7 @@ describe('a cat and her own Breakable', () => {
    * knock, which is what makes the walk below unambiguous.
    */
   it('cannot knock a Breakable down after a hand has stopped her on the way to it', () => {
-    const mark = BREAKABLE_MARK['entryway-vase'];
+    const mark = breakableById('entryway-vase').mark;
     const step = 100;
     let now = clock;
     let world = createWorld({ ...plainArrival, random: seededRandom(1) });

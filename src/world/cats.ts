@@ -1,5 +1,7 @@
 // 08: the three cats roam
 import type { ActorId } from './actors';
+// 09: the hall table's mark is the Entryway's own, written down once there.
+import { ENTRYWAY_MARKS } from './entryway';
 import type { RoomId } from './rooms';
 import { distance, type Point } from './stage';
 
@@ -178,8 +180,8 @@ export function meowOf(cat: CatId): string {
  * The five Breakables the apartment holds, across four Rooms (design notes
  * 10 §4.2, 11 §5.2, 12 §5.4, 13 §7).
  *
- * A cat's own name is not part of the id: the ownership below is the single
- * source of truth for who reaches for which, so nothing else in the codebase
+ * A cat's own name is not part of the id: the table below is the single source
+ * of truth for who reaches for which, so nothing else in the codebase
  * hard-codes the pairing a second time.
  */
 export type BreakableId =
@@ -199,63 +201,98 @@ export const BREAKABLE_IDS: readonly BreakableId[] = [
 ];
 
 /**
- * Which cat owns each Breakable.
+ * Everything the apartment knows about one Breakable, in one record.
  *
- * The owner's ruling of 2026-09-20: every cat owns at least one, the tally is
- * 2/2/1 (Míca, Mira, Luna), and the roll below is per-cat-per-Breakable rather
- * than "whoever is in the Room" — Luna must never reach for Míca's vase even
- * though both stand in the Entryway.
+ * A `Film` for china: who owns it, where it stands, where she stands to push
+ * it, how long that takes and what it sounds like going over are five facts
+ * about one thing rather than five tables that have to be kept in step.
  */
-export const BREAKABLE_OWNER: Record<BreakableId, CatId> = {
-  'entryway-vase': 'mica',
-  'cinema-film-can': 'mica',
-  'cinema-lucky-cat': 'mira',
-  'snow-globe': 'luna',
-  'activity-pencil-mug': 'mira',
+export interface Breakable {
+  readonly id: BreakableId;
+  /**
+   * The cat who owns it, and the only one who ever reaches for it.
+   *
+   * The owner's ruling of 2026-09-20: every cat owns at least one, the tally
+   * is 2/2/1 (Míca, Mira, Luna), and the roll is per-cat-per-Breakable rather
+   * than "whoever is in the Room" — Luna must never reach for Míca's vase even
+   * though both stand in the Entryway.
+   */
+  readonly owner: CatId;
+  /** The Room it stands in. */
+  readonly room: RoomId;
+  /**
+   * Where she stands to knock it down, in stage units.
+   *
+   * Three of these are marks a cat was already roaming to — the Cinema's two
+   * (design 13 §8, Beats B9/B10) and the Game Room's sideboard cat bed (design
+   * 11 §5.3) — because the design notes put a cat's roam mark exactly where
+   * her Breakable stands, and they are taken from `CAT_MARKS` above rather
+   * than written out again. The Entryway's `K` is the hall table's own mark in
+   * `entryway.ts`, which is the only place that number is written down. Only
+   * the Activity Room's `M-mug` (design 12 §4.3) is a point of its own: no cat
+   * stands there except on her way to a knock.
+   */
+  readonly mark: Point;
+  /**
+   * How long she holds at the mark before it falls, in milliseconds.
+   *
+   * Animation is parked, so this is the whole of the Beat until its sheet is
+   * drawn: the design notes' own timings (10 §4.2's S23+S24, 13 §8's B9/B10,
+   * 11 §5.3's wobble-then-fall, 12's unscored equivalent) with no in-between
+   * frames to paint, exactly like a petting Beat with no `[data-beat]` layer.
+   */
+  readonly knockMs: number;
+  /** The sound it makes going over. One name each: the five never share one. */
+  readonly sfx: string;
+}
+
+const BREAKABLES: Readonly<Record<BreakableId, Breakable>> = {
+  'entryway-vase': {
+    id: 'entryway-vase',
+    owner: 'mica',
+    room: 'entryway',
+    mark: ENTRYWAY_MARKS.K,
+    knockMs: 2300,
+    sfx: 'ceramic-break',
+  },
+  'cinema-film-can': {
+    id: 'cinema-film-can',
+    owner: 'mica',
+    room: 'cinema',
+    mark: CAT_MARKS.cinema[1],
+    knockMs: 1800,
+    sfx: 'film-can-fall',
+  },
+  'cinema-lucky-cat': {
+    id: 'cinema-lucky-cat',
+    owner: 'mira',
+    room: 'cinema',
+    mark: CAT_MARKS.cinema[2],
+    knockMs: 1400,
+    sfx: 'porcelain-shatter',
+  },
+  'snow-globe': {
+    id: 'snow-globe',
+    owner: 'luna',
+    room: 'games',
+    mark: CAT_MARKS.games[3],
+    knockMs: 1950,
+    sfx: 'snow-globe-smash',
+  },
+  'activity-pencil-mug': {
+    id: 'activity-pencil-mug',
+    owner: 'mira',
+    room: 'activities',
+    mark: { x: 620, y: 690 },
+    knockMs: 1500,
+    sfx: 'mug-smash',
+  },
 };
 
-/** Which Room each Breakable stands in. */
-export const BREAKABLE_ROOM: Record<BreakableId, RoomId> = {
-  'entryway-vase': 'entryway',
-  'cinema-film-can': 'cinema',
-  'cinema-lucky-cat': 'cinema',
-  'snow-globe': 'games',
-  'activity-pencil-mug': 'activities',
-};
-
-/**
- * Where a cat stands to knock her Breakable down, in stage units.
- *
- * Three of these are marks a cat was already roaming to before this ticket —
- * the Cinema's two (design 13 §8, Beats B9/B10) and the Game Room's sideboard
- * cat bed (design 11 §5.3) — because the design notes put a cat's roam mark
- * exactly where her Breakable stands. The Entryway's `K` and the Activity
- * Room's `M-mug` (design 10 §3.3, 12 §4.3) are not roam marks at all: a cat
- * only ever stands on them on her way to a knock.
- */
-export const BREAKABLE_MARK: Record<BreakableId, Point> = {
-  'entryway-vase': { x: 1040, y: 690 },
-  'cinema-film-can': { x: 392, y: 850 },
-  'cinema-lucky-cat': { x: 790, y: 690 },
-  'snow-globe': { x: 1180, y: 700 },
-  'activity-pencil-mug': { x: 620, y: 690 },
-};
-
-/**
- * How long she holds at the mark before it falls, in milliseconds.
- *
- * Animation is parked, so this is the whole of the Beat until its sheet is
- * drawn: the design notes' own timings (10 §4.2's S23+S24, 13 §8's B9/B10, 11
- * §5.3's wobble-then-fall, 12's unscored equivalent) with no in-between frames
- * to paint, exactly like a petting Beat with no `[data-beat]` layer.
- */
-const KNOCK_MS: Record<BreakableId, number> = {
-  'entryway-vase': 2300,
-  'cinema-film-can': 1800,
-  'cinema-lucky-cat': 1400,
-  'snow-globe': 1950,
-  'activity-pencil-mug': 1500,
-};
+/** One Breakable, by id. Every id has a record, so this never answers nothing. */
+export function breakableById(breakable: BreakableId): Breakable {
+  return BREAKABLES[breakable];
+}
 
 /**
  * How likely a cat at rest is to reach for her own Breakable instead of
@@ -269,22 +306,6 @@ export function knockBeat(breakable: BreakableId): string {
   return `knock-${breakable}`;
 }
 
-/** The sound this Breakable makes going over. One name each (design notes). */
-export function breakSfxOf(breakable: BreakableId): string {
-  switch (breakable) {
-    case 'entryway-vase':
-      return 'ceramic-break';
-    case 'cinema-film-can':
-      return 'film-can-fall';
-    case 'cinema-lucky-cat':
-      return 'porcelain-shatter';
-    case 'snow-globe':
-      return 'snow-globe-smash';
-    case 'activity-pencil-mug':
-      return 'mug-smash';
-  }
-}
-
 /**
  * The Breakable this cat could reach for right now, or `null`.
  *
@@ -294,7 +315,10 @@ export function breakSfxOf(breakable: BreakableId): string {
  */
 export function reachableBreakable(cat: CatId, room: RoomId, broken: ReadonlySet<BreakableId>): BreakableId | null {
   return (
-    BREAKABLE_IDS.find(id => BREAKABLE_OWNER[id] === cat && BREAKABLE_ROOM[id] === room && !broken.has(id)) ?? null
+    BREAKABLE_IDS.find(id => {
+      const breakable = BREAKABLES[id];
+      return breakable.owner === cat && breakable.room === room && !broken.has(id);
+    }) ?? null
   );
 }
 
@@ -447,12 +471,12 @@ export function tickCats(
       if (mind.knockUntil === null) {
         // Just arrived at the mark. The hold before it falls starts now.
         goals.set(mind.id, null);
-        return next({ knockUntil: now + KNOCK_MS[mind.knocking] });
+        return next({ knockUntil: now + BREAKABLES[mind.knocking].knockMs });
       }
       if (now < mind.knockUntil) return next({});
       // It falls.
       knocked.push(mind.knocking);
-      sfx.push(breakSfxOf(mind.knocking));
+      sfx.push(BREAKABLES[mind.knocking].sfx);
       return next({ knocking: null, knockUntil: null, restUntil: now + between(REST_MS, random) });
     }
 
@@ -469,7 +493,7 @@ export function tickCats(
     // `reachableBreakable` only ever answers with a mark that is hers.
     const reach = reachableBreakable(mind.id, room, broken);
     if (reach && random() < REACH_CHANCE) {
-      const mark = BREAKABLE_MARK[reach];
+      const mark = BREAKABLES[reach].mark;
       goals.set(mind.id, mark);
       sends.push({ cat: mind.id, goal: mark });
       return next({ goal: mark, knocking: reach, restUntil: null });

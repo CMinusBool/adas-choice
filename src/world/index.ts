@@ -56,8 +56,10 @@ export { CAT_CLEARANCE, CAT_IDS, CAT_MARKS, isCat, meowOf, pettingBeat } from '.
 export { catSfx, isBeingPetted } from './world';
 
 // 09: the apartment's five Breakables — who owns each one, where she knocks
-// it down, and what it sounds like going over.
-export { BREAKABLE_IDS, BREAKABLE_MARK, BREAKABLE_OWNER, breakSfxOf, knockBeat } from './cats';
+// it down, how long that takes and what it sounds like going over, all on one
+// record apiece.
+export type { Breakable } from './cats';
+export { BREAKABLE_IDS, breakableById, knockBeat } from './cats';
 
 // 18: the nine Films, and the rummage that pins three of them to the wall.
 // 19: `FilmPairing` is what the panel's meta line turns into a copy key.
