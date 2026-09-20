@@ -38,3 +38,7 @@ export { actorView, actorsIn } from './world';
 export type { CinemaShelf, CinemaSlice } from './cinema';
 export { CINEMA_MARKS, CINEMA_SHELVES } from './cinema';
 export { attendedShelf, isSeated } from './world';
+// 16: the Activity Room — its three stations, and tonight's pick.
+export type { ActivitiesSlice, ActivityId } from './activities';
+export { ACTIVITY_IDS } from './activities';
+export { chosenActivity, openActivity } from './world';

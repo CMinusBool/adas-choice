@@ -81,11 +81,21 @@ const WALKABLE: Record<RoomId, Polygon> = {
     { x: 425, y: 860 },
     { x: 100, y: 860 },
   ],
+  // 16: the Activity Room, from `design/12-activity-room.md` §4.2 — a band
+  // below the floor line at y 620, with a bite out of its front edge for each
+  // foreground Prop, so nobody stands inside the call corner's stool or the
+  // boombox's crate. The rug is not cut out; it is something to walk on.
   activities: [
-    { x: 140, y: 640 },
-    { x: 1460, y: 640 },
-    { x: 1460, y: 860 },
-    { x: 140, y: 860 },
+    { x: 100, y: 650 },
+    { x: 1540, y: 650 },
+    { x: 1540, y: 760 },
+    { x: 1365, y: 760 },
+    { x: 1365, y: 860 },
+    { x: 340, y: 860 },
+    { x: 340, y: 745 },
+    { x: 195, y: 745 },
+    { x: 195, y: 860 },
+    { x: 100, y: 860 },
   ],
 };
 

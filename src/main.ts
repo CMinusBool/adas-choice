@@ -1,3 +1,4 @@
+import { mountActivityRoom } from './dom/activity-room'; // 16: the Activity Room
 import { mountActors } from './dom/actors'; // 07: actors
 import { mountCinemaRoom } from './dom/cinema-room'; // 17: the Cinema Room
 import { mountGameRoom } from './dom/game-room';
@@ -39,6 +40,7 @@ const mounts: Mount[] = [
   mountLoading,
   mountLanguage, mountMotion, mountRooms, mountGameRoom,
   mountCinemaRoom, // 17: the Cinema Room's bookshelves
+  mountActivityRoom, // 16: the Activity Room
   mountSound, // 06: audio
   mountActors, // 07: actors — the Cast stands on top of whatever the Room laid down.
 ];

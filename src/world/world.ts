@@ -15,6 +15,15 @@ import {
   type CycleId,
   type RandomSource,
 } from './actors';
+// 16: the Activity Room
+import {
+  createActivities,
+  withActivityChosen,
+  withCardClosed,
+  withCardOpened,
+  type ActivitiesSlice,
+  type ActivityId,
+} from './activities';
 import { resolveLanguage, toggleLanguage, type Language } from './language';
 // 05: loading
 import { createLoading, declareAssets, everythingSettled, progressOf, settleAsset, type AssetOutcome, type LoadingSlice } from './loading';
@@ -74,6 +83,8 @@ export interface World {
   readonly actors: ActorsSlice;
   // 17: cinema
   readonly cinema: CinemaSlice;
+  // 16: the Activity Room
+  readonly activities: ActivitiesSlice;
 }
 
 /** What the DOM layer knows at start-up that the model cannot ask for itself. */
@@ -122,7 +133,11 @@ export type WorldEvent =
     }
   // 17: cinema — which bookshelf the visitor's pointer or focus is on, or
   // `null` for none. What it means for the Boy is the model's decision.
-  | { readonly type: 'cinema-shelf-attended'; readonly shelf: CinemaShelf | null };
+  | { readonly type: 'cinema-shelf-attended'; readonly shelf: CinemaShelf | null }
+  // 16: the Activity Room — reading a station's card, and picking it.
+  | { readonly type: 'activity-card-opened'; readonly activity: ActivityId }
+  | { readonly type: 'activity-card-closed' }
+  | { readonly type: 'activity-chosen'; readonly activity: ActivityId };
 
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
@@ -142,6 +157,9 @@ export function createWorld(inputs: WorldInputs): World {
     actors: createActors(inputs.random ?? seededRandom(DEFAULT_SEED), arriving),
     // 17: cinema
     cinema: createCinema(),
+    // 16: the Activity Room — nothing about tonight's pick survives the visit,
+    // so it takes no input either.
+    activities: createActivities(),
   };
 }
 
@@ -237,6 +255,18 @@ export function advance(world: World, event: WorldEvent): World {
       if (cinema === world.cinema) return world;
       const actors = sendActor(world.actors, 'boy', boyMark(event.shelf), 'walk', motionIsOn(world));
       return { ...world, cinema, actors };
+    }
+    // 16: the Activity Room
+    case 'activity-card-opened':
+    case 'activity-card-closed':
+    case 'activity-chosen': {
+      const activities =
+        event.type === 'activity-card-opened'
+          ? withCardOpened(world.activities, event.activity)
+          : event.type === 'activity-card-closed'
+            ? withCardClosed(world.activities)
+            : withActivityChosen(world.activities, event.activity);
+      return activities === world.activities ? world : { ...world, activities };
     }
   }
 }
@@ -370,4 +400,15 @@ export function actorsIn(world: World, room: RoomId): readonly ActorView[] {
  */
 export function actorView(world: World, actor: ActorId): ActorView | null {
   return findActorView(world.actors, actor);
+}
+
+// 16: the Activity Room
+/** Which station's card is open, or `null`. One card serves all three. */
+export function openActivity(world: World): ActivityId | null {
+  return world.activities.open;
+}
+
+/** What the visitor has picked for tonight, or `null` while nothing is picked. */
+export function chosenActivity(world: World): ActivityId | null {
+  return world.activities.chosen;
 }
