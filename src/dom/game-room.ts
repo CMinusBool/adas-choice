@@ -333,7 +333,14 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
     // 21: a game's name is a proper noun, the same in both languages, and the
     // card already carries it. Read it off the card rather than keeping a third
     // copy here that no dictionary types and no build step compares.
-    byId('dialog-game').textContent = wrap.querySelector('h2')!.textContent;
+    //
+    // Node by node, because one of the three cards breaks its title over two
+    // lines with a `<br>` and `textContent` would run the words together.
+    byId('dialog-game').textContent = [...wrap.querySelector('h2')!.childNodes]
+      .map(node => node.textContent ?? '')
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     byId<HTMLImageElement>('dialog-poster').src = wrap.querySelector<HTMLImageElement>('.game-art')!.dataset.still!;
     byId<HTMLAnchorElement>('dialog-steam').href = wrap.querySelector<HTMLAnchorElement>('.game-card')!.href;
     removeChallenge();
