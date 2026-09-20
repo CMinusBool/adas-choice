@@ -81,14 +81,24 @@ import type { Point } from './stage';
 // 14: the Entryway — the arrival, and the Room's Props and its Breakable.
 import {
   createArrival,
+  createRoomArrival,
   finishArrival,
   propsAt,
+  roomDoorAt,
+  settleRoomArrival,
   startArrival,
+  startRoomArrival,
   tickArrival,
+  tickRoomArrival,
   viewArrival,
   type ArrivalCue,
+  type ArrivalMark,
+  type ArrivalMarks,
   type ArrivalSlice,
+  type ArrivalState,
   type ArrivalView,
+  type DoorState,
+  type RoomArrivalSlice,
 } from './arrival';
 import { type EntrywayProps, type VaseState } from './entryway';
 
@@ -136,6 +146,8 @@ export interface World {
   readonly activities: ActivitiesSlice;
   // 14: the Entryway
   readonly arrival: ArrivalSlice;
+  // 44: the entrance the Room the visitor is in is playing, or has played.
+  readonly roomArrival: RoomArrivalSlice;
   /** Every Breakable the apartment holds, broken so far. Persists across a reload. */
   readonly broken: ReadonlySet<BreakableId>;
 }
@@ -184,6 +196,11 @@ export type WorldEvent =
   // 14: the Entryway — the DOM layer starts the arrival 0.6 s after the loading
   // screen's reveal settles, which is a moment only the page can know about.
   | { readonly type: 'arrival-started' }
+  // 44: a click, a tap or a key press, whatever it was aimed at. The DOM layer
+  // reports it and this file decides what it means: the Room's entrance ends at
+  // once and everyone stands on their mark. The Entryway's own arrival is a
+  // different thing and does not listen for it.
+  | { readonly type: 'visitor-input' }
   | { readonly type: 'breakable-broken'; readonly breakable: BreakableId }
   | { readonly type: 'actor-tick'; readonly now: number }
   | {
@@ -249,6 +266,10 @@ export function createWorld(inputs: WorldInputs): World {
     arrival: createArrival(
       inputs.arrived === true || inputs.reducedMotion || parseRoute(inputs.hash) !== ENTRYWAY,
     ),
+    // 44: and the entrance of whichever Room the page opened on, waiting on the
+    // page to say the loading screen has gone. Opening on the Entryway is not
+    // walking through a Door, so that Room has nothing to play here.
+    roomArrival: createRoomArrival(arriving, arriving === ENTRYWAY || inputs.reducedMotion),
     broken: new Set(inputs.brokenBreakables ?? []),
   };
 }
@@ -265,31 +286,40 @@ export function advance(world: World, event: WorldEvent): World {
     case 'hash-changed': {
       const entering = parseRoute(event.hash);
       if (entering === world.rooms.current) return world;
+      // 44: the Room being left is tidied before anybody moves: its entrance
+      // ends where it was going rather than wherever it had got to, so nobody
+      // is carried through the Door mid-stride.
+      const leaving = withRoomArrivalSettled(world);
       // The model decides whether this move animates, so the DOM layer never
       // waits on an animation that was never going to run.
-      const transition: TransitionKind = motionIsOn(world) ? 'animated' : 'instant';
+      const transition: TransitionKind = motionIsOn(leaving) ? 'animated' : 'instant';
       // 14: leaving the Entryway mid-arrival settles it, so the visitor never
       // comes back to find it half done.
       const moved = {
-        ...world,
-        rooms: { current: entering, leaving: world.rooms.current, transition },
+        ...leaving,
+        rooms: { current: entering, leaving: leaving.rooms.current, transition },
         // 17: the Room being walked into puts its own Cast back on their
         // marks, so every Room is found the way its design note describes it.
         // 08: and the three cats come with the visitor, onto whichever of that
         // Room's marks are free, so they are the same three animals throughout.
-        actors: gatherCats(gatherInto(world.actors, entering), entering),
+        actors: gatherCats(gatherInto(leaving.actors, entering), entering),
         // A mark is a place in one Room, so whatever a cat was heading for is
         // forgotten at the door. Everything else about it comes along.
-        cats: arriveCats(world.cats),
+        cats: arriveCats(leaving.cats),
         // 17: a shelf cannot hold the attention of a visitor who has walked
         // out. 18: the errand he was on finishes rather than being abandoned,
         // so the wall they come back to shows the Posters he went to fetch.
-        cinema: settleCinema(world.cinema),
+        cinema: settleCinema(leaving.cinema),
       };
       // 20: and a Film that was rolling falls silent on the way out, because
       // the Bumper is a Cinema Room moment rather than something that follows
       // the visitor down the hall.
-      return runCinema(entering === ENTRYWAY ? moved : withArrivalOver(moved), null);
+      const home = entering === ENTRYWAY ? moved : withArrivalOver(moved);
+      // 44: and the Room behind the Door plays the Cast in. The Entryway is the
+      // one Room that does not: its own arrival is a different and longer
+      // thing, played once, and coming home is not walking in for the first
+      // time.
+      return runCinema(withRoomEntered(home, entering), null);
     }
     case 'room-transition-finished': {
       if (world.rooms.transition === 'settled') return world;
@@ -301,9 +331,11 @@ export function advance(world: World, event: WorldEvent): World {
       const motion = toggleMotion(world.motion);
       const actors = motion.paused ? settleActors(world.actors) : world.actors;
       // 14: pausing motion mid-arrival completes it, the way a walk settles.
+      // 44: and so does the Room's own entrance, which is the whole of what
+      // motion being off means for it: the Door shut, everyone on their mark.
       // 18: and an errand in progress ends with its Posters on the wall rather
       // than with the Boy standing at a shelf holding three tubes for ever.
-      return runCinema(withArrivalOver({ ...world, motion, actors }), null);
+      return runCinema(withRoomArrivalSettled(withArrivalOver({ ...world, motion, actors })), null);
     }
     case 'reduced-motion-changed': {
       const motion = withReducedMotion(world.motion, event.reducedMotion);
@@ -312,8 +344,8 @@ export function advance(world: World, event: WorldEvent): World {
       const actors = motion.paused ? settleActors(world.actors) : world.actors;
       const stilled = { ...world, motion, actors };
       // 14: the arrival is motion, so a system that starts asking for stillness
-      // mid-way gets its outcome rather than the rest of it.
-      return runCinema(motion.paused ? withArrivalOver(stilled) : stilled, null);
+      // mid-way gets its outcome rather than the rest of it. 44: both of them.
+      return runCinema(motion.paused ? withRoomArrivalSettled(withArrivalOver(stilled)) : stilled, null);
     }
     case 'language-toggled': {
       return { ...world, language: toggleLanguage(world.language) };
@@ -346,9 +378,14 @@ export function advance(world: World, event: WorldEvent): World {
       // done to the Cast; `actors.ts` still owns the walking itself.
       const stepped = tickArrival(world.arrival, event.now);
       const after = stepped.arrival === world.arrival ? world : { ...world, arrival: stepped.arrival };
-      const cued = applyCues(after, stepped.cues, motionIsOn(after));
-      const actors = tickActors(cued.actors, event.now, motionIsOn(cued));
-      const ticked = actors === cued.actors ? cued : { ...cued, actors };
+      const cued = applyCues(after, stepped.cues, motionIsOn(after), ENTRYWAY);
+      // 44: and the Room the visitor is in runs its own, shorter, entrance on
+      // the same clock, through the same cues and the same walking.
+      const entrance = tickRoomArrival(cued.roomArrival, event.now);
+      const opened = entrance.arrival === cued.roomArrival ? cued : { ...cued, roomArrival: entrance.arrival };
+      const shown = applyCues(opened, entrance.cues, motionIsOn(opened), opened.roomArrival.room);
+      const actors = tickActors(shown.actors, event.now, motionIsOn(shown));
+      const ticked = actors === shown.actors ? shown : { ...shown, actors };
       // 18: the same tick is the Cinema Room's clock: the errand's Beats end
       // on it, and so does each leg of the walk it is waiting on.
       // 08: and the same tick is the cats' clock: it is when one of them thinks
@@ -360,10 +397,20 @@ export function advance(world: World, event: WorldEvent): World {
     // 14: the Entryway
     case 'arrival-started': {
       const arrival = startArrival(world.arrival);
-      if (arrival === world.arrival) return world;
       // The hall the arrival opens on is empty: nobody is home until they come
       // through the door, and an Actor nobody has placed has nowhere to be.
-      return { ...world, arrival, actors: clearRoom(world.actors, ENTRYWAY) };
+      if (arrival !== world.arrival) {
+        return { ...world, arrival, actors: clearRoom(world.actors, ENTRYWAY) };
+      }
+      // 44: the page opened on one of the other three Rooms instead, so what
+      // was waiting behind the loading screen is that Room's own entrance.
+      return withRoomStarted(world);
+    }
+    // 44: a click, a tap or a key press. A Room's entrance is interruptible:
+    // whatever the visitor was reaching for, they get the Room at once rather
+    // than the rest of the entrance, and nobody is left mid-stride.
+    case 'visitor-input': {
+      return withRoomArrivalSettled(world);
     }
     // 09: a Breakable going over. The roll that decides when lives in
     // `roamCats` below; this event is the general answer either it or a test
@@ -458,7 +505,11 @@ export function advance(world: World, event: WorldEvent): World {
  * then the three of them are in a backpack on the Boy's back.
  */
 function roamCats(world: World, now: number): World {
-  if (!motionIsOn(world) || world.arrival.state !== 'done') return world;
+  // 44: and it waits on the Room's own entrance too, because until that is
+  // over the three of them are still coming through the door.
+  if (!motionIsOn(world) || world.arrival.state !== 'done' || world.roomArrival.state === 'playing') {
+    return world;
+  }
   const room = world.rooms.current;
   const stepped = tickCats(world.cats, room, catPlaces(world.actors, room), now, world.actors.random, world.broken);
   let actors = world.actors;
@@ -756,6 +807,9 @@ export function cinemaNeedsClock(world: World): boolean {
 export function apartmentNeedsClock(world: World): boolean {
   if (cinemaNeedsClock(world)) return true;
   if (!motionIsOn(world)) return false;
+  // 44: a Room letting the Cast in counts even before anybody is in it,
+  // because an empty Room is where its entrance starts.
+  if (world.roomArrival.state === 'playing') return true;
   return actorsIn(world, world.rooms.current).length > 0 || arrivalView(world).state === 'playing';
 }
 
@@ -830,12 +884,17 @@ export type { BreakableId } from './cats';
  * and finding them already there: `actors.ts` turns a walk with motion off into
  * the place the walk was going.
  */
-function applyCue(world: World, cue: ArrivalCue, motionOn: boolean): World {
+function applyCue(world: World, cue: ArrivalCue, motionOn: boolean, room: RoomId): World {
   switch (cue.kind) {
     case 'place':
-      return { ...world, actors: placeActor(world.actors, cue.actor, ENTRYWAY, cue.mark, cue.facing) };
+      return { ...world, actors: placeActor(world.actors, cue.actor, room, cue.mark, cue.facing) };
     case 'send':
-      return { ...world, actors: sendActor(world.actors, cue.actor, cue.mark, 'walk', motionOn) };
+      return {
+        ...world,
+        // 44: a cue may name the Cycle that carries the Actor and the stance the
+        // mark has; the Entryway's script names neither and gets the defaults.
+        actors: sendActor(world.actors, cue.actor, cue.mark, cue.cycle ?? 'walk', motionOn, cue.facing ?? null),
+      };
     case 'sfx':
       // Sound is the DOM layer's to make; the model only says that it happened,
       // and `arrival.sfx` is where it says so.
@@ -843,9 +902,9 @@ function applyCue(world: World, cue: ArrivalCue, motionOn: boolean): World {
   }
 }
 
-function applyCues(world: World, cues: readonly ArrivalCue[], motionOn: boolean): World {
+function applyCues(world: World, cues: readonly ArrivalCue[], motionOn: boolean, room: RoomId): World {
   let next = world;
-  for (const cue of cues) next = applyCue(next, cue, motionOn);
+  for (const cue of cues) next = applyCue(next, cue, motionOn, room);
   return next;
 }
 
@@ -859,8 +918,84 @@ function applyCues(world: World, cues: readonly ArrivalCue[], motionOn: boolean)
 function withArrivalOver(world: World): World {
   const finished = finishArrival(world.arrival);
   if (finished.arrival === world.arrival) return world;
-  const settled = applyCues({ ...world, arrival: finished.arrival }, finished.cues, false);
+  const settled = applyCues({ ...world, arrival: finished.arrival }, finished.cues, false, ENTRYWAY);
   return { ...settled, actors: settleActors(settled.actors) };
+}
+
+// 44: a Room's arrival
+/**
+ * Where everyone in a Room is standing, as marks for its entrance to walk to.
+ *
+ * Read off the Cast that `gatherInto` and `gatherCats` have just placed, which
+ * is how the entrance drives `HOMES` and `CAT_MARKS` rather than a second
+ * table: the Room has already said where everybody belongs, and all the
+ * entrance does is bring them in from the Door to those places.
+ */
+function marksIn(slice: ActorsSlice, room: RoomId): ArrivalMarks {
+  const marks: Partial<Record<ActorId, ArrivalMark>> = {};
+  for (const view of actorViewsIn(slice, room)) marks[view.id] = { at: view.at, facing: view.facing };
+  return marks;
+}
+
+/**
+ * The world with the current Room's entrance playing, and the Room emptied.
+ *
+ * A Room is not found already settled: it opens empty and fills up, and an
+ * empty Room is the absence of the Cast rather than a flag on it. Refused
+ * unless the entrance is waiting, so nothing replays under a visitor who is
+ * already standing in it.
+ */
+function withRoomStarted(world: World): World {
+  const room = world.rooms.current;
+  if (world.roomArrival.room !== room) return world;
+  const started = startRoomArrival(world.roomArrival, marksIn(world.actors, room));
+  if (started === world.roomArrival) return world;
+  return { ...world, roomArrival: started, actors: clearRoom(world.actors, room) };
+}
+
+/**
+ * The world one Door further in, with that Room's entrance about to play.
+ *
+ * A fresh entrance every time, because a Room is walked into over and over and
+ * each entry is its own. With motion off it is made already over, which is the
+ * whole of what stillness means here and is why nothing below it needs a
+ * second path.
+ */
+function withRoomEntered(world: World, room: RoomId): World {
+  const over = room === ENTRYWAY || !motionIsOn(world);
+  const entered = { ...world, roomArrival: createRoomArrival(room, over) };
+  return over ? entered : withRoomStarted(entered);
+}
+
+/**
+ * The world with the Room's entrance over and everyone on their mark.
+ *
+ * What a click, a tap, a key press, a request for stillness and walking back
+ * out all mean. Every mark is taken at once, with motion off, and anything
+ * still walking takes its destination and the stance that goes with it, which
+ * is exactly what the visitor would have seen had they watched it through.
+ */
+function withRoomArrivalSettled(world: World): World {
+  const settled = settleRoomArrival(world.roomArrival);
+  if (settled.arrival === world.roomArrival) return world;
+  const placed = applyCues({ ...world, roomArrival: settled.arrival }, settled.cues, false, settled.arrival.room);
+  return { ...placed, actors: settleActors(placed.actors) };
+}
+
+/** How far the Room the visitor is in has got with letting them in. */
+export function roomArrivalState(world: World): ArrivalState {
+  return world.roomArrival.state;
+}
+
+/**
+ * Which state a Room's Door leaf is in.
+ *
+ * Shut in every Room but the one being walked into, and shut there too once
+ * its entrance is over, so the painter asks every Room the same question and
+ * never has to know which of them is playing.
+ */
+export function roomDoorState(world: World, room: RoomId): DoorState {
+  return world.roomArrival.room === room ? roomDoorAt(world.roomArrival) : 'closed';
 }
 
 /** What the DOM layer paints of the arrival: the Beats, the costumes, the SFX. */

@@ -51,9 +51,15 @@ function run(world: World, ms: number, step = 16): World {
   return next;
 }
 
-/** Walk the visitor into a Room the way a door link does. */
+/**
+ * Walk the visitor into a Room the way a door link does.
+ *
+ * 44: and straight past the Room's arrival, which any click or key press ends
+ * at once. The three of them run in through the Door now; where they run to is
+ * still the marks this file is about, and it is about where they go next.
+ */
 function walkInto(world: World, room: RoomId): World {
-  return advance(world, { type: 'hash-changed', hash: roomHash(room) });
+  return advance(advance(world, { type: 'hash-changed', hash: roomHash(room) }), { type: 'visitor-input' });
 }
 
 function catsIn(world: World, room: RoomId): readonly ActorView[] {

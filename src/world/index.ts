@@ -47,6 +47,11 @@ export type { EntrywayPropId, EntrywayProps, VaseState } from './entryway';
 export { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';
 export type { ArrivalSlice, ArrivalState, ArrivalView, BeatId, Box, Costume, PlayingBeat } from './arrival';
 export { ARRIVAL_SECONDS } from './arrival';
+// 44: every other Room's own short entrance, on the same clock and walked to
+// the same marks. A Door's leaf has four states; the painter asks for one.
+export type { DoorState, RoomArrivalSlice } from './arrival';
+export { ROOM_ARRIVAL_SECONDS } from './arrival';
+export { roomArrivalState, roomDoorState } from './world';
 export type { BreakableId } from './world';
 export { arrivalView, breakableState, entrywayProps, vaseState } from './world';
 

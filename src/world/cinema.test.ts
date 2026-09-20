@@ -43,9 +43,17 @@ function who(world: World, id: ActorId): ActorView {
   return actor;
 }
 
-/** The world after the visitor walks through the Cinema Room's door. */
+/**
+ * The world after the visitor walks through the Cinema Room's door.
+ *
+ * 44: and past the Room's arrival, which every Door plays and which any input
+ * ends at once. This file is about what the Room does once the visitor is
+ * standing in it, so it walks in the way an impatient one does; `room-arrival.test.ts`
+ * is where the entrance itself is watched through.
+ */
 function inTheCinema(world: World = createWorld(plainArrival)): World {
-  return advance(world, { type: 'hash-changed', hash: '#/cinema' });
+  const entering = advance(world, { type: 'hash-changed', hash: '#/cinema' });
+  return advance(entering, { type: 'visitor-input' });
 }
 
 /** One clock for the whole file, because a real visit's clock only goes up. */
