@@ -337,6 +337,11 @@
             <span class="shelf-body" aria-hidden="true"><span class="cubby"></span><span class="cubby"></span><span class="cubby"></span></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfComedy">喜劇</span>
           </button>
+          <!-- P19: the lucky cat 招財貓, Mira's Breakable, on the comedy
+               shelf's bottom cubby floor (design 13 §7). Ticket 09 owns the
+               knock and the state; the visitor cannot break it by clicking. -->
+          <div class="cinema-prop cinema-lucky-cat" data-breakable="cinema-lucky-cat" data-breakable-owner="mira" data-breakable-state="intact" role="img" aria-label="一隻招財貓" data-i18n-aria="luckyCatIntact" style="--x:726;--y:544;--w:44;--h:44"></div>
+          <div class="cinema-prop cinema-lucky-cat-broken" data-breakable="cinema-lucky-cat" data-breakable-owner="mira" data-breakable-state="broken" role="img" aria-label="摔成三塊的招財貓，手還在招" data-i18n-aria="luckyCatBroken" style="--x:700;--y:650;--w:90;--h:30" hidden></div>
           <button class="cinema-prop cinema-shelf" type="button" data-shelf="romance" style="--x:824;--y:260;--w:120;--h:380" aria-label="愛情書架：點一下，讓他挑三部片" data-i18n-aria="shelfRomanceAria">
             <span class="shelf-ornament" aria-hidden="true"><span class="roses"></span><span class="fairy-lights"></span></span>
             <span class="shelf-body" aria-hidden="true"><span class="cubby"></span><span class="cubby"></span><span class="cubby"></span></span>
@@ -364,6 +369,10 @@
           <span class="cinema-prop cinema-beanbag beanbag-girl" style="--x:230;--y:690;--w:180;--h:110" aria-hidden="true"></span>
           <span class="cinema-prop cinema-beanbag beanbag-boy" style="--x:570;--y:690;--w:180;--h:110" aria-hidden="true"></span>
           <span class="cinema-prop cinema-cabinet" style="--x:430;--y:730;--w:140;--h:100" aria-hidden="true"><span class="cabinet-knob"></span></span>
+          <!-- P18: the film can, Míca's Breakable, lying on the cabinet top
+               (design 13 §7). Ticket 09 owns the knock and the state. -->
+          <div class="cinema-prop cinema-film-can" data-breakable="cinema-film-can" data-breakable-owner="mica" data-breakable-state="intact" role="img" aria-label="一盒膠卷" data-i18n-aria="filmCanIntact" style="--x:470;--y:706;--w:60;--h:24"></div>
+          <div class="cinema-prop cinema-film-can-broken" data-breakable="cinema-film-can" data-breakable-owner="mica" data-breakable-state="broken" role="img" aria-label="被貓推下去的膠卷盒，底片散了一地" data-i18n-aria="filmCanBroken" style="--x:290;--y:800;--w:180;--h:80" hidden></div>
           <!-- P15-P17: one machine, two affordances. The motor switch is low on
                the base plate and red; the film gate is the machine's mouth, high
                and cream, and stays disabled until ticket 20 loads a reel. -->
@@ -444,8 +453,8 @@
                 <div class="prop a-clamp-lamp" aria-hidden="true" style="--x:330;--y:352;--w:70;--h:120;--z:621"></div>
                 <!-- L13, A-S06 / A-S07: Mira's Breakable. Ticket 09 owns the knock and the state;
                      both Props stand here so that ticket only has to flip which one is hidden. -->
-                <div class="prop a-mug" data-breakable="activity-pencil-mug" data-breakable-state="intact" role="img" aria-label="一只裝滿鉛筆的馬克杯" data-i18n-aria="pencilMugIntact" style="--x:630;--y:400;--w:50;--h:72;--z:621"></div>
-                <div class="prop a-mug-broken" data-breakable="activity-pencil-mug" data-breakable-state="broken" role="img" aria-label="摔成兩半的馬克杯，鉛筆滾了一地" data-i18n-aria="pencilMugBroken" style="--x:560;--y:786;--w:160;--h:46;--z:832" hidden></div>
+                <div class="prop a-mug" data-breakable="activity-pencil-mug" data-breakable-owner="mira" data-breakable-state="intact" role="img" aria-label="一只裝滿鉛筆的馬克杯" data-i18n-aria="pencilMugIntact" style="--x:630;--y:400;--w:50;--h:72;--z:621"></div>
+                <div class="prop a-mug-broken" data-breakable="activity-pencil-mug" data-breakable-owner="mira" data-breakable-state="broken" role="img" aria-label="摔成兩半的馬克杯，鉛筆滾了一地" data-i18n-aria="pencilMugBroken" style="--x:560;--y:786;--w:160;--h:46;--z:832" hidden></div>
                 <!-- The Treasure Hunt's station: L14-L19, A-S03. -->
                 <div class="prop a-shelf" aria-hidden="true" style="--x:760;--y:360;--w:340;--h:260;--z:620"></div>
                 <div class="prop a-timer" aria-hidden="true" style="--x:930;--y:296;--w:84;--h:64;--z:621"></div>

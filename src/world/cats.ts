@@ -174,6 +174,130 @@ export function meowOf(cat: CatId): string {
   return `${cat}-meow`;
 }
 
+/**
+ * The five Breakables the apartment holds, across four Rooms (design notes
+ * 10 §4.2, 11 §5.2, 12 §5.4, 13 §7).
+ *
+ * A cat's own name is not part of the id: the ownership below is the single
+ * source of truth for who reaches for which, so nothing else in the codebase
+ * hard-codes the pairing a second time.
+ */
+export type BreakableId =
+  | 'entryway-vase'
+  | 'cinema-film-can'
+  | 'cinema-lucky-cat'
+  | 'snow-globe'
+  | 'activity-pencil-mug';
+
+/** Every Breakable, in the order its owning cat and Room were decided. */
+export const BREAKABLE_IDS: readonly BreakableId[] = [
+  'entryway-vase',
+  'cinema-film-can',
+  'cinema-lucky-cat',
+  'snow-globe',
+  'activity-pencil-mug',
+];
+
+/**
+ * Which cat owns each Breakable.
+ *
+ * The owner's ruling of 2026-09-20: every cat owns at least one, the tally is
+ * 2/2/1 (Míca, Mira, Luna), and the roll below is per-cat-per-Breakable rather
+ * than "whoever is in the Room" — Luna must never reach for Míca's vase even
+ * though both stand in the Entryway.
+ */
+export const BREAKABLE_OWNER: Record<BreakableId, CatId> = {
+  'entryway-vase': 'mica',
+  'cinema-film-can': 'mica',
+  'cinema-lucky-cat': 'mira',
+  'snow-globe': 'luna',
+  'activity-pencil-mug': 'mira',
+};
+
+/** Which Room each Breakable stands in. */
+export const BREAKABLE_ROOM: Record<BreakableId, RoomId> = {
+  'entryway-vase': 'entryway',
+  'cinema-film-can': 'cinema',
+  'cinema-lucky-cat': 'cinema',
+  'snow-globe': 'games',
+  'activity-pencil-mug': 'activities',
+};
+
+/**
+ * Where a cat stands to knock her Breakable down, in stage units.
+ *
+ * Three of these are marks a cat was already roaming to before this ticket —
+ * the Cinema's two (design 13 §8, Beats B9/B10) and the Game Room's sideboard
+ * cat bed (design 11 §5.3) — because the design notes put a cat's roam mark
+ * exactly where her Breakable stands. The Entryway's `K` and the Activity
+ * Room's `M-mug` (design 10 §3.3, 12 §4.3) are not roam marks at all: a cat
+ * only ever stands on them on her way to a knock.
+ */
+export const BREAKABLE_MARK: Record<BreakableId, Point> = {
+  'entryway-vase': { x: 1040, y: 690 },
+  'cinema-film-can': { x: 392, y: 850 },
+  'cinema-lucky-cat': { x: 790, y: 690 },
+  'snow-globe': { x: 1180, y: 700 },
+  'activity-pencil-mug': { x: 620, y: 690 },
+};
+
+/**
+ * How long she holds at the mark before it falls, in milliseconds.
+ *
+ * Animation is parked, so this is the whole of the Beat until its sheet is
+ * drawn: the design notes' own timings (10 §4.2's S23+S24, 13 §8's B9/B10, 11
+ * §5.3's wobble-then-fall, 12's unscored equivalent) with no in-between frames
+ * to paint, exactly like a petting Beat with no `[data-beat]` layer.
+ */
+const KNOCK_MS: Record<BreakableId, number> = {
+  'entryway-vase': 2300,
+  'cinema-film-can': 1800,
+  'cinema-lucky-cat': 1400,
+  'snow-globe': 1950,
+  'activity-pencil-mug': 1500,
+};
+
+/**
+ * How likely a cat at rest is to reach for her own Breakable instead of
+ * wandering to an ordinary mark, checked once each time she decides where to
+ * be next. Rare enough to read as "occasionally", per the ticket.
+ */
+const REACH_CHANCE = 0.06;
+
+/** The Beat played over a cat knocking her Breakable down, by its sheet's name. */
+export function knockBeat(breakable: BreakableId): string {
+  return `knock-${breakable}`;
+}
+
+/** The sound this Breakable makes going over. One name each (design notes). */
+export function breakSfxOf(breakable: BreakableId): string {
+  switch (breakable) {
+    case 'entryway-vase':
+      return 'ceramic-break';
+    case 'cinema-film-can':
+      return 'film-can-fall';
+    case 'cinema-lucky-cat':
+      return 'porcelain-shatter';
+    case 'snow-globe':
+      return 'snow-globe-smash';
+    case 'activity-pencil-mug':
+      return 'mug-smash';
+  }
+}
+
+/**
+ * The Breakable this cat could reach for right now, or `null`.
+ *
+ * `null` for a Breakable that is not hers, not in this Room, or already
+ * broken — the three reasons a cat has nothing to reach for, all folded into
+ * one answer so `tickCats` never has to ask more than once.
+ */
+export function reachableBreakable(cat: CatId, room: RoomId, broken: ReadonlySet<BreakableId>): BreakableId | null {
+  return (
+    BREAKABLE_IDS.find(id => BREAKABLE_OWNER[id] === cat && BREAKABLE_ROOM[id] === room && !broken.has(id)) ?? null
+  );
+}
+
 function between(span: { least: number; most: number }, random: () => number): number {
   return span.least + random() * (span.most - span.least);
 }
@@ -212,6 +336,10 @@ interface CatMind {
   readonly meowAt: number | null;
   /** When the fuss it is having ends, or `null` when nobody is petting it. */
   readonly pettedUntil: number | null;
+  /** The Breakable she is walking to or knocking down, or `null` the rest of the time. */
+  readonly knocking: BreakableId | null;
+  /** When the Breakable she is knocking falls, or `null` while she is still walking to it. */
+  readonly knockUntil: number | null;
 }
 
 /** What the three of them have decided, and what the last tick made a noise about. */
@@ -230,7 +358,15 @@ export interface CatsSlice {
 /** Three cats who have not decided anything yet, and have not been told the time. */
 export function createCats(): CatsSlice {
   return {
-    minds: CAT_IDS.map(id => ({ id, goal: null, restUntil: null, meowAt: null, pettedUntil: null })),
+    minds: CAT_IDS.map(id => ({
+      id,
+      goal: null,
+      restUntil: null,
+      meowAt: null,
+      pettedUntil: null,
+      knocking: null,
+      knockUntil: null,
+    })),
     sfx: [],
   };
 }
@@ -245,13 +381,17 @@ export interface CatSend {
 export interface CatsStep {
   readonly slice: CatsSlice;
   readonly sends: readonly CatSend[];
+  /** Breakables that fell this tick, for the world to mark broken and remember. */
+  readonly knocked: readonly BreakableId[];
 }
 
 const same = (one: CatMind, other: CatMind) =>
   one.goal === other.goal &&
   one.restUntil === other.restUntil &&
   one.meowAt === other.meowAt &&
-  one.pettedUntil === other.pettedUntil;
+  one.pettedUntil === other.pettedUntil &&
+  one.knocking === other.knocking &&
+  one.knockUntil === other.knockUntil;
 
 /**
  * The cats after one tick of the clock.
@@ -271,9 +411,11 @@ export function tickCats(
   places: readonly CatPlace[],
   now: number,
   random: () => number,
+  broken: ReadonlySet<BreakableId>,
 ): CatsStep {
   const sends: CatSend[] = [];
   const sfx: string[] = [];
+  const knocked: BreakableId[] = [];
   // Updated as each cat decides, so two of them settling on the same tick still
   // see each other's choice rather than both reaching for the same mark.
   const goals = new Map<CatId, Point | null>(slice.minds.map(mind => [mind.id, mind.goal]));
@@ -297,12 +439,42 @@ export function tickCats(
       return next({ pettedUntil: null, restUntil: now + between(REST_MS, random) });
     }
     if (place.moving) return next({});
+
+    // She has a Breakable in her sights: walking to its mark, or holding there
+    // for the knock. A mark is claimed by `goals` exactly like an ordinary
+    // wander goal, so the other two still route around her while she is on it.
+    if (mind.knocking !== null) {
+      if (mind.knockUntil === null) {
+        // Just arrived at the mark. The hold before it falls starts now.
+        goals.set(mind.id, null);
+        return next({ knockUntil: now + KNOCK_MS[mind.knocking] });
+      }
+      if (now < mind.knockUntil) return next({});
+      // It falls.
+      knocked.push(mind.knocking);
+      sfx.push(breakSfxOf(mind.knocking));
+      return next({ knocking: null, knockUntil: null, restUntil: now + between(REST_MS, random) });
+    }
+
     if (mind.goal !== null) {
       // Arrived. Sit here a moment before thinking of anywhere else.
       goals.set(mind.id, null);
       return next({ goal: null, restUntil: now + between(REST_MS, random) });
     }
     if (!reached(mind.restUntil, now, REST_MS)) return next({ restUntil: due(mind.restUntil, now, REST_MS, random) });
+
+    // At rest, and thinking of somewhere else to be: occasionally that
+    // somewhere is her own Breakable, rather than an ordinary mark. The roll
+    // is per-cat-per-Breakable — Luna is never offered Míca's vase, because
+    // `reachableBreakable` only ever answers with a mark that is hers.
+    const reach = reachableBreakable(mind.id, room, broken);
+    if (reach && random() < REACH_CHANCE) {
+      const mark = BREAKABLE_MARK[reach];
+      goals.set(mind.id, mark);
+      sends.push({ cat: mind.id, goal: mark });
+      return next({ goal: mark, knocking: reach, restUntil: null });
+    }
+
     const goal = freeMark(room, mind.id, places, goals, random);
     // Nowhere free is a cat that stays put and asks again shortly, which is
     // what keeps two of them off one mark without any of them queueing.
@@ -313,8 +485,8 @@ export function tickCats(
   });
 
   const settled = minds.every((mind, index) => mind === slice.minds[index]);
-  if (settled && sfx.length === 0 && slice.sfx.length === 0) return { slice, sends };
-  return { slice: { minds: settled ? slice.minds : minds, sfx }, sends };
+  if (settled && sfx.length === 0 && slice.sfx.length === 0) return { slice, sends, knocked };
+  return { slice: { minds: settled ? slice.minds : minds, sfx }, sends, knocked };
 }
 
 /**
@@ -347,6 +519,14 @@ export function isPetted(slice: CatsSlice, cat: CatId): boolean {
 }
 
 export function arriveCats(slice: CatsSlice): CatsSlice {
-  if (slice.minds.every(mind => mind.goal === null)) return slice;
-  return { ...slice, minds: slice.minds.map(mind => (mind.goal === null ? mind : { ...mind, goal: null })) };
+  // A knock's mark is a place in one Room too, so a visitor who walks out
+  // mid-knock leaves it forgotten exactly like an ordinary goal — she does not
+  // arrive in the new Room still holding a knock over a Breakable she cannot
+  // see any more.
+  const forgets = (mind: CatMind) => mind.goal !== null || mind.knocking !== null;
+  if (!slice.minds.some(forgets)) return slice;
+  return {
+    ...slice,
+    minds: slice.minds.map(mind => (forgets(mind) ? { ...mind, goal: null, knocking: null, knockUntil: null } : mind)),
+  };
 }

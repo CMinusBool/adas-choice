@@ -30,7 +30,16 @@ import {
   type ActivityId,
 } from './activities';
 // 08: the three cats, who decide for themselves where to be and when to meow.
-import { arriveCats, createCats, isPetted, petCats, tickCats, type CatId, type CatsSlice } from './cats';
+import {
+  arriveCats,
+  createCats,
+  isPetted,
+  petCats,
+  tickCats,
+  type BreakableId,
+  type CatId,
+  type CatsSlice,
+} from './cats';
 import { resolveLanguage, toggleLanguage, type Language } from './language';
 // 05: loading
 import { createLoading, declareAssets, everythingSettled, progressOf, settleAsset, type AssetOutcome, type LoadingSlice } from './loading';
@@ -123,8 +132,8 @@ export interface World {
   readonly activities: ActivitiesSlice;
   // 14: the Entryway
   readonly arrival: ArrivalSlice;
-  /** The Entryway's Breakable. Ticket 09 decides when Míca reaches for it. */
-  readonly vase: VaseState;
+  /** Every Breakable the apartment holds, broken so far. Persists across a reload. */
+  readonly broken: ReadonlySet<BreakableId>;
 }
 
 /** What the DOM layer knows at start-up that the model cannot ask for itself. */
@@ -142,6 +151,9 @@ export interface WorldInputs {
   // 14: the Entryway — whether this tab has already been shown the arrival.
   // Read out of session storage by the DOM layer, because the model may not ask.
   readonly arrived?: boolean;
+  // 09: the Breakables already broken this session, read out of session storage
+  // the same way — a new tab finds every one of them whole.
+  readonly brokenBreakables?: readonly BreakableId[];
 }
 
 /**
@@ -227,7 +239,7 @@ export function createWorld(inputs: WorldInputs): World {
     arrival: createArrival(
       inputs.arrived === true || inputs.reducedMotion || parseRoute(inputs.hash) !== ENTRYWAY,
     ),
-    vase: 'intact',
+    broken: new Set(inputs.brokenBreakables ?? []),
   };
 }
 
@@ -345,11 +357,11 @@ export function advance(world: World, event: WorldEvent): World {
       // through the door, and an Actor nobody has placed has nowhere to be.
       return { ...world, arrival, actors: clearRoom(world.actors, ENTRYWAY) };
     }
-    // 14: the Entryway. Which cat reaches for which Breakable, and when, is
-    // ticket 09's roll; this only records that one of them went over.
+    // 09: a Breakable going over. The roll that decides when lives in
+    // `roamCats` below; this event is the general answer either it or a test
+    // can reach for, and it is a no-op for one already broken.
     case 'breakable-broken': {
-      if (event.breakable !== 'entryway-vase' || world.vase === 'broken') return world;
-      return { ...world, vase: 'broken' };
+      return withBreakableBroken(world, event.breakable);
     }
     case 'actor-sent': {
       const actors = sendActor(world.actors, event.actor, event.goal, event.cycle ?? 'walk', motionIsOn(world));
@@ -424,11 +436,20 @@ export function advance(world: World, event: WorldEvent): World {
 function roamCats(world: World, now: number): World {
   if (!motionIsOn(world) || world.arrival.state !== 'done') return world;
   const room = world.rooms.current;
-  const stepped = tickCats(world.cats, room, catPlaces(world.actors, room), now, world.actors.random);
+  const stepped = tickCats(world.cats, room, catPlaces(world.actors, room), now, world.actors.random, world.broken);
   let actors = world.actors;
   for (const send of stepped.sends) actors = sendActor(actors, send.cat, send.goal, 'walk', true);
-  if (stepped.slice === world.cats && actors === world.actors) return world;
-  return { ...world, cats: stepped.slice, actors };
+  // 09: every Breakable a cat knocked down this tick, folded into what the
+  // apartment remembers. `tickCats` only ever offers a cat her own, in her
+  // own Room, still intact, so nothing here has to check ownership again.
+  let broken: ReadonlySet<BreakableId> = world.broken;
+  if (stepped.knocked.some(id => !world.broken.has(id))) {
+    const next = new Set(world.broken);
+    for (const id of stepped.knocked) next.add(id);
+    broken = next;
+  }
+  if (stepped.slice === world.cats && actors === world.actors && broken === world.broken) return world;
+  return { ...world, cats: stepped.slice, actors, broken };
 }
 
 // 18: cinema
@@ -693,9 +714,8 @@ export function chosenActivity(world: World): ActivityId | null {
   return world.activities.chosen;
 }
 
-// 14: the Entryway
-/** The Breakables the apartment holds. Ticket 09 adds the other Rooms'. */
-export type BreakableId = 'entryway-vase';
+// 14: the Entryway. 09: the other four.
+export type { BreakableId } from './cats';
 
 /**
  * The world with one of the arrival's cues carried out.
@@ -750,7 +770,24 @@ export function entrywayProps(world: World): EntrywayProps {
 
 /** Is the Entryway's vase of dried grasses still on the hall table? */
 export function vaseState(world: World): VaseState {
-  return world.vase;
+  return breakableState(world, 'entryway-vase');
+}
+
+/** Is this Breakable, anywhere in the apartment, still whole? */
+export function breakableState(world: World, breakable: BreakableId): VaseState {
+  return world.broken.has(breakable) ? 'broken' : 'intact';
+}
+
+/**
+ * The world with this Breakable knocked over, if it was not already.
+ *
+ * `roamCats` reaches for this over the roll it decides on its own; the
+ * `breakable-broken` event reaches for it from outside. Both leave the
+ * apartment in the same state either way.
+ */
+function withBreakableBroken(world: World, breakable: BreakableId): World {
+  if (world.broken.has(breakable)) return world;
+  return { ...world, broken: new Set(world.broken).add(breakable) };
 }
 
 /** How long the Entryway's arrival runs, for anything that has to wait it out. */

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  BREAKABLE_OWNER,
   CAT_CLEARANCE,
   CAT_IDS,
   CAT_MARKS,
@@ -8,6 +9,7 @@ import {
   actorView,
   actorsIn,
   advance,
+  breakableState,
   catSfx,
   createWorld,
   isBeingPetted,
@@ -176,11 +178,14 @@ describe('a cat making itself heard', () => {
   it('meows now and then, and the three never share one sample', () => {
     const world = walkInto(createWorld({ ...plainArrival, random: seededRandom(404) }), 'games');
     // Three minutes in one Room, listened to the way the frame loop listens.
+    // Luna's snow globe lives here too (09), so the meows are picked out from
+    // whatever else the three of them made happen over that stretch.
     const { heard } = listen(world, 180000);
-    expect([...new Set(heard)].sort()).toEqual(['luna-meow', 'mica-meow', 'mira-meow']);
+    const meows = heard.filter(name => name.endsWith('-meow'));
+    expect([...new Set(meows)].sort()).toEqual(['luna-meow', 'mica-meow', 'mira-meow']);
     // Occasionally: three cats over three minutes, not a cat every second.
-    expect(heard.length).toBeGreaterThan(8);
-    expect(heard.length).toBeLessThan(60);
+    expect(meows.length).toBeGreaterThan(8);
+    expect(meows.length).toBeLessThan(60);
   });
 
   it('says nothing at all on a tick that crossed no meow', () => {
@@ -258,6 +263,36 @@ describe('the marks a Room offers a cat', () => {
         }
       }
     }
+  });
+});
+
+describe('a cat and her own Breakable', () => {
+  it('gives every Breakable to exactly one cat, and every cat at least one', () => {
+    expect(BREAKABLE_OWNER['entryway-vase']).toBe('mica');
+    expect(BREAKABLE_OWNER['cinema-film-can']).toBe('mica');
+    expect(BREAKABLE_OWNER['cinema-lucky-cat']).toBe('mira');
+    expect(BREAKABLE_OWNER['activity-pencil-mug']).toBe('mira');
+    expect(BREAKABLE_OWNER['snow-globe']).toBe('luna');
+    // Never a Breakable with nobody's name on it, and never a cat left out.
+    expect(new Set(Object.values(BREAKABLE_OWNER))).toEqual(new Set(CAT_IDS));
+  });
+
+  it('occasionally knocks her own Breakable down, with its own breaking sound', () => {
+    const world = walkInto(createWorld({ ...plainArrival, random: seededRandom(1) }), 'games');
+    const { world: after, heard } = listen(world, 60000, 100);
+    expect(breakableState(after, 'snow-globe')).toBe('broken');
+    expect(heard).toContain('snow-globe-smash');
+  });
+
+  it('stays broken for the rest of the visit once it has gone over', () => {
+    const world = walkInto(createWorld({ ...plainArrival, random: seededRandom(1) }), 'games');
+    const broken = run(world, 60000, 100);
+    expect(breakableState(broken, 'snow-globe')).toBe('broken');
+    // Another two minutes in the Room does not somehow un-break it, or break
+    // it a second time and make a second sound.
+    const { world: still, heard } = listen(broken, 120000, 100);
+    expect(breakableState(still, 'snow-globe')).toBe('broken');
+    expect(heard).not.toContain('snow-globe-smash');
   });
 });
 

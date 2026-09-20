@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import { advance, createWorld, isCurrentRoom, isRoomPainted, motionIsOn, motionIsOnByChoice, type WorldInputs } from './index';
+import {
+  advance,
+  breakableState,
+  createWorld,
+  isCurrentRoom,
+  isRoomPainted,
+  motionIsOn,
+  motionIsOnByChoice,
+  roomHash,
+  type WorldInputs,
+} from './index';
 
 /** A visitor arriving with nothing stored, no reduced-motion request, no hash. */
 const plainArrival: WorldInputs = { hash: '', storedLanguage: null, reducedMotion: false };
@@ -141,6 +151,45 @@ describe('whether the visitor has overruled their system on motion', () => {
     const asked = advance(chosen, { type: 'reduced-motion-changed', reducedMotion: true });
     expect(motionIsOn(asked)).toBe(true);
     expect(motionIsOnByChoice(asked)).toBe(true);
+  });
+});
+
+describe('a Breakable, once it has gone over', () => {
+  /**
+   * `breakable-broken` is the general way to knock one down without waiting on
+   * a cat's own roll — 09's public seam for exactly this, so a test can put
+   * the apartment in the state a visit eventually reaches without simulating
+   * the minutes it takes to get there.
+   */
+  const knockVase = (world: ReturnType<typeof createWorld>) =>
+    advance(world, { type: 'breakable-broken', breakable: 'entryway-vase' });
+
+  it('starts every visit whole', () => {
+    expect(breakableState(createWorld(plainArrival), 'entryway-vase')).toBe('intact');
+  });
+
+  it('is recorded once, and again does nothing', () => {
+    const broken = knockVase(createWorld(plainArrival));
+    expect(breakableState(broken, 'entryway-vase')).toBe('broken');
+    expect(knockVase(broken)).toBe(broken);
+  });
+
+  it('survives a Room change', () => {
+    const broken = knockVase(createWorld(plainArrival));
+    const movedOn = advance(broken, { type: 'hash-changed', hash: roomHash('games') });
+    expect(breakableState(movedOn, 'entryway-vase')).toBe('broken');
+  });
+
+  it('survives a reload — the DOM layer hands back what it read from session storage', () => {
+    const reloaded = createWorld({ ...plainArrival, brokenBreakables: ['entryway-vase'] });
+    expect(breakableState(reloaded, 'entryway-vase')).toBe('broken');
+  });
+
+  it('does not survive a new tab — nothing stored, nothing broken', () => {
+    // A new tab is a fresh `createWorld` with no `brokenBreakables` input at
+    // all, exactly like the very first visit above: session storage is
+    // per-tab, so this is the same call and the same answer.
+    expect(breakableState(createWorld(plainArrival), 'entryway-vase')).toBe('intact');
   });
 });
 

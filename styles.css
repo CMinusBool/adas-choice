@@ -489,6 +489,14 @@ html.dialog-open { overflow: hidden; }
 .cinema-cabinet { z-index: 830; border-radius: calc(var(--u) * 5); background: linear-gradient(#6a4a39, #4c342a); border: calc(var(--u) * 4) solid #3a2820; }
 .cinema-cabinet .cabinet-knob { position: absolute; right: 12%; top: 46%; width: calc(var(--u) * 10); height: calc(var(--u) * 10); border-radius: 50%; background: #c79a4e; }
 
+/* 09: the Cinema Room's two Breakables. Simple placeholder shapes, like the
+   other three Breakables' — the artwork is ticket 36's, and neither is
+   clickable: the visitor cannot break either by hand. */
+.cinema-film-can { z-index: 831; border-radius: 40% / 50%; background: linear-gradient(100deg, #7a8a6f 0 55%, #5c6b52 55%); box-shadow: inset 0 0 0 calc(var(--u) * 2) #3f4a38; }
+.cinema-film-can-broken { z-index: 871; background: linear-gradient(#5c6b52 0 34%, transparent 34%) no-repeat 0 0 / 34% 60%, repeating-linear-gradient(100deg, #2a241f 0 6%, #17130f 6% 10%) no-repeat 30% 20% / 68% 40%; }
+.cinema-lucky-cat { z-index: 640; border-radius: 40% 40% 50% 50%; background: linear-gradient(#f6efe4 0 70%, #d9524a 70% 84%, #f0d18a 84%); }
+.cinema-lucky-cat-broken { z-index: 680; background: radial-gradient(closest-side, #f6efe4 0 90%, transparent 90%) no-repeat 4% 30% / 30% 60%, radial-gradient(closest-side, #f6efe4 0 90%, transparent 90%) no-repeat 60% 10% / 26% 50%, radial-gradient(closest-side, #d9524a 0 90%, transparent 90%) no-repeat 82% 40% / 18% 40%; }
+
 /* P15-P17: the projector, and its two affordances. */
 .cinema-projector { z-index: 831; }
 .cinema-projector .projector-body { position: absolute; left: 0; bottom: 0; width: calc(var(--u) * 110); height: calc(var(--u) * 80); border-radius: calc(var(--u) * 8); background: linear-gradient(#4b4a52, #2a282f); }

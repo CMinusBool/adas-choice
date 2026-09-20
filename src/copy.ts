@@ -105,8 +105,14 @@ const zhHant = {
   // end 14
   // 08: the three cats. Each name says which cat it is as well as what happens
   // if you reach for her, because the sprite is the only other thing saying so.
-  catMica: '三花貓 Míca：摸摸她', catMira: '虎斑貓 Mira：摸摸她', catLuna: '黑貓 Luna：摸摸她'
+  catMica: '三花貓 Míca：摸摸她', catMira: '虎斑貓 Mira：摸摸她', catLuna: '黑貓 Luna：摸摸她',
   // end 08
+  // 09: the Cinema Room's two Breakables. The Entryway's vase (14), the Game
+  // Room's snow globe (15) and the Activity Room's pencil mug (16) already
+  // have their keys above; these are the two this ticket adds the markup for.
+  filmCanIntact: '一盒膠卷', filmCanBroken: '被貓推下去的膠卷盒，底片散了一地',
+  luckyCatIntact: '一隻招財貓', luckyCatBroken: '摔成三塊的招財貓，手還在招'
+  // end 09
 };
 
 /** Every piece of copy on the page. Both dictionaries carry the same keys. */
@@ -208,7 +214,11 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     // 08: the three cats
     catMica: 'Míca the calico cat: give her a fuss',
     catMira: 'Mira the tabby cat: give her a fuss',
-    catLuna: 'Luna the black cat: give her a fuss'
+    catLuna: 'Luna the black cat: give her a fuss',
     // end 08
+    // 09: the Cinema Room's two Breakables
+    filmCanIntact: 'A can of film', filmCanBroken: 'A film can the cats knocked down, its film spilled across the rug',
+    luckyCatIntact: 'A lucky cat figurine', luckyCatBroken: 'A lucky cat in three pieces, its paw still beckoning'
+    // end 09
   }
 };

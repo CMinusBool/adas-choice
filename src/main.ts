@@ -1,5 +1,6 @@
 import { mountActivityRoom } from './dom/activity-room'; // 16: the Activity Room
 import { mountActors } from './dom/actors'; // 07: actors
+import { mountBreakables, readStoredBroken } from './dom/breakables'; // 09: the Breakables
 import { mountCinemaRoom } from './dom/cinema-room'; // 17: the Cinema Room
 import { mountEntryway, readStoredArrival } from './dom/entryway'; // 14: the Entryway
 import { mountGameRoom } from './dom/game-room';
@@ -26,6 +27,7 @@ let world: World = createWorld({
   storedLanguage: readStoredLanguage(),
   reducedMotion: prefersReducedMotion(),
   arrived: readStoredArrival(), // 14: the Entryway
+  brokenBreakables: readStoredBroken(), // 09: the Breakables
 });
 
 function dispatch(event: WorldEvent) {
@@ -52,6 +54,7 @@ const mounts: Mount[] = [
   // 14: the Entryway, after the Cast, because the arrival's Beats stand in for
   // Actors the painter above has just placed.
   mountEntryway,
+  mountBreakables, // 09: the other four Breakables
 ];
 // Filled as each painter mounts, so an event arriving mid-mount paints only
 // what is already standing instead of reaching for a painter that is not there.

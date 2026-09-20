@@ -48,12 +48,16 @@ export { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';
 export type { ArrivalSlice, ArrivalState, ArrivalView, BeatId, Box, Costume, PlayingBeat } from './arrival';
 export { ARRIVAL_SECONDS } from './arrival';
 export type { BreakableId } from './world';
-export { arrivalView, entrywayProps, vaseState } from './world';
+export { arrivalView, breakableState, entrywayProps, vaseState } from './world';
 
 // 08: the three cats — who they are, and where a Room lets them stand.
 export type { CatId, CatsSlice } from './cats';
 export { CAT_CLEARANCE, CAT_IDS, CAT_MARKS, isCat, meowOf, pettingBeat } from './cats';
 export { catSfx, isBeingPetted } from './world';
+
+// 09: the apartment's five Breakables — who owns each one, where she knocks
+// it down, and what it sounds like going over.
+export { BREAKABLE_IDS, BREAKABLE_MARK, BREAKABLE_OWNER, breakSfxOf, knockBeat } from './cats';
 
 // 18: the nine Films, and the rummage that pins three of them to the wall.
 // 19: `FilmPairing` is what the panel's meta line turns into a copy key.
