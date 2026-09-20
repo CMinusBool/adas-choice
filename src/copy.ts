@@ -39,8 +39,13 @@ const zhHant = {
   loadingTitle: '正在整理公寓⋯', loadingProgress: '載入進度', loadingNote: '畫都掛上牆之後，門就會打開。',
   // 06: audio
   mute: '關閉聲音', unmute: '開啟聲音',
-  musicSourceStart: '播放房間音樂', musicSourceStop: '停止房間音樂', placeholder: '暫代'
+  musicSourceStart: '播放房間音樂', musicSourceStop: '停止房間音樂', placeholder: '暫代',
   // end 06
+  // 14: the Entryway
+  entrywayRadio: '玄關的收音機',
+  vaseIntact: '玄關桌上插著乾燥花的花瓶', vaseBroken: '摔碎的花瓶，乾燥花散了一地',
+  arrivalDescription: '他們回到家了：他背著裝了三隻貓的背包，幫她脫下大衣，貓咪一隻一隻跳出來。'
+  // end 14
 };
 
 /** Every piece of copy on the page. Both dictionaries carry the same keys. */
@@ -79,7 +84,12 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     loadingTitle: 'Tidying the apartment…', loadingProgress: 'Loading progress', loadingNote: 'The door opens once every picture is on the wall.',
     // 06: audio
     mute: 'Mute sound', unmute: 'Unmute sound',
-    musicSourceStart: "Play the Room's music", musicSourceStop: "Stop the Room's music", placeholder: 'placeholder'
+    musicSourceStart: "Play the Room's music", musicSourceStop: "Stop the Room's music", placeholder: 'placeholder',
     // end 06
+    // 14: the Entryway
+    entrywayRadio: 'The hall radio',
+    vaseIntact: 'A vase of dried grasses on the hall table', vaseBroken: 'The vase in pieces, its dried grasses scattered across the floor',
+    arrivalDescription: 'They are home. He carries the three cats in a backpack and helps her out of her coat, and the cats climb out one by one.'
+    // end 14
   }
 };

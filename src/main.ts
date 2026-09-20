@@ -1,4 +1,5 @@
 import { mountActors } from './dom/actors'; // 07: actors
+import { mountEntryway, readStoredArrival } from './dom/entryway'; // 14: the Entryway
 import { mountGameRoom } from './dom/game-room';
 import { mountLanguage, readStoredLanguage } from './dom/language';
 // 05: loading
@@ -21,6 +22,7 @@ let world: World = createWorld({
   hash: location.hash,
   storedLanguage: readStoredLanguage(),
   reducedMotion: prefersReducedMotion(),
+  arrived: readStoredArrival(), // 14: the Entryway
 });
 
 function dispatch(event: WorldEvent) {
@@ -39,6 +41,9 @@ const mounts: Mount[] = [
   mountLanguage, mountMotion, mountRooms, mountGameRoom,
   mountSound, // 06: audio
   mountActors, // 07: actors — the Cast stands on top of whatever the Room laid down.
+  // 14: the Entryway, after the Cast, because the arrival's Beats stand in for
+  // Actors the painter above has just placed.
+  mountEntryway,
 ];
 // Filled as each painter mounts, so an event arriving mid-mount paints only
 // what is already standing instead of reaching for a painter that is not there.
