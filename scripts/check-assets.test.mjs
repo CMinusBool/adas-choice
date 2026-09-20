@@ -14,7 +14,9 @@
 //   CHECK_ASSETS_FIXTURES=/path/to/dir node --test scripts/check-assets.test.mjs
 //
 // where the directory holds `candidate-sheet.png` and `v2/candidate-sheet.png`.
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
@@ -401,6 +403,46 @@ test('--beat with --actor is refused: --actor is a Cycle frame box by another na
   assert.throws(() => parseArguments([...BEAT_ARGS, '--actor', 'mira']), {
     message: /--actor names a Cycle's frame box/,
   });
+});
+
+// --- the command line, end to end, over a Beat written to a temp file ----------
+
+/** Run the script the way a person would, and hand back what they would see. */
+function runCli(args) {
+  const run = spawnSync(process.execPath, [join(root, 'scripts', 'check-assets.mjs'), ...args], { encoding: 'utf8' });
+  return { status: run.status, out: `${run.stdout}${run.stderr}` };
+}
+
+test('the command line checks a Beat under --beat and refuses it under neither', t => {
+  const directory = mkdtempSync(join(tmpdir(), 'beat-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const frame = { width: 120, height: 160 };
+  const sheet = buildSheet({
+    frames: 8,
+    columns: 4,
+    frame,
+    figure: index => ({ width: 20, height: 70 + index * 6, centreOffset: -40 + index * 11, feetUp: index * 4 }),
+  });
+  const path = join(directory, 'mira-startle-right.png');
+  writeFileSync(path, encodePng(sheet.image));
+  const grid = ['--frames', '8', '--columns', '4', '--frame', '120x160'];
+
+  const beat = runCli(['--beat', path, ...grid]);
+  assert.equal(beat.status, 0, beat.out);
+  assert.match(beat.out, /^PASS/m);
+  assert.match(beat.out, /1\/1 sheets pass the Beat contract\./);
+
+  const cycle = runCli([path, ...grid]);
+  assert.equal(cycle.status, 1, cycle.out);
+  assert.match(cycle.out, /^FAIL/m);
+  assert.match(cycle.out, /re-run with --beat/);
+  assert.match(cycle.out, /1 sheets pass the Cycle contract\./);
+});
+
+test('the command line refuses --beat with nothing to check', () => {
+  const refused = runCli(['--beat', '--frames', '8', '--columns', '4', '--frame', '120x160']);
+  assert.equal(refused.status, 1);
+  assert.match(refused.out, /check-assets: --beat needs the sheets to check/);
 });
 
 // --- the two real generations, when they are on disk ---------------------------

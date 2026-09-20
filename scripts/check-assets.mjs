@@ -481,6 +481,7 @@ function main(args) {
       frames: target.frames,
       columns: target.columns,
       frame,
+      beat: options.beat,
     });
     result.stats.actor = actor;
     if (palette) {
@@ -502,6 +503,8 @@ function main(args) {
           : `  ${result.stats.intermediateAlpha} soft-alpha px (${(result.stats.intermediateAlphaFraction * 100).toFixed(2)}%)`;
       if (result.ok) console.log(`PASS  ${result.name}  ${result.stats.frames} frames${alpha}`);
       else console.log(`FAIL  ${result.name}  ${result.failures[0].rule}: ${result.failures[0].message}`);
+      const hint = beatHint(result);
+      if (hint) console.log(`      ${hint}`);
       if (result.stats.paletteNearPercent) {
         console.log(
           `      palette: ${Object.entries(result.stats.paletteNearPercent)
@@ -510,7 +513,9 @@ function main(args) {
         );
       }
     }
-    console.log(`${results.length - failed.length}/${results.length} sheets pass the Cycle contract.`);
+    console.log(
+      `${results.length - failed.length}/${results.length} sheets pass the ${options.beat ? 'Beat' : 'Cycle'} contract.`,
+    );
   }
 
   if (!failed.length) return 0;
