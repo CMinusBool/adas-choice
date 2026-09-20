@@ -1148,15 +1148,35 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
     margin: 0 auto;
     z-index: 910;
     grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 2rem;
-    padding: 1.8rem 2rem;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    /* One definite row, so the world can take the overlay's height and the
+       panel can be the only thing that scrolls. A stage 495 px tall does not
+       hold this much copy, and a panel that carried the ellipse up out of the
+       frame with it as it scrolled was the first thing built here. */
+    grid-template-rows: minmax(0, 1fr);
+    gap: 1.6rem;
+    padding: 1.4rem 1.6rem;
+    overflow: hidden;
     box-shadow: 0 24px 80px #000a;
     animation: activity-fade-in .15s ease-out;
   }
-  .portal-expanded-world { width: clamp(12rem, 20vw, 22rem); }
+  .portal-expanded-world { width: auto; height: 88%; align-self: center; }
+  /* The prose scrolls; the two actions are pinned under it. */
+  .portal-panel { min-height: 0; max-height: 100%; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+  .portal-prose { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: .5rem; }
+  /* Page type, tightened by the stage's height: a 16:9 stage at its 880 px
+     floor gives the panel about 400 px, and this is what fits most of the copy
+     into it without shrinking the words on a phone, where there is no cap. */
+  .portal-expanded-title { margin-top: .15rem; font-size: 1.5rem; line-height: 1.15; }
+  /* Flat sizes rather than the page's viewport clamps: the stage sits at its
+     880 px floor from 1080 px of viewport all the way up, so type that grows
+     with the viewport grows against a box that does not. */
+  .portal-meta, .portal-label { font-size: .9375rem; }
+  .portal-caption, .portal-description, .portal-why, .portal-setup { font-size: 1rem; }
+  .portal-caption { margin-top: .35rem; }
+  .portal-description { margin-top: .5rem; }
+  .portal-setup-note { margin-top: .25rem; font-size: 1rem; }
+  .portal-label { margin: .6rem 0 .2rem; }
+  .portal-actions { margin-top: .8rem; }
   .motion-off .portal-scrim, .motion-off .portal-expanded { animation: none; }
 }
 

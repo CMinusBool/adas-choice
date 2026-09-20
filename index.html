@@ -313,6 +313,7 @@
             <span class="portal-rim" aria-hidden="true"></span>
           </div>
           <div class="portal-panel">
+            <div class="portal-prose">
             <p class="portal-meta"><span class="portal-category"></span><span class="portal-pick"></span><span class="portal-players"></span></p>
             <p class="portal-caption"></p>
             <h2 class="portal-expanded-title" id="portal-expanded-title" tabindex="-1"></h2>
@@ -322,6 +323,10 @@
             <h3 class="portal-label" data-i18n="setup">開玩前準備</h3>
             <p class="portal-setup"></p>
             <p class="portal-setup-note"></p>
+            </div>
+            <!-- The two actions stay out of the scrolling prose: a stage 495 px
+                 tall does not hold this panel, and the Invitation is what the
+                 page is for — it does not go below a fold. -->
             <div class="portal-actions">
               <button class="portal-invite" id="portal-invite" type="button" aria-haspopup="dialog" aria-controls="game-dialog"><span aria-hidden="true">♡</span><span data-i18n="invite">想跟你一起玩這個～</span></button>
               <a class="portal-steam" id="portal-steam" target="_blank" rel="noopener noreferrer"><span data-i18n="steam">在 Steam 上看看</span><span class="sr-only" data-i18n="newTab">（在新分頁開啟）</span><span aria-hidden="true">↗</span></a>
