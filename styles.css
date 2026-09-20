@@ -307,6 +307,21 @@ html.dialog-open { overflow: hidden; }
   height: calc(var(--h) / 9 * 1%);
 }
 
+/* 53: ...and a Prop's surface comes from the Prop, the same way its box does.
+   `src/dom/artwork.ts` turns the `data-still` a Prop declares into `--still`, and
+   this paints it. The URL lives in the markup, where the loading gate in
+   `src/dom/loading.ts` and `scripts/assert-built-page.mjs` can both see it —
+   ticket 35 furnished the Activity Room with fourteen `url()`s written here
+   instead, and neither could, so the Room was never preloaded and its URLs were
+   never checked in `dist/`.
+
+   `:where()` holds the whole rule at zero specificity, so "fill the Prop's box
+   once" is a default a Room overrides by saying so in its own rule: the two-cell
+   door leaf and boombox below are `200% 100%` and stay that way. An `<img>` is
+   left out because it paints itself from `src`; its `data-still` is the Scenes'
+   motionless poster, which is the Game Room's business. */
+:where([data-still]:not(img)) { background-image: var(--still); background-size: 100% 100%; background-repeat: no-repeat; }
+
 /* Every Cinema Prop sorts at one depth; the Room has no Prop the Cast walks
    behind, so it needs no per-Prop key. */
 .stage-cinema .cinema-prop { z-index: 640; }
@@ -733,8 +748,12 @@ html.dialog-open { overflow: hidden; }
 /* 35: the art drop. A Prop's box is unchanged (index.html keeps §4.1's arithmetic); what changes
    here is the surface each box paints, from a CSS placeholder to the delivered image. A group box
    that now covers more than one §4.1 Prop (the table, the shelf, the desk, the call corner, the
-   boombox+crate) is one `background-image` the way the illustrator drew it, not several. */
-.a-backdrop { background-image: url("activity-room/backdrop.png"); background-size: 100% 100%; background-repeat: no-repeat; }
+   boombox+crate) is one image the way the illustrator drew it, not several.
+
+   53: which image is no longer written here. Every one of these Props names its own file in the
+   `data-still` beside its box in `index.html`, and the zero-specificity rule above paints it, so
+   the Props that only ever said "this file, filling the box" need no rule at all any more. What
+   is left below is what a Prop genuinely differs on. */
 
 .a-door { display: block; border-radius: calc(4cqw / 16) calc(4cqw / 16) 0 0; background: transparent; transition: filter .2s, transform .2s; }
 /* The delivered leaf is a two-cell sheet, shut then swung ~70° open, so the DOM could show either
@@ -742,17 +761,9 @@ html.dialog-open { overflow: hidden; }
    `styles.css` said so before the art existed ("these two angles stay") and the art does not
    change that. `background-size: 200% 100%` with a fixed `background-position: 0 0` keeps showing
    cell 1 (shut) through the rotation; cell 2 (open) ships but is not read by this rule. */
-.a-door-leaf { position: absolute; left: 7.8%; top: 3.8%; width: 84.4%; height: 96.2%; background-image: url("activity-room/door-leaf.png"); background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; }
+.a-door-leaf { position: absolute; left: 7.8%; top: 3.8%; width: 84.4%; height: 96.2%; background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; }
 .a-door:hover, .a-door:focus-visible { transform: translateY(calc(-3cqw / 16)); filter: brightness(1.1); }
 
-.a-map { background-image: url("activity-room/map.png"); background-size: 100% 100%; background-repeat: no-repeat; }
-
-.a-table { background-image: url("activity-room/table.png"); background-size: 100% 100%; background-repeat: no-repeat; }
-.a-desk { background-image: url("activity-room/desk.png"); background-size: 100% 100%; background-repeat: no-repeat; }
-.a-mug { background-image: url("activity-room/mug-intact.png"); background-size: 100% 100%; background-repeat: no-repeat; }
-.a-mug-broken { background-image: url("activity-room/mug-broken.png"); background-size: 100% 100%; background-repeat: no-repeat; }
-
-.a-shelf { background-image: url("activity-room/shelf.png"); background-size: 100% 100%; background-repeat: no-repeat; }
 
 .a-chalkboard { display: grid; align-items: center; padding-inline: calc(14cqw / 16); border-radius: calc(4cqw / 16); background: linear-gradient(#36443F, #2F3A35); box-shadow: inset 0 0 0 calc(3cqw / 16) #5C3F2C; }
 .a-chalk { font-size: calc(26cqw / 16); line-height: 1.08; text-align: center; color: #EADCC2; opacity: .88; transition: opacity .2s, text-shadow .2s; overflow: hidden; }
@@ -777,27 +788,22 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 .motion-off .a-station, .motion-off .a-door, .motion-off .a-chalk { transition: none; }
 
 .a-tableau { background-size: 100% 100%; background-repeat: no-repeat; animation: activity-tableau-in .25s ease-out; }
-.a-tableau[data-tableau="draw"] { background-image: url("activity-room/tableau-draw.png"); }
-.a-tableau[data-tableau="hunt"] { background-image: url("activity-room/tableau-hunt.png"); }
-.a-tableau[data-tableau="map"] { background-image: url("activity-room/tableau-map.png"); }
 @keyframes activity-tableau-in { from { opacity: 0; } to { opacity: 1; } }
 .motion-off .a-tableau { animation: none; }
 /* The tableau replaces the two of them; the cats stay where they are. */
 .stage[data-stage="activities"].has-tableau .actor[data-actor="boy"], .stage[data-stage="activities"].has-tableau .actor[data-actor="girl"] { display: none; }
-
-.a-call-corner { background-image: url("activity-room/call-corner.png"); background-size: 100% 100%; background-repeat: no-repeat; }
 
 /* L26, A-S09: the boombox and its crate are one off/on two-cell image, `.a-boombox-art`, sitting
    behind the `.a-boombox` control — the control keeps its own §5.3 hit box (210 x 120 units) rather
    than growing to the art's full extent, so the click target the design note measured is unchanged.
    `:has()` reaches back from the button's `aria-pressed` to the art layer that precedes it in the
    DOM, the same technique the chalkboards already use for their chosen state. */
-.a-boombox-art { background-image: url("activity-room/boombox.png"); background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; transition: filter .2s; }
+.a-boombox-art { background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; transition: filter .2s; }
 .stage[data-stage="activities"]:has(.a-boombox[aria-pressed="true"]) .a-boombox-art { background-position: 100% 0; }
 .stage[data-stage="activities"]:has(.a-boombox:hover, .a-boombox:focus-visible) .a-boombox-art { filter: brightness(1.12); }
 .a-boombox { display: block; background: transparent; }
 .a-boombox-window { position: absolute; left: 39.2%; top: 33.3%; width: 21.5%; height: 33.3%; display: flex; align-items: center; justify-content: space-around; }
-.a-reel { width: 38%; aspect-ratio: 1; border-radius: 50%; background-image: url("activity-room/cassette-reel.png"); background-size: 100% 100%; }
+.a-reel { width: 38%; aspect-ratio: 1; border-radius: 50%; }
 .a-boombox-notes { position: absolute; left: 12%; top: 8%; width: 24%; height: 60%; opacity: 0; }
 .a-boombox-notes span { position: absolute; bottom: 0; font-size: calc(26cqw / 16); line-height: 1; color: var(--pink); }
 .a-boombox-notes span:nth-child(2) { left: 38%; }

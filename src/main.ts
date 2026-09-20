@@ -1,6 +1,7 @@
 import { mountActivityRoom } from './dom/activity-room'; // 16: the Activity Room
 import { mountActors } from './dom/actors'; // 07: actors
 import { mountArrival } from './dom/arrival'; // 44: every Room's own entrance
+import { paintDeclaredArtwork } from './dom/artwork'; // 53: a Prop's surface, from the Prop
 import { mountBreakables, readStoredBroken } from './dom/breakables'; // 09: the Breakables
 import { mountCats } from './dom/cats'; // 08: the cats
 import { mountCinemaRoom } from './dom/cinema-room'; // 17: the Cinema Room
@@ -60,6 +61,12 @@ const mounts: Mount[] = [
   mountEntryway,
   mountBreakables, // 09: the other four Breakables
 ];
+// 53: every Prop's surface, taken from the `data-still` it declares, before the
+// first painter runs. Not in the list below, because it is not a painter: a
+// surface is the same file whatever the world is doing, and declaring it in the
+// markup rather than the stylesheet is what puts it in the loading gate's list.
+paintDeclaredArtwork();
+
 // Filled as each painter mounts, so an event arriving mid-mount paints only
 // what is already standing instead of reaching for a painter that is not there.
 const painters: Painter[] = [];
