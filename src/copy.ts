@@ -25,6 +25,10 @@ const zhHant = {
   projectorMotorStart: '讓放映機空轉', projectorMotorStop: '停下放映機',
   projectorGateEmpty: '還沒有膠卷。先選一部片。',
   // end 17
+  // 18: what a pinned Poster offers. The Film's own title comes from
+  // `src/world/films.ts` and is bilingual there; this is the rest of its name.
+  posterExpandHint: '展開海報',
+  // end 18
   activitiesTitle: '活動室', activitiesSoon: '桌上空著，等著擺上今晚要一起做的事。',
   eyebrow: '三款精選・兩個玩家', titleStart: '今晚，', titleAccent: '一起玩。', intro: '一起解謎、分享操控，在手忙腳亂時接住彼此。',
   pause: '暫停動畫', play: '播放動畫', why: '為什麼選它', setup: '開玩前準備', steam: '在 Steam 上看看', newTab: '（在新分頁開啟）',
@@ -75,6 +79,9 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     projectorMotorStart: 'Let the projector run', projectorMotorStop: 'Stop the projector',
     projectorGateEmpty: 'No reel yet. Choose a Film first.',
     // end 17
+    // 18
+    posterExpandHint: 'Expand the Poster',
+    // end 18
     activitiesTitle: 'The Activity Room', activitiesSoon: 'The table is clear, waiting for something to do tonight.',
     eyebrow: 'THREE PICKS. TWO PLAYERS.', titleStart: 'Your next', titleAccent: 'co-op night.', intro: 'Crack the puzzle. Share the controls. Catch each other when things go sideways.',
     pause: 'Pause motion', play: 'Play motion', why: 'WHY IT FITS', setup: 'THE SETUP', steam: 'Open on Steam', newTab: ' in a new tab',

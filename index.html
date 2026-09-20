@@ -215,12 +215,18 @@
             <span class="shelf-body" aria-hidden="true"><span class="cubby"></span><span class="cubby"></span><span class="cubby"></span></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfHorror">恐怖</span>
           </button>
-          <!-- P10: the Poster board, empty until ticket 18 pins anything to it. -->
+          <!-- P10-P11: the Poster board. The three slots are filled by
+               `src/dom/cinema-room.ts` as the Boy pins each Poster, so they are
+               absent here: an empty slot is not a thing on the wall, and a
+               `<button>` for a Poster that is not up is one more Tab stop for
+               nothing. The container is placed off the board's padding box, so
+               its three 132 x 196 slots land on stage x 1125 / 1279 / 1433. -->
           <section class="cinema-prop cinema-board" style="--x:1110;--y:300;--w:470;--h:320" aria-label="釘在牆上的海報" data-i18n-aria="boardLabel">
             <span class="board-pin" aria-hidden="true"></span>
             <span class="board-pin" aria-hidden="true"></span>
             <span class="board-ghost" aria-hidden="true"></span>
             <p class="board-empty" data-i18n="boardEmpty">牆上還空著。先選一排書架。</p>
+            <div class="board-slots" data-poster-slots></div>
           </section>
           <!-- P12-P14: her teal beanbag, his coral one, the reel cabinet between. -->
           <span class="cinema-prop cinema-beanbag beanbag-girl" style="--x:230;--y:690;--w:180;--h:110" aria-hidden="true"></span>
