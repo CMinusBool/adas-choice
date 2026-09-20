@@ -36,7 +36,6 @@ const themes: Record<GameKey, { shapes: ParticleKind[]; colors: string[] }> = {
   heavenly: { shapes: ['wrench', 'nut', 'ring', 'spark'], colors: ['#f1bbdc', '#d9c9ff', '#ffdead'] }
 };
 
-const gameNames: Record<GameKey, string> = { tango: 'Operation: Tango', lovers: 'Lovers in a Dangerous Spacetime', heavenly: 'Heavenly Bodies' };
 const frameDurations = [600, 250, 250, 300, 300, 350, 400, 500, 300, 250, 250, 350];
 
 /**
@@ -331,7 +330,10 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
     consent.checked = false;
     consent.disabled = !notificationsReady;
     byId<HTMLInputElement>('invite-website').value = '';
-    byId('dialog-game').textContent = gameNames[dialogGame];
+    // 21: a game's name is a proper noun, the same in both languages, and the
+    // card already carries it. Read it off the card rather than keeping a third
+    // copy here that no dictionary types and no build step compares.
+    byId('dialog-game').textContent = wrap.querySelector('h2')!.textContent;
     byId<HTMLImageElement>('dialog-poster').src = wrap.querySelector<HTMLImageElement>('.game-art')!.dataset.still!;
     byId<HTMLAnchorElement>('dialog-steam').href = wrap.querySelector<HTMLAnchorElement>('.game-card')!.href;
     removeChallenge();
