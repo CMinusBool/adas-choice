@@ -948,7 +948,10 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
    and the stage's own `overflow: hidden` is what keeps them in the Room. */
 #room-games .stage .portal {
   --rim: var(--pink);
-  border: calc(16 * var(--u)) solid var(--rim);
+  /* 46: the thickness is a variable because the expanded Portal wears the same
+     rim at a different size, and `--u` does not reach outside the stage. */
+  --rim-width: calc(16 * var(--u));
+  border: var(--rim-width) solid var(--rim);
   border-radius: 50%;
   background: #0A0810;
   cursor: pointer;
@@ -981,9 +984,9 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 .portal-rim {
   position: absolute;
   /* Out to the button's border box, so this ring lands exactly on the rim. */
-  inset: calc(-16 * var(--u));
+  inset: calc(-1 * var(--rim-width));
   z-index: 382;
-  border: calc(16 * var(--u)) solid transparent;
+  border: var(--rim-width) solid transparent;
   border-radius: 50%;
   background: conic-gradient(from var(--rim-angle, 0deg),
       #ffffff00 0 6%,
@@ -1033,6 +1036,129 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   box-shadow: 0 0 calc(18 * var(--u)) #f5a3c5aa;
 }
 @media (min-width: 1080px) { .portal-dots { display: none; } }
+
+/* §5.4: the expanded Portal — one overlay serving all three, built on the
+   Activity Room's `.activity-card` pattern above rather than a second one of
+   its own: over the stage on a wide shell with the Room showing all the way
+   round it, and an ordinary block below the stage at page type under 1080 px,
+   which is where §3.5 says a Scene is actually watched.
+
+   `.game-room` is the positioned column that makes "over the stage" mean the
+   *visible* stage: `#games-scene` is a horizontal scroller below 880 px of
+   rendered width, and an overlay inside it would lie over the scroll content
+   and pan away with the Room.
+
+   Modal at both widths — `src/dom/game-room.ts` puts the stage in `inert` and
+   keeps Tab inside — and the scrim takes the pointer.
+
+   The expanded world keeps being a Portal: same ellipse, same `.portal-rim`
+   sweep, sized off its own `--rim-width` because `--u` belongs to the stage.
+   Motion off stops the sweep through the existing `.motion-off .portal-rim`
+   rule, and the interior holds its still, so nothing here opts out twice. */
+.game-room {
+  position: relative;
+  /* The stage's own width, spelled once: `min-width` then `max-width`, exactly
+     as `#room-games .stage` writes them, so the scrim lands on the stage and
+     not on the Room's full column. */
+  --stage-box: max(880px, min(100%, calc((100dvh - 25.5rem) * 16 / 9)));
+}
+.portal-scrim { display: none; }
+.portal-expanded {
+  --rim: var(--pink);
+  display: grid;
+  gap: 1.3rem;
+  margin-top: 1.4rem;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--rim);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.portal-expanded[data-game="tango"] { --rim: #4DA3D9; }
+.portal-expanded[data-game="lovers"] { --rim: #F5A3C5; }
+.portal-expanded[data-game="heavenly"] { --rim: #287F98; }
+.portal-expanded-world {
+  --rim-width: clamp(6px, 1.4vw, 13px);
+  position: relative;
+  justify-self: center;
+  align-self: center;
+  width: min(100%, 14rem);
+  aspect-ratio: 5 / 8;
+  border: var(--rim-width) solid var(--rim);
+  border-radius: 50%;
+  background: #0A0810;
+  box-shadow:
+    0 0 2.2rem .4rem color-mix(in srgb, var(--rim) 55%, transparent),
+    inset 0 0 1.5rem .2rem color-mix(in srgb, var(--rim) 40%, transparent);
+}
+.portal-panel { min-width: 0; }
+.portal-meta { display: flex; flex-wrap: wrap; gap: .3rem .9rem; margin: 0; font-size: clamp(.9375rem, .8375rem + .426vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
+.portal-meta .portal-players { font-weight: 400; letter-spacing: 0; color: var(--muted); }
+.portal-caption { margin: .5rem 0 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
+.portal-expanded-title { margin: .3rem 0 0; font-size: clamp(1.4rem, .968rem + 1.9vw, 2.2rem); line-height: 1.25; }
+.portal-expanded-title:focus-visible { outline-offset: 3px; }
+.portal-description { margin: .7rem 0 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
+.portal-label { margin: 1.1rem 0 .35rem; font-size: clamp(.9375rem, .8375rem + .426vw, 1.125rem); font-weight: 650; letter-spacing: .04em; color: var(--pink); }
+.portal-why, .portal-setup { margin: 0; font-size: clamp(1rem, .9rem + .426vw, 1.1875rem); color: #e1d6de; }
+.portal-setup-note { margin: .35rem 0 0; font-size: clamp(1rem, .9rem + .35vw, 1.125rem); color: var(--muted); }
+.portal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin-top: 1.3rem; }
+.portal-invite, .portal-steam, .portal-close {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  min-height: 44px;
+  padding: .6rem 1.1rem;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: filter .2s, background-color .2s;
+}
+/* The Invitation is what the page is for, so it is the first action and the
+   only filled one; the store is a reference and reads as a link (ADR 0004). */
+.portal-invite { border: 0; background: var(--pink); color: var(--bg); font-weight: 650; }
+.portal-invite:hover { filter: brightness(1.08); }
+.portal-steam { border: 1px solid var(--line); background: transparent; color: var(--ink); text-decoration: none; }
+.portal-steam:hover { background: #ffffff0f; }
+.portal-close { border: 1px solid transparent; background: transparent; color: var(--muted); }
+.portal-close:hover { background: #ffffff0f; color: var(--ink); }
+.motion-off .portal-invite, .motion-off .portal-steam, .motion-off .portal-close { transition: none; }
+
+@media (min-width: 1080px) {
+  .portal-scrim {
+    display: block;
+    position: absolute;
+    inset: 0;
+    max-width: var(--stage-box);
+    margin: 0 auto;
+    z-index: 900;
+    border-radius: 14px;
+    background: rgba(10, 8, 16, .62);
+    animation: activity-fade-in .15s ease-out;
+  }
+  /* 3 % of the stage down each side and 4 % top and bottom left showing, so the
+     Room is still there around the edges of what opened over it. */
+  .portal-expanded {
+    position: absolute;
+    left: 3%;
+    right: 3%;
+    top: 4%;
+    bottom: 4%;
+    max-width: calc(var(--stage-box) * .94);
+    margin: 0 auto;
+    z-index: 910;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 2rem;
+    padding: 1.8rem 2rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-shadow: 0 24px 80px #000a;
+    animation: activity-fade-in .15s ease-out;
+  }
+  .portal-expanded-world { width: clamp(12rem, 20vw, 22rem); }
+  .motion-off .portal-scrim, .motion-off .portal-expanded { animation: none; }
+}
 
 
 /* G11-G16, G19: the sideboard and what stands on it, the lamp, and the table

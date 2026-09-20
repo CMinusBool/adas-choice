@@ -174,11 +174,10 @@
              stage is exactly 1600 x 900 units at every width and nothing hangs
              off it (design note 11 §3.4).
 
-             A Portal is a button, not a link. Ticket 46 makes it expand over
-             the stage with the game's copy in a panel beside it; until then
-             `src/dom/game-room.ts` opens the Invitation dialog, which already
-             carries this game's poster, its name, the store link and the
-             Invitation itself.
+             A Portal is a button, not a link: 46 makes it expand over the
+             stage, with the game's copy in a panel beside it and the Invitation
+             as that panel's first action. The overlay is below the stage, after
+             `#games-scene`.
 
              This stage is not `aria-hidden` — it holds the Portals, the three
              dots, the boombox and the door — so every decorative child carries
@@ -190,6 +189,13 @@
              Every Prop below is a CSS placeholder standing in its exact box:
              the artwork is ticket 34's, and a URL with no file behind it would
              fail the build and stall the loading screen. -->
+        <!-- 46, §5.4: one positioned column around the Room's scroller and the
+             expanded Portal, the Cinema Room's `.cinema-room` arrangement. The
+             overlay has to lie over the *visible* stage rather than over the
+             880 px of scroll content a narrow Room pans across, which is what
+             it would do inside `#games-scene`. The scene keeps its own
+             indentation: this is a new parent, not a rewrite of the Room. -->
+        <div class="game-room">
         <div class="room-scene" id="games-scene">
           <div class="stage" data-stage="games" role="group" aria-label="合作遊戲精選" data-i18n-aria="gamesLabel">
             <div class="stage-backdrop" data-box aria-hidden="true" style="--x:0;--y:0;--w:1600;--h:900;z-index:0"></div>
@@ -209,9 +215,9 @@
                  until the art lane lands, which is expected.
 
                  The game's name and store URL live on the button because the
-                 card that used to carry them is gone; both are what the
-                 Invitation dialog reads when a Portal is clicked. -->
-              <button class="portal" type="button" data-box data-game="tango" data-title="Operation: Tango" data-steam="https://store.steampowered.com/app/1335790/Operation_Tango/" aria-haspopup="dialog" aria-controls="game-dialog" aria-label="打開 Operation: Tango 的傳送門" data-i18n-aria="tangoPortal" style="--x:265;--y:50;--w:300;--h:480;z-index:381">
+                 card that used to carry them is gone; 46's panel and the
+                 Invitation dialog behind it both read them from here. -->
+              <button class="portal" type="button" data-box data-game="tango" data-title="Operation: Tango" data-steam="https://store.steampowered.com/app/1335790/Operation_Tango/" aria-haspopup="dialog" aria-controls="portal-expanded" aria-expanded="false" aria-label="打開 Operation: Tango 的傳送門" data-i18n-aria="tangoPortal" style="--x:265;--y:50;--w:300;--h:480;z-index:381">
                 <span class="portal-world">
                   <span class="scene-frame">
                     <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/operation-tango.webp"><img class="game-art" src="assets/operation-tango.gif" data-animated="assets/operation-tango.gif" data-still="assets/operation-tango.webp" width="360" height="576" alt="戴著眼鏡的棕髮男生負責駭客工作，黑髮女生破解保安系統，兩人一起慶祝成功。" data-i18n-alt="tangoAlt" fetchpriority="high"></picture>
@@ -221,7 +227,7 @@
                 <span class="portal-rim" aria-hidden="true"></span>
                 <span class="particle-field" aria-hidden="true"></span>
               </button>
-              <button class="portal" type="button" data-box data-game="lovers" data-title="Lovers in a Dangerous Spacetime" data-steam="https://store.steampowered.com/app/252110/Lovers_in_a_Dangerous_Spacetime/" aria-haspopup="dialog" aria-controls="game-dialog" aria-label="打開 Lovers in a Dangerous Spacetime 的傳送門" data-i18n-aria="loversPortal" style="--x:675;--y:50;--w:300;--h:480;z-index:381">
+              <button class="portal" type="button" data-box data-game="lovers" data-title="Lovers in a Dangerous Spacetime" data-steam="https://store.steampowered.com/app/252110/Lovers_in_a_Dangerous_Spacetime/" aria-haspopup="dialog" aria-controls="portal-expanded" aria-expanded="false" aria-label="打開 Lovers in a Dangerous Spacetime 的傳送門" data-i18n-aria="loversPortal" style="--x:675;--y:50;--w:300;--h:480;z-index:381">
                 <span class="portal-world">
                   <span class="scene-frame">
                     <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/lovers-in-a-dangerous-spacetime.webp"><img class="game-art" src="assets/lovers-in-a-dangerous-spacetime.gif" data-animated="assets/lovers-in-a-dangerous-spacetime.gif" data-still="assets/lovers-in-a-dangerous-spacetime.webp" width="360" height="576" alt="黑髮女生掌舵，戴眼鏡的棕髮男生操作護盾，兩人在粉紅太空船裡擋下隱石。" data-i18n-alt="loversAlt"></picture>
@@ -231,7 +237,7 @@
                 <span class="portal-rim" aria-hidden="true"></span>
                 <span class="particle-field" aria-hidden="true"></span>
               </button>
-              <button class="portal" type="button" data-box data-game="heavenly" data-title="Heavenly Bodies" data-steam="https://store.steampowered.com/app/1138850/Heavenly_Bodies/" aria-haspopup="dialog" aria-controls="game-dialog" aria-label="打開 Heavenly Bodies 的傳送門" data-i18n-aria="heavenlyPortal" style="--x:1085;--y:50;--w:300;--h:480;z-index:381">
+              <button class="portal" type="button" data-box data-game="heavenly" data-title="Heavenly Bodies" data-steam="https://store.steampowered.com/app/1138850/Heavenly_Bodies/" aria-haspopup="dialog" aria-controls="portal-expanded" aria-expanded="false" aria-label="打開 Heavenly Bodies 的傳送門" data-i18n-aria="heavenlyPortal" style="--x:1085;--y:50;--w:300;--h:480;z-index:381">
                 <span class="portal-world">
                   <span class="scene-frame">
                     <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/heavenly-bodies.webp"><img class="game-art" src="assets/heavenly-bodies.gif" data-animated="assets/heavenly-bodies.gif" data-still="assets/heavenly-bodies.webp" width="360" height="576" alt="黑髮女太空人抓著扶手和隊友的靴子，戴眼鏡的棕髮男生伸手去拿漂浮的扳手，兩人笑得很開心。" data-i18n-alt="heavenlyAlt" loading="lazy"></picture>
@@ -273,6 +279,56 @@
                  above leads out too. -->
             <a class="prop prop-door" data-box href="#/entryway" aria-label="回到玄關" data-i18n-aria="backToEntryway" style="--x:60;--y:290;--w:180;--h:350;z-index:640"><span class="door-leaf" aria-hidden="true"></span></a>
           </div>
+        </div>
+        <!-- §5.4: the expanded Portal. One overlay reused by all three, on the
+             Activity Room's `.activity-card` pattern one Room over: over the
+             stage on a wide shell with the Room visible around its edges, an
+             ordinary block below it under 1080 px, Escape and the close button
+             out of it, and focus back on the Portal that opened it.
+
+             Left, the world: the same 5:8 ellipse with the same turning rim,
+             grown and playing rather than still. Right, the panel: everything
+             the card used to carry, then the Invitation first and the store
+             link second (ADR 0004) — the store is a reference, and it now lives
+             where it cannot be hit by accident.
+
+             One panel serving three games means its per-game lines are
+             painter-owned, the way the Activity Room's card is: they are empty
+             at first paint and `src/dom/game-room.ts` fills them from
+             `src/copy.ts`, which is why only the labels carry a `data-i18n`
+             hook. No key changes value; `why`, `setup`, `steam` and `newTab`
+             were left on the shelf by 45 and this is what picks them up. The
+             world's `<img>` has no `src` at first paint for the same reason,
+             and so that it declares no asset of its own to the loading screen:
+             it mirrors whichever Portal is open. -->
+        <div class="portal-scrim" id="portal-scrim" hidden></div>
+        <div class="portal-expanded" id="portal-expanded" role="dialog" aria-modal="true" aria-labelledby="portal-expanded-title" hidden>
+          <div class="portal-expanded-world">
+            <span class="portal-world">
+              <span class="scene-frame">
+                <img class="game-art" alt="">
+                <span class="scene-sprite" aria-hidden="true" hidden></span>
+              </span>
+            </span>
+            <span class="portal-rim" aria-hidden="true"></span>
+          </div>
+          <div class="portal-panel">
+            <p class="portal-meta"><span class="portal-category"></span><span class="portal-pick"></span><span class="portal-players"></span></p>
+            <p class="portal-caption"></p>
+            <h2 class="portal-expanded-title" id="portal-expanded-title" tabindex="-1"></h2>
+            <p class="portal-description"></p>
+            <h3 class="portal-label" data-i18n="why">為什麼選它</h3>
+            <p class="portal-why"></p>
+            <h3 class="portal-label" data-i18n="setup">開玩前準備</h3>
+            <p class="portal-setup"></p>
+            <p class="portal-setup-note"></p>
+            <div class="portal-actions">
+              <button class="portal-invite" id="portal-invite" type="button" aria-haspopup="dialog" aria-controls="game-dialog"><span aria-hidden="true">♡</span><span data-i18n="invite">想跟你一起玩這個～</span></button>
+              <a class="portal-steam" id="portal-steam" target="_blank" rel="noopener noreferrer"><span data-i18n="steam">在 Steam 上看看</span><span class="sr-only" data-i18n="newTab">（在新分頁開啟）</span><span aria-hidden="true">↗</span></a>
+              <button class="portal-close" id="portal-close" type="button" data-i18n="detailsClose">收起</button>
+            </div>
+          </div>
+        </div>
         </div>
       </section>
       <section class="room" id="room-cinema" data-room="cinema" aria-labelledby="cinema-title" hidden>

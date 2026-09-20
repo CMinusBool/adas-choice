@@ -4,6 +4,7 @@ import {
   currentPortal,
   isCurrentRoom,
   motionIsOn,
+  openPortal,
   type Language,
   type PortalId,
   type World,
@@ -53,6 +54,59 @@ const themes: Record<PortalId, { shapes: ParticleKind[]; colors: string[] }> = {
 const frameDurations = [600, 250, 250, 300, 300, 350, 400, 500, 300, 250, 250, 350];
 
 /**
+ * Every string one game's expanded panel is made of, as `src/copy.ts` keys.
+ *
+ * 46: these are the card's own keys, unchanged in either dictionary — the card
+ * went off the page with ticket 45 and its words did not. Two games share
+ * `couchSetup`, exactly as the three cards did, and only Tango has a setup line
+ * of its own. The game's name is not here: it is a proper noun, the same in
+ * both languages, and it lives on the Portal as `data-title`.
+ */
+interface PanelCopy {
+  readonly category: CopyKey;
+  readonly pick: CopyKey;
+  readonly players: CopyKey;
+  readonly caption: CopyKey;
+  readonly description: CopyKey;
+  readonly why: CopyKey;
+  readonly setup: CopyKey;
+  readonly setupNote: CopyKey;
+}
+
+const PANELS: Record<PortalId, PanelCopy> = {
+  tango: {
+    category: 'tangoCategory',
+    pick: 'tangoPick',
+    players: 'tangoPlayers',
+    caption: 'tangoCaption',
+    description: 'tangoDescription',
+    why: 'tangoWhy',
+    setup: 'tangoSetup',
+    setupNote: 'tangoSetupNote',
+  },
+  lovers: {
+    category: 'loversCategory',
+    pick: 'loversPick',
+    players: 'loversPlayers',
+    caption: 'loversCaption',
+    description: 'loversDescription',
+    why: 'loversWhy',
+    setup: 'couchSetup',
+    setupNote: 'loversSetupNote',
+  },
+  heavenly: {
+    category: 'heavenlyCategory',
+    pick: 'heavenlyPick',
+    players: 'heavenlyPlayers',
+    caption: 'heavenlyCaption',
+    description: 'heavenlyDescription',
+    why: 'heavenlyWhy',
+    setup: 'couchSetup',
+    setupNote: 'heavenlySetupNote',
+  },
+};
+
+/**
  * The Game Room: three Portals, their Scenes, and the Invitation.
  *
  * 45: the three cards became three Portals (`docs/adr/0004`) and this painter
@@ -67,6 +121,13 @@ const frameDurations = [600, 250, 250, 300, 300, 350, 400, 500, 300, 250, 250, 3
  * is noise, and a stopped world that starts when you come near is the whole
  * effect of looking *through* something. The rim and the sparks run all the
  * time regardless, and stop dead with motion (§5.4).
+ *
+ * 46: and a Portal expands. The overlay below the stage is the Activity Room's
+ * card pattern — `role="dialog"`, Escape and a close button out of it, focus
+ * back on the Portal that opened it — with a focus trap the Activity Room's
+ * non-modal card does not need. The expanded world is not a fourth player: it
+ * mirrors the open Portal's, so one sprite sheet drives both and the ellipse
+ * the visitor opened keeps playing the frames it was on.
  */
 export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   let world = initial;
@@ -76,6 +137,14 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   const portals = [...stage.querySelectorAll<HTMLButtonElement>('.portal')];
   const dots = [...stage.querySelectorAll<HTMLButtonElement>('.portal-dot')];
   const dialog = byId<HTMLDialogElement>('game-dialog');
+  // 46: the expanded Portal, and the parts of it the painter fills.
+  const scrim = byId('portal-scrim');
+  const expanded = byId('portal-expanded');
+  const expandedTitle = byId('portal-expanded-title');
+  const expandedFrame = expanded.querySelector<HTMLElement>('.scene-frame')!;
+  const expandedImage = expanded.querySelector<HTMLImageElement>('.game-art')!;
+  const expandedSprite = expanded.querySelector<HTMLElement>('.scene-sprite')!;
+  const steamLink = byId<HTMLAnchorElement>('portal-steam');
   const inviteForm = byId<HTMLFormElement>('invite-form');
   const consent = byId<HTMLInputElement>('invite-consent');
   const sendButton = byId<HTMLButtonElement>('send-invite');
@@ -88,6 +157,9 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   // the wall is at the Portal their focus is on whatever the mouse is over.
   let pointerAt: PortalId | null = null;
   let focusAt: PortalId | null = null;
+  // 46: the Portal the open overlay belongs to, so focus can go back to it.
+  let opener: HTMLButtonElement | null = null;
+  let reportQueued = false;
   let frameRequest = 0;
   let lastTick = 0;
   let lastEmission = 0;
@@ -117,15 +189,30 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   const inGameRoom = () => isCurrentRoom(world, 'games');
   /** The Portals actually on the wall: all three, or one on a narrow one. */
   const onTheWall = () => portals.filter(portal => !portal.hidden);
-  /** Sparks are the heaviest motion here, so they also honour the system ask. */
-  const sparksRun = () => !paused() && !prefersReducedMotion() && !document.hidden && !dialog.open;
+  /**
+   * Sparks are the heaviest motion here, so they also honour the system ask —
+   * and 46: a wall behind an overlay is throwing them at a scrim.
+   */
+  const sparksRun = () =>
+    !paused() && !prefersReducedMotion() && !document.hidden && !dialog.open && openPortal(world) === null;
 
+  /**
+   * Whether this game's world is moving.
+   *
+   * 46: an expanded Portal plays whatever is or is not near the one on the
+   * wall behind it — the visitor is looking straight at it, which is what the
+   * expansion is for — and the other two hold still with nothing to be near.
+   * Its own visibility stops mattering too: the overlay is what is on screen.
+   */
   function shouldPlay(player: ScenePlayer) {
-    return !paused() && inGameRoom() && !document.hidden && !dialog.open && player.visible
-      && attendedPortal(world) === player.game;
+    if (paused() || !inGameRoom() || document.hidden || dialog.open) return false;
+    const open = openPortal(world);
+    if (open !== null) return open === player.game;
+    return player.visible && attendedPortal(world) === player.game;
   }
 
   function syncPlayers() {
+    const open = openPortal(world);
     for (const player of players) {
       // Sprites pause on their actual current frame; GIFs are a loading fallback.
       player.source.media = 'not all';
@@ -133,14 +220,39 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
         const next = (shouldPlay(player) ? player.image.dataset.animated : player.image.dataset.still)!;
         if (player.image.getAttribute('src') !== next) player.image.src = next;
       }
+      if (player.game === open) mirrorIntoOverlay(player);
     }
     startClock();
+  }
+
+  /**
+   * The expanded world, showing whatever the Portal underneath is showing.
+   *
+   * 46: the overlay owns no player of its own. Whatever the open Portal's is
+   * on — a still, a GIF while its sheet loads, or the sheet at the frame it
+   * has reached — is copied across, so the two never disagree and one clock
+   * drives both. The alt text comes across with it, which keeps it bilingual
+   * through the `data-i18n-alt` sweep that maintains the Portal's.
+   */
+  function mirrorIntoOverlay(player: ScenePlayer) {
+    const src = player.image.getAttribute('src');
+    if (src && expandedImage.getAttribute('src') !== src) expandedImage.src = src;
+    if (expandedImage.alt !== player.image.alt) expandedImage.alt = player.image.alt;
+    const sheet = player.sprite.dataset.sheet;
+    expandedFrame.classList.toggle('has-sprite', player.ready);
+    expandedSprite.hidden = !player.ready;
+    if (player.ready && sheet) {
+      expandedSprite.style.backgroundImage = 'url("' + sheet + '")';
+      paintFrame(player);
+    }
   }
 
   function paintFrame(player: ScenePlayer) {
     const x = (player.frame % 4) * 100 / 3;
     const y = Math.floor(player.frame / 4) * 50;
-    player.sprite.style.backgroundPosition = x + '% ' + y + '%';
+    const position = x + '% ' + y + '%';
+    player.sprite.style.backgroundPosition = position;
+    if (openPortal(world) === player.game) expandedSprite.style.backgroundPosition = position;
   }
 
   // Keep posters available while the sprite sheets load.
@@ -155,7 +267,7 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
       player.ready = true;
       player.image.src = player.image.dataset.still!;
       paintFrame(player);
-      startClock();
+      syncPlayers();
     };
     preload.src = sheet;
   }
@@ -213,9 +325,25 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     }
   }
 
-  /** Report where the visitor is on the wall. The model decides what it means. */
+  /**
+   * Report where the visitor is on the wall. The model decides what it means.
+   *
+   * 46: deferred by a microtask, because opening and closing the overlay moves
+   * focus and covers the wall, so the `blur` and `pointerleave` that follow
+   * arrive while a paint is still running. A dispatch from inside a paint
+   * re-enters the whole painter list; a microtask lands after it instead, and
+   * one queued report is enough however many events raised it.
+   */
   function reportAttention() {
-    dispatch({ type: 'portal-attended', portal: focusAt ?? pointerAt });
+    if (reportQueued) return;
+    reportQueued = true;
+    queueMicrotask(() => {
+      reportQueued = false;
+      // A wall behind an overlay reports nothing: it keeps whatever it had, and
+      // the Portal that gets focus back on close says where the visitor is.
+      if (openPortal(world) !== null) return;
+      dispatch({ type: 'portal-attended', portal: focusAt ?? pointerAt });
+    });
   }
 
   function tick(now: number) {
@@ -259,12 +387,9 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     portal.addEventListener('pointerleave', () => { pointerAt = null; reportAttention(); });
     portal.addEventListener('focus', () => { focusAt = player.game; reportAttention(); });
     portal.addEventListener('blur', () => { focusAt = null; reportAttention(); });
-    // 45: a Portal is a button that expands (ADR 0004), and ticket 46 wires the
-    // expansion. Until then the click opens the Invitation dialog that was
-    // behind the card, which already carries this game's poster, its name, the
-    // store link and the Invitation itself — so nothing the card offered has
-    // left the page, and the store link still cannot be hit by accident.
-    portal.addEventListener('click', () => openGame(portal));
+    // 46: a Portal is a button that expands (ADR 0004). A `<button>` fires this
+    // for a click, a tap, Enter and Space alike, so there is one path in.
+    portal.addEventListener('click', () => dispatch({ type: 'portal-opened', portal: player.game }));
     portal.addEventListener('keydown', chooseByKey);
   }
 
@@ -384,6 +509,45 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     } catch { if (run === dialogRun) setStatus('verifyError', true); }
   }
 
+  // 46: the panel's first action. The Invitation itself is untouched — same
+  // dialog, same Turnstile, same Worker contract — and it now opens from the
+  // expanded panel rather than from a click on the Portal.
+  byId('portal-invite').addEventListener('click', () => {
+    if (opener) openGame(opener);
+  });
+  const closeExpansion = () => dispatch({ type: 'portal-closed' });
+  byId('portal-close').addEventListener('click', closeExpansion);
+  scrim.addEventListener('click', closeExpansion);
+  // Escape closes the expansion wherever focus is. The Invitation dialog is a
+  // modal on top of it and answers Escape for itself, so it goes first.
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || dialog.open || openPortal(world) === null) return;
+    event.preventDefault();
+    closeExpansion();
+  });
+  /**
+   * Tab stays inside the expanded Portal while it is open.
+   *
+   * The Activity Room's card is `aria-modal="false"` and lets Tab walk out of
+   * it; this one covers the stage and says it is modal, so it owes the keyboard
+   * the same answer it gives the pointer. The heading is `tabindex="-1"` and so
+   * is not in the ring: focus sitting on it wraps to whichever end Tab is
+   * heading for.
+   */
+  expanded.addEventListener('keydown', event => {
+    if (event.key !== 'Tab' || dialog.open) return;
+    const stops = [...expanded.querySelectorAll<HTMLElement>('a[href], button')].filter(
+      stop => !stop.hasAttribute('disabled') && stop.offsetParent !== null,
+    );
+    if (!stops.length) return;
+    const at = stops.indexOf(document.activeElement as HTMLElement);
+    const last = stops.length - 1;
+    if (at === -1) { event.preventDefault(); stops[event.shiftKey ? last : 0].focus(); return; }
+    if (event.shiftKey ? at !== 0 : at !== last) return;
+    event.preventDefault();
+    stops[event.shiftKey ? last : 0].focus();
+  });
+
   consent.addEventListener('change', prepareChallenge);
   byId('dialog-close').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => {
@@ -435,6 +599,10 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   let paintedAwake: PortalId | null | undefined;
   let paintedShowing: PortalId | '' = '';
   let paintedWide: boolean | null = null;
+  // 46: `undefined` until the first paint, so closed-on-arrival is not mistaken
+  // for an overlay that has just been closed and owes the wall its focus back.
+  let paintedOpen: PortalId | null | undefined;
+  let paintedPanel: Language | null = null;
 
   /**
    * Which Portals are on the wall.
@@ -472,6 +640,60 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     const box = portal.getBoundingClientRect();
     if (box.width === 0) return;
     scene.scrollLeft += (box.left + box.width / 2) - (seen.left + seen.width / 2);
+  }
+
+  /**
+   * The expanded Portal: the overlay, its panel, and where focus is.
+   *
+   * Everything per-game in the panel is written here rather than hooked to
+   * `data-i18n`, because one panel serves three games — the Activity Room's
+   * card does exactly this. No key changes value: these are the card's own,
+   * left on the shelf when ticket 45 took the card off the page.
+   */
+  function paintExpansion() {
+    const open = openPortal(world);
+    if (paintedOpen === open && paintedPanel === world.language) return;
+    const opening = paintedOpen !== open && open !== null;
+    const closing = paintedOpen !== open && open === null && paintedOpen !== undefined;
+    paintedOpen = open;
+    paintedPanel = world.language;
+    for (const portal of portals) portal.setAttribute('aria-expanded', String(portal.dataset.game === open));
+    // Inert rather than merely covered: what the scrim hides from the pointer
+    // it has to hide from the keyboard too.
+    stage.inert = open !== null;
+    scrim.hidden = open === null;
+    expanded.hidden = open === null;
+    if (open) {
+      const player = players.find(item => item.game === open)!;
+      opener = player.portal;
+      const words = copy[world.language];
+      const keys = PANELS[open];
+      expanded.dataset.game = open;
+      expanded.querySelector('.portal-category')!.textContent = words[keys.category];
+      expanded.querySelector('.portal-pick')!.textContent = words[keys.pick];
+      expanded.querySelector('.portal-players')!.textContent = words[keys.players];
+      expanded.querySelector('.portal-caption')!.textContent = words[keys.caption];
+      // The game's own name: a proper noun, the same in both languages, and on
+      // the Portal rather than in a dictionary.
+      expandedTitle.textContent = player.portal.dataset.title!;
+      expanded.querySelector('.portal-description')!.textContent = words[keys.description];
+      expanded.querySelector('.portal-why')!.textContent = words[keys.why];
+      expanded.querySelector('.portal-setup')!.textContent = words[keys.setup];
+      expanded.querySelector('.portal-setup-note')!.textContent = words[keys.setupNote];
+      steamLink.href = player.portal.dataset.steam!;
+      mirrorIntoOverlay(player);
+    }
+    // Focus follows the expansion in and back out again: into its heading, and
+    // onto the Portal that opened it when it closes. The stage is inert by
+    // then, so a Portal on a narrow wall has to be the one the wall carries —
+    // which is why opening moved the wall onto it.
+    if (opening) expandedTitle.focus({ preventScroll: wideLayout.matches });
+    if (closing) {
+      opener?.focus({ preventScroll: true });
+      opener = null;
+    }
+    clearParticles();
+    syncPlayers();
   }
 
   /** The one Portal the visitor is at, playing; the other two back at rest. */
@@ -517,5 +739,6 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     }
     paintWall();
     paintAttention();
+    paintExpansion();
   };
 };
