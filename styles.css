@@ -730,43 +730,29 @@ html.dialog-open { overflow: hidden; }
 .stage[data-stage="activities"] [aria-hidden="true"] { pointer-events: none; }
 .stage[data-stage="activities"] :focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 
-.a-cornice { background: linear-gradient(#36443F, #2b3733); }
-.a-wall { background: radial-gradient(ellipse 40% 70% at 35% 12%, #5c756f, transparent 70%), #4E6560; }
-.a-skirting { background: #2F3A35; }
-.a-floor { background: repeating-linear-gradient(to bottom, #A98457 0 calc(9cqw / 16 * 3), #C09A6A calc(9cqw / 16 * 3) calc(9cqw / 16 * 3.4)); }
-.a-rug { border-radius: calc(8cqw / 16); background: linear-gradient(to bottom, #C9922F 0 22%, #EADCC2 22% 34%, #6F8578 34% 66%, #EADCC2 66% 78%, #C9922F 78% 100%); opacity: .95; }
-.a-window { border: calc(6cqw / 16) solid #E4D6BC; border-radius: calc(4cqw / 16); background: radial-gradient(circle at 72% 58%, #FFD9A8 0 6%, transparent 7%), linear-gradient(#22293f, #2B3550); }
-.a-sill { border-radius: calc(3cqw / 16); background: #E4D6BC; }
-.a-cord { background: #36443F; }
-.a-pendant { border-radius: 50%; background: radial-gradient(circle at 40% 30%, #fff6e4, #EADCC2 70%); box-shadow: 0 0 calc(80cqw / 16) calc(20cqw / 16) #ffd9a82e; }
+/* 35: the art drop. A Prop's box is unchanged (index.html keeps §4.1's arithmetic); what changes
+   here is the surface each box paints, from a CSS placeholder to the delivered image. A group box
+   that now covers more than one §4.1 Prop (the table, the shelf, the desk, the call corner, the
+   boombox+crate) is one `background-image` the way the illustrator drew it, not several. */
+.a-backdrop { background-image: url("activity-room/backdrop.png"); background-size: 100% 100%; background-repeat: no-repeat; }
 
-.a-door { display: block; border-radius: calc(4cqw / 16) calc(4cqw / 16) 0 0; background: #5C3F2C; transition: filter .2s, transform .2s; }
-.a-door-leaf { position: absolute; left: 7.8%; top: 3.8%; width: 84.4%; height: 96.2%; border-radius: calc(3cqw / 16) calc(3cqw / 16) 0 0; background: linear-gradient(to right, #9d7a34, #B08A3E 30%, #c09a4c); }
-.a-door-tag { position: absolute; left: 33.3%; top: 34.1%; width: 33.3%; height: 16.5%; border-radius: 50% 50% 46% 46%; background: #EADCC2; opacity: .8; transition: opacity .2s; }
+.a-door { display: block; border-radius: calc(4cqw / 16) calc(4cqw / 16) 0 0; background: transparent; transition: filter .2s, transform .2s; }
+/* The delivered leaf is a two-cell sheet, shut then swung ~70° open, so the DOM could show either
+   cell outright; the swing itself stays the continuous 3D rotation below, on the shut cell alone —
+   `styles.css` said so before the art existed ("these two angles stay") and the art does not
+   change that. `background-size: 200% 100%` with a fixed `background-position: 0 0` keeps showing
+   cell 1 (shut) through the rotation; cell 2 (open) ships but is not read by this rule. */
+.a-door-leaf { position: absolute; left: 7.8%; top: 3.8%; width: 84.4%; height: 96.2%; background-image: url("activity-room/door-leaf.png"); background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; }
 .a-door:hover, .a-door:focus-visible { transform: translateY(calc(-3cqw / 16)); filter: brightness(1.1); }
-.a-door:hover .a-door-tag, .a-door:focus-visible .a-door-tag { opacity: 1; }
 
-.a-map { border-radius: calc(3cqw / 16); background: radial-gradient(circle at 28% 44%, #8FB4B0 0 14%, transparent 15%), radial-gradient(circle at 62% 38%, #8FB4B0 0 18%, transparent 19%), radial-gradient(circle at 78% 68%, #8FB4B0 0 11%, transparent 12%), #EADCC2; box-shadow: 0 calc(4cqw / 16) calc(10cqw / 16) #0003; }
-.a-map::after { content: ""; position: absolute; left: 30%; top: 42%; width: 34%; height: 0; border-top: calc(2cqw / 16) solid #C8462F; transform: rotate(14deg); }
+.a-map { background-image: url("activity-room/map.png"); background-size: 100% 100%; background-repeat: no-repeat; }
 
-.a-table, .a-desk { background: linear-gradient(#c79b68 0 12%, transparent 12%), linear-gradient(to right, transparent 0 4%, #B98D5C 4% 12%, transparent 12% 88%, #B98D5C 88% 96%, transparent 96%), linear-gradient(transparent 0 58%, #a87f4e 58% 64%, transparent 64%); }
-.a-pad { border-radius: calc(2cqw / 16); background: radial-gradient(circle at 42% 42%, #9a8a74 0 4%, transparent 5%), radial-gradient(circle at 60% 40%, #9a8a74 0 4%, transparent 5%), #EADCC2; box-shadow: inset 0 0 0 calc(2cqw / 16) #cbbb9e; }
-.a-paper { background: #f3ead6; }
-.a-clamp-lamp { background: linear-gradient(to right, transparent 0 40%, #3b332c 40% 52%, transparent 52%), radial-gradient(ellipse 60% 22% at 50% 92%, #FFD9A8 0 100%, transparent); }
-.a-mug { background: linear-gradient(to right, #c9b04a 0 8%, #D76451 12% 20%, #6F8578 24% 32%, #3b5f8f 36% 44%, #C8462F 48% 56%, #8a6f4a 60% 68%, transparent 72%) 0 0 / 100% 42% no-repeat, linear-gradient(#D76451 0 12%, #EADCC2 12% 100%) 0 42% / 100% 58% no-repeat; border-radius: 0 0 calc(8cqw / 16) calc(8cqw / 16); }
-.a-mug-broken { background: linear-gradient(115deg, transparent 0 8%, #EADCC2 8% 34%, transparent 34% 40%, #D76451 40% 46%, #EADCC2 46% 62%, transparent 62%), linear-gradient(to right, #c9b04a 0 14%, transparent 14% 22%, #6F8578 22% 38%, transparent 38% 46%, #3b5f8f 46% 62%, transparent 62% 70%, #8a6f4a 70% 86%, transparent 86%) 0 70% / 100% 18% no-repeat; }
+.a-table { background-image: url("activity-room/table.png"); background-size: 100% 100%; background-repeat: no-repeat; }
+.a-desk { background-image: url("activity-room/desk.png"); background-size: 100% 100%; background-repeat: no-repeat; }
+.a-mug { background-image: url("activity-room/mug-intact.png"); background-size: 100% 100%; background-repeat: no-repeat; }
+.a-mug-broken { background-image: url("activity-room/mug-broken.png"); background-size: 100% 100%; background-repeat: no-repeat; }
 
-.a-shelf { background: linear-gradient(to bottom, #E4D6BC 0 4.6%, transparent 4.6% 35.4%, #E4D6BC 35.4% 40%, transparent 40% 69.2%, #E4D6BC 69.2% 73.8%, transparent 73.8% 95.4%, #E4D6BC 95.4% 100%), linear-gradient(to right, #E4D6BC 0 3%, transparent 3% 97%, #E4D6BC 97% 100%), #3f524d55; }
-.a-timer { border-radius: 50% 50% calc(6cqw / 16) calc(6cqw / 16); background: radial-gradient(circle at 50% 46%, #f4efe6 0 34%, transparent 35%), #C8462F; }
-.a-basket { border-radius: 0 0 calc(10cqw / 16) calc(10cqw / 16); background: repeating-linear-gradient(to right, #C2A06A 0 calc(6cqw / 16), #a9874f calc(6cqw / 16) calc(11cqw / 16)); }
-.a-finds { background: radial-gradient(circle at 18% 70%, #F2B85A 0 22%, transparent 23%), radial-gradient(circle at 52% 60%, #B9B4AC 0 20%, transparent 21%), radial-gradient(circle at 84% 66%, #c9a13f 0 18%, transparent 19%); }
-.a-boxes { background: linear-gradient(to right, #b98552 0 31%, transparent 31% 34%, #a97b4c 34% 65%, transparent 65% 68%, #c29a63 68% 100%); }
-.a-storage { border-radius: calc(3cqw / 16); background: linear-gradient(#cdbb9c 0 18%, #b6a488 18% 100%); }
-.a-stopwatch { background: linear-gradient(#B9B4AC 0 62%, transparent 62%) 50% 0 / 22% 100% no-repeat, radial-gradient(circle at 50% 82%, #B9B4AC 0 44%, transparent 45%); }
-
-.a-globe { border-radius: 50% 50% 46% 46%; background: radial-gradient(circle at 38% 34%, #a8c8c4 0 18%, transparent 19%), radial-gradient(circle at 66% 62%, #a8c8c4 0 14%, transparent 15%), #8FB4B0; box-shadow: inset 0 calc(-6cqw / 16) calc(8cqw / 16) #0003, 0 calc(4cqw / 16) 0 #B98552; }
-.a-atlas { border-radius: calc(2cqw / 16); background: linear-gradient(to right, #EADCC2 0 46%, #cbbb9e 46% 54%, #EADCC2 54% 100%); }
-.a-desk-lamp { background: linear-gradient(to right, transparent 0 44%, #8a6f4a 44% 56%, transparent 56%), radial-gradient(ellipse 52% 26% at 50% 14%, #B98552 0 100%, transparent), radial-gradient(ellipse 70% 30% at 50% 96%, #FFD9A8 0 100%, transparent); }
+.a-shelf { background-image: url("activity-room/shelf.png"); background-size: 100% 100%; background-repeat: no-repeat; }
 
 .a-chalkboard { display: grid; align-items: center; padding-inline: calc(14cqw / 16); border-radius: calc(4cqw / 16); background: linear-gradient(#36443F, #2F3A35); box-shadow: inset 0 0 0 calc(3cqw / 16) #5C3F2C; }
 .a-chalk { font-size: calc(26cqw / 16); line-height: 1.08; text-align: center; color: #EADCC2; opacity: .88; transition: opacity .2s, text-shadow .2s; overflow: hidden; }
@@ -790,32 +776,33 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 .a-station[data-chosen] { background: #f2b85a12; box-shadow: inset 0 0 0 calc(2cqw / 16) #F2B85A99, 0 0 calc(26cqw / 16) #f2b85a26; }
 .motion-off .a-station, .motion-off .a-door, .motion-off .a-chalk { transition: none; }
 
-.a-tableau { border-radius: calc(10cqw / 16); background: linear-gradient(#eadcc21f, #eadcc20f), repeating-linear-gradient(135deg, #eadcc214 0 calc(10cqw / 16), transparent calc(10cqw / 16) calc(20cqw / 16)); box-shadow: inset 0 0 0 calc(2cqw / 16) #eadcc23d; animation: activity-tableau-in .25s ease-out; }
+.a-tableau { background-size: 100% 100%; background-repeat: no-repeat; animation: activity-tableau-in .25s ease-out; }
+.a-tableau[data-tableau="draw"] { background-image: url("activity-room/tableau-draw.png"); }
+.a-tableau[data-tableau="hunt"] { background-image: url("activity-room/tableau-hunt.png"); }
+.a-tableau[data-tableau="map"] { background-image: url("activity-room/tableau-map.png"); }
 @keyframes activity-tableau-in { from { opacity: 0; } to { opacity: 1; } }
 .motion-off .a-tableau { animation: none; }
 /* The tableau replaces the two of them; the cats stay where they are. */
 .stage[data-stage="activities"].has-tableau .actor[data-actor="boy"], .stage[data-stage="activities"].has-tableau .actor[data-actor="girl"] { display: none; }
 
-.a-laptop { border-radius: calc(4cqw / 16) calc(4cqw / 16) 0 0; background: radial-gradient(circle at 84% 12%, #7fd48a 0 5%, transparent 6%), linear-gradient(#DCE8F0, #c3d4e0); box-shadow: 0 0 calc(30cqw / 16) #dce8f033, inset 0 0 0 calc(4cqw / 16) #B9B4AC; }
-.a-stool { background: linear-gradient(to right, transparent 0 6%, #8a6f4a 6% 16%, transparent 16% 84%, #8a6f4a 84% 94%, transparent 94%), linear-gradient(#B9B4AC 0 18%, transparent 18%); }
-.a-tea { border-radius: 0 0 calc(6cqw / 16) calc(6cqw / 16); background: #EADCC2; }
-.a-crate { background: repeating-linear-gradient(to bottom, #b98552 0 calc(14cqw / 16), #a3703f calc(14cqw / 16) calc(18cqw / 16)); }
+.a-call-corner { background-image: url("activity-room/call-corner.png"); background-size: 100% 100%; background-repeat: no-repeat; }
 
+/* L26, A-S09: the boombox and its crate are one off/on two-cell image, `.a-boombox-art`, sitting
+   behind the `.a-boombox` control — the control keeps its own §5.3 hit box (210 x 120 units) rather
+   than growing to the art's full extent, so the click target the design note measured is unchanged.
+   `:has()` reaches back from the button's `aria-pressed` to the art layer that precedes it in the
+   DOM, the same technique the chalkboards already use for their chosen state. */
+.a-boombox-art { background-image: url("activity-room/boombox.png"); background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; transition: filter .2s; }
+.stage[data-stage="activities"]:has(.a-boombox[aria-pressed="true"]) .a-boombox-art { background-position: 100% 0; }
+.stage[data-stage="activities"]:has(.a-boombox:hover, .a-boombox:focus-visible) .a-boombox-art { filter: brightness(1.12); }
 .a-boombox { display: block; background: transparent; }
-.a-boombox-body { position: absolute; left: 5.7%; top: 13.3%; width: 88.6%; height: 80%; border-radius: calc(8cqw / 16); background: linear-gradient(#45464a, #3A3B3E); box-shadow: inset 0 0 0 calc(3cqw / 16) #B9B4AC; }
-.a-boombox-speaker { position: absolute; top: 31.3%; width: 36.6%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #2a2b2e 0 38%, #4a4b4f 39% 100%); box-shadow: inset 0 0 0 calc(2cqw / 16) #B9B4AC; }
-.a-boombox-speaker.left { left: 10.8%; }
-.a-boombox-speaker.right { right: 10.8%; }
-.a-boombox-window { position: absolute; left: 39.2%; top: 33.3%; width: 21.5%; height: 33.3%; display: flex; align-items: center; justify-content: space-around; border-radius: calc(2cqw / 16); background: #1f2022; box-shadow: inset 0 0 0 calc(2cqw / 16) #B9B4AC; }
-.a-reel { width: 38%; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(#B9B4AC 0 12%, #55565a 12% 33%, #B9B4AC 33% 45%, #55565a 45% 66%, #B9B4AC 66% 78%, #55565a 78% 100%); }
-.a-boombox-dial { position: absolute; left: 10.8%; bottom: 8%; width: 78.4%; height: 14%; border-radius: calc(3cqw / 16); background: #2a2b2e; box-shadow: inset 0 0 0 calc(2cqw / 16) #6c6d71; }
+.a-boombox-window { position: absolute; left: 39.2%; top: 33.3%; width: 21.5%; height: 33.3%; display: flex; align-items: center; justify-content: space-around; }
+.a-reel { width: 38%; aspect-ratio: 1; border-radius: 50%; background-image: url("activity-room/cassette-reel.png"); background-size: 100% 100%; }
 .a-boombox-notes { position: absolute; left: 12%; top: 8%; width: 24%; height: 60%; opacity: 0; }
 .a-boombox-notes span { position: absolute; bottom: 0; font-size: calc(26cqw / 16); line-height: 1; color: var(--pink); }
 .a-boombox-notes span:nth-child(2) { left: 38%; }
 .a-boombox-notes span:nth-child(3) { left: 72%; }
-.a-boombox:hover .a-boombox-body, .a-boombox:focus-visible .a-boombox-body { filter: brightness(1.12); }
-/* On: the dial lights, the reels turn, three notes drift up from the left speaker. */
-.a-boombox[aria-pressed="true"] .a-boombox-dial { background: linear-gradient(#F2B85A, #d59a3c); box-shadow: 0 0 calc(24cqw / 16) #f2b85a77, inset 0 0 0 calc(2cqw / 16) #6c6d71; }
+/* On: the reels turn and three notes drift up from the left speaker; the lit dial is cell 2 above. */
 .a-boombox[aria-pressed="true"] .a-reel { animation: activity-reel 3s linear infinite; }
 .a-boombox[aria-pressed="true"] .a-reel.left { animation-duration: 2.6s; }
 .a-boombox[aria-pressed="true"] .a-boombox-notes { opacity: 1; }

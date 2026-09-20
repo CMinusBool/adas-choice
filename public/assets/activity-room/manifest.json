@@ -1,0 +1,502 @@
+{
+  "schema": "activity-room-manifest/1",
+  "note": "Provenance for the Activity Room's delivered art (COOP-001 ticket 35). The raw generations live in the main checkout's art/generated/42-activity-room/ (gitignored) and travel here only as sha256s; each entry's source.path is where the kept attempt was read from, not a copy in this repository.",
+  "identitySource": "art/characters/v2 — the version 2 Character Sheets, referenced by the Cast shots (A-S12-A-S15), never a generated asset",
+  "assets": [
+    {
+      "file": "backdrop.png",
+      "shot": "A-S01-backdrop",
+      "frames": 1,
+      "columns": 1,
+      "frame": "1600x900",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S01-backdrop/attempt-2/strip-raw.png",
+        "sha256": "5c51389919c189699cbb0060c96f826a85e504ef1f3f927c35b3ef164d30eb7e"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "table.png",
+      "shot": "A-S02-table",
+      "frames": 1,
+      "columns": 1,
+      "frame": "760x600",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S02-table/attempt-1/strip-raw.png",
+        "sha256": "6e8c08f73d6c237c04232d2b1b2ef17dc84d955f9f871e69686f17eb5bb203be"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "shelf.png",
+      "shot": "A-S03-shelf",
+      "frames": 1,
+      "columns": 1,
+      "frame": "712x648",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S03-shelf/attempt-1/strip-raw.png",
+        "sha256": "60e8f5e8bcade30c0418bf31789506f737ce9e79d96e030d59803690a1b668c1"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "desk.png",
+      "shot": "A-S04-desk",
+      "frames": 1,
+      "columns": 1,
+      "frame": "760x472",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S04-desk/attempt-1/strip-raw.png",
+        "sha256": "ef7dcbc2afa2ef1e823c3637a4bd8aedb32fcbb91d397157dd942cb68f6b43c6"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "map.png",
+      "shot": "A-S05-map",
+      "frames": 1,
+      "columns": 1,
+      "frame": "720x544",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S05-map/attempt-1/strip-raw.png",
+        "sha256": "115b1ac78f5b559b6049ae12664f7d8b07eeac9c68c73f558dd963cf6dd0aadd"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "mug-intact.png",
+      "shot": "A-S06-mug-intact",
+      "frames": 1,
+      "columns": 1,
+      "frame": "100x144",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S06-mug-intact/attempt-1/strip-raw.png",
+        "sha256": "1e99d213cbc94856fcd2134460d083fb5aaf5ae8054d49675c408db20555f2b5"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "mug-broken.png",
+      "shot": "A-S07-mug-broken",
+      "frames": 1,
+      "columns": 1,
+      "frame": "320x92",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S07-mug-broken/attempt-1/strip-raw.png",
+        "sha256": "278965991abce506f0f21e56ef868ffd61274a1c638568e9dce41bcb65cd772b"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "call-corner.png",
+      "shot": "A-S08-call-corner",
+      "frames": 1,
+      "columns": 1,
+      "frame": "368x432",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S08-call-corner/attempt-1/strip-raw.png",
+        "sha256": "324b5e02d3476dd8783a3ce998b08a25634e95745e9b8d117f04f223a5f444a2"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "boombox.png",
+      "shot": "A-S09-boombox",
+      "frames": 2,
+      "columns": 2,
+      "frame": "372x372",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S09-boombox/attempt-1/strip-raw.png",
+        "sha256": "ddc4998ed72593c930805b28a1f3f794c12400a1886628d6f19ca9c39f4c4ce0"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "cassette-reel.png",
+      "shot": "A-S10-cassette-reel",
+      "frames": 1,
+      "columns": 1,
+      "frame": "56x56",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S10-cassette-reel/attempt-1/strip-raw.png",
+        "sha256": "32e3fe2fbbedbeeb4bb5b28465cc0b9b89d5c2f514ba8691e0c14e2b142f12b7"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "door-leaf.png",
+      "shot": "A-S11-door-leaf",
+      "frames": 2,
+      "columns": 2,
+      "frame": "304x700",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S11-door-leaf/attempt-1/strip-raw.png",
+        "sha256": "a50aefbc174371fd8131d7e5086549f33274f207dc35ba27715f6ba8f121f3dd"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "tableau-draw.png",
+      "shot": "A-S12-draw-tableau",
+      "frames": 1,
+      "columns": 1,
+      "frame": "920x520",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S12-draw-tableau/attempt-1/strip-raw.png",
+        "sha256": "16d9ae4c7134674f4a159312aa882d6e3f881454340c138e8a13807a59cf58cb"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "tableau-hunt.png",
+      "shot": "A-S13-hunt-tableau",
+      "frames": 1,
+      "columns": 1,
+      "frame": "880x760",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S13-hunt-tableau/attempt-1/strip-raw.png",
+        "sha256": "67114f9c24f52b828172aec9084d6edc567da06362b866e038c265d0a7a839e8"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "tableau-map.png",
+      "shot": "A-S14-map-tableau",
+      "frames": 1,
+      "columns": 1,
+      "frame": "840x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S14-map-tableau/attempt-1/strip-raw.png",
+        "sha256": "907ac86d64e8bbc883cc1ce853f18247ee7131a280e805365450faf717d16287"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1",
+      "validatedAt": "2026-09-20",
+      "motionPhase": null
+    },
+    {
+      "file": "mira-mug-beat.png",
+      "shot": "A-S15-mira-beat",
+      "frames": 8,
+      "columns": 4,
+      "frame": "560x560",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S15-mira-beat/attempt-2/strip-raw.png",
+        "sha256": "c4b41ba91cb67782aa6868b8a03269920f9a9681c4db6327f5b71ad6e9720380"
+      },
+      "generator": {
+        "tool": "codex exec",
+        "version": "codex-cli 0.154.0",
+        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+      },
+      "references": [
+        {
+          "path": "art/characters/v2/boy-character-sheet-v2.png",
+          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
+        },
+        {
+          "path": "art/characters/v2/girl-character-sheet-v2.png",
+          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
+        },
+        {
+          "path": "art/characters/v2/mira-character-sheet-v2.png",
+          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+        }
+      ],
+      "builtBy": "scripts/art/build-prop.mjs@1 (--fit contain)",
+      "validatedAt": "2026-09-20",
+      "motionPhase": "not verified"
+    }
+  ]
+}
