@@ -22,7 +22,12 @@ const zhHant = {
   shelfRomanceAria: '愛情書架：點一下，讓他挑三部片',
   shelfHorrorAria: '恐怖書架：點一下，讓他挑三部片',
   boardLabel: '釘在牆上的海報', boardEmpty: '牆上還空著。先選一排書架。',
-  projectorMotorStart: '讓放映機空轉', projectorMotorStop: '停下放映機',
+  // 49: every Music Source says "not yet" — the owner ruled that no audio
+  // ships until later, so each Prop's action copy says so honestly instead
+  // of reading as broken. Start and Stop share the same text on purpose:
+  // pressing still toggles the cosmetic animation, but the fact stays true
+  // either way.
+  projectorMotorStart: '馬達會轉，但還沒有聲音', projectorMotorStop: '馬達會轉，但還沒有聲音',
   projectorGateEmpty: '還沒有膠卷。先選一部片。',
   // end 17
   // 18: what a pinned Poster offers. The Film's own title comes from
@@ -51,7 +56,7 @@ const zhHant = {
   activityCardWhat: '怎麼玩', activityCardNeeds: '需要準備', activityCardTime: '大約時間', activityCardWhy: '為什麼是這個',
   activityPick: '今晚就做這個', activityCardClose: '收起',
   activityChosenSuffix: '（今晚就這個了）', activityChosenNote: '今晚就這個了。想換再點另一個。',
-  activityBoombox: '角落的手提音響', boomboxStart: '按下播放鍵', boomboxStop: '停下卡帶',
+  activityBoombox: '角落的手提音響', boomboxStart: '音響還沒有音樂', boomboxStop: '音響還沒有音樂',
   pencilMugIntact: '一只裝滿鉛筆的馬克杯', pencilMugBroken: '摔成兩半的馬克杯，鉛筆滾了一地',
   activityDrawName: '盲畫大賽', activityDrawAria: '盲畫大賽：點一下看怎麼玩',
   activityDrawLine: '看著對方的臉，不看自己的紙，五分鐘畫完彼此。',
@@ -100,10 +105,10 @@ const zhHant = {
   loadingTitle: '正在整理公寓⋯', loadingProgress: '載入進度', loadingNote: '畫都掛上牆之後，門就會打開。',
   // 06: audio
   mute: '關閉聲音', unmute: '開啟聲音',
-  musicSourceStart: '播放房間音樂', musicSourceStop: '停止房間音樂', placeholder: '暫代',
+  musicSourceStart: '還沒有音樂可以播放', musicSourceStop: '還沒有音樂可以播放', placeholder: '暫代',
   // end 06
   // 15: the Game Room's own Props — the boombox Music Source and Luna's snow globe.
-  gamesBoombox: '遊戲室的手提音響', gamesBoomboxStart: '放卡帶', gamesBoomboxStop: '停下卡帶',
+  gamesBoombox: '遊戲室的手提音響', gamesBoomboxStart: '卡帶還沒到，先安靜著', gamesBoomboxStop: '卡帶還沒到，先安靜著',
   // 45: the three Portals. The game's name inside each one is a proper noun,
   // the same in both languages; what needs saying twice is what the button
   // does with it.
@@ -147,7 +152,8 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     shelfRomanceAria: 'Romance shelf: click and he will pick three Films',
     shelfHorrorAria: 'Horror shelf: click and he will pick three Films',
     boardLabel: 'Posters pinned to the wall', boardEmpty: 'The wall is still bare. Pick a shelf first.',
-    projectorMotorStart: 'Let the projector run', projectorMotorStop: 'Stop the projector',
+    // 49: same "not yet" text on both states — see the zh-Hant comment above.
+    projectorMotorStart: "It'll spin, but there's no sound yet", projectorMotorStop: "It'll spin, but there's no sound yet",
     projectorGateEmpty: 'No reel yet. Choose a Film first.',
     // end 17
     // 18
@@ -170,7 +176,7 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     activityCardWhat: 'How it goes', activityCardNeeds: 'What you need', activityCardTime: 'How long', activityCardWhy: 'Why this one',
     activityPick: "Let's do this one tonight", activityCardClose: 'Close',
     activityChosenSuffix: '(chosen for tonight)', activityChosenNote: 'Chosen for tonight. Pick another one to change your mind.',
-    activityBoombox: 'The boombox in the corner', boomboxStart: 'Press play', boomboxStop: 'Stop the tape',
+    activityBoombox: 'The boombox in the corner', boomboxStart: 'No music in this boombox yet', boomboxStop: 'No music in this boombox yet',
     pencilMugIntact: 'A mug full of pencils', pencilMugBroken: 'A mug broken in two, its pencils rolled across the floor',
     activityDrawName: 'The Blind Portrait', activityDrawAria: 'The Blind Portrait: click to see how it goes',
     activityDrawLine: "Five minutes with your eyes on each other's face and never on your own paper.",
@@ -219,10 +225,10 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     loadingTitle: 'Tidying the apartment…', loadingProgress: 'Loading progress', loadingNote: 'The door opens once every picture is on the wall.',
     // 06: audio
     mute: 'Mute sound', unmute: 'Unmute sound',
-    musicSourceStart: "Play the Room's music", musicSourceStop: "Stop the Room's music", placeholder: 'placeholder',
+    musicSourceStart: 'No music here yet', musicSourceStop: 'No music here yet', placeholder: 'placeholder',
     // end 06
     // 15: the Game Room
-    gamesBoombox: 'The boombox in the Game Room', gamesBoomboxStart: 'Put the tape on', gamesBoomboxStop: 'Stop the tape',
+    gamesBoombox: 'The boombox in the Game Room', gamesBoomboxStart: "No tape yet, it's staying quiet", gamesBoomboxStop: "No tape yet, it's staying quiet",
     // 45: the three Portals
     tangoPortal: 'Open the Operation: Tango Portal',
     loversPortal: 'Open the Lovers in a Dangerous Spacetime Portal',
