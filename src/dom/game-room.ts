@@ -1,12 +1,19 @@
 import { copy, type CopyKey } from '../copy';
-import { isCurrentRoom, motionIsOn, type Language, type World } from '../world';
+import {
+  attendedPortal,
+  currentPortal,
+  isCurrentRoom,
+  motionIsOn,
+  type Language,
+  type PortalId,
+  type World,
+} from '../world';
 import { prefersReducedMotion } from './motion';
 import { WIDE_LAYOUT, byId, type Dispatch, type Painter } from './painter';
 
-type GameKey = 'tango' | 'lovers' | 'heavenly';
-
 interface ScenePlayer {
-  wrap: HTMLElement;
+  game: PortalId;
+  portal: HTMLButtonElement;
   image: HTMLImageElement;
   source: HTMLSourceElement;
   sprite: HTMLElement;
@@ -30,27 +37,43 @@ const shapes = {
 /** `bit` is drawn as text rather than an SVG path, so it has no shape entry. */
 type ParticleKind = keyof typeof shapes | 'bit';
 
-const themes: Record<GameKey, { shapes: ParticleKind[]; colors: string[] }> = {
-  tango: { shapes: ['bit', 'diamond', 'chip', 'shot'], colors: ['#ffaad2', '#f36ca7', '#d5b4f6'] },
-  lovers: { shapes: ['heart', 'heart', 'shot', 'spark', 'ring'], colors: ['#ff7bb7', '#ffb4d8', '#ffe6a6'] },
-  heavenly: { shapes: ['wrench', 'nut', 'ring', 'spark'], colors: ['#f1bbdc', '#d9c9ff', '#ffdead'] }
+/**
+ * What each Portal throws off its rim.
+ *
+ * The shapes are the game's, unchanged; the colours are that Portal's rim
+ * palette from design note 11 §4.1 (G8a) rather than the site pink the cards
+ * used, so a spark plainly comes out of *that* hole in the wall.
+ */
+const themes: Record<PortalId, { shapes: ParticleKind[]; colors: string[] }> = {
+  tango: { shapes: ['bit', 'diamond', 'chip', 'shot'], colors: ['#4DA3D9', '#8FD0F2', '#D5E9FA'] },
+  lovers: { shapes: ['heart', 'heart', 'shot', 'spark', 'ring'], colors: ['#F5A3C5', '#FFC8DE', '#FFE6A6'] },
+  heavenly: { shapes: ['wrench', 'nut', 'ring', 'spark'], colors: ['#287F98', '#5CC0D9', '#CFEDF4'] }
 };
 
 const frameDurations = [600, 250, 250, 300, 300, 350, 400, 500, 300, 250, 250, 350];
 
 /**
- * The Game Room: three cards, their Scenes, and the Invitation.
+ * The Game Room: three Portals, their Scenes, and the Invitation.
  *
- * Everything here was already on the page and is unchanged by the move into a
- * Room — the Scenes still pause offscreen and in a background tab, and now also
- * while the visitor is somewhere else in the apartment, which the model reports
- * rather than this file deciding.
+ * 45: the three cards became three Portals (`docs/adr/0004`) and this painter
+ * was re-aimed rather than rewritten. The sprite-sheet playback and its
+ * `shouldPlay` rules, the particle field, the dialog, the Turnstile load and
+ * the invite `fetch` are the ones that were already here; what changed is what
+ * decides a Scene is playing. It used to be a selected card — hover on a wide
+ * shell, whichever card the scroll had brought into view on a narrow one. It
+ * is now the Portal the visitor is at, and the model says which that is.
+ *
+ * At rest every Portal holds its first frame: three looping worlds on one wall
+ * is noise, and a stopped world that starts when you come near is the whole
+ * effect of looking *through* something. The rim and the sparks run all the
+ * time regardless, and stop dead with motion (§5.4).
  */
-export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
+export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   let world = initial;
   const root = document.documentElement;
-  const games = byId('games');
-  const wraps = [...document.querySelectorAll<HTMLElement>('.game-wrap')];
+  const stage = document.querySelector<HTMLElement>('[data-stage="games"]')!;
+  const portals = [...stage.querySelectorAll<HTMLButtonElement>('.portal')];
+  const dots = [...stage.querySelectorAll<HTMLButtonElement>('.portal-dot')];
   const dialog = byId<HTMLDialogElement>('game-dialog');
   const inviteForm = byId<HTMLFormElement>('invite-form');
   const consent = byId<HTMLInputElement>('invite-consent');
@@ -58,17 +81,17 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
   const status = byId('invite-status');
   const config: AdaConfig = window.ADA_CONFIG ?? { inviteEndpoint: '', turnstileSiteKey: '' };
   const notificationsReady = /^https:\/\/[a-z0-9.-]+\.workers\.dev\/invite$/.test(config.inviteEndpoint || '') && /^[A-Za-z0-9_-]{10,100}$/.test(config.turnstileSiteKey || '');
-  const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
   const wideLayout = matchMedia(WIDE_LAYOUT);
-  let active: HTMLElement | null = null;
-  let scrolledCard: HTMLElement | null = null;
-  let scrollFrame = 0;
-  let pointerCard: HTMLElement | null = null;
-  let keyboardCard: HTMLElement | null = null;
+  // Hover and focus are one answer to the model, so the page keeps both and
+  // reports whichever is live: focus wins, because a visitor tabbing through
+  // the wall is at the Portal their focus is on whatever the mouse is over.
+  let pointerAt: PortalId | null = null;
+  let focusAt: PortalId | null = null;
   let frameRequest = 0;
   let lastTick = 0;
   let lastEmission = 0;
-  let dialogGame: GameKey | null = null;
+  let emitFrom = 0;
+  let dialogGame: PortalId | null = null;
   let dialogRun = 0;
   let sending = false;
   let sent = false;
@@ -76,17 +99,30 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
   let turnstileToken = '';
   let turnstileWidget: string | null = null;
   let turnstileLoad: Promise<Turnstile> | null = null;
-  const players: ScenePlayer[] = wraps.map(wrap => ({ wrap, image: wrap.querySelector<HTMLImageElement>('.game-art')!, source: wrap.querySelector<HTMLSourceElement>('source')!, sprite: wrap.querySelector<HTMLElement>('.scene-sprite')!, ready: false, visible: true, frame: 0, elapsed: 0 }));
+  let statusKey: CopyKey | '' = '';
+  const players: ScenePlayer[] = portals.map(portal => ({
+    game: portal.dataset.game as PortalId,
+    portal,
+    image: portal.querySelector<HTMLImageElement>('.game-art')!,
+    source: portal.querySelector<HTMLSourceElement>('source')!,
+    sprite: portal.querySelector<HTMLElement>('.scene-sprite')!,
+    ready: false,
+    visible: true,
+    frame: 0,
+    elapsed: 0,
+  }));
 
   const paused = () => !motionIsOn(world);
   const inGameRoom = () => isCurrentRoom(world, 'games');
+  /** The Portals actually on the wall: all three, or one on a narrow one. */
+  const onTheWall = () => portals.filter(portal => !portal.hidden);
+  /** Sparks are the heaviest motion here, so they also honour the system ask. */
+  const sparksRun = () => !paused() && !prefersReducedMotion() && !document.hidden && !dialog.open;
 
   function shouldPlay(player: ScenePlayer) {
-    const selected = scrollDriven() ? scrolledCard : active;
-    return !paused() && inGameRoom() && !document.hidden && !dialog.open && player.visible && (scrollDriven() ? selected === player.wrap : !selected || selected === player.wrap);
+    return !paused() && inGameRoom() && !document.hidden && !dialog.open && player.visible
+      && attendedPortal(world) === player.game;
   }
-
-  function scrollDriven() { return !wideLayout.matches || !finePointer.matches; }
 
   function syncPlayers() {
     for (const player of players) {
@@ -123,48 +159,36 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
     preload.src = sheet;
   }
 
-  function emitParticle(wrap: HTMLElement) {
-    if (paused() || !inGameRoom() || prefersReducedMotion() || document.hidden || dialog.open) return;
-    const narrow = scrollDriven();
-    const field = wrap.querySelector<HTMLElement>('.particle-field')!;
-    if (field.childElementCount >= (narrow ? 12 : 24)) return;
-    const theme = themes[wrap.dataset.game as GameKey];
+  /**
+   * One spark, thrown off a Portal's rim into the room.
+   *
+   * It leaves from a point on the ellipse and travels straight outward from
+   * it, which is why the field is the one thing on a Portal that is not
+   * clipped to the aperture.
+   */
+  function emitParticle(portal: HTMLElement) {
+    if (!sparksRun() || !inGameRoom()) return;
+    const field = portal.querySelector<HTMLElement>('.particle-field')!;
+    if (field.childElementCount >= 14) return;
+    const theme = themes[portal.dataset.game as PortalId];
     const kind = theme.shapes[Math.floor(Math.random() * theme.shapes.length)];
     const particle = document.createElement('span');
     particle.className = 'game-particle ' + kind;
     particle.style.color = theme.colors[Math.floor(Math.random() * theme.colors.length)];
-    const size = kind === 'heart' ? 14 + Math.random() * 14 : 10 + Math.random() * 15;
+    const size = kind === 'heart' ? 12 + Math.random() * 12 : 9 + Math.random() * 12;
     particle.style.width = size + 'px';
     particle.style.height = size + 'px';
     if (kind === 'bit') particle.textContent = Math.random() > .5 ? '1' : '0';
     else particle.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + shapes[kind] + '</svg>';
-    const width = wrap.clientWidth;
-    const height = wrap.clientHeight;
-    const side = Math.floor(Math.random() * 4);
-    const distance = 40 + Math.random() * 75;
-    let x: number, y: number, dx: number, dy: number;
-    if (narrow) {
-      const bounds = wrap.getBoundingClientRect();
-      const top = Math.max(18, 18 - bounds.top);
-      const bottom = Math.min(height - 18, window.innerHeight - bounds.top - 18);
-      if (bottom <= top) return;
-      const fromRight = side % 2;
-      x = fromRight ? width - 4 : 4;
-      y = top + Math.random() * (bottom - top);
-      // Drift inward from the visible edges so phone margins don't clip the effect.
-      dx = (fromRight ? -1 : 1) * (24 + Math.random() * 34);
-      dy = -30 - Math.random() * 65;
-    } else if (side < 2) {
-      x = side ? width : 0;
-      y = 20 + Math.random() * (height - 40);
-      dx = distance * (side ? 1 : -1);
-      dy = (Math.random() - .65) * 100;
-    } else {
-      x = 20 + Math.random() * (width - 40);
-      y = side === 2 ? 0 : height;
-      dx = (Math.random() - .5) * 100;
-      dy = distance * (side === 2 ? -1 : 1);
-    }
+    const rx = portal.clientWidth / 2;
+    const ry = portal.clientHeight / 2;
+    if (rx <= 0 || ry <= 0) return;
+    const angle = Math.random() * Math.PI * 2;
+    const x = rx + Math.cos(angle) * rx;
+    const y = ry + Math.sin(angle) * ry;
+    const distance = 26 + Math.random() * 62;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
     particle.style.left = (x - size / 2) + 'px';
     particle.style.top = (y - size / 2) + 'px';
     field.append(particle);
@@ -180,7 +204,7 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
   }
 
   function clearParticles() {
-    for (const field of document.querySelectorAll('.particle-field')) {
+    for (const field of stage.querySelectorAll('.particle-field')) {
       for (const particle of [...field.children]) {
         if (typeof particle.getAnimations === 'function') particle.getAnimations().forEach(animation => animation.cancel());
         particle.remove();
@@ -188,64 +212,10 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
     }
   }
 
-  function selectCard(wrap: HTMLElement | null) {
-    const next = !scrollDriven() ? wrap : null;
-    if (next === active) return;
-    if (next && !active) games.style.minHeight = games.getBoundingClientRect().height + 'px';
-    active = next;
-    if (active) games.dataset.active = active.dataset.game;
-    else delete games.dataset.active;
-    for (const item of wraps) {
-      item.classList.toggle('is-active', item === active);
-      item.classList.toggle('is-muted', Boolean(active && item !== active));
-    }
-    clearParticles();
-    if (active) {
-      for (let i = 0; i < 10; i++) emitParticle(active);
-      lastEmission = performance.now();
-    }
-    syncPlayers();
+  /** Report where the visitor is on the wall. The model decides what it means. */
+  function reportAttention() {
+    dispatch({ type: 'portal-attended', portal: focusAt ?? pointerAt });
   }
-
-  function clearSelection() {
-    pointerCard = null;
-    keyboardCard = null;
-    selectCard(null);
-    games.style.removeProperty('min-height');
-  }
-
-  function updateScrollCard() {
-    scrollFrame = 0;
-    let next: HTMLElement | null = null;
-    let mostVisible = 80;
-    if (scrollDriven() && inGameRoom()) {
-      for (const wrap of wraps) {
-        const rect = wrap.getBoundingClientRect();
-        const visible = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
-        if (visible > mostVisible) { next = wrap; mostVisible = visible; }
-      }
-    }
-    if (next === scrolledCard) return;
-    scrolledCard = next;
-    for (const wrap of wraps) wrap.classList.toggle('is-scroll-active', wrap === next);
-    clearParticles();
-    if (next) for (let i = 0; i < 6; i++) emitParticle(next);
-    lastEmission = performance.now();
-    syncPlayers();
-  }
-
-  function scheduleScrollUpdate() {
-    if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScrollCard);
-  }
-
-  function updateLayout() { clearSelection(); updateScrollCard(); }
-
-  // Keep the deck steady while the narrower panels regain their full copy.
-  games.addEventListener('transitionend', event => {
-    if (event.target === games && event.propertyName === 'grid-template-columns' && !active) {
-      games.style.removeProperty('min-height');
-    }
-  });
 
   function tick(now: number) {
     frameRequest = 0;
@@ -260,58 +230,88 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
         paintFrame(player);
       }
     }
-    const particleCard = scrollDriven() ? scrolledCard : active;
-    if (particleCard && !dialog.open && now - lastEmission > (scrollDriven() ? 380 : 180)) { emitParticle(particleCard); lastEmission = now; }
+    // Every Portal throws sparks, all the time, in turn — the rim and the
+    // particles are not a hover effect (ADR 0004).
+    const wall = onTheWall();
+    if (wall.length && sparksRun() && now - lastEmission > 150) {
+      emitParticle(wall[emitFrom % wall.length]);
+      emitFrom += 1;
+      lastEmission = now;
+    }
     startClock();
   }
 
   function startClock() {
-    const particleCard = scrollDriven() ? scrolledCard : active;
-    const needsClock = !paused() && inGameRoom() && !document.hidden && !dialog.open && (players.some(p => p.ready && shouldPlay(p)) || Boolean(particleCard));
+    const needsClock = inGameRoom() && !document.hidden && !dialog.open
+      && (players.some(player => player.ready && shouldPlay(player)) || sparksRun());
     if (needsClock && !frameRequest) frameRequest = requestAnimationFrame(tick);
     if (!needsClock) { cancelAnimationFrame(frameRequest); frameRequest = 0; lastTick = 0; }
   }
 
-  for (const wrap of wraps) {
-    wrap.addEventListener('pointerenter', event => {
-      if (scrollDriven() || event.pointerType === 'touch') return;
-      pointerCard = wrap;
-      selectCard(wrap);
+  for (const player of players) {
+    const portal = player.portal;
+    portal.addEventListener('pointerenter', event => {
+      if (event.pointerType === 'touch') return;
+      pointerAt = player.game;
+      reportAttention();
     });
-    wrap.addEventListener('pointerleave', () => { pointerCard = null; selectCard(keyboardCard); });
-    const card = wrap.querySelector<HTMLAnchorElement>('.game-card')!;
-    card.setAttribute('role', 'button');
-    card.setAttribute('aria-haspopup', 'dialog');
-    card.setAttribute('aria-controls', 'game-dialog');
-    card.addEventListener('click', event => { event.preventDefault(); openGame(wrap); });
-    card.addEventListener('keydown', event => {
-      if (event.key === ' ') { event.preventDefault(); openGame(wrap); }
+    portal.addEventListener('pointerleave', () => { pointerAt = null; reportAttention(); });
+    portal.addEventListener('focus', () => { focusAt = player.game; reportAttention(); });
+    portal.addEventListener('blur', () => { focusAt = null; reportAttention(); });
+    // 45: a Portal is a button that expands (ADR 0004), and ticket 46 wires the
+    // expansion. Until then the click opens the Invitation dialog that was
+    // behind the card, which already carries this game's poster, its name, the
+    // store link and the Invitation itself — so nothing the card offered has
+    // left the page, and the store link still cannot be hit by accident.
+    portal.addEventListener('click', () => openGame(portal));
+    portal.addEventListener('keydown', chooseByKey);
+  }
+
+  for (const dot of dots) {
+    dot.addEventListener('click', () => {
+      dispatch({ type: 'portal-chosen', portal: dot.dataset.game as PortalId });
+      focusCurrentDot();
     });
-    card.addEventListener('focus', () => {
-      if (card.matches(':focus-visible')) { keyboardCard = wrap; selectCard(wrap); }
-    });
-    card.addEventListener('blur', () => { keyboardCard = null; selectCard(pointerCard); });
+    dot.addEventListener('keydown', chooseByKey);
+  }
+
+  /**
+   * The arrow keys, where the wall only has room for one Portal (§3.5).
+   *
+   * They do nothing on a wide wall, where all three are already up, and they
+   * leave the focus where it makes sense: on the dots if that is where it was,
+   * and otherwise on the Portal, which is the same button showing another
+   * game.
+   */
+  function chooseByKey(event: KeyboardEvent) {
+    if (wideLayout.matches) return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    const fromDot = (event.currentTarget as HTMLElement).classList.contains('portal-dot');
+    dispatch({ type: 'portal-stepped', step: event.key === 'ArrowRight' ? 1 : -1 });
+    if (fromDot) focusCurrentDot();
+  }
+
+  function focusCurrentDot() {
+    dots.find(dot => dot.dataset.game === currentPortal(world))?.focus();
   }
 
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
-        const player = players.find(item => item.wrap === entry.target)!;
+        const player = players.find(item => item.portal === entry.target)!;
         player.visible = entry.isIntersecting;
       }
       syncPlayers();
-      scheduleScrollUpdate();
     }, { rootMargin: '80px', threshold: 0 });
-    players.forEach(player => observer.observe(player.wrap));
+    players.forEach(player => observer.observe(player.portal));
   }
 
-  wideLayout.addEventListener('change', updateLayout);
-  finePointer.addEventListener('change', updateLayout);
-  document.addEventListener('visibilitychange', () => { clearParticles(); lastTick = 0; updateScrollCard(); syncPlayers(); });
-  addEventListener('resize', updateLayout, { passive: true });
-  addEventListener('scroll', scheduleScrollUpdate, { passive: true });
+  wideLayout.addEventListener('change', () => paintWall(true));
+  document.addEventListener('visibilitychange', () => { clearParticles(); lastTick = 0; syncPlayers(); });
 
   function setStatus(key: CopyKey | '', error = false) {
+    statusKey = key;
     status.textContent = key ? copy[world.language][key] : '';
     status.dataset.state = error ? 'error' : 'ok';
   }
@@ -321,28 +321,21 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
     byId('send-label').textContent = copy[world.language][sending ? 'sending' : 'invite'];
   }
 
-  function openGame(wrap: HTMLElement) {
+  function openGame(portal: HTMLElement) {
     dialogRun++;
-    dialogGame = wrap.dataset.game as GameKey;
+    dialogGame = portal.dataset.game as PortalId;
     submissionId = crypto.randomUUID();
     sending = false;
     sent = false;
     consent.checked = false;
     consent.disabled = !notificationsReady;
     byId<HTMLInputElement>('invite-website').value = '';
-    // 21: a game's name is a proper noun, the same in both languages, and the
-    // card already carries it. Read it off the card rather than keeping a third
-    // copy here that no dictionary types and no build step compares.
-    //
-    // Node by node, because one of the three cards breaks its title over two
-    // lines with a `<br>` and `textContent` would run the words together.
-    byId('dialog-game').textContent = [...wrap.querySelector('h2')!.childNodes]
-      .map(node => node.textContent ?? '')
-      .join(' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    byId<HTMLImageElement>('dialog-poster').src = wrap.querySelector<HTMLImageElement>('.game-art')!.dataset.still!;
-    byId<HTMLAnchorElement>('dialog-steam').href = wrap.querySelector<HTMLAnchorElement>('.game-card')!.href;
+    // 21: a game's name is a proper noun, the same in both languages, and no
+    // dictionary types it. 45: the card that used to carry it is gone, so the
+    // Portal does — along with the store URL the card's `href` used to be.
+    byId('dialog-game').textContent = portal.dataset.title!;
+    byId<HTMLImageElement>('dialog-poster').src = portal.querySelector<HTMLImageElement>('.game-art')!.dataset.still!;
+    byId<HTMLAnchorElement>('dialog-steam').href = portal.dataset.steam!;
     removeChallenge();
     setStatus(notificationsReady ? '' : 'unavailable');
     updateSendButton();
@@ -401,7 +394,6 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
     dialogRun++;
     removeChallenge();
     root.classList.remove('dialog-open');
-    updateScrollCard();
     syncPlayers();
   });
 
@@ -439,15 +431,55 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
   let paintedLanguage: Language | null = null;
   let paintedPaused: boolean | null = null;
   let paintedInRoom: boolean | null = null;
-  let paintedSettled: boolean | null = null;
+  let paintedAwake: PortalId | null | undefined;
+  let paintedShowing: PortalId | '' = '';
+  let paintedWide: boolean | null = null;
+
+  /**
+   * Which Portals are on the wall.
+   *
+   * All three on a wide one; on a narrow one just the one the model says,
+   * because three of them there are 165 px each and a world is unreadable at
+   * that size (§3.5). The dots say which of the three it is.
+   */
+  function paintWall(force = false) {
+    const wide = wideLayout.matches;
+    const showing = currentPortal(world);
+    if (!force && paintedWide === wide && paintedShowing === showing) return;
+    paintedWide = wide;
+    paintedShowing = showing;
+    for (const portal of portals) portal.hidden = !wide && portal.dataset.game !== showing;
+    for (const dot of dots) dot.setAttribute('aria-current', String(dot.dataset.game === showing));
+    syncPlayers();
+  }
+
+  /** The one Portal the visitor is at, playing; the other two back at rest. */
+  function paintAttention() {
+    const awake = attendedPortal(world);
+    if (paintedAwake === awake) return;
+    paintedAwake = awake;
+    for (const player of players) {
+      const on = player.game === awake;
+      player.portal.classList.toggle('is-awake', on);
+      // A world nobody is looking at goes back to the moment it was stopped
+      // at, rather than holding wherever the visitor happened to walk off.
+      if (!on && player.ready && player.frame !== 0) {
+        player.frame = 0;
+        player.elapsed = 0;
+        paintFrame(player);
+      }
+    }
+    syncPlayers();
+  }
 
   return (next: World) => {
     world = next;
-    const settled = inGameRoom() && world.rooms.transition === 'settled';
     if (paintedLanguage !== world.language) {
-      // The cards change height when their copy does, so the deck starts again.
       paintedLanguage = world.language;
-      clearSelection();
+      // The dialog's own two painter-owned strings; everything else on the
+      // page is swept by `src/dom/language.ts` off its `data-i18n` hook.
+      setStatus(statusKey, status.dataset.state === 'error');
+      updateSendButton();
     }
     if (paintedPaused !== paused()) {
       paintedPaused = paused();
@@ -456,12 +488,10 @@ export const mountGameRoom = (_dispatch: Dispatch, initial: World): Painter => {
     }
     if (paintedInRoom !== inGameRoom()) {
       paintedInRoom = inGameRoom();
-      clearSelection();
+      clearParticles();
       syncPlayers();
     }
-    if (paintedSettled !== settled) {
-      paintedSettled = settled;
-      updateScrollCard();
-    }
+    paintWall();
+    paintAttention();
   };
 };

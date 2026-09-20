@@ -27,10 +27,10 @@ export type Mount = (dispatch: Dispatch, initial: World) => Painter;
 /**
  * The shell's one layout boundary, as `styles.css` writes it.
  *
- * The page turns wide at 1080 px, and three painters have to know when it has:
- * the Game Room's card behaviour, the deck its stage rehouses, and the
- * Activity Room's scrim. One string, so a breakpoint moved in the stylesheet
- * is moved in one place on this side of it too.
+ * The page turns wide at 1080 px, and two painters have to know when it has:
+ * the Game Room, whose wall carries one Portal below it and three above, and
+ * the Activity Room's scrim. One string, so a breakpoint moved in the
+ * stylesheet is moved in one place on this side of it too.
  */
 export const WIDE_LAYOUT = '(min-width: 1080px)';
 

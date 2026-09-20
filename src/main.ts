@@ -4,8 +4,7 @@ import { mountBreakables, readStoredBroken } from './dom/breakables'; // 09: the
 import { mountCats } from './dom/cats'; // 08: the cats
 import { mountCinemaRoom } from './dom/cinema-room'; // 17: the Cinema Room
 import { mountEntryway, readStoredArrival } from './dom/entryway'; // 14: the Entryway
-import { mountGameRoom } from './dom/game-room';
-import { mountGameStage } from './dom/game-stage'; // 15: the Game Room's wall unit
+import { mountGameRoom } from './dom/game-room'; // 15, 45: the Game Room
 import { mountLanguage, readStoredLanguage } from './dom/language';
 // 05: loading
 import { mountLoading } from './dom/loading';
@@ -45,9 +44,6 @@ const mounts: Mount[] = [
   // opens the shell is out of `inert` before the Room router moves focus into it.
   mountLoading,
   mountLanguage, mountMotion, mountRooms, mountGameRoom,
-  // 15: after the Game Room's own painter, because it rehouses the deck that
-  // painter has already taken hold of.
-  mountGameStage,
   mountCinemaRoom, // 17: the Cinema Room's bookshelves
   mountActivityRoom, // 16: the Activity Room
   mountSound, // 06: audio
