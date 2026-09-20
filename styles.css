@@ -844,7 +844,7 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   --brass: #C9A25E;
   --bulb: #FFD9A8;
   position: relative;
-  margin-top: 1.5rem;
+  margin-top: .8rem;
   /* Below a rendered 880 px the stage keeps 880 px of legibility and the Room
      pans from its left end, which is the door — the Entryway's rule and the
      Activity Room's. */
@@ -857,17 +857,24 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
    no DOM wall above it, no padding for an overhang, no measured deck height,
    and no painter measuring anything. `--u` is one stage unit, read off the
    stage's own inline size exactly as the Cinema Room reads its own. */
-#room-games { padding-bottom: 2.4rem; }
-#room-games .intro { padding: 1.8rem 0 1.4rem; }
+/* Measured at 1440 x 900 rather than guessed: the header, the way out and the
+   intro come to 410 px above the stage as this Room shipped, and the stage's
+   own legibility floor is 495 px tall, which leaves 900 px of viewport five px
+   short. These three trims are what buy it back — the intro keeps its copy and
+   gives up 16 px of padding, and the Room is one screenful. */
+#room-games { padding-bottom: 1rem; }
+#room-games .intro { padding: 1.1rem 0 .9rem; }
+#room-games .room-exit { margin-top: 1rem; }
 #room-games .stage {
   --u: .0625cqw;
   container-type: inline-size;
-  /* The header, the way out and the intro come to roughly 24rem above the
-     stage, so capping its width by what is left of the viewport keeps the
-     whole Room — the cats roaming on the floor included — in one screenful.
-     The aspect ratio is untouched: the stage is exactly 16:9 at every width. */
+  /* Everything above the stage in this Room comes to about 23rem, and the
+     Room's own foot to another 1rem, so capping the stage's width by what the
+     viewport has left keeps the whole Room — the cats roaming on the floor
+     included — in one screenful. The aspect ratio is untouched: the stage is
+     exactly 16:9 at every width, at 1600, 1440, 1280 and 1100 px alike. */
   min-width: 880px;
-  max-width: min(100%, calc((100dvh - 24rem) * 16 / 9));
+  max-width: min(100%, calc((100dvh - 25.5rem) * 16 / 9));
   margin: 0 auto;
   overflow: hidden;
   border-radius: 14px;
@@ -1030,11 +1037,29 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 
 /* G11-G16, G19: the sideboard and what stands on it, the lamp, and the table
    that is the front edge of the doll's house. */
+/* The image box reaches up to y 468 because the console and the stack of game
+   cases stand above the surface at y 540 (G13, G14) — so only those two are
+   drawn up there and the rest of the band is wall, which the Portals show
+   through. An opaque slab here would take the bottom 62 units off all three. */
 .prop-sideboard {
-  border-radius: calc(4 * var(--u));
   background:
-    linear-gradient(to bottom, #8C6440 0 15%, var(--oak) 15% 100%),
-    var(--oak);
+    /* G13: the console and its two controllers, at (700,504)-(880,540) */
+    linear-gradient(to bottom, #4A4F55 0 55%, #2A2D31 55% 100%)
+      no-repeat calc(400 * var(--u)) calc(36 * var(--u)) / calc(180 * var(--u)) calc(36 * var(--u)),
+    /* G14: three game cases leaning together, at (940,468)-(1010,540) */
+    linear-gradient(to right, #D9483B 0 30%, #EAD9C2 30% 64%, #4DA3D9 64% 100%)
+      no-repeat calc(640 * var(--u)) 0 / calc(70 * var(--u)) calc(72 * var(--u));
+}
+.prop-sideboard::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* y 540, which is 72 units down this box. */
+  top: calc(72 * var(--u));
+  bottom: 0;
+  border-radius: calc(4 * var(--u));
+  background: linear-gradient(to bottom, #8C6440 0 15%, var(--oak) 15% 100%);
   box-shadow: inset 0 calc(-3 * var(--u)) 0 #3A2A22, 0 calc(6 * var(--u)) calc(18 * var(--u)) #0006;
 }
 /* The pole stands at x 1470 with its foot on the floor line, and the shade

@@ -71,6 +71,7 @@ const frameDurations = [600, 250, 250, 300, 300, 350, 400, 500, 300, 250, 250, 3
 export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   let world = initial;
   const root = document.documentElement;
+  const scene = byId('games-scene');
   const stage = document.querySelector<HTMLElement>('[data-stage="games"]')!;
   const portals = [...stage.querySelectorAll<HTMLButtonElement>('.portal')];
   const dots = [...stage.querySelectorAll<HTMLButtonElement>('.portal-dot')];
@@ -450,7 +451,27 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     paintedShowing = showing;
     for (const portal of portals) portal.hidden = !wide && portal.dataset.game !== showing;
     for (const dot of dots) dot.setAttribute('aria-current', String(dot.dataset.game === showing));
+    panToPortal();
     syncPlayers();
+  }
+
+  /**
+   * Start the pan on the Portal the wall is carrying.
+   *
+   * Below 880 px of rendered width the stage keeps its 880 and the Room pans
+   * from the left end, which is the door (§3.5) — so on a phone the wall's one
+   * Portal begins off the right of the screen. It is what the Room is for, so
+   * the pan opens on it and the door is a scroll away rather than the other
+   * way round.
+   */
+  function panToPortal() {
+    if (wideLayout.matches || scene.scrollWidth <= scene.clientWidth) return;
+    const portal = portals.find(item => !item.hidden);
+    if (!portal) return;
+    const seen = scene.getBoundingClientRect();
+    const box = portal.getBoundingClientRect();
+    if (box.width === 0) return;
+    scene.scrollLeft += (box.left + box.width / 2) - (seen.left + seen.width / 2);
   }
 
   /** The one Portal the visitor is at, playing; the other two back at rest. */
@@ -490,6 +511,9 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
       paintedInRoom = inGameRoom();
       clearParticles();
       syncPlayers();
+      // A Room that was hidden measured nothing, so the pan is set the moment
+      // it is standing rather than on the paint that opened it.
+      if (paintedInRoom) panToPortal();
     }
     paintWall();
     paintAttention();
