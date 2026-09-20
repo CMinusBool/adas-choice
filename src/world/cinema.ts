@@ -553,7 +553,15 @@ export function rollingFilmOf(slice: CinemaSlice): Film | null {
  * has to keep turning until the Bumper and the title card are through.
  */
 export function cinemaAwaitsClock(slice: CinemaSlice): boolean {
-  return slice.until !== null;
+  // A Beat with an end on the clock is plainly waiting for it.
+  if (slice.until !== null) return true;
+  // And so is the one step that cannot leave without reading the clock first.
+  // `loading` ends in the Bumper, which is a Film rather than the apartment
+  // moving, so `filmUntil` refuses to start it from an event that carries no
+  // time — a motion preference changing — and holds the step instead of
+  // skipping four seconds of it. Holding is only safe while the page keeps a
+  // frame loop turning, and this is where it is told to.
+  return slice.step === 'loading';
 }
 
 /** The Room with a different shelf attended, or the same slice when it is not. */
