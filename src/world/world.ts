@@ -461,7 +461,15 @@ export function advance(world: World, event: WorldEvent): World {
     // 44: a click, a tap or a key press. A Room's entrance is interruptible:
     // whatever the visitor was reaching for, they get the Room at once rather
     // than the rest of the entrance, and nobody is left mid-stride.
+    // 51: an entrance that is **playing**, and only that. The page reports
+    // input from the moment it mounts, and the loading screen is an overlay the
+    // visitor can tap or tab through while the apartment waits behind it — so
+    // ending a waiting entrance here means the Door never opens and nobody
+    // walks in. There is nothing to cut short before the entrance has begun,
+    // and the two things that do call one off before it begins — a stage
+    // nobody can see, stillness — say so themselves below.
     case 'visitor-input': {
+      if (world.roomArrival.state !== 'playing') return world;
       return withRoomArrivalSettled(world);
     }
     // 44: and a Room nobody is looking at. An entrance that cannot be seen is
