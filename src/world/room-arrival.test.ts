@@ -189,6 +189,20 @@ describe.each(ROOMS)('the arrival of the %s Room', room => {
     expect(actorsIn(shown, room)).toEqual([]);
   });
 
+  it('is over before it is watched in a Room whose stage is not on the screen', () => {
+    // The Game Room's stage sits below its deck at desktop widths — measured at
+    // y 1076 in an 800 px viewport — so a visitor who walks in is looking at the
+    // wall while the Cast would be coming through a Door a thousand pixels down
+    // the page. An entrance nobody can see is not worth playing: they get the
+    // settled Room, which is what every other interruption gives them.
+    const unseen = advance(walkInto(room), { type: 'room-unwatched', room });
+    expect(roomArrivalState(unseen)).toBe('done');
+    expect(roomDoorState(unseen, room)).toBe('closed');
+    expect(actorsIn(unseen, room)).toHaveLength(5);
+    standsOnItsMark(unseen, room, 'boy');
+    standsOnItsMark(unseen, room, 'girl');
+  });
+
   it('keeps the frame clock turning while it plays, and lets it stop after', () => {
     const opening = walkInto(room);
     // Nobody is in the Room yet, and the clock still has to run: an empty Room
@@ -196,6 +210,18 @@ describe.each(ROOMS)('the arrival of the %s Room', room => {
     expect(actorsIn(opening, room)).toEqual([]);
     expect(apartmentNeedsClock(opening)).toBe(true);
     expect(apartmentNeedsClock(advance(opening, { type: 'visitor-input' }))).toBe(true);
+  });
+});
+
+describe('a Room the visitor has walked out of', () => {
+  it('cannot end the entrance of the Room they walked into', () => {
+    const games = walkInto('games');
+    const cinema = advance(games, { type: 'hash-changed', hash: '#/cinema' });
+    expect(roomArrivalState(cinema)).toBe('playing');
+    // The Game Room's stage leaving the screen is what walking out of it looks
+    // like to the page, and it arrives after the Cinema Room's entrance has
+    // begun. A report names its Room so it cannot settle somebody else's.
+    expect(advance(cinema, { type: 'room-unwatched', room: 'games' })).toBe(cinema);
   });
 });
 

@@ -201,6 +201,9 @@ export type WorldEvent =
   // once and everyone stands on their mark. The Entryway's own arrival is a
   // different thing and does not listen for it.
   | { readonly type: 'visitor-input' }
+  // 44: this Room's stage is not on the screen. The browser alone knows it, and
+  // it names the Room because the one being walked out of is the one that goes.
+  | { readonly type: 'room-unwatched'; readonly room: RoomId }
   | { readonly type: 'breakable-broken'; readonly breakable: BreakableId }
   | { readonly type: 'actor-tick'; readonly now: number }
   | {
@@ -410,6 +413,15 @@ export function advance(world: World, event: WorldEvent): World {
     // whatever the visitor was reaching for, they get the Room at once rather
     // than the rest of the entrance, and nobody is left mid-stride.
     case 'visitor-input': {
+      return withRoomArrivalSettled(world);
+    }
+    // 44: and a Room nobody is looking at. An entrance that cannot be seen is
+    // not worth playing  the Game Room's stage sits below its deck at desktop
+    // widths, a thousand pixels under the wall the visitor is reading  so it
+    // is over, on the same terms as every other interruption: everyone on
+    // their mark and the Door shut, ready for whoever scrolls down to it.
+    case 'room-unwatched': {
+      if (world.roomArrival.room !== event.room) return world;
       return withRoomArrivalSettled(world);
     }
     // 09: a Breakable going over. The roll that decides when lives in
