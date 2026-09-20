@@ -350,15 +350,29 @@ const SETTLED = () => {
  * Counts `requestAnimationFrame` callbacks and reads each Actor's box before and after,
  * which is the one check the embedded pane could never make: there `visibilityState` is
  * `hidden`, rAF never fires, and every Actor sits exactly where the model first put it.
+ *
+ * `read()` re-queries `.actor` on the stage every time it is called rather than closing
+ * over one snapshot taken before the window opens. `SETTLED` only means the loading
+ * screen is gone; with full motion `attach()` in `src/dom/actors.ts` has not necessarily
+ * reparented the Cast onto the stage yet, so a snapshot taken too early carries an empty
+ * NodeList through the whole window and the check reports nobody there and nothing
+ * moving. Before opening the window, this also gives the Cast up to `attachTimeoutMs` to
+ * attach — capped well under `windowMs` so a Room that genuinely has no Actors on its
+ * stage does not hang, it just samples an empty stage as it always could.
  */
 const WATCH = async ({ room, windowMs }) => {
   const stage = document.querySelector(`[data-stage="${room}"]`);
-  const actors = stage ? [...stage.querySelectorAll('.actor')] : [];
+  const query = () => (stage ? [...stage.querySelectorAll('.actor')] : []);
   const read = () =>
-    actors.map(actor => {
+    query().map(actor => {
       const box = actor.getBoundingClientRect();
       return { actor: actor.dataset.actor ?? '?', x: box.left, y: box.top };
     });
+  const attachTimeoutMs = Math.min(windowMs, 1000);
+  const attachDeadline = Date.now() + attachTimeoutMs;
+  while (query().length === 0 && Date.now() < attachDeadline) {
+    await new Promise(resolve => setTimeout(resolve, 20));
+  }
   let frames = 0;
   let watching = true;
   const count = () => {
@@ -371,13 +385,16 @@ const WATCH = async ({ room, windowMs }) => {
   await new Promise(resolve => setTimeout(resolve, windowMs));
   watching = false;
   const after = read();
-  const moved = before.map((start, index) => ({
-    actor: start.actor,
-    dx: Number((after[index].x - start.x).toFixed(2)),
-    dy: Number((after[index].y - start.y).toFixed(2)),
-  }));
+  const moved = before.map((start, index) => {
+    const end = after[index] ?? start;
+    return {
+      actor: start.actor,
+      dx: Number((end.x - start.x).toFixed(2)),
+      dy: Number((end.y - start.y).toFixed(2)),
+    };
+  });
   return {
-    actors: actors.length,
+    actors: after.length,
     frames,
     moved,
     maxPx: moved.length === 0 ? 0 : Math.max(...moved.map(entry => Math.abs(entry.dx) + Math.abs(entry.dy))),
