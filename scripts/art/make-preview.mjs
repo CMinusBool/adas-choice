@@ -341,7 +341,7 @@ export function main(argv = process.argv.slice(2)) {
         + `(${run.frames} frames, the strip, and ${comparePairs(run.frames).map(([a, b]) => `${a} vs ${b}`).join(' and ')})`,
       );
     }
-    console.log('  motion phase is answered from these by `motion-reviewer` and by the owner, never by the generator.');
+    console.log('  motion phase is answered from these by the owner, never by a grader and never by the generator.');
   }
   return 0;
 }

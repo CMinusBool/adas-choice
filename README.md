@@ -37,11 +37,11 @@ Run `npm ci` once, then `npm run dev` and open the address it prints. `npm run b
 | `worker/` | Protected email endpoint, deployment configuration and security tests |
 | `SECURITY.md` | Data collection, secret handling and abuse limits |
 
-Sprite frames are 480×480, ordered left to right then top to bottom, with a 4.1-second loop. The boy follows the original Lovers scene's face, hair, glasses, and slimmer body. The girl blends the original Lovers and Heavenly Bodies designs. The artwork is original fan art, not gameplay footage or official game artwork.
+Scene frames are 360×576 — a 5:8 portrait, twelve of them in a 4×3 sheet, ordered left to right then top to bottom, with a 4.1-second loop. They fit the Game Room's elliptical Portals; see `docs/adr/0004-the-game-room-is-portals.md`. The three Scenes currently on disk are still the square 480×480 set that preceded them, and stay that way until the art lane delivers. The boy follows the original Lovers scene's face, hair, glasses, and slimmer body. The girl blends the original Lovers and Heavenly Bodies designs. The artwork is original fan art, not gameplay footage or official game artwork.
 
 ## Editing
 
-Edit both language dictionaries in `src/main.ts`; keep the Traditional Chinese first-paint content in `index.html` in sync. Update colours and spacing in `styles.css`. To replace a scene, update its GIF, poster, and sprite sheet together.
+Edit both language dictionaries in `src/copy.ts`; keep the Traditional Chinese first-paint content in `index.html` in sync. Update colours and spacing in `styles.css`. To replace a scene, update its GIF, poster, and sprite sheet together.
 
 ## GitHub Pages
 

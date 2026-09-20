@@ -136,9 +136,11 @@ _Avoid_: intro, ident, logo
 **Activity**:
 One of the three things the Activity Room proposes the two people do together over a video call.
 Like a Film it is a recommendation with its own details — what it involves, what it needs, roughly
-how long — and unlike a Film there is nothing to fetch or play: choosing one marks it as tonight's
-and nothing else happens.
-_Avoid_: game (a game is a Game Room card), idea, suggestion
+how long — and unlike a Film there is nothing to fetch or play. Choosing one marks it as tonight's:
+the card closes, the station and its chalkboard say so, and the Boy and the Girl are replaced by a
+painted tableau of the two of them doing it. Exactly one is chosen at a time, it lasts the visit
+and not the reload, and it can be put back — which brings them out from behind the tableau.
+_Avoid_: game (a game is a Portal), idea, suggestion
 
 ### Sound
 

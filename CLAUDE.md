@@ -37,8 +37,10 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
 
 ## Layout
 
-- `index.html` — the first-paint markup. Its `/src/main.ts` script tag is the only URL on the
-  page the bundler rewrites; every other URL there is passed through untouched.
+- `index.html` — the first-paint markup. Its `/src/main.ts` script tag and its
+  `<link rel="stylesheet" href="styles.css">` are the only two URLs on the page the bundler
+  rewrites — both come back out of `dist/` hashed, under `assets/`. Every other URL there,
+  `site-config.js` and `assets/favicon.svg` included, is passed through untouched.
 - `src/main.ts` — the DOM layer's composition root: it builds the world once, mounts the painters
   in `src/dom/` and re-runs them on every change. Deliberately untested.
 - `src/dom/` — one painter per slice of the world, each a `Mount` that wires its listeners once and
@@ -103,6 +105,12 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   square — `.scene-sprite` writes the grid as `background-size: 400% 300%`, and
   `check-assets.mjs` deliberately skips scene sprites — so the shape lives here and in the
   three `width`/`height` attributes on the `.game-art` images in `index.html`.
+  **The contract changed; the assets have not.** The six files in `public/assets/` are still the
+  square ones — 480x480 GIFs and posters, 1920x1440 sheets — and will be until the art lane
+  delivers (tickets 41 and 34). The markup already declares `width="360" height="576"`, so the
+  Portals squeeze a square Scene into a 5:8 ellipse today, and `index.html` says so where the
+  Portals are declared. That is expected, and it is the one place a reader should not take this
+  file's present tense for what is on disk.
 - **Cycle assets travel as a set too**, and to their own contract. An Actor's Cycles live at
   `public/assets/actors/<actor>-<cycle>-<facing>.png` — `walk` and `run`, `left` and `right` — and
   are replaced together. Frames are laid left to right then top to bottom in a 4-column grid, 8
@@ -123,8 +131,14 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   not any more: she has her `.cycle` layers, her `ActorId` and her row in `ACTOR_SHAPES`, so her
   placeholders preload and validate like everyone else's. She roams, meows and can be petted
   like the other two, and the Game Room's snow globe is her Breakable. She
-  stands slightly taller than the other two, `data-height="144"` against their `132`, which is her
-  Character Sheet's 24 bible units to the shoulder against their 22. What is in the repository is
+  stands slightly taller than the other two, `data-height="105"` against their `96`, which is her
+  Character Sheet's 24 bible units to the shoulder against their 22. **`data-height` is the
+  figure's rendered height in stage units, not the sprite's frame box** — the owner ruled that on
+  2026-09-20, and the five values in `index.html` became 300 / 273 / 96 / 96 / 105, replacing
+  360 / 328 / 132 / 132 / 144, which rendered the Boy taller than a door leaf and the cats at
+  about twice their ruled shoulder height. There is one set of them, on the `#cast` parking block,
+  because `src/dom/actors.ts` moves one element per Actor between stages rather than giving each
+  Room its own. What is in the repository is
   **placeholders**
   — one neutral standing frame per Actor, cut out of that Actor's Character Sheet in
   `art/characters/v2/` by `scripts/make-actor-placeholders.mjs` — and **that is the shipped state,
@@ -161,8 +175,10 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   rather than the tolerance loosened. `--mirror` bakes the other facing and is refused for the
   cats. `node scripts/art/make-preview.mjs --sheet <sheet.png>` writes a self-contained page that
   plays a candidate back at the contract's rate for the owner's eye. **Motion phase is no longer
-  checked by machine**, and no sheet carries a "motion phase not verified" status — see
-  "Animation is parked" below.
+  checked by machine** — see "Animation is parked" below. The `motionPhase: 'not verified'` that
+  `build-cycle.mjs` writes into `manifest.json` and `metrics.json`, and prints after a PASS, is
+  therefore the permanent and correct answer for every sheet rather than a to-do: nothing grades
+  it, and the owner's eye on `make-preview.mjs` is what stands in its place.
 - **Animation is parked, and placeholders are the answer.** Seven generations of one walk Cycle,
   across every prompt technique that was tried — plain brief, explicit leg order, phase wording,
   per-limb shading, a stick-figure pose reference — failed to produce a walk whose leading leg
