@@ -128,4 +128,37 @@ describe('a Portal expanded over the stage', () => {
     const open = advance(inTheGameRoom(), { type: 'portal-opened', portal: 'lovers' });
     expect(openPortal(advance(open, { type: 'portal-closed' }))).toBeNull();
   });
+
+  it('hands back the same world when the report says nothing new', () => {
+    const closed = inTheGameRoom();
+    expect(advance(closed, { type: 'portal-closed' })).toBe(closed);
+
+    const open = advance(closed, { type: 'portal-opened', portal: 'tango' });
+    expect(advance(open, { type: 'portal-opened', portal: 'tango' })).toBe(open);
+  });
+
+  it('puts the wall on the Portal it expanded, so closing gives that one back', () => {
+    const open = advance(inTheGameRoom(), { type: 'portal-opened', portal: 'heavenly' });
+    expect(currentPortal(open)).toBe('heavenly');
+    expect(currentPortal(advance(open, { type: 'portal-closed' }))).toBe('heavenly');
+  });
+
+  it('leaves the Portal the visitor is at awake, because it is the same world', () => {
+    const atLovers = advance(inTheGameRoom(), { type: 'portal-attended', portal: 'lovers' });
+    const open = advance(atLovers, { type: 'portal-opened', portal: 'lovers' });
+    expect(attendedPortal(open)).toBe('lovers');
+  });
+
+  it('closes the expansion when the visitor walks out of the Room', () => {
+    const open = advance(inTheGameRoom(), { type: 'portal-opened', portal: 'tango' });
+    const gone = advance(open, { type: 'hash-changed', hash: '#/cinema' });
+    expect(openPortal(gone)).toBeNull();
+    expect(openPortal(advance(gone, { type: 'hash-changed', hash: '#/games' }))).toBeNull();
+  });
+
+  it('expands nothing for a visitor who is somewhere else in the apartment', () => {
+    const cinema = createWorld({ ...arrival, hash: '#/cinema' });
+    expect(advance(cinema, { type: 'portal-opened', portal: 'tango' })).toBe(cinema);
+    expect(advance(cinema, { type: 'portal-closed' })).toBe(cinema);
+  });
 });
