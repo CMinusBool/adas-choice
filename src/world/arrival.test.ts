@@ -217,8 +217,10 @@ describe('the arrival and the rest of the apartment', () => {
     const walkedOut = advance(arriving(5), { type: 'hash-changed', hash: '#/games' });
     const inTheGameRoom = run(walkedOut, ARRIVAL_SECONDS);
     expect(actorsIn(inTheGameRoom, 'games')).toHaveLength(5);
-    for (const view of actorsIn(inTheGameRoom, 'games')) {
-      expect(view.moving, `${view.id} has arrived`).toBe(false);
+    // The two of them have reached their marks and stay on them; the three cats
+    // are free to be somewhere else in the Room by now.
+    for (const id of ['boy', 'girl'] as const) {
+      expect(actorView(inTheGameRoom, id)!.moving, `${id} has arrived`).toBe(false);
     }
     expect(actorsIn(inTheGameRoom, 'entryway')).toEqual([]);
   });

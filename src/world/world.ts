@@ -333,12 +333,17 @@ export function advance(world: World, event: WorldEvent): World {
       // 44: the Room being left is tidied before anybody moves: its entrance
       // ends where it was going rather than wherever it had got to, so nobody
       // is carried through the Door mid-stride.
-      const leaving = withRoomArrivalSettled(world);
+      const tidied = withRoomArrivalSettled(world);
       // The model decides whether this move animates, so the DOM layer never
       // waits on an animation that was never going to run.
-      const transition: TransitionKind = motionIsOn(leaving) ? 'animated' : 'instant';
+      const transition: TransitionKind = motionIsOn(tidied) ? 'animated' : 'instant';
       // 14: leaving the Entryway mid-arrival settles it, so the visitor never
       // comes back to find it half done.
+      // 51: and it settles **here**, before anybody is gathered into the Room
+      // being walked into. Its remaining cues place the Cast in the Entryway,
+      // so finishing it after the gather put all five of them back in the hall
+      // they had just left and left the new Room with nobody in it at all.
+      const leaving = entering === ENTRYWAY ? tidied : withArrivalOver(tidied);
       const moved = {
         ...leaving,
         rooms: { current: entering, leaving: leaving.rooms.current, transition },
@@ -360,15 +365,13 @@ export function advance(world: World, event: WorldEvent): World {
         // button close it — the Room is never walked back into mid-expansion.
         portals: withPortalClosed(withPortalAttended(leaving.portals, null)),
       };
-      // 20: and a Film that was rolling falls silent on the way out, because
-      // the Bumper is a Cinema Room moment rather than something that follows
-      // the visitor down the hall.
-      const home = entering === ENTRYWAY ? moved : withArrivalOver(moved);
       // 44: and the Room behind the Door plays the Cast in. The Entryway is the
       // one Room that does not: its own arrival is a different and longer
       // thing, played once, and coming home is not walking in for the first
-      // time.
-      return runCinema(withRoomEntered(home, entering), null);
+      // time. 20: and a Film that was rolling falls silent on the way out,
+      // because the Bumper is a Cinema Room moment rather than something that
+      // follows the visitor down the hall.
+      return runCinema(withRoomEntered(moved, entering), null);
     }
     case 'room-transition-finished': {
       if (world.rooms.transition === 'settled') return world;
