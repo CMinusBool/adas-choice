@@ -259,6 +259,62 @@ describe('choosing a bookshelf', () => {
     expect(pinnedPosters(done)).toEqual(filmsOn('romance'));
   });
 
+  it('puts the Posters straight on the wall when the apartment may not move', () => {
+    // No tick is dispatched at all: with motion off there is nothing for the
+    // clock to do, and the visitor is owed the outcome without the performance.
+    const still = inTheCinema(createWorld({ ...plainArrival, reducedMotion: true }));
+    const done = choose('horror', still);
+    expect(cinemaStep(done)).toBe('seated');
+    expect(pinnedPosters(done)).toEqual(filmsOn('horror'));
+    expect(isSeated(done, 'boy')).toBe(true);
+  });
+
+  it('finishes the errand rather than stranding him when motion is turned off', () => {
+    const rummaging = runUntil(choose('comedy'), world => cinemaStep(world) === 'rummaging');
+    expect(cinemaStep(rummaging)).toBe('rummaging');
+
+    const paused = advance(rummaging, { type: 'motion-toggled' });
+    expect(cinemaStep(paused)).toBe('seated');
+    expect(pinnedPosters(paused)).toEqual(filmsOn('comedy'));
+    expect(isSeated(paused, 'boy')).toBe(true);
+    expect(who(paused, 'boy').moving).toBe(false);
+  });
+
+  it('lights another shelf on hover mid-errand without moving him', () => {
+    const rummaging = runUntil(choose('comedy'), world => cinemaStep(world) === 'rummaging');
+    const hovered = advance(rummaging, { type: 'cinema-shelf-attended', shelf: 'horror' });
+    expect(attendedShelf(hovered)).toBe('horror');
+    expect(who(hovered, 'boy').at).toEqual(CINEMA_MARKS.shelves.comedy);
+    expect(who(hovered, 'boy').moving).toBe(false);
+    expect(cinemaStep(hovered)).toBe('rummaging');
+  });
+
+  it('abandons a half-pinned wall for the shelf chosen instead', () => {
+    const half = runUntil(choose('comedy'), world => pinnedPosters(world).length === 2, 40000);
+    expect(pinnedPosters(half)).toEqual(filmsOn('comedy').slice(0, 2));
+
+    const switched = choose('horror', half);
+    expect(cinemaStep(switched)).toBe('walking-to-shelf');
+    // The wall is not cleared until he reaches in, so the two are still up.
+    expect(pinnedPosters(switched)).toEqual(filmsOn('comedy').slice(0, 2));
+
+    const done = runUntil(switched, world => cinemaStep(world) === 'seated', 40000);
+    expect(pinnedPosters(done)).toEqual(filmsOn('horror'));
+    expect(isSeated(done, 'boy')).toBe(true);
+  });
+
+  it('finishes the errand and keeps the wall when the visitor walks out', () => {
+    const half = runUntil(choose('romance'), world => cinemaStep(world) === 'carrying', 40000);
+    const left = advance(half, { type: 'hash-changed', hash: '#/entryway' });
+    expect(cinemaStep(left)).toBe('seated');
+    expect(pinnedPosters(left)).toEqual(filmsOn('romance'));
+    expect(who(left, 'boy').room).toBe('entryway');
+
+    const back = inTheCinema(left);
+    expect(isSeated(back, 'boy')).toBe(true);
+    expect(openShelf(back)).toBe('romance');
+  });
+
   it('replaces the wall when a different shelf is chosen', () => {
     const comedy = runUntil(choose('comedy'), world => cinemaStep(world) === 'seated', 40000);
     expect(openShelf(comedy)).toBe('comedy');

@@ -194,13 +194,16 @@ export function advance(world: World, event: WorldEvent): World {
       // freezing halfway across the floor.
       const motion = toggleMotion(world.motion);
       const actors = motion.paused ? settleActors(world.actors) : world.actors;
-      return { ...world, motion, actors };
+      // 18: and an errand in progress ends with its Posters on the wall rather
+      // than with the Boy standing at a shelf holding three tubes for ever.
+      return runErrand({ ...world, motion, actors }, null);
     }
     case 'reduced-motion-changed': {
       const motion = withReducedMotion(world.motion, event.reducedMotion);
       if (motion === world.motion) return world;
-      // 07: actors
-      return { ...world, motion, actors: motion.paused ? settleActors(world.actors) : world.actors };
+      // 07: actors. 18: and the errand settles with them.
+      const actors = motion.paused ? settleActors(world.actors) : world.actors;
+      return runErrand({ ...world, motion, actors }, null);
     }
     case 'language-toggled': {
       return { ...world, language: toggleLanguage(world.language) };
