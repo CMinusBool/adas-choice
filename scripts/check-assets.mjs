@@ -1,4 +1,4 @@
-// Mechanical acceptance for Cycle sheets.
+// Mechanical acceptance for Cycle sheets, and with `--beat`, for Beat sheets.
 //
 // A generator cannot be trusted to hit the Cycle contract, and a human looking
 // at a strip cannot see that a figure is three pixels off the floor. So "done"
@@ -10,10 +10,21 @@
 //   node scripts/check-assets.mjs <path> ...          # named sheets
 //   node scripts/check-assets.mjs --json              # machine-readable, for the orchestrator
 //   node scripts/check-assets.mjs --palette art/characters/v2/palette.json
+//   node scripts/check-assets.mjs --beat <path> --frames N --columns N --frame WxH
 //
 // A path that `index.html` declares inherits that layer's `data-frames` and
 // `data-columns`; any other path needs `--frames N --columns N` and either
 // `--actor <boy|girl|mica|mira|luna>` or `--frame <W>x<H>`.
+//
+// `--beat` checks a **Beat** instead: the same sprite-sheet rules, minus the
+// four in `CYCLE_ONLY_RULES` that a Beat breaks on purpose by moving its figure
+// inside the frame. It is a second, smaller contract for a different kind of
+// sheet; the Cycle contract the default mode enforces is unchanged. A Beat is
+// declared nowhere this script can read, so `--beat` infers nothing: it needs
+// its sheets, its grid and its frame box named, and refuses `--actor` (which is
+// a Cycle frame box by another name) and a bare invocation (which would sweep
+// `index.html`, where only Cycles are declared). A default run whose every
+// failure is Cycle-only prints a line saying the mode exists.
 //
 // `--non-fatal` reports and exits 0. `npm run build` runs it that way for now,
 // because every sheet in the repository today is a placeholder; it becomes fatal
@@ -67,9 +78,10 @@ export const TOLERANCES = {
 /**
  * The four rules a Beat is excused, and the only difference between the two contracts.
  *
- * A Beat is a one-off dramatic pose sequence — a door opening, a cat startling —
- * and it moves its figure inside the frame on purpose, which is the whole point
- * of it. Everything else a sprite sheet must be is still true of a Beat: the
+ * A Beat is a one-off scripted animation tied to the moment it happens to —
+ * searching a bookshelf, knocking a Breakable down — so it moves its figure
+ * inside the frame, which is the whole point of it and which no Cycle may do.
+ * Everything else a sprite sheet must be is still true of a Beat: the
  * grid, the colour type, binary alpha, no colour under transparent pixels, no
  * empty declared frame, no bleed into a neighbour, no content in a spare cell.
  * So `--beat` drops exactly these four and keeps the other seven. The Cycle
