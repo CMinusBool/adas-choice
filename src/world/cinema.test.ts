@@ -584,6 +584,46 @@ describe('choosing a Film, and the reel he fetches for it', () => {
     expect(cinemaStep(world)).toBe('slate');
   });
 
+  /**
+   * Pausing motion part-way to the projector.
+   *
+   * The shelf errand's own version of this is asserted further up; the reel
+   * sequence needs its own because it ends in two Beats that are a Film rather
+   * than the apartment moving, and those cannot be skipped. What the reel
+   * sequence must never do is stop between the two: the Room asks the page for
+   * a clock it has no way to ask for on its own, and a frame loop that had
+   * already stopped would leave the Boy at the cabinet for good.
+   */
+  it('runs the reel sequence out rather than deadlocking when motion is turned off mid-fetch', () => {
+    const searching = runUntil(choose(wallUp(), 'knives-out'), next => cinemaStep(next) === 'searching', 40000);
+    expect(cinemaStep(searching)).toBe('searching');
+
+    const paused = advance(searching, { type: 'motion-toggled' });
+    // The Beats are skipped, but the Bumper is not one: it needs the clock,
+    // and the Room has to say so or nothing will ever tick again.
+    expect(cinemaNeedsClock(paused)).toBe(true);
+    expect(who(paused, 'boy').moving).toBe(false);
+
+    expect(route(paused, next => cinemaStep(next) === 'slate')).toEqual(['loading', 'bumper', 'title', 'slate']);
+
+    const slated = runUntil(paused, next => cinemaStep(next) === 'slate', 40000);
+    expect(loadedReel(slated)).toBe('knives-out');
+    expect(rollingFilm(slated)?.id).toBe('knives-out');
+    expect(who(slated, 'boy').at).toEqual(CINEMA_MARKS.boySeat);
+    expect(who(slated, 'boy').moving).toBe(false);
+  });
+
+  it('does the same when the visitor’s system starts asking for stillness mid-fetch', () => {
+    const searching = runUntil(choose(wallUp('horror'), 'get-out'), next => cinemaStep(next) === 'searching', 40000);
+    const stilled = advance(searching, { type: 'reduced-motion-changed', reducedMotion: true });
+    expect(cinemaNeedsClock(stilled)).toBe(true);
+
+    const slated = runUntil(stilled, next => cinemaStep(next) === 'slate', 40000);
+    expect(cinemaStep(slated)).toBe('slate');
+    expect(loadedReel(slated)).toBe('get-out');
+    expect(who(slated, 'boy').at).toEqual(CINEMA_MARKS.boySeat);
+  });
+
   it('is unmoved by a tick whose clock reads earlier than the Beat it is in', () => {
     const rolling = runUntil(choose(wallUp(), 'knives-out'), next => cinemaStep(next) === 'bumper', 40000);
     // A tab coming back to the front, a clock the page never promised to keep

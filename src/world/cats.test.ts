@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  BREAKABLE_MARK,
   BREAKABLE_OWNER,
   CAT_CLEARANCE,
   CAT_IDS,
@@ -282,6 +283,59 @@ describe('a cat and her own Breakable', () => {
     const { world: after, heard } = listen(world, 60000, 100);
     expect(breakableState(after, 'snow-globe')).toBe('broken');
     expect(heard).toContain('snow-globe-smash');
+  });
+
+  /**
+   * A fuss ends the errand, not only the walk.
+   *
+   * Petting a cat on her way to a Breakable used to stop her where she stood
+   * and leave the knock running, so the thing went over its whole Beat later
+   * with her sitting halfway across the floor. Míca and the hall table's vase
+   * are the case the review found, and the hall table is not one of the
+   * Entryway's roam marks — the only thing that ever takes her there is a
+   * knock, which is what makes the walk below unambiguous.
+   */
+  it('cannot knock a Breakable down after a hand has stopped her on the way to it', () => {
+    const mark = BREAKABLE_MARK['entryway-vase'];
+    const step = 100;
+    let now = clock;
+    let world = createWorld({ ...plainArrival, random: seededRandom(1) });
+    const frames: { world: World; now: number }[] = [];
+    while (frames.length < 1200 && breakableState(world, 'entryway-vase') === 'intact') {
+      now += step;
+      world = advance(world, { type: 'actor-tick', now });
+      frames.push({ world, now });
+    }
+    clock = now;
+    expect(breakableState(world, 'entryway-vase')).toBe('broken');
+
+    // The walk that ended on the mark, and the moment half way along it.
+    let onMark = frames.length - 1;
+    while (onMark > 0 && !cat(frames[onMark - 1].world, 'mica').moving) onMark -= 1;
+    let setOff = onMark;
+    while (setOff > 0 && cat(frames[setOff - 1].world, 'mica').moving) setOff -= 1;
+    expect(cat(frames[onMark].world, 'mica').at).toEqual(mark);
+    const midway = frames[Math.floor((setOff + onMark) / 2)];
+    expect(cat(midway.world, 'mica').moving).toBe(true);
+
+    // A hand on her mid-errand: she stops where it found her, a Room apart
+    // from the hall table.
+    const petted = advance(midway.world, { type: 'cat-petted', cat: 'mica', now: midway.now });
+    const stopped = cat(petted, 'mica').at;
+    expect(isBeingPetted(petted, 'mica')).toBe(true);
+    expect(cat(petted, 'mica').moving).toBe(false);
+    expect(Math.hypot(stopped.x - mark.x, stopped.y - mark.y)).toBeGreaterThan(CAT_CLEARANCE);
+
+    // The fuss lasts 1.6 s and the vase's Beat 2.3 s, so the break this test
+    // exists for landed about 3.9 s after the hand. Ten seconds covers it.
+    let after = petted;
+    for (let tick = 1; tick <= 100; tick += 1) {
+      after = advance(after, { type: 'actor-tick', now: midway.now + tick * step });
+      // The one thing that may never happen: it goes over with her elsewhere.
+      if (breakableState(after, 'entryway-vase') === 'broken') {
+        expect(cat(after, 'mica').at).toEqual(mark);
+      }
+    }
   });
 
   it('stays broken for the rest of the visit once it has gone over', () => {
