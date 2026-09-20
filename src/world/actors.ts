@@ -328,6 +328,22 @@ export function settleActors(slice: ActorsSlice): ActorsSlice {
   return { ...slice, actors, lastTick: null };
 }
 
+// 08: the cats
+/**
+ * The Cast with one of them stopped exactly where it stands.
+ *
+ * Not `settleActors`, which finishes a walk at its destination: a cat that is
+ * being petted stops under the hand that reached for it, which is halfway
+ * across the floor and is the whole point. An Actor already standing still, or
+ * one the apartment has not placed, is left alone.
+ */
+export function haltActor(slice: ActorsSlice, id: ActorId): ActorsSlice {
+  const walking = slice.actors.find(actor => actor.id === id && actor.route.length > 0);
+  if (!walking) return slice;
+  const stopped = standing(walking, walking.at, walking.facing);
+  return { ...slice, actors: slice.actors.map(actor => (actor.id === id ? stopped : actor)) };
+}
+
 // 14: the Entryway
 /**
  * Put an Actor somewhere, at once, with no walking and no route.

@@ -4,6 +4,7 @@ import {
   actorViewsIn,
   catPlaces, // 08: the cats
   clearRoom,
+  haltActor, // 08: the cats
   createActors,
   findActorView,
   gatherCats, // 08: the cats
@@ -29,7 +30,7 @@ import {
   type ActivityId,
 } from './activities';
 // 08: the three cats, who decide for themselves where to be and when to meow.
-import { arriveCats, createCats, tickCats, type CatsSlice } from './cats';
+import { arriveCats, createCats, isPetted, petCats, tickCats, type CatId, type CatsSlice } from './cats';
 import { resolveLanguage, toggleLanguage, type Language } from './language';
 // 05: loading
 import { createLoading, declareAssets, everythingSettled, progressOf, settleAsset, type AssetOutcome, type LoadingSlice } from './loading';
@@ -183,7 +184,11 @@ export type WorldEvent =
   // 18: cinema — a bookshelf clicked or activated. `now` is the clock the
   // errand's Beats are timed against; it is the same reading the ticks carry,
   // because the model is never allowed to ask what time it is.
-  | { readonly type: 'cinema-shelf-chosen'; readonly shelf: CinemaShelf; readonly now: number };
+  | { readonly type: 'cinema-shelf-chosen'; readonly shelf: CinemaShelf; readonly now: number }
+  // 08: a cat clicked, tapped or activated from the keyboard. `now` is the same
+  // reading the ticks carry, because the fuss is timed and the model is never
+  // allowed to ask what time it is.
+  | { readonly type: 'cat-petted'; readonly cat: CatId; readonly now: number };
 
 /** Build the world the visitor arrives into. */
 export function createWorld(inputs: WorldInputs): World {
@@ -362,6 +367,18 @@ export function advance(world: World, event: WorldEvent): World {
       const cinema = withChosenShelf(world.cinema, event.shelf);
       const actors = sendActor(world.actors, 'boy', CINEMA_MARKS.shelves[event.shelf], 'walk', motionIsOn(world));
       return runErrand({ ...world, cinema, actors }, event.now);
+    }
+    // 08: a cat fussed over. Only a cat that is actually in the Room the
+    // visitor is in: one still in the backpack has no ear to scratch.
+    case 'cat-petted': {
+      const view = findActorView(world.actors, event.cat);
+      if (!view || view.room !== world.rooms.current) return world;
+      return {
+        ...world,
+        cats: petCats(world.cats, event.cat, event.now, motionIsOn(world)),
+        // She stops under the hand rather than finishing the walk she was on.
+        actors: motionIsOn(world) ? haltActor(world.actors, event.cat) : world.actors,
+      };
     }
     // 16: the Activity Room
     case 'activity-card-opened':
@@ -589,6 +606,24 @@ export function actorsIn(world: World, room: RoomId): readonly ActorView[] {
  */
 export function actorView(world: World, actor: ActorId): ActorView | null {
   return findActorView(world.actors, actor);
+}
+
+// 08: the cats
+/**
+ * Meows the apartment has just made, to play once and then forget.
+ *
+ * Edge-triggered: the names are the ones the last tick or the last fuss
+ * crossed, and the slice they live on changes identity as they appear and
+ * again as they are forgotten, so a painter watching the slice plays each meow
+ * exactly once without keeping a count of its own.
+ */
+export function catSfx(world: World): readonly string[] {
+  return world.cats.sfx;
+}
+
+/** Is this cat being fussed over? What its petting Beat hangs on. */
+export function isBeingPetted(world: World, cat: CatId): boolean {
+  return isPetted(world.cats, cat);
 }
 
 // 16: the Activity Room

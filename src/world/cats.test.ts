@@ -8,8 +8,11 @@ import {
   actorView,
   actorsIn,
   advance,
+  catSfx,
   createWorld,
+  isBeingPetted,
   isWalkable,
+  pettingBeat,
   roomHash,
   seededRandom,
   type ActorView,
@@ -68,6 +71,25 @@ function runUntil(world: World, ready: (world: World) => boolean, ms = 60000, st
     next = advance(next, { type: 'actor-tick', now: clock });
   }
   return next;
+}
+
+/**
+ * Every sound the apartment made over a stretch of clock.
+ *
+ * A meow is named on the tick that crosses it and forgotten on the next one, so
+ * anything that listens less often than the frame loop does hears almost none
+ * of them — which is exactly what the DOM layer must not do either.
+ */
+function listen(world: World, ms: number, step = 16): { world: World; heard: string[] } {
+  const until = clock + ms;
+  const heard: string[] = [];
+  let next = world;
+  while (clock < until) {
+    clock += step;
+    next = advance(next, { type: 'actor-tick', now: clock });
+    heard.push(...catSfx(next));
+  }
+  return { world: next, heard };
 }
 
 /**
@@ -147,6 +169,72 @@ describe('a cat roaming the Room it is in', () => {
     const world = walkInto(createWorld({ ...plainArrival, reducedMotion: true }), 'games');
     const still = run(world, 40000);
     expect(still).toBe(world);
+  });
+});
+
+describe('a cat making itself heard', () => {
+  it('meows now and then, and the three never share one sample', () => {
+    const world = walkInto(createWorld({ ...plainArrival, random: seededRandom(404) }), 'games');
+    // Three minutes in one Room, listened to the way the frame loop listens.
+    const { heard } = listen(world, 180000);
+    expect([...new Set(heard)].sort()).toEqual(['luna-meow', 'mica-meow', 'mira-meow']);
+    // Occasionally: three cats over three minutes, not a cat every second.
+    expect(heard.length).toBeGreaterThan(8);
+    expect(heard.length).toBeLessThan(60);
+  });
+
+  it('says nothing at all on a tick that crossed no meow', () => {
+    const world = walkInto(createWorld({ ...plainArrival, random: seededRandom(6) }), 'cinema');
+    expect(catSfx(run(world, 32))).toEqual([]);
+  });
+});
+
+describe('a cat being fussed over', () => {
+  /** A visitor in the Cinema Room with the cats settled in it. */
+  function inTheCinema(seed = 77): World {
+    return run(walkInto(createWorld({ ...plainArrival, random: seededRandom(seed) }), 'cinema'), 3000);
+  }
+
+  it('stops where it stands, meows, and plays its own petting Beat', () => {
+    const world = inTheCinema();
+    const before = cat(world, 'mica').at;
+    const petted = advance(world, { type: 'cat-petted', cat: 'mica', now: clock });
+    expect(catSfx(petted)).toEqual(['mica-meow']);
+    expect(isBeingPetted(petted, 'mica')).toBe(true);
+    expect(cat(petted, 'mica').moving).toBe(false);
+    expect(cat(petted, 'mica').at).toEqual(before);
+    expect(pettingBeat('mica')).toBe('pet-mica');
+    // And the other two carry on with their afternoon.
+    expect(isBeingPetted(petted, 'mira')).toBe(false);
+  });
+
+  it('holds the fuss for its whole Beat and then wanders off again', () => {
+    let world = advance(inTheCinema(), { type: 'cat-petted', cat: 'luna', now: clock });
+    const at = cat(world, 'luna').at;
+    world = run(world, 800);
+    expect(isBeingPetted(world, 'luna')).toBe(true);
+    expect(cat(world, 'luna').at).toEqual(at);
+    world = run(world, 2400);
+    expect(isBeingPetted(world, 'luna')).toBe(false);
+    world = runUntil(world, next => cat(next, 'luna').moving, 20000);
+    expect(cat(world, 'luna').moving).toBe(true);
+  });
+
+  it('answers a visitor who asked the apartment to hold still with the meow alone', () => {
+    const still = walkInto(createWorld({ ...plainArrival, reducedMotion: true }), 'games');
+    const petted = advance(still, { type: 'cat-petted', cat: 'mira', now: clock });
+    expect(catSfx(petted)).toEqual(['mira-meow']);
+    // No Beat, because a Beat is motion; and nothing left ticking to end it.
+    expect(isBeingPetted(petted, 'mira')).toBe(false);
+  });
+
+  it('cannot be fussed over before it is out of the backpack', () => {
+    // The arrival opens on an empty hall: nobody is home to be petted yet.
+    const arriving = advance(createWorld({ hash: '', storedLanguage: null, reducedMotion: false }), {
+      type: 'arrival-started',
+    });
+    expect(catsIn(arriving, 'entryway')).toEqual([]);
+    expect(advance(arriving, { type: 'cat-petted', cat: 'mica', now: clock })).toBe(arriving);
   });
 });
 

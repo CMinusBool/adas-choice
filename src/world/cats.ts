@@ -154,6 +154,21 @@ const REST_MS = { least: 900, most: 3400 };
 /** How long between one cat's meows, in milliseconds. Three cats, so: rarely. */
 const MEOW_MS = { least: 12000, most: 34000 };
 
+/**
+ * How long a fuss lasts, in milliseconds.
+ *
+ * The petting Beat's whole length: the cat flops, is fussed over, and gets up.
+ * Named by the model and played by the DOM layer if a sheet for it has been
+ * delivered — until then the cat simply stops for as long as the fuss lasts,
+ * the way the arrival's Beats degrade to the Cast walking it.
+ */
+const PETTING_MS = 1600;
+
+/** The Beat played over a cat being petted, by the name its sheet would carry. */
+export function pettingBeat(cat: CatId): string {
+  return `pet-${cat}`;
+}
+
 /** The sound this cat makes. One name each: the three never share a sample. */
 export function meowOf(cat: CatId): string {
   return `${cat}-meow`;
@@ -310,6 +325,27 @@ export function tickCats(
  * meows, the fuss it is having — comes with it, because they are the same three
  * animals throughout rather than three new ones in every Room.
  */
+/**
+ * The cats after one of them is clicked, tapped or activated: a fuss.
+ *
+ * She stops where she is, says something about it, and stays for the Beat's
+ * length before going back to whatever she had in mind. With motion off there
+ * is no Beat to play and no clock to end one, so the visitor gets the meow and
+ * the cat is not held anywhere — which is what an apartment asked to hold still
+ * should do with an animation, and still leaves the fuss worth making.
+ */
+export function petCats(slice: CatsSlice, cat: CatId, now: number, motionOn: boolean): CatsSlice {
+  const minds = slice.minds.map(mind =>
+    mind.id === cat ? { ...mind, goal: null, restUntil: null, pettedUntil: motionOn ? now + PETTING_MS : null } : mind,
+  );
+  return { minds, sfx: [meowOf(cat)] };
+}
+
+/** Is this cat having a fuss made of it right now? The Beat's own question. */
+export function isPetted(slice: CatsSlice, cat: CatId): boolean {
+  return slice.minds.some(mind => mind.id === cat && mind.pettedUntil !== null);
+}
+
 export function arriveCats(slice: CatsSlice): CatsSlice {
   if (slice.minds.every(mind => mind.goal === null)) return slice;
   return { ...slice, minds: slice.minds.map(mind => (mind.goal === null ? mind : { ...mind, goal: null })) };
