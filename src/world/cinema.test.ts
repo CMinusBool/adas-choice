@@ -3,24 +3,30 @@ import { describe, expect, it } from 'vitest';
 import {
   CINEMA_MARKS,
   CINEMA_SHELVES,
+  REEL_STEPS,
   actorView,
   actorsIn,
   advance,
   attendedShelf,
+  cinemaNeedsClock,
   cinemaStep,
   createWorld,
   expandedPoster,
   filmById,
   filmsOn,
+  isRoomMusicAudible,
   isSeated,
   isWalkable,
+  loadedReel,
   openShelf,
   pinnedPosters,
   posterDetails,
+  rollingFilm,
   rummagingShelf,
   type ActorId,
   type ActorView,
   type CinemaShelf,
+  type CinemaStep,
   type FilmId,
   type World,
   type WorldInputs,
@@ -529,5 +535,58 @@ describe('choosing a Film, and the reel he fetches for it', () => {
 
     const searching = runUntil(chosen, next => cinemaStep(next) === 'searching', 40000);
     expect(who(searching, 'boy').at).toEqual(CINEMA_MARKS.cabinet);
+  });
+
+  /**
+   * Every step the Room passes through, in the order it reached them.
+   *
+   * One entry per change rather than one per tick, so what comes back is the
+   * route the sequence took and not how long it spent on each leg.
+   */
+  function route(world: World, done: (world: World) => boolean, ms = 40000): CinemaStep[] {
+    const seen: CinemaStep[] = [cinemaStep(world)];
+    runUntil(
+      world,
+      next => {
+        if (cinemaStep(next) !== seen[seen.length - 1]) seen.push(cinemaStep(next));
+        return done(next);
+      },
+      ms,
+    );
+    return seen;
+  }
+
+  // The spec's Testing Decisions name this one: the Bumper-to-Film sequence
+  // advancing in order, and refusing to run backwards.
+  it('runs the cabinet search, the loading, the Bumper and the title card in order', () => {
+    const seen = route(choose(wallUp(), 'knives-out'), next => cinemaStep(next) === 'slate');
+    expect(seen).toEqual([...REEL_STEPS]);
+  });
+
+  it('never takes a step backwards, however long the visitor watches', () => {
+    // Asserted on every tick rather than on the route above, because a step
+    // the sequence dipped into and came straight back out of would not show
+    // up in a list of changes at all.
+    let world = choose(wallUp(), 'knives-out');
+    let furthest = 0;
+    for (let tick = 0; tick < 1200; tick += 1) {
+      clock += 16;
+      world = advance(world, { type: 'actor-tick', now: clock });
+      const reached = REEL_STEPS.indexOf(cinemaStep(world));
+      expect(reached).toBeGreaterThanOrEqual(furthest);
+      furthest = reached;
+    }
+    // And it did get somewhere: a sequence that never moved would pass the
+    // assertion above without meaning anything.
+    expect(cinemaStep(world)).toBe('slate');
+  });
+
+  it('is unmoved by a tick whose clock reads earlier than the Beat it is in', () => {
+    const rolling = runUntil(choose(wallUp(), 'knives-out'), next => cinemaStep(next) === 'bumper', 40000);
+    // A tab coming back to the front, a clock the page never promised to keep
+    // going up: neither is licence to un-play four seconds of Bumper.
+    const stale = advance(rolling, { type: 'actor-tick', now: 1 });
+    expect(cinemaStep(stale)).toBe('bumper');
+    expect(rollingFilm(stale)?.id).toBe('knives-out');
   });
 });
