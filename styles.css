@@ -1437,9 +1437,9 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 .prop-door:hover, .prop-door:focus-visible {
   box-shadow: inset 0 0 0 calc(3 * var(--u)) #4A3320, 0 0 calc(24 * var(--u)) #ffd9a840;
 }
-.prop-door:hover .door-leaf, .prop-door:focus-visible .door-leaf {
-  transform: perspective(600px) rotateY(-20deg);
-}
+/* The leaf lifting under the cursor is stated once, at the foot of the file
+   with the rest of the Door's angles, because it has to beat them and only
+   while the Door is shut (ticket 51). */
 .motion-off .prop-door, .motion-off .prop-door .door-leaf { transition: none; }
 
 /* The narrow layout: the wall only has room for one Portal, so it carries one
@@ -1588,10 +1588,18 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   transform: perspective(600px) rotateY(-68deg);
 }
 /* The Door is still a link, and a link says so when it is pointed at: the Game
-   Room's leaf lifts under the cursor, which the rule above would otherwise sit
-   on. Only that Room's does; the other two answer hover elsewhere. */
-.stage a:hover .door-leaf,
-.stage a:focus-visible .door-leaf {
+   Room's leaf lifts under the cursor. Only that Room's does — the other two
+   answer hover elsewhere — and only while the Door is **shut**.
+
+   51: both halves of that were wrong. `.stage a:hover .door-leaf` outranks the
+   angles above and sits after them, so pointing at a Door during an entrance
+   snapped the leaf the Girl is holding from -68deg back to -20deg with the cats
+   still running through it; and it matched the Cinema Room's door too, which is
+   an `<a>` with a `.door-leaf` inside it, so that leaf swung on hover as well.
+   Naming the Door's state fixes both: while the entrance owns the leaf, this
+   rule cannot match at all. `scripts/check-styles.mjs` now checks it. */
+.stage[data-door="closed"] .prop-door:hover .door-leaf,
+.stage[data-door="closed"] .prop-door:focus-visible .door-leaf {
   transform: perspective(600px) rotateY(-20deg);
 }
 /* Motion is opt-outable, and the swing is motion: with it off the entrance
