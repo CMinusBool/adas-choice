@@ -195,6 +195,23 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
     sprite.moving = false;
   }
 
+  /**
+   * Put this Actor's element in its Room, in Cast order.
+   *
+   * 08: the three cats are focusable, so the order they sit in is the order Tab
+   * visits them in, and that has to be the Character Sheet's rather than an
+   * accident. Appending would give the order the sheets happened to finish
+   * loading in — an Actor is not painted until its artwork has really arrived —
+   * so each one is inserted ahead of the first Actor that comes after it in the
+   * Cast and is already standing here. Only ever called when an Actor changes
+   * Room, so nothing moves under a focus ring frame by frame.
+   */
+  function attach(sprite: Sprite, stage: HTMLElement) {
+    if (sprite.element.parentElement === stage) return;
+    const after = sprites.slice(sprites.indexOf(sprite) + 1).find(later => later.element.parentElement === stage);
+    stage.insertBefore(sprite.element, after ? after.element : null);
+  }
+
   let frameRequest = 0;
   let lastFrame = 0;
   const onScreen = new Set<RoomId>(ROOM_IDS);
@@ -344,8 +361,7 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
         park(sprite);
         continue;
       }
-      const stage = stages.get(view.room)!;
-      if (sprite.element.parentElement !== stage) stage.append(sprite.element);
+      attach(sprite, stages.get(view.room)!);
       show(sprite, resolved.layer);
       place(sprite, view, resolved.mirrored);
       sprite.moving = view.moving;
