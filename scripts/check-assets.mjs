@@ -64,6 +64,19 @@ export const TOLERANCES = {
   paletteDistance: 40,
 };
 
+/**
+ * The four rules a Beat is excused, and the only difference between the two contracts.
+ *
+ * A Beat is a one-off dramatic pose sequence — a door opening, a cat startling —
+ * and it moves its figure inside the frame on purpose, which is the whole point
+ * of it. Everything else a sprite sheet must be is still true of a Beat: the
+ * grid, the colour type, binary alpha, no colour under transparent pixels, no
+ * empty declared frame, no bleed into a neighbour, no content in a spare cell.
+ * So `--beat` drops exactly these four and keeps the other seven. The Cycle
+ * contract is not relaxed by their existing; see CLAUDE.md.
+ */
+export const CYCLE_ONLY_RULES = Object.freeze(['feet', 'centre', 'height-variance', 'drift']);
+
 /** The two frame boxes the Cycle contract defines, and who gets which. */
 export const FRAME_BOXES = {
   person: { width: 192, height: 320 },
@@ -166,14 +179,23 @@ function monotonic(values) {
 }
 
 /**
- * Check one decoded sheet against the Cycle contract.
+ * Check one decoded sheet against the Cycle contract, or with `beat`, the Beat one.
  *
  * Returns every violation it finds, in a fixed rule order, so a caller can print
  * the first one and a JSON consumer can have them all.
+ *
+ * `beat` drops the four rules in `CYCLE_ONLY_RULES` and changes nothing else:
+ * every measurement is still taken and still reported in `stats`, so a Beat's
+ * feet and centre offsets are there to read — they just do not fail it. The
+ * default call is untouched down to the shape of `stats`, which `--json` prints.
  */
-export function checkSheet({ name, image, colourType, depth, frames, columns, frame, tolerances = TOLERANCES }) {
+export function checkSheet({ name, image, colourType, depth, frames, columns, frame, beat = false, tolerances = TOLERANCES }) {
   const failures = [];
-  const fail = (rule, message) => failures.push({ rule, message });
+  const excused = beat ? new Set(CYCLE_ONLY_RULES) : null;
+  const fail = (rule, message) => {
+    if (excused?.has(rule)) return;
+    failures.push({ rule, message });
+  };
   const rows = Math.ceil(frames / columns);
   const stats = {
     name,
@@ -186,6 +208,8 @@ export function checkSheet({ name, image, colourType, depth, frames, columns, fr
     colourType,
     depth,
   };
+  // Only under `--beat`: a default run's `stats` keeps the shape `--json` has always printed.
+  if (beat) stats.contract = 'beat';
 
   if (!(frames >= 1 && columns >= 1)) {
     fail('grid', `declares ${frames} frames in ${columns} columns, which is not a grid`);
