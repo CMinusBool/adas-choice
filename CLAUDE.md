@@ -94,8 +94,14 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   `data-animated` and `data-sheet` attributes and the `<img src>`s inside `#apartment` — so
   furnishing a Room preloads it, with no second list to maintain. An asset the markup cannot
   name (audio) goes in `ASSETS_OUTSIDE_MARKUP` in `src/dom/loading.ts`.
-- **Scene assets travel as a set**: GIF, still poster, and 4x3 sprite sheet (480x480 frames,
-  12 frames, 4.1s loop) are replaced together.
+- **Scene assets travel as a set**: GIF, still poster, and 4x3 sprite sheet are replaced
+  together. Frames are **360x576, a 5:8 portrait**, 12 frames, 4.1s loop — so a sheet is
+  1440x1728. They were 480x480 square until 2026-09-20, when the Game Room became three
+  **Portals** (tall elliptical apertures into each game's world) and a Scene had to fit one:
+  see `docs/adr/0004-the-game-room-is-portals.md`. Nothing in code depends on the frame being
+  square — `.scene-sprite` writes the grid as `background-size: 400% 300%`, and
+  `check-assets.mjs` deliberately skips scene sprites — so the shape lives here and in the
+  three `width`/`height` attributes on the `.game-art` images in `index.html`.
 - **Cycle assets travel as a set too**, and to their own contract. An Actor's Cycles live at
   `public/assets/actors/<actor>-<cycle>-<facing>.png` — `walk` and `run`, `left` and `right` — and
   are replaced together. Frames are laid left to right then top to bottom in a 4-column grid, 8
@@ -130,6 +136,16 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   Cycle — which `npm run build` runs as a report and which any delivered sheet must still pass.
   **Those rules are not relaxed.** They are geometry, they cost nothing to run, and they have
   never been what a generation failed on.
+- **Generated art lives in the main checkout, never in a worktree.** Raw generations go to
+  `art/generated/<NN>-<slug>/` in the primary checkout — `illustrator` has no worktree and no
+  branch, so that is where they land — and the frames actually chosen are committed under
+  `public/assets/`, which is the only copy that survives. `/art/` is gitignored on purpose (ADR-less
+  policy call from ticket 07: megabytes of rejected generations do not belong in history), so a
+  generation that is not selected and dropped is **gone the moment the directory is cleaned**. This
+  is not hypothetical: the seven Cinema Room shots generated before the 2026-09-20 spend cap were
+  lost exactly this way, along with the ticket 22 walk strips, while `art/characters/v1` and `v2`
+  survived because nothing cleaned them. Never point an art ticket's `Deliverable:` at a path inside
+  a worktree, and never assume a generation from an earlier run is still on disk — check.
 - **A Cycle sheet is built by code, never by hand.** A generation comes back as a strip on a
   chroma ground at whatever size the model felt like, and `node scripts/art/build-cycle.mjs
   <strip.png> --out public/assets/actors/<actor>-<cycle>-<facing>.png` turns it into a sheet: mask
@@ -158,6 +174,16 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   mechanical geometry validator above is untouched. If a real Cycle is ever delivered, it goes
   through `build-cycle.mjs`, passes `check-assets.mjs`, and the owner watches `make-preview.mjs`
   — one pair of eyes, no grader.
+- **The Cast is wherever the visitor is, and it arrives.** The Boy, the Girl and all three cats are
+  in whichever Room is open, placed by `HOMES` in `src/world/actors.ts`. A Room is not found already
+  settled: it plays an **Arrival** of about three seconds on every entry — the Girl opens the Door
+  and holds it, the cats run through first, the Boy comes last, everyone walks to their mark — and
+  any click, tap or key press ends it and settles everyone at once. With motion off nothing plays
+  and the Room is found at rest, which is `createArrival(over: true)` and needs no second code path.
+  The Entryway's own 11.9s arrival is a different thing and is unchanged: it is the Cast coming in
+  from outside, played once. Because a Door has to open, **a door leaf is a separate transparent
+  asset and every Room backdrop is drawn with an empty doorway** — a leaf painted into the backdrop
+  at a fixed angle cannot be one anybody opens.
 - **Every Room has a stage**: a 16:9 logical canvas of 1600 x 900 units, origin top-left, x right,
   y down, held by `<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS.
   Walkable areas, Props, doors and Actor positions are all written in those units, so the same

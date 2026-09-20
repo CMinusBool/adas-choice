@@ -26,9 +26,31 @@ same place at every screen width. Every Room has exactly one.
 _Avoid_: canvas, viewport, board, pixels
 
 **Scene**:
-A per-game animated sprite loop on a Game Room card. Reserved to its existing meaning — a
-Scene lives inside a Room and is never a synonym for one.
+A per-game animated sprite loop, seen through a Portal. Drawn 5:8 portrait and shipped as a set —
+still poster, animated GIF and 4x3 sprite sheet — which are replaced together. Reserved to its
+existing meaning: a Scene lives inside a Room and is never a synonym for one.
 _Avoid_: using "scene" for a Room or for a Beat
+
+**Portal**:
+An aperture in a Game Room wall opening into one game's world: a tall 5:8 ellipse with a turning
+rim, showing that game's Scene, which expands over the stage with the game's information beside it.
+A Portal is **not a Door** — it goes nowhere, it is not a route, and clicking it expands it rather
+than navigating. There are exactly three, one per game. See ADR 0004.
+_Avoid_: card, tile, bay, window, gate
+
+**Door**:
+A painted opening between two Rooms, and the `<a href="#/<room>">` over it. A Door is a route: it
+changes the hash and the browser does the rest. Its leaf is a separate asset from the Room's
+backdrop, so the Cast can open it during an Arrival.
+_Avoid_: portal, link, exit
+
+**Arrival**:
+The short scripted entrance a Room plays when the visitor walks into it: the Girl opens the Door
+and holds it, the Cats run through first, the Boy comes last, and everyone walks to their mark.
+About three seconds, on every entry, and interruptible — any input ends it and settles everyone at
+once. The Entryway's own arrival is a different and longer thing: it is the Cast coming in from
+outside, played once.
+_Avoid_: intro, cutscene, animation
 
 **Prop**:
 A fixed object in a Room that can be looked at or interacted with: a bookshelf, the projector,
