@@ -174,10 +174,14 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   `public/assets/`, which is the only copy that survives. `/art/` is gitignored on purpose (ADR-less
   policy call from ticket 07: megabytes of rejected generations do not belong in history), so a
   generation that is not selected and dropped is **gone the moment the directory is cleaned**. This
-  is not hypothetical: the seven Cinema Room shots generated before the 2026-09-20 spend cap were
-  lost exactly this way, along with the ticket 22 walk strips, while `art/characters/v1` and `v2`
-  survived because nothing cleaned them. Never point an art ticket's `Deliverable:` at a path inside
-  a worktree, and never assume a generation from an earlier run is still on disk — check.
+  is not hypothetical: the ticket 22 walk strips went exactly this way, while `art/characters/v1`
+  and `v2` survived because nothing cleaned them. Never point an art ticket's `Deliverable:` at a
+  path inside a worktree, and never assume a generation from an earlier run is still on disk —
+  **check, and check the disk rather than the prose.** This paragraph used to say the seven Cinema
+  Room shots generated before the 2026-09-20 spend cap were lost too. They were not: all seven are
+  in `art/generated/32-cinema-room/`, s01 to s07, and the art run of 2026-09-20 found them there
+  and resumed from them. Nothing had cleaned that directory. The risk the paragraph describes is
+  real; that particular instance of it was not.
 - **A Cycle sheet is built by code, never by hand.** A generation comes back as a strip on a
   chroma ground at whatever size the model felt like, and `node scripts/art/build-cycle.mjs
   <strip.png> --out public/assets/actors/<actor>-<cycle>-<facing>.png` turns it into a sheet: mask
@@ -251,7 +255,16 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   pixels.
 - **Furnishing a Room.** A Prop is a box in stage units — `--x/--y/--w/--h`, turned into
   percentages of the stage by `left: calc(var(--x) / 16 * 1%)` and its three siblings — over a CSS
-  placeholder surface, so dropping artwork in swaps the surface and keeps the box. Its `--z` is its
+  placeholder surface, so dropping artwork in swaps the surface and keeps the box. **An art drop
+  swaps that surface by putting the file on the Prop's `data-still`, never by writing a `url()` into
+  `styles.css`** — the attribute is what preloads it and what gets it checked in `dist/`. Ticket 35
+  furnished the Activity Room the other way round and the Room fell straight out of the loading
+  gate; ticket 53 put it back, and `assert-built-page.mjs` went from resolving 21 local references
+  to 35 — the fourteen it could not see were the ones hidden in the stylesheet. `src/dom/artwork.ts`
+  turns `data-still` into a `--still` custom property and one zero-specificity
+  `:where([data-still]:not(img))` rule paints it, resolving against `document.baseURI` because a
+  relative `url()` in a custom property resolves where the `var()` is **substituted**, not where it
+  is declared. Its `--z` is its
   sort key, and it has to be one, because `src/dom/actors.ts` gives every Actor
   `z-index: round(y)` and the two interleave so an Actor can pass behind a shelf; a stage is
   `isolation: isolate` to keep those keys local to their Room. A stage that holds a control — a
