@@ -195,7 +195,14 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   in whichever Room is open, placed by `HOMES` in `src/world/actors.ts`. A Room is not found already
   settled: it plays an **Arrival** of about three seconds on every entry — the Girl opens the Door
   and holds it, the cats run through first, the Boy comes last, everyone walks to their mark — and
-  any click, tap or key press ends it and settles everyone at once. With motion off nothing plays
+  any click, tap or key press ends it and settles everyone at once. **Not found settled for a
+  moment either**: a Room the page opens on has its marks taken down and its floor cleared as the
+  Arrival is *made*, not as it starts, so the wait behind the loading screen is a wait on an empty
+  Room rather than on a Cast about to blink out (ticket 51). For the same reason input ends only an
+  Arrival that is **playing** — the page reports a tap on the loading screen like any other, and
+  ending a waiting Arrival there would lift the screen onto a Room whose Door never opened. A stage
+  nobody can see and a request for stillness do still call off a waiting one, and both put everybody
+  on their mark, because a waiting Arrival has already emptied its Room. With motion off nothing plays
   and the Room is found at rest, which is `createRoomArrival(room, over: true)` and needs no second
   code path. **Three seconds is fixed and the Rooms are not the same size**, so `cycleWithin` in
   `src/world/actors.ts` decides per Actor: a mark a walk reaches inside the script is walked to, and
@@ -205,7 +212,11 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   Game Room, 3.44 in the Activity Room and 3.60 in the Cinema Room — but being **cut short** does
   place everybody, on the marks the Arrival took down when the Door opened.
   The Entryway's own 11.9s arrival is a different thing and is unchanged: it is the Cast coming in
-  from outside, played once. Because a Door has to open, **a door leaf must be a separate
+  from outside, played once. The Doors are live all the way through it, so a Door taken at five
+  seconds finishes it **in the Entryway, before the Cast is gathered into the Room being walked
+  into** — finishing it afterwards put all five of them back in the hall they had just left and
+  handed the new Room a set of marks nobody was standing on, which is a Room with no Cast in it
+  (ticket 51). Because a Door has to open, **a door leaf must be a separate
   transparent asset and every Room backdrop must be drawn with an empty doorway** — a leaf painted
   into the backdrop at a fixed angle cannot be one anybody opens. **That is the contract every art
   ticket is written to, and it is not what is on disk yet**: today the leaves are CSS placeholders
