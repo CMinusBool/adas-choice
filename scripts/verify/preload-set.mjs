@@ -63,9 +63,29 @@
  * vacuous pass — a Room that painted nothing at all trivially satisfies a
  * subset test.
  *
+ * ## `--inject`, which is how the "and it is general" claim is answered
+ *
+ * Ticket 53 had to show that a Room furnished *later* is preloaded without
+ * anybody editing `src/dom/loading.ts` again, and the honest way to show that is
+ * to furnish one and look, rather than to argue from the code.
+ *
+ * `--inject <room>` rewrites the served `index.html` on the way past, adding one
+ * Prop to that Room's stage with a `data-still` on it — nothing else, no build,
+ * no TypeScript, no stylesheet rule. That is exactly the edit furnishing a Room
+ * consists of. The Prop then falls into the measurement above like any other, so
+ * the ordinary verdict answers the question: the file has to turn up in the
+ * preload set of the runs where that Room was hidden, and the Prop has to be
+ * painted with it.
+ *
+ * `--inject-url` defaults to a picture that ships in `dist/` and that nothing on
+ * the page references — Mira's mug Beat, delivered by ticket 35 and not yet used
+ * — so a pass cannot be something else's fetch mistaken for this one. If that
+ * ever stops being true, point the flag at another unreferenced file.
+ *
  * ## Usage
  *
  *   node scripts/verify/preload-set.mjs --launch preview --expect 28
+ *   node scripts/verify/preload-set.mjs --launch preview --inject cinema
  *   node scripts/verify/preload-set.mjs --base-url http://localhost:4173 --routes games,cinema
  *
  * Run it against `preview`, not `dev`: `dist/` is what ships, and it is the
@@ -81,10 +101,19 @@ import process from 'node:process';
 import { loadPlaywright, startServer } from './room-shots.mjs';
 
 const HOW_TO =
-  'usage: node scripts/verify/preload-set.mjs (--launch <name> | --base-url <url>) [--routes a,b,c] [--expect N] [--settle MS] [--port N]';
+  'usage: node scripts/verify/preload-set.mjs (--launch <name> | --base-url <url>) [--routes a,b,c] [--expect N] [--inject <room>] [--inject-url <url>] [--settle MS] [--port N]';
 
 /** The four Rooms, which are also the four routes. A Room id is its route's path word. */
 const ROUTES = ['entryway', 'games', 'cinema', 'activities'];
+
+/**
+ * The picture `--inject` furnishes a Room with.
+ *
+ * Mira's mug Beat: delivered into `public/assets/activity-room/` by ticket 35,
+ * so it is really in `dist/`, and referenced by nothing on the page, so its
+ * appearance in a preload set can only be the injected Prop's doing.
+ */
+const INJECT_URL = 'assets/activity-room/mira-mug-beat.png';
 
 function fail(message) {
   console.error(`preload-set: ${message}`);
@@ -93,7 +122,7 @@ function fail(message) {
 }
 
 function parseArguments(argv) {
-  const options = { launch: null, baseUrl: null, routes: ROUTES, expect: 1, settleMs: 1500, port: null };
+  const options = { launch: null, baseUrl: null, routes: ROUTES, expect: 1, settleMs: 1500, port: null, inject: null, injectUrl: INJECT_URL };
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
     const value = () => {
@@ -108,11 +137,19 @@ function parseArguments(argv) {
     else if (flag === '--expect') options.expect = Number(value());
     else if (flag === '--settle') options.settleMs = Number(value());
     else if (flag === '--port') options.port = Number(value());
+    else if (flag === '--inject') options.inject = value();
+    else if (flag === '--inject-url') options.injectUrl = value();
     else if (flag === '--help' || flag === '-h') { console.log(HOW_TO); process.exit(0); }
     else fail(`unknown argument ${flag}`);
   }
   if (!options.launch && !options.baseUrl) fail('one of --launch or --base-url is required');
   if (options.routes.length === 0) fail('--routes listed nothing');
+  if (options.inject && !ROUTES.includes(options.inject)) fail(`--inject wants one of ${ROUTES.join(', ')}`);
+  // The injected Prop is only evidence from a run where its Room is hidden, so
+  // there has to be at least one route that is not it.
+  if (options.inject && !options.routes.some(route => route !== options.inject)) {
+    fail(`--inject ${options.inject} needs a route other than ${options.inject} in --routes to be witnessed from`);
+  }
   return options;
 }
 
@@ -190,12 +227,38 @@ const DECLARED_STILLS = () => {
   return { declared, unpainted };
 };
 
-async function measure(browser, { baseUrl, route, settleMs }) {
+/**
+ * Furnish a Room on the way past: one Prop, one `data-still`, nothing else.
+ *
+ * The Prop is dropped in immediately after the Room's stage opens, which is
+ * where a furnishing ticket would put it, and it is given a box in stage units
+ * because that is what a Prop is. It carries no class, so no rule in
+ * `styles.css` knows anything about it — whatever paints it is the general
+ * mechanism and not a Room's own arrangement.
+ */
+function furnish(html, room, url) {
+  const stage = new RegExp(`(data-stage="${room}"[^>]*>)`);
+  if (!stage.test(html)) throw new Error(`no stage for ${room} in the served page`);
+  const prop = `<div data-still="${url}" style="--x:40;--y:40;--w:120;--h:120;--z:900" aria-hidden="true"></div>`;
+  return html.replace(stage, `$1${prop}`);
+}
+
+async function measure(browser, { baseUrl, route, settleMs, inject, injectUrl }) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const page = await context.newPage();
   const consoleErrors = [];
   page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
   page.on('pageerror', error => consoleErrors.push(String(error)));
+
+  if (inject) {
+    await page.route(
+      requested => requested.pathname === '/' || requested.pathname.endsWith('.html'),
+      async apiRoute => {
+        const response = await apiRoute.fetch();
+        apiRoute.fulfill({ response, body: furnish(await response.text(), inject, injectUrl) });
+      },
+    );
+  }
 
   await page.addInitScript(PROBE);
   const url = new URL(`#/${route}`, baseUrl).href;
@@ -226,7 +289,13 @@ async function main() {
   try {
     browser = await chromium.launch();
     for (const route of options.routes) {
-      const measured = await measure(browser, { baseUrl: server.baseUrl, route, settleMs: options.settleMs });
+      const measured = await measure(browser, {
+        baseUrl: server.baseUrl,
+        route,
+        settleMs: options.settleMs,
+        inject: options.inject,
+        injectUrl: options.injectUrl,
+      });
       runs.push({ route, ...measured });
     }
   } finally {
@@ -273,7 +342,22 @@ async function main() {
     late.push(...missing.map(short));
   }
 
+  // The injected Prop, called out of the Room totals it is already counted in,
+  // because it is the whole answer to "and the next Room gets this for free".
+  const injectedUrl = options.inject ? new URL(options.injectUrl, server.baseUrl).href : null;
+  const injected = options.inject
+    ? {
+        room: options.inject,
+        url: short(injectedUrl),
+        preloadedWhileHidden: options.routes
+          .filter(route => route !== options.inject)
+          .filter(route => evidence.get(route).has(injectedUrl)),
+        painted: (imagesByRoom[options.inject] ?? []).includes(injectedUrl),
+      }
+    : null;
+
   const report = {
+    injected,
     routesLoaded: runs.map(run => ({
       route: run.route,
       liftedAtMs: Math.round(run.probe.liftedAt),
@@ -296,6 +380,8 @@ async function main() {
       // painted nothing means the URL moved and the surface did not follow.
       everyStillPainted: runs[0].stills.unpainted.length === 0,
       noConsoleErrors: runs.every(run => run.consoleErrors.length === 0),
+      // Only asked when a Room was furnished on the way past.
+      ...(injected ? { injectedPropPreloaded: injected.preloadedWhileHidden.length > 0 && injected.painted } : {}),
     },
   };
   report.ok = Object.values(report.verdict).every(answer => answer === true);
