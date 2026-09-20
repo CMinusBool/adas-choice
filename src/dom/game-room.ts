@@ -408,11 +408,16 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
    * 47: the swipe — the touch shorthand for the dots and the arrow keys, and
    * never the only way to do anything (§3.5).
    *
-   * The gesture is measured here and judged by the model: 44 px across and
-   * plainly more across than down, or it is not a swipe. The stage is
-   * `touch-action: pan-y` on a narrow shell, so the browser hands the sideways
-   * gesture over instead of panning the Room with it, and keeps the one
-   * gesture that is never ours — the page scrolling down under the finger.
+   * The gesture is measured across the whole stage and judged by the model:
+   * 44 px across and plainly more across than down, or it is not a swipe.
+   *
+   * Which finger gets here is CSS's call. `#games-scene` is a horizontal
+   * scroller at every width below 1080 px, and that pan is the only way a
+   * phone sees the door or Luna's snow globe at all, so only the chooser — the
+   * Portal and the dots — is `touch-action: pan-y`. A finger there is swiping
+   * the wall; a finger on the floorboards is panning the Room, and the browser
+   * says so by cancelling the pointer. A mouse cannot pan by dragging, so a
+   * drag anywhere on the stage is a swipe.
    *
    * The same answer stops the click: a finger that leaves the Portal it landed
    * on was swiping the wall, not tapping a hole in it.
