@@ -196,9 +196,31 @@ describe('the arrival and the rest of the apartment', () => {
   it('settles the moment the visitor walks out of the Entryway', () => {
     const left = advance(arriving(4), { type: 'hash-changed', hash: '#/games' });
     expect(arrivalView(left).state).toBe('done');
-    for (const [actor, mark] of TABLEAU) standsAt(left, actor, mark);
-    const back = advance(left, { type: 'hash-changed', hash: '#/entryway' });
+    // 51: it settles **in the Entryway**, before anybody is gathered into the
+    // Room being walked into. It used to settle afterwards, which put all five
+    // of them back in the hall they had just left — this test asserted that,
+    // and a Door taken during the arrival left the new Room with no Cast.
+    expect(actorsIn(left, 'entryway')).toEqual([]);
+    // The Game Room's own entrance has emptied it, so the Cast is read once
+    // that entrance is over rather than at the moment of the Door.
+    const arrived = advance(left, { type: 'visitor-input' });
+    expect(actorsIn(arrived, 'games')).toHaveLength(5);
+    const back = advance(arrived, { type: 'hash-changed', hash: '#/entryway' });
     for (const [actor, mark] of TABLEAU) standsAt(back, actor, mark);
+  });
+
+  it('lands a full Cast in the Room whose Door is taken while it is playing', () => {
+    // A fresh tab, the eleven seconds of coming home half played, and the
+    // visitor clicks the Game Room's door at five. Nothing locks the Doors
+    // during the arrival, and the Cast goes with them: the Room they walk into
+    // holds all five once its own entrance has run, not an empty floor.
+    const walkedOut = advance(arriving(5), { type: 'hash-changed', hash: '#/games' });
+    const inTheGameRoom = run(walkedOut, ARRIVAL_SECONDS);
+    expect(actorsIn(inTheGameRoom, 'games')).toHaveLength(5);
+    for (const view of actorsIn(inTheGameRoom, 'games')) {
+      expect(view.moving, `${view.id} has arrived`).toBe(false);
+    }
+    expect(actorsIn(inTheGameRoom, 'entryway')).toEqual([]);
   });
 
   it('never plays for a tab that has already been shown it', () => {
