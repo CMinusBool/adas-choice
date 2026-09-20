@@ -1,0 +1,16 @@
+# Git converts no line ending in this repository, in either direction.
+#
+# Five tracked files are stored with doubled carriage returns (`\r\r\n`):
+# index.html, styles.css, src/main.ts, src/world/world.ts and src/world/index.ts.
+# The rest are CRLF. Nobody chose that; it is what the working tree grew into,
+# and normalising it would rewrite almost every file for no gain.
+#
+# What it does cost is real: two merges during COOP-001 had to restore doubled
+# CRs by hand after an editor collapsed them, because a flattened file diffs as
+# a whole-file rewrite and buries the actual change. `-text` guarantees git is
+# never the thing that does the flattening — in particular on a clone made with
+# `core.autocrlf=true`, which would otherwise mangle all five on checkout.
+#
+# It does not stop an editor from rewriting a file it opens. If you are editing
+# one of the five, patch it at byte level and check the endings afterwards.
+* -text
