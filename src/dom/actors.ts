@@ -5,6 +5,7 @@ import {
   STAGE_WIDTH,
   actorView,
   actorsIn,
+  arrivalView, // 14: the Entryway
   motionIsOn,
   type ActorId,
   type ActorView,
@@ -179,14 +180,19 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
   /**
    * Is there anything for the clock to do?
    *
-   * Only while the Room the visitor is in has somebody in it, that Room's stage
-   * is on screen, the tab is in front, and the visitor has not asked the
+   * Only while the Room the visitor is in has something to do, that Room's
+   * stage is on screen, the tab is in front, and the visitor has not asked the
    * apartment to hold still. Anything else and the loop stops outright rather
    * than running to discover there is nothing to draw.
+   *
+   * 14: an arrival still playing counts as something to do even with nobody in
+   * the Room, because an empty hall is where it starts: the Cast comes through
+   * the door on the same clock that would otherwise have stopped waiting for it.
    */
   function needsClock() {
     const room = world.rooms.current;
-    return motionIsOn(world) && !document.hidden && onScreen.has(room) && actorsIn(world, room).length > 0;
+    if (!motionIsOn(world) || document.hidden || !onScreen.has(room)) return false;
+    return actorsIn(world, room).length > 0 || arrivalView(world).state === 'playing';
   }
 
   function startClock() {

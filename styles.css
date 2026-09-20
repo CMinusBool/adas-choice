@@ -345,8 +345,10 @@ html.dialog-open { overflow: hidden; }
 
 /* The Props the arrival moves. */
 .entryway-stage .prop { border: 0; padding: 0; }
-.prop-front-door { background: #4A3327; border-right: 3px solid #C9A25E; transform-origin: left center; transition: transform .6s ease; }
-.prop-front-door.is-open { transform: perspective(900px) rotateY(-62deg); }
+/* The leaf sorts at 600 shut and 665 open, so the Cast appears from behind it
+   as it swings in — which is why `--z` is set here and not in the markup. */
+.prop-front-door { --z: 600; background: #4A3327; border-right: 3px solid #C9A25E; transform-origin: left center; transition: transform .6s ease; }
+.prop-front-door.is-open { --z: 665; transform: perspective(900px) rotateY(-62deg); }
 .prop-girl-coat { background: #7B4159; border-radius: 40% 40% 18% 18% / 18% 18% 10% 10%; }
 .prop-boy-parka { background: #3F5A46; border-radius: 40% 40% 18% 18% / 18% 18% 10% 10%; }
 .prop-backpack { display: grid; place-items: center; background: #4F6B72; border-radius: 12%; box-shadow: inset 0 0 0 4px #2F4248; }
