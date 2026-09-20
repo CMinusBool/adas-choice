@@ -1369,3 +1369,48 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   .entryway-stage { max-width: none; }
   .stage-caption { text-align: left; margin-inline: 0; }
 }
+
+/* 44: a Room's Door, and the leaf that swings on it.
+
+   `src/dom/arrival.ts` writes the model's answer onto each Room's stage as
+   `data-door`, and the leaf hangs off that: shut, swinging open, held open
+   while the Cast comes through, swinging shut behind them. Last in the file on
+   purpose, so that these angles beat each Room's own resting one at the equal
+   specificity they share.
+
+   Every Door is in a left-hand wall, so every leaf is hinged on its left edge
+   and swings into the Room. The three leaves are CSS placeholders until the art
+   lane delivers the two-cell transparent asset each Room's note now asks for;
+   when it does, the artwork replaces the surface and these two angles stay.
+   Being properly shut is half the point: a leaf frozen ajar in a painting is
+   not one anybody opens, which is why `closed` is stated here rather than left
+   to whatever each Room's placeholder was resting at. */
+.stage[data-door] .door-leaf,
+.stage[data-door] .a-door-leaf {
+  transform-origin: left center;
+  transition: transform .34s ease;
+}
+.stage[data-door="closing"] .door-leaf,
+.stage[data-door="closed"] .door-leaf,
+.stage[data-door="closing"] .a-door-leaf,
+.stage[data-door="closed"] .a-door-leaf {
+  transform: perspective(600px) rotateY(0deg);
+}
+.stage[data-door="opening"] .door-leaf,
+.stage[data-door="open"] .door-leaf,
+.stage[data-door="opening"] .a-door-leaf,
+.stage[data-door="open"] .a-door-leaf {
+  transform: perspective(600px) rotateY(-68deg);
+}
+/* The Door is still a link, and a link says so when it is pointed at: the Game
+   Room's leaf lifts under the cursor, which the rule above would otherwise sit
+   on. Only that Room's does; the other two answer hover elsewhere. */
+.stage a:hover .door-leaf,
+.stage a:focus-visible .door-leaf {
+  transform: perspective(600px) rotateY(-20deg);
+}
+/* Motion is opt-outable, and the swing is motion: with it off the entrance
+   does not play at all, so the leaf is simply shut and gets there without
+   travelling. The reduced-motion block at the top of the file covers the
+   system's own request, scoped to a visitor who has not overruled it. */
+.motion-off .stage .door-leaf, .motion-off .stage .a-door-leaf { transition: none; }

@@ -45,9 +45,10 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   returns a `Painter`. A new slice is a new file plus one entry in `src/main.ts`'s `mounts` list,
   not a branch inside an existing painter. `src/dom/painter.ts` holds that contract and `byId`.
   Today, in mount order: `loading`, `language`, `motion`, `rooms`, `game-room`,
-  `cinema-room`, `activity-room`, `sound`, `actors`, `cats`, `entryway`, `breakables`. The order is load
-  bearing at both ends — `loading` first so the shell leaves `inert` before the router moves focus,
-  `actors` after the Rooms so the Cast stands on top of whatever the Room laid down.
+  `cinema-room`, `activity-room`, `sound`, `arrival`, `actors`, `cats`, `entryway`, `breakables`. The
+  order is load bearing at both ends — `loading` first so the shell leaves `inert` before the router
+  moves focus, `actors` after the Rooms so the Cast stands on top of whatever the Room laid down —
+  and `arrival` sits after `sound` because the Door's own sounds go out through `playSfx`.
 - `src/copy.ts` — both copy dictionaries, typed against each other.
 - `src/world/` — the world model: pure TypeScript, no DOM and no browser APIs. This is the one
   seam, and the only thing tested. `src/world/index.ts` is its whole public surface; the DOM layer
@@ -179,7 +180,14 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   settled: it plays an **Arrival** of about three seconds on every entry — the Girl opens the Door
   and holds it, the cats run through first, the Boy comes last, everyone walks to their mark — and
   any click, tap or key press ends it and settles everyone at once. With motion off nothing plays
-  and the Room is found at rest, which is `createArrival(over: true)` and needs no second code path.
+  and the Room is found at rest, which is `createRoomArrival(room, over: true)` and needs no second
+  code path. **Three seconds is fixed and the Rooms are not the same size**, so `cycleWithin` in
+  `src/world/actors.ts` decides per Actor: a mark a walk reaches inside the script is walked to, and
+  one further off than the script is long is hurried to at a run. Move a Room's marks and its Cast
+  changes gait rather than the Arrival changing length. The script does not place anybody at its
+  end — a last stride finishes under its own steam, which is why the last one lands at 3.28 s in the
+  Game Room, 3.44 in the Activity Room and 3.60 in the Cinema Room — but being **cut short** does
+  place everybody, on the marks the Arrival took down when the Door opened.
   The Entryway's own 11.9s arrival is a different thing and is unchanged: it is the Cast coming in
   from outside, played once. Because a Door has to open, **a door leaf is a separate transparent
   asset and every Room backdrop is drawn with an empty doorway** — a leaf painted into the backdrop

@@ -372,9 +372,15 @@ describe('the dice the Cast is given', () => {
  * §4.3 — so this is a check of the two Rooms and not of the placing code.
  */
 describe('the Cast in whichever Room the visitor is in', () => {
-  /** Walk in the way a door link does: through the hash the router reads. */
+  /**
+   * Walk in the way a door link does: through the hash the router reads.
+   *
+   * 44: and then the way an impatient visitor does, with an input that ends
+   * the Room's arrival at once. Where the arrival leaves everyone is the marks
+   * below, which is exactly what this describe block is about.
+   */
   function walkInto(world: World, room: RoomId): World {
-    return advance(world, { type: 'hash-changed', hash: roomHash(room) });
+    return advance(advance(world, { type: 'hash-changed', hash: roomHash(room) }), { type: 'visitor-input' });
   }
 
   function who(world: World, id: ActorId): ActorView {

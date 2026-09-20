@@ -1,7 +1,9 @@
 // 14: the Entryway
-import type { ActorId, Facing } from './actors';
+// 44: and every other Room's own, shorter, entrance.
+import { ACTOR_IDS, cycleWithin, type ActorId, type CycleId, type Facing } from './actors';
 import { ENTRYWAY_MARKS, ENTRYWAY_PROPS_AT_REST, type EntrywayProps } from './entryway';
-import type { Point } from './stage';
+import type { RoomId } from './rooms';
+import { distance, type Point } from './stage';
 
 /**
  * The moment that opens the page: the two of them coming home with three cats
@@ -19,6 +21,14 @@ import type { Point } from './stage';
  * Nothing here moves an Actor itself: it says who should be sent where, and
  * `world.ts` hands that to `actors.ts`, which already knows how to walk the
  * floor. Time arrives as a `now` on a tick, as everywhere in the model.
+ *
+ * 44: there are two scripts in this file now, and one clock behind both. The
+ * Entryway's is the long one above — the front door of the page, seen once. The
+ * other three Rooms share the short one at the foot of the file, played on
+ * every entry, because a Room is a place you walk into rather than one you find
+ * already settled. They are the same machine: a list of cues in time order, a
+ * Prop timeline folded out of the clock rather than stored, and two ways to
+ * end — the script running out, or being cut short.
  */
 
 /** How far the arrival has got. */
@@ -100,6 +110,10 @@ export interface ArrivalSlice {
  * the doorway, a cat landing off the end of the bench. `send` gives one a mark
  * to walk to, at ticket 07's 190 units per second, which is where every
  * duration in §5.2 comes from. `sfx` is a sound to play once.
+ *
+ * 44: a `send` may also say which Cycle carries the Actor and which way it
+ * turns once it gets there. Both are left out by the Entryway's script, whose
+ * walks are all walks and whose settled stances are `place` cues of their own.
  */
 export type ArrivalCue =
   | {
@@ -109,7 +123,14 @@ export type ArrivalCue =
       readonly mark: Point;
       readonly facing: Facing;
     }
-  | { readonly at: number; readonly kind: 'send'; readonly actor: ActorId; readonly mark: Point }
+  | {
+      readonly at: number;
+      readonly kind: 'send';
+      readonly actor: ActorId;
+      readonly mark: Point;
+      readonly cycle?: CycleId;
+      readonly facing?: Facing;
+    }
   | { readonly at: number; readonly kind: 'sfx'; readonly name: string };
 
 const M = ENTRYWAY_MARKS;
@@ -237,9 +258,65 @@ function crossed(from: number, to: number): readonly ArrivalCue[] {
   return CUES.filter(cue => cue.at > from && cue.at <= to);
 }
 
+/**
+ * The clock an arrival keeps, whichever script it is playing.
+ *
+ * Both scripts in this file carry exactly this much: how far they have got,
+ * the `now` they started at, and the sounds the last tick crossed.
+ */
+interface Playhead {
+  readonly state: ArrivalState;
+  readonly startedAt: number | null;
+  readonly seconds: number;
+  readonly sfx: readonly string[];
+}
+
 /** The same slice with last tick's sounds forgotten, so none is played twice. */
-function quiet(arrival: ArrivalSlice): ArrivalSlice {
+function quiet<T extends Playhead>(arrival: T): T {
   return arrival.sfx.length === 0 ? arrival : { ...arrival, sfx: [] };
+}
+
+/**
+ * What one tick of the clock did to a script.
+ *
+ * `idle` is a tick that changed nothing — a script that is not running, or a
+ * frame with no elapsed time — and the caller hands its slice straight back, by
+ * identity, so the page costs no repaint. `moved` carries the window
+ * `(from, to]` the cues that fired lie in, which is how each one fires exactly
+ * once. `ended` is the script running out, and every script answers that the
+ * same way: it is over, and whatever it had left to do happens at once.
+ */
+type PlayheadStep<T> =
+  | { readonly kind: 'idle' }
+  | { readonly kind: 'moved'; readonly head: T; readonly from: number; readonly to: number }
+  | { readonly kind: 'ended' };
+
+const IDLE = { kind: 'idle' } as const;
+const ENDED = { kind: 'ended' } as const;
+
+/** One tick of a script's clock, whichever script it belongs to. */
+function stepPlayhead<T extends Playhead>(head: T, now: number, length: number): PlayheadStep<T> {
+  if (head.state !== 'playing') return IDLE;
+  // The very first tick, or a clock that restarted, measures from itself. The
+  // window is empty, because no time has passed to cross a cue in.
+  if (head.startedAt === null || now < head.startedAt) {
+    const based = { ...quiet(head), startedAt: now - Math.max(0, head.seconds) * 1000 };
+    return { kind: 'moved', head: based, from: head.seconds, to: head.seconds };
+  }
+  const seconds = (now - head.startedAt) / 1000;
+  if (seconds <= head.seconds) {
+    const hushed = quiet(head);
+    return hushed === head ? IDLE : { kind: 'moved', head: hushed, from: seconds, to: seconds };
+  }
+  if (seconds >= length) return ENDED;
+  // Last tick's sounds are forgotten here, so a tick that crosses no cue is a
+  // silent one rather than a second playing of whatever the last tick crossed.
+  return { kind: 'moved', head: { ...quiet(head), seconds }, from: head.seconds, to: seconds };
+}
+
+/** The sounds among a tick's cues, to be played once and then forgotten. */
+function sfxOf(cues: readonly ArrivalCue[]): readonly string[] {
+  return cues.flatMap(cue => (cue.kind === 'sfx' ? [cue.name] : []));
 }
 
 /** The arrival one tick on, and everything that happened during that tick. */
@@ -247,17 +324,12 @@ export function tickArrival(
   arrival: ArrivalSlice,
   now: number,
 ): { readonly arrival: ArrivalSlice; readonly cues: readonly ArrivalCue[] } {
-  if (arrival.state !== 'playing') return { arrival, cues: [] };
-  // The very first tick, or a clock that restarted, measures from itself.
-  if (arrival.startedAt === null || now < arrival.startedAt) {
-    return { arrival: { ...quiet(arrival), startedAt: now - Math.max(0, arrival.seconds) * 1000 }, cues: [] };
-  }
-  const seconds = (now - arrival.startedAt) / 1000;
-  if (seconds <= arrival.seconds) return { arrival: quiet(arrival), cues: [] };
-  if (seconds >= ARRIVAL_SECONDS) return finishArrival(arrival);
-  const cues = crossed(arrival.seconds, seconds);
-  const sfx = cues.flatMap(cue => (cue.kind === 'sfx' ? [cue.name] : []));
-  return { arrival: { ...arrival, seconds, sfx }, cues };
+  const step = stepPlayhead(arrival, now, ARRIVAL_SECONDS);
+  if (step.kind === 'idle') return { arrival, cues: [] };
+  if (step.kind === 'ended') return finishArrival(arrival);
+  const cues = crossed(step.from, step.to);
+  const sfx = sfxOf(cues);
+  return { arrival: sfx.length === 0 ? step.head : { ...step.head, sfx }, cues };
 }
 
 /**
@@ -324,4 +396,261 @@ export function viewArrival(arrival: ArrivalSlice): ArrivalView {
   const costumes: Partial<Record<ActorId, Costume>> = {};
   if (playing) for (const worn of COSTUMES) if (seconds < worn.until) costumes[worn.actor] = worn.costume;
   return { state: arrival.state, seconds, beats, costumes, sfx: arrival.sfx };
+}
+
+// ---------------------------------------------------------------------------
+// 44: a Room's arrival — the short entrance the other three Doors play.
+// ---------------------------------------------------------------------------
+
+/**
+ * How long a Room's entrance runs, in seconds.
+ *
+ * The owner's ruling of 2026-09-20: about three seconds, not the Entryway's
+ * eleven. This is a doorway between Rooms, seen every time, rather than the
+ * front door of the page, seen once.
+ */
+export const ROOM_ARRIVAL_SECONDS = 3;
+
+/**
+ * A Door leaf's state.
+ *
+ * The same four the Entryway's front door has, because a door leaf is a door
+ * leaf: shut, swinging open, held open, swinging shut. The leaf is a separate
+ * transparent asset from its Room's backdrop precisely so that it can take
+ * them — a leaf painted into a backdrop at a fixed angle is not one anybody
+ * opens.
+ */
+export type DoorState = 'closed' | 'opening' | 'open' | 'closing';
+
+/**
+ * Where an Actor stands once a Room's entrance is over.
+ *
+ * Taken down as the entrance begins, off the Actors `gatherInto` and
+ * `gatherCats` have just placed — so the entrance walks the Cast back to the
+ * marks `HOMES` and `CAT_MARKS` chose rather than carrying a second table of
+ * its own. Which is also why a cat lands somewhere different on every visit:
+ * the dice that picked its mark were rolled before this file saw it.
+ */
+export interface ArrivalMark {
+  readonly at: Point;
+  readonly facing: Facing;
+}
+
+/** Where each Actor belongs once the Room has settled, by Actor. */
+export type ArrivalMarks = Readonly<Partial<Record<ActorId, ArrivalMark>>>;
+
+/** A Room's entrance, as far as it has got. */
+export interface RoomArrivalSlice {
+  /** The Room this entrance belongs to; its Door is the one that is open. */
+  readonly room: RoomId;
+  readonly state: ArrivalState;
+  /** The `now` the entrance started at, or `null` until the first tick. */
+  readonly startedAt: number | null;
+  /** Seconds played; `-1` while playing but not yet ticked. */
+  readonly seconds: number;
+  readonly sfx: readonly string[];
+  readonly marks: ArrivalMarks;
+}
+
+/**
+ * The Door each Room puts the Cast down at, and which way it turns them.
+ *
+ * `design/11-game-room.md` §4.3 and `design/12-activity-room.md` §4.3 both name
+ * (150, 662); the Cinema Room's note gives its Door no mark of its own, and its
+ * P4 frame spans x 40-170 with the floor starting at x 100, so the same point
+ * is the same place. Every Door is in a left-hand wall, so everyone turns right
+ * as they come through it. The Entryway's entry is its own threshold and is
+ * never used: that Room's arrival is the long script above, and it comes in
+ * from outside rather than from another Room.
+ */
+const DOOR_MARKS: Record<RoomId, ArrivalMark> = {
+  entryway: { at: ENTRYWAY_MARKS.T, facing: 'right' },
+  games: { at: { x: 150, y: 662 }, facing: 'right' },
+  cinema: { at: { x: 150, y: 662 }, facing: 'right' },
+  activities: { at: { x: 150, y: 662 }, facing: 'right' },
+};
+
+/**
+ * One moment of the entrance, written against whoever the Room holds.
+ *
+ * A cue names an Actor rather than a point, because where that Actor is going
+ * is the mark taken down when the Door opened. `enter` stands one in the
+ * doorway; `cross` sends it to its mark; `sfx` is a sound. A cue naming an
+ * Actor this Room has not placed simply does not fire.
+ */
+type RoomCue =
+  | { readonly at: number; readonly kind: 'enter'; readonly actor: ActorId }
+  | { readonly at: number; readonly kind: 'cross'; readonly actor: ActorId; readonly cycle?: CycleId }
+  | { readonly at: number; readonly kind: 'sfx'; readonly name: string };
+
+/**
+ * The entrance, beat by beat (`design/11-game-room.md` §4.3).
+ *
+ * The Girl's hand is on the leaf; she stops in the doorway and holds it, the
+ * three cats bolt through the gap ahead of her, the Boy walks in past her, she
+ * lets it fall shut behind him and follows. One script for all three Rooms:
+ * what differs between them is where the marks are, and the marks are not in
+ * here.
+ */
+const ROOM_CUES: readonly RoomCue[] = [
+  { at: 0, kind: 'sfx', name: 'door-open' },
+  { at: 0.3, kind: 'enter', actor: 'girl' },
+  // The cats run, always: it is what they do through an opening door, and it
+  // is what §4.3 says they do. Everyone else is asked, in `resolve` below.
+  { at: 0.4, kind: 'enter', actor: 'mica' },
+  { at: 0.4, kind: 'cross', actor: 'mica', cycle: 'run' },
+  { at: 0.55, kind: 'enter', actor: 'mira' },
+  { at: 0.55, kind: 'cross', actor: 'mira', cycle: 'run' },
+  { at: 0.7, kind: 'enter', actor: 'luna' },
+  { at: 0.7, kind: 'cross', actor: 'luna', cycle: 'run' },
+  { at: 1, kind: 'enter', actor: 'boy' },
+  { at: 1, kind: 'cross', actor: 'boy' },
+  { at: 1.7, kind: 'sfx', name: 'door-close' },
+  { at: 2, kind: 'cross', actor: 'girl' },
+];
+
+/** When the Door takes each of its states, in time order. */
+const ROOM_DOOR_TIMELINE: ReadonlyArray<readonly [number, DoorState]> = [
+  [0, 'opening'],
+  [0.3, 'open'],
+  [1.7, 'closing'],
+  [2, 'closed'],
+];
+
+/**
+ * One symbolic cue, resolved against the marks this entrance took down.
+ *
+ * The Cycle a `cross` is carried on is worked out here rather than written into
+ * the script, because it is a consequence of the geometry: an Actor whose mark
+ * a walk reaches inside the script walks to it, and one whose mark is further
+ * off than the script is long hurries. That is what keeps the entrance three
+ * seconds in a Room whose marks are half a stage from its Door as well as in
+ * one whose marks are beside it.
+ */
+function resolve(arrival: RoomArrivalSlice, cue: RoomCue): ArrivalCue | null {
+  if (cue.kind === 'sfx') return cue;
+  const mark = arrival.marks[cue.actor];
+  if (!mark) return null;
+  const door = DOOR_MARKS[arrival.room];
+  if (cue.kind === 'enter') {
+    return { at: cue.at, kind: 'place', actor: cue.actor, mark: door.at, facing: door.facing };
+  }
+  return {
+    at: cue.at,
+    kind: 'send',
+    actor: cue.actor,
+    mark: mark.at,
+    facing: mark.facing,
+    cycle: cue.cycle ?? cycleWithin(distance(door.at, mark.at), ROOM_ARRIVAL_SECONDS - cue.at),
+  };
+}
+
+/** The entrance's cues in `(from, to]`, resolved against its marks. */
+function roomCues(arrival: RoomArrivalSlice, from: number, to: number): readonly ArrivalCue[] {
+  return ROOM_CUES.filter(cue => cue.at > from && cue.at <= to).flatMap(cue => {
+    const resolved = resolve(arrival, cue);
+    return resolved ? [resolved] : [];
+  });
+}
+
+/**
+ * The entrance as the visitor finds the Room: waiting to play, or already over.
+ *
+ * `over` is what motion being off means here, and it is the whole of it: the
+ * Door is shut, everyone is on their mark, the Room is found at rest. There is
+ * no second code path for a still apartment because there is nothing for one to
+ * do.
+ */
+export function createRoomArrival(room: RoomId, over: boolean): RoomArrivalSlice {
+  return {
+    room,
+    state: over ? 'done' : 'pending',
+    startedAt: null,
+    seconds: over ? ROOM_ARRIVAL_SECONDS : 0,
+    sfx: [],
+    marks: {},
+  };
+}
+
+/**
+ * The entrance, started, with everyone's mark taken down.
+ *
+ * The clock is not set here — the first tick does that, because that is the
+ * first time the model is told what time it is.
+ */
+export function startRoomArrival(arrival: RoomArrivalSlice, marks: ArrivalMarks): RoomArrivalSlice {
+  if (arrival.state !== 'pending') return arrival;
+  return { ...arrival, state: 'playing', startedAt: null, seconds: -1, sfx: [], marks };
+}
+
+/**
+ * The entrance, over because its script ran out.
+ *
+ * Whatever it had left to say is said — the Door falls shut — but nobody is put
+ * anywhere. An Actor still crossing the floor keeps walking and arrives under
+ * its own steam, which is what "both walk to their home marks and settle" asks
+ * for. Being cut short is the other ending, and it is `settleRoomArrival`.
+ */
+function endRoomArrival(
+  arrival: RoomArrivalSlice,
+): { readonly arrival: RoomArrivalSlice; readonly cues: readonly ArrivalCue[] } {
+  const cues = roomCues(arrival, arrival.seconds, ROOM_ARRIVAL_SECONDS);
+  return { arrival: { ...arrival, state: 'done', seconds: ROOM_ARRIVAL_SECONDS, sfx: sfxOf(cues) }, cues };
+}
+
+/** The entrance one tick on, and everything that happened during that tick. */
+export function tickRoomArrival(
+  arrival: RoomArrivalSlice,
+  now: number,
+): { readonly arrival: RoomArrivalSlice; readonly cues: readonly ArrivalCue[] } {
+  const step = stepPlayhead(arrival, now, ROOM_ARRIVAL_SECONDS);
+  if (step.kind === 'idle') return { arrival, cues: [] };
+  if (step.kind === 'ended') return endRoomArrival(arrival);
+  const cues = roomCues(step.head, step.from, step.to);
+  const sfx = sfxOf(cues);
+  return { arrival: sfx.length === 0 ? step.head : { ...step.head, sfx }, cues };
+}
+
+/**
+ * The entrance, cut short, and everyone put on their mark at once.
+ *
+ * What a click, a tap, a key press or a request for stillness means: the
+ * outcome of the whole entrance and none of the entering. Nobody is left
+ * mid-stride and nothing is half-open, because the Door's state is folded out
+ * of a clock that has now run to the end. An entrance still waiting to play
+ * never emptied the Room, so there is nothing to catch up.
+ */
+export function settleRoomArrival(
+  arrival: RoomArrivalSlice,
+): { readonly arrival: RoomArrivalSlice; readonly cues: readonly ArrivalCue[] } {
+  if (arrival.state === 'done') return { arrival, cues: [] };
+  const cues: readonly ArrivalCue[] =
+    arrival.state === 'pending'
+      ? []
+      : ACTOR_IDS.flatMap(id => {
+          const mark = arrival.marks[id];
+          if (!mark) return [];
+          const settled: ArrivalCue = {
+            at: ROOM_ARRIVAL_SECONDS,
+            kind: 'place',
+            actor: id,
+            mark: mark.at,
+            facing: mark.facing,
+          };
+          return [settled];
+        });
+  return { arrival: { ...arrival, state: 'done', seconds: ROOM_ARRIVAL_SECONDS, sfx: [] }, cues };
+}
+
+/**
+ * Which state this entrance's Door is in.
+ *
+ * Folded out of the clock every time rather than stored, exactly as the
+ * Entryway's Props are — so a Door can never disagree with the script, and a
+ * Room that is not playing one has a shut Door by reading the script at its
+ * last second rather than by carrying a flag of its own.
+ */
+export function roomDoorAt(arrival: RoomArrivalSlice): DoorState {
+  const seconds = arrival.state === 'playing' ? Math.max(0, arrival.seconds) : ROOM_ARRIVAL_SECONDS;
+  return stateAt(ROOM_DOOR_TIMELINE, seconds, 'closed');
 }

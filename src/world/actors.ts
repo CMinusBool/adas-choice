@@ -43,6 +43,19 @@ export type Facing = 'left' | 'right';
 /** How fast each Cycle carries an Actor, in stage units per second. */
 const CYCLE_SPEED: Record<CycleId, number> = { idle: 0, walk: 190, run: 430 };
 
+// 44: a Room's arrival
+/**
+ * The Cycle that covers `span` stage units inside `seconds`.
+ *
+ * A walk where a walk gets there, and a run where it does not. A Room's
+ * entrance is three seconds whatever Room it is, and the Rooms are not the same
+ * size: this is how one script serves a mark beside the Door and a mark half a
+ * stage away from it without either a second script or a stretched clock.
+ */
+export function cycleWithin(span: number, seconds: number): Extract<CycleId, 'walk' | 'run'> {
+  return span <= CYCLE_SPEED.walk * seconds ? 'walk' : 'run';
+}
+
 /**
  * The longest step a single tick may take, in milliseconds.
  *
@@ -149,6 +162,17 @@ interface ActorState {
   readonly route: readonly Point[];
   /** How long the route was when it was handed out, for reporting progress. */
   readonly distance: number;
+  // 44: a Room's arrival
+  /**
+   * Which way to turn on arriving, or `null` to keep facing the way it walked.
+   *
+   * A mark is a place *and* a stance — the Boy's pouf has him turned towards
+   * her — and the direction he approached it from is not usually that stance.
+   * Carried on the walk rather than applied by whoever sent him, so that a walk
+   * finishing on its own, a walk settled by a request for stillness and a walk
+   * that never played all leave him standing the same way.
+   */
+  readonly turnTo: Facing | null;
   /**
    * Goals this Actor walks between in turn, taking the next one each time it
    * arrives. A Room's `Home` may hand one out; an Actor with an empty patrol
@@ -216,7 +240,7 @@ function facingTowards(from: Point, to: Point, unchanged: Facing): Facing {
 }
 
 function standing(actor: ActorState, at: Point, facing: Facing): ActorState {
-  return { ...actor, at, facing, cycle: 'idle', route: [], distance: 0 };
+  return { ...actor, at, facing, cycle: 'idle', route: [], distance: 0, turnTo: null };
 }
 
 /**
@@ -226,19 +250,32 @@ function standing(actor: ActorState, at: Point, facing: Facing): ActorState {
  * animated gets the outcome of the walk and none of the walking, and the DOM
  * layer never has to decide that for itself. A goal outside the walkable area
  * is pulled to the nearest point of it rather than refused.
+ *
+ * 44: `turnTo` is the stance the mark has, taken on arriving rather than on
+ * setting off — so a request for stillness half way there produces the same
+ * Actor as watching the walk through does.
  */
-function send(actor: ActorState, goal: Point, cycle: CycleId, motionOn: boolean): ActorState {
+function send(
+  actor: ActorState,
+  goal: Point,
+  cycle: CycleId,
+  motionOn: boolean,
+  turnTo: Facing | null = null,
+): ActorState {
   const area = WALKABLE[actor.room];
   const destination = clampInto(area, goal);
-  if (!motionOn) return standing(actor, destination, facingTowards(actor.at, destination, actor.facing));
+  if (!motionOn) {
+    return standing(actor, destination, turnTo ?? facingTowards(actor.at, destination, actor.facing));
+  }
   const route = routeThrough(area, actor.at, destination);
-  if (route.length === 0) return standing(actor, destination, actor.facing);
+  if (route.length === 0) return standing(actor, destination, turnTo ?? actor.facing);
   return {
     ...actor,
     facing: facingTowards(actor.at, route[0], actor.facing),
     cycle,
     route,
     distance: routeLength(actor.at, route),
+    turnTo,
   };
 }
 
@@ -274,7 +311,7 @@ function step(actor: ActorState, seconds: number, motionOn: boolean): ActorState
   // Arriving ends the walk here; the patrol picks up on the next tick, so an
   // Actor can never chase its own goals round in a loop inside one frame.
   return route.length === 0
-    ? { ...actor, at, facing, cycle: 'idle', route, distance: actor.distance }
+    ? { ...actor, at, facing: actor.turnTo ?? facing, cycle: 'idle', route, distance: actor.distance, turnTo: null }
     : { ...actor, at, facing, route };
 }
 
@@ -309,9 +346,13 @@ export function sendActor(
   goal: Point,
   cycle: CycleId,
   motionOn: boolean,
+  turnTo: Facing | null = null,
 ): ActorsSlice {
   if (!slice.actors.some(actor => actor.id === id)) return slice;
-  return { ...slice, actors: slice.actors.map(actor => (actor.id === id ? send(actor, goal, cycle, motionOn) : actor)) };
+  return {
+    ...slice,
+    actors: slice.actors.map(actor => (actor.id === id ? send(actor, goal, cycle, motionOn, turnTo) : actor)),
+  };
 }
 
 /**
@@ -323,7 +364,11 @@ export function sendActor(
 export function settleActors(slice: ActorsSlice): ActorsSlice {
   if (!slice.actors.some(actor => actor.route.length > 0)) return slice;
   const actors = slice.actors.map(actor =>
-    actor.route.length === 0 ? actor : standing(actor, actor.route[actor.route.length - 1], actor.facing),
+    actor.route.length === 0
+      ? actor
+      : // 44: and turned the way the mark it was walking to is turned, which is
+        // what makes a settled walk indistinguishable from a walked one.
+        standing(actor, actor.route[actor.route.length - 1], actor.turnTo ?? actor.facing),
   );
   return { ...slice, actors, lastTick: null };
 }
@@ -358,7 +403,7 @@ export function placeActor(slice: ActorsSlice, id: ActorId, room: RoomId, at: Po
   const existing = slice.actors.find(actor => actor.id === id);
   const next: ActorState = existing
     ? { ...standing(existing, placed, facing), room }
-    : { id, room, at: placed, facing, cycle: 'idle', route: [], distance: 0, patrol: STILL };
+    : { id, room, at: placed, facing, cycle: 'idle', route: [], distance: 0, patrol: STILL, turnTo: null };
   return {
     ...slice,
     actors: existing ? slice.actors.map(actor => (actor.id === id ? next : actor)) : [...slice.actors, next],
@@ -457,6 +502,7 @@ function atHome(id: ActorId, room: RoomId, home: Home): ActorState {
     route: [],
     distance: 0,
     patrol: home.patrol ?? STILL,
+    turnTo: null,
   };
 }
 
