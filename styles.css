@@ -1053,6 +1053,14 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   box-shadow: 0 0 calc(18 * var(--u)) #f5a3c5aa;
 }
 @media (min-width: 1080px) { .portal-dots { display: none; } }
+/* 47: and below it, a sideways drag across the stage moves the wall on
+   rather than panning the Room across the viewport. The one Portal up there
+   is a chooser, not a viewing surface (§3.5), so the swipe is what a thumb
+   reaches for and `src/dom/game-room.ts` measures it. `pan-y` leaves the one
+   gesture that is never ours — the page scrolling down under the finger —
+   and the intersection with the buttons' own `touch-action` means the
+   Portals and the dots inside the stage need no rule of their own. */
+@media (max-width: 1079px) { #room-games .stage { touch-action: pan-y; } }
 
 /* §5.4: the expanded Portal — one overlay serving all three, built on the
    Activity Room's `.activity-card` pattern above rather than a second one of
