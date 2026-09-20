@@ -29,6 +29,13 @@ const zhHant = {
   // `src/world/films.ts` and is bilingual there; this is the rest of its name.
   posterExpandHint: '展開海報',
   // end 18
+  // 19: the details panel an expanded Poster opens onto. The Film's own title,
+  // year, premise and reason come from `src/world/films.ts`; these are the
+  // labels around them, and they are the design note's §11 strings.
+  detailsPremise: '故事', detailsReason: '為什麼值得看',
+  pairingZhEn: '中文原音・英文字幕', pairingEnZh: '英文原音・中文字幕',
+  detailsLink: '在 Apple TV 找到它', detailsClose: '收起',
+  // end 19
   activitiesTitle: '活動室',
   // 16: the Activity Room — `activitiesSoon` retired with the Room's build.
   activitiesLede: '三件事，隔著螢幕也能一起做。挑一件，今晚就開始。',
@@ -122,6 +129,11 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     // 18
     posterExpandHint: 'Expand the Poster',
     // end 18
+    // 19
+    detailsPremise: 'The story', detailsReason: "Why it's worth watching",
+    pairingZhEn: 'Chinese audio, English subtitles', pairingEnZh: 'English audio, Chinese subtitles',
+    detailsLink: 'Find it on Apple TV', detailsClose: 'Close',
+    // end 19
     activitiesTitle: 'The Activity Room',
     // 16: the Activity Room
     activitiesLede: 'Three things you can do together through a screen. Pick one and start tonight.',
