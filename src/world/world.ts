@@ -424,6 +424,17 @@ export function openShelf(world: World): CinemaShelf | null {
 }
 
 /**
+ * The bookshelf he has his arm in right now, or `null`.
+ *
+ * What makes the rummage visible on the shelf itself — the tubes rattling in
+ * their cubbies — which matters because the Beat is otherwise 1.8 seconds of a
+ * Boy standing still.
+ */
+export function rummagingShelf(world: World): CinemaShelf | null {
+  return world.cinema.step === 'rummaging' ? world.cinema.errand : null;
+}
+
+/**
  * Is this Actor sitting in its beanbag in front of the screen?
  *
  * True of the Boy and the Girl while they are in the Cinema Room, standing

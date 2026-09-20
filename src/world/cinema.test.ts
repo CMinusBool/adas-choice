@@ -15,6 +15,7 @@ import {
   isWalkable,
   openShelf,
   pinnedPosters,
+  rummagingShelf,
   type ActorId,
   type ActorView,
   type CinemaShelf,
@@ -257,6 +258,17 @@ describe('choosing a bookshelf', () => {
     expect(cinemaStep(done)).toBe('seated');
     expect(isSeated(done, 'boy')).toBe(true);
     expect(pinnedPosters(done)).toEqual(filmsOn('romance'));
+  });
+
+  it('names the shelf being rummaged, and only while the Beat runs', () => {
+    const chosen = choose('romance');
+    expect(rummagingShelf(chosen)).toBe(null);
+
+    const rummaging = runUntil(chosen, world => cinemaStep(world) === 'rummaging');
+    expect(rummagingShelf(rummaging)).toBe('romance');
+
+    const carrying = runUntil(rummaging, world => cinemaStep(world) !== 'rummaging', 40000);
+    expect(rummagingShelf(carrying)).toBe(null);
   });
 
   it('puts the Posters straight on the wall when the apartment may not move', () => {

@@ -43,4 +43,4 @@ export { attendedShelf, isSeated } from './world';
 export type { Film, FilmId } from './films';
 export { filmById, filmsOn } from './films';
 export type { CinemaStep } from './cinema';
-export { cinemaStep, openShelf, pinnedPosters } from './world';
+export { cinemaStep, openShelf, pinnedPosters, rummagingShelf } from './world';
