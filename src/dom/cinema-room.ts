@@ -188,6 +188,37 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
 
   detailsPart('.details-close')?.addEventListener('click', close);
 
+  /**
+   * Hand focus between an expanded Poster and the card it opened.
+   *
+   * The card is outside the stage in the markup — it has to be, because on a
+   * narrow shell it flows below the stage rather than lying over it — so Tab
+   * from a Poster would otherwise land on the Poster next door, which moves
+   * the expansion and takes the card away with it. The design note asks for
+   * "Tab from the expanded Poster into the card" (§4.6), and this is it: one
+   * step forwards into the card's first action, one step back out to the
+   * Poster, and ordinary Tab order inside the card and everywhere else.
+   */
+  function handOff(event: KeyboardEvent, to: HTMLElement | null) {
+    if (event.key !== 'Tab' || !to) return;
+    event.preventDefault();
+    to.focus();
+  }
+
+  slots?.addEventListener('keydown', event => {
+    const key = event as KeyboardEvent;
+    if (key.shiftKey || details?.hidden !== false) return;
+    if (!posterOf(key.target)?.classList.contains('is-expanded')) return;
+    handOff(key, detailsPart('.details-choose'));
+  });
+  details?.addEventListener('keydown', event => {
+    const key = event as KeyboardEvent;
+    // Only off the front of the card: Tab within it, and off its end, are the
+    // browser's own business.
+    if (!key.shiftKey || key.target !== detailsPart('.details-choose')) return;
+    handOff(key, posters.find(poster => poster.classList.contains('is-expanded')) ?? null);
+  });
+
   // 20: the card's primary action, and the projector's gate lever.
   //
   // Both carry `performance.now()`, the clock every other report in this Room
@@ -204,7 +235,12 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
 
   detailsPart('.details-choose')?.addEventListener('click', () => {
     // The card is only ever showing one Film, and it is the one being chosen.
-    if (paintedDetails) dispatch({ type: 'cinema-film-chosen', film: paintedDetails.id, now: performance.now() });
+    if (!paintedDetails) return;
+    dispatch({ type: 'cinema-film-chosen', film: paintedDetails.id, now: performance.now() });
+    // The button the visitor just pressed closes with the card, so focus has
+    // to be put somewhere on purpose rather than dropped on the document. The
+    // gate lever is where it belongs: it is the control this choice hands them.
+    gate?.focus();
   });
 
   // The lever is a real `<button>` throughout rather than a disabled one, so it

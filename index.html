@@ -410,22 +410,26 @@
           <div class="cinema-prop cinema-film" style="--x:220;--y:100;--w:400;--h:225" hidden>
             <div class="bumper" aria-hidden="true">
               <span class="bumper-ground"></span>
-              <span class="bumper-bag bumper-bag-left"></span>
-              <span class="bumper-bag bumper-bag-right"></span>
+              <!-- Ahead of the beanbags in the markup, because the tails come
+                   up from behind them: the two silhouettes have to paint over
+                   the base of each tail for it to read as one. -->
               <svg class="bumper-art" viewBox="0 0 400 225" preserveAspectRatio="none" focusable="false" aria-hidden="true">
                 <!-- The cinema-screen rectangle, drawn on by its own dash. -->
-                <rect class="bumper-frame" x="74" y="40" width="252" height="146" rx="8" />
+                <rect class="bumper-frame" x="60" y="24" width="280" height="178" rx="8" />
                 <!-- Míca's broad tail, with the light-brown patch in its
                      middle, and Mira's slender one with its four dark rings
-                     and dark tip. Both pop up from behind the beanbags. -->
+                     and dark tip: the two cats, named by the only part of them
+                     anyone ever sees over the back of a beanbag. -->
                 <g class="bumper-tails">
-                  <path class="tail-mica" d="M166 168C158 142 150 124 160 104" />
-                  <path class="tail-mica-patch" d="M156 140C153 130 152 124 154 118" />
-                  <path class="tail-mira" d="M238 168C250 144 256 126 250 106" />
-                  <path class="tail-mira-rings" d="M238 168C250 144 256 126 250 106" />
-                  <circle class="tail-mira-tip" cx="250" cy="106" r="5" />
+                  <path class="tail-mica" d="M158 86C148 72 136 54 143 38" />
+                  <path class="tail-mica-patch" d="M146 70C142 62 141 54 142 46" />
+                  <path class="tail-mira" d="M244 86C258 72 268 54 262 38" />
+                  <path class="tail-mira-rings" d="M244 86C258 72 268 54 262 38" />
+                  <circle class="tail-mira-tip" cx="262" cy="38" r="5" />
                 </g>
               </svg>
+              <span class="bumper-bag bumper-bag-left"></span>
+              <span class="bumper-bag bumper-bag-right"></span>
               <span class="bumper-wordmark">
                 <span class="bumper-name" data-i18n="studioName">懶骨頭影業</span>
                 <span class="bumper-name-other"></span>
