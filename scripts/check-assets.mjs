@@ -332,6 +332,23 @@ export function checkSheet({ name, image, colourType, depth, frames, columns, fr
   return { name, ok: failures.length === 0, failures, stats };
 }
 
+/**
+ * The line to print when a failed Cycle run looks like a Beat run in the wrong mode.
+ *
+ * Returns null unless *every* failure is a Cycle-only rule — a sheet that also
+ * broke a sprite-sheet rule would fail under `--beat` as well, and pointing at
+ * the mode there would send the reader the wrong way. Null for a result that
+ * already came from a Beat run, so nothing suggests a flag that is already on.
+ */
+export function beatHint(result) {
+  if (result.ok || result.stats?.contract === 'beat') return null;
+  if (!result.failures.every(failure => CYCLE_ONLY_RULES.includes(failure.rule))) return null;
+  return (
+    'every failure above is a Cycle-only rule. If this is a Beat rather than a Cycle, ' +
+    'a Beat moves its figure inside the frame on purpose: re-run with --beat.'
+  );
+}
+
 /** How much of the drawing sits near each of an Actor's bible colours. Printed, never failed on. */
 export function paletteReport(image, colours, distance = TOLERANCES.paletteDistance) {
   const near = Object.fromEntries(Object.keys(colours).map(key => [key, 0]));

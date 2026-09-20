@@ -26,6 +26,7 @@ import {
   FRAME_BOXES,
   TOLERANCES,
   actorFromFile,
+  beatHint,
   checkSheet,
   decodeSheet,
   frameBoxForActor,
@@ -342,6 +343,21 @@ test('content in a spare cell of a Beat still fails the spare-cell rule', () => 
   const sheet = buildBeat();
   sheet.frames = 7;
   assert.deepEqual(rules(check(sheet, { beat: true })), ['spare-cell']);
+});
+
+test('a default run that only broke Cycle-only rules is told --beat exists', () => {
+  const hint = beatHint(check(buildBeat()));
+  assert.match(hint, /--beat/);
+});
+
+test('no hint when the sheet would fail under --beat too', () => {
+  // rgba is a sprite-sheet rule, so --beat would not save this one.
+  assert.equal(beatHint(check(buildBeat(), { colourType: 2 })), null);
+});
+
+test('no hint for a sheet that passes, nor for one already checked as a Beat', () => {
+  assert.equal(beatHint(check(buildSheet())), null);
+  assert.equal(beatHint(check(buildBeat(), { beat: true })), null);
 });
 
 test('a Beat run records which contract was applied, and a Cycle run does not', () => {
