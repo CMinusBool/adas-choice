@@ -43,7 +43,6 @@ const zhHant = {
   detailsChoose: '今晚就看這部',
   projectorGateStart: '放映', projectorGateStop: '停止放映',
   studioName: '懶骨頭影業', studioPresents: '呈獻',
-  filmScreenLabel: '銀幕',
   // end 20
   activitiesTitle: '活動室',
   // 16: the Activity Room — `activitiesSoon` retired with the Room's build.
@@ -157,7 +156,6 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     detailsChoose: 'Watch this one tonight',
     projectorGateStart: 'Roll the reel', projectorGateStop: 'Stop the reel',
     studioName: 'Beanbag Pictures', studioPresents: 'presents',
-    filmScreenLabel: 'The screen',
     // end 20
     activitiesTitle: 'The Activity Room',
     // 16: the Activity Room

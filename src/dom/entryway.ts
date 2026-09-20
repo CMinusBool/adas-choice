@@ -1,4 +1,3 @@
-import { copy } from '../copy';
 import {
   ENTRYWAY,
   arrivalView,
@@ -11,7 +10,6 @@ import {
   type ArrivalView,
   type Box,
   type EntrywayProps,
-  type Language,
   type VaseState,
   type World,
 } from '../world';
@@ -151,7 +149,7 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
     return acted;
   }
 
-  let painted: { arrival: World['arrival']; vase: VaseState; language: Language } | null = null;
+  let painted: { arrival: World['arrival']; vase: VaseState } | null = null;
   return (next: World) => {
     world = next;
     openTheDoor();
@@ -162,19 +160,17 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
     if (arrival.state === 'done') rememberArrival();
 
     const vase = vaseState(next);
-    if (painted && painted.arrival === next.arrival && painted.vase === vase && painted.language === next.language) {
-      return;
-    }
-    painted = { arrival: next.arrival, vase, language: next.language };
+    if (painted && painted.arrival === next.arrival && painted.vase === vase) return;
+    painted = { arrival: next.arrival, vase };
 
     showProps(entrywayProps(next));
+    // Each of the vase's two Props has one sentence of its own and says it in
+    // whichever state it is shown in, so the sentences are the markup's
+    // `data-i18n-aria` and `src/dom/language.ts` sweeps them like any other —
+    // the same arrangement the other four Breakables ship with. All that is
+    // left here is which of the two is on the table.
     props.get('vaseIntact')!.hidden = vase !== 'intact';
     props.get('vaseBroken')!.hidden = vase !== 'broken';
-    // The vase's two states have a sentence each, and the language painter has
-    // already run by now: setting both keeps it right in either language.
-    const words = copy[next.language];
-    props.get('vaseIntact')!.setAttribute('aria-label', words.vaseIntact);
-    props.get('vaseBroken')!.setAttribute('aria-label', words.vaseBroken);
 
     const acted = playBeats(arrival);
     for (const [id, element] of cast) {

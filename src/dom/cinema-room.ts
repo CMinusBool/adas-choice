@@ -463,10 +463,6 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
       gate.setAttribute('aria-disabled', String(reel === null));
       gate.setAttribute('aria-pressed', String(rolling !== null));
       gate.setAttribute('aria-label', label);
-      // The first-paint markup names a copy key for this label; now that it
-      // changes with the reel, this painter owns it and the sweep must not
-      // overwrite it on the next language change.
-      delete gate.dataset.i18nAria;
       paintedReel = reel;
     }
 
