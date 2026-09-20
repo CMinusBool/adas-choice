@@ -51,6 +51,8 @@ import {
   steppedPortal,
   withPortalAttended,
   withPortalChosen,
+  withPortalClosed,
+  withPortalOpened,
   type PortalId,
   type PortalsSlice,
 } from './portals';
@@ -235,6 +237,11 @@ export type WorldEvent =
   // clicked, and the arrow keys or a step either side of it.
   | { readonly type: 'portal-chosen'; readonly portal: PortalId }
   | { readonly type: 'portal-stepped'; readonly step: number }
+  // 46: a Portal is a button that expands, so this is the click, the tap, the
+  // Enter and the Space on one — and Escape, the close button and the scrim
+  // are the one way back out of it.
+  | { readonly type: 'portal-opened'; readonly portal: PortalId }
+  | { readonly type: 'portal-closed' }
   // 20: cinema — the projector's gate lever, the machine's other affordance.
   // It says nothing about what it wants done: a Film on the screen is stopped
   // and a threaded reel is rolled, and which of the two is the model's answer.
@@ -308,8 +315,10 @@ export function advance(world: World, event: WorldEvent): World {
         // so the wall they come back to shows the Posters he went to fetch.
         cinema: settleCinema(world.cinema),
         // 45: and no Portal is still awake on a wall nobody is looking at,
-        // so the Game Room is found at rest however it was left.
-        portals: withPortalAttended(world.portals, null),
+        // so the Game Room is found at rest however it was left. 46: an
+        // expansion closes on the way out too, which is what makes the back
+        // button close it — the Room is never walked back into mid-expansion.
+        portals: withPortalClosed(withPortalAttended(world.portals, null)),
       };
       // 20: and a Film that was rolling falls silent on the way out, because
       // the Bumper is a Cinema Room moment rather than something that follows
@@ -474,14 +483,20 @@ export function advance(world: World, event: WorldEvent): World {
     // the apartment is a stale listener and means nothing.
     case 'portal-attended':
     case 'portal-chosen':
-    case 'portal-stepped': {
+    case 'portal-stepped':
+    case 'portal-opened':
+    case 'portal-closed': {
       if (world.rooms.current !== 'games') return world;
       const portals =
         event.type === 'portal-attended'
           ? withPortalAttended(world.portals, event.portal)
           : event.type === 'portal-chosen'
             ? withPortalChosen(world.portals, event.portal)
-            : steppedPortal(world.portals, event.step);
+            : event.type === 'portal-stepped'
+              ? steppedPortal(world.portals, event.step)
+              : event.type === 'portal-opened'
+                ? withPortalOpened(world.portals, event.portal)
+                : withPortalClosed(world.portals);
       return portals === world.portals ? world : { ...world, portals };
     }
   }
@@ -873,6 +888,16 @@ export function attendedPortal(world: World): PortalId | null {
 /** The Portal on the wall where it only has room for one. Never `null`. */
 export function currentPortal(world: World): PortalId {
   return world.portals.current;
+}
+
+/**
+ * The Portal expanded over the stage, or `null` while the wall is whole.
+ *
+ * 46: the expanded world plays whether or not anything is near the Portal
+ * underneath, so the page asks this before it asks `attendedPortal`.
+ */
+export function openPortal(world: World): PortalId | null {
+  return world.portals.open;
 }
 
 // 14: the Entryway. 09: the other four.

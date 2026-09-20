@@ -47,6 +47,8 @@ export { chosenActivity, openActivity } from './world';
 export type { PortalId, PortalsSlice } from './portals';
 export { PORTAL_IDS } from './portals';
 export { attendedPortal, currentPortal } from './world';
+// 46: and which one is expanded over the stage.
+export { openPortal } from './world';
 // 14: the Entryway — the Room's geometry, its Props and its arrival.
 export type { EntrywayPropId, EntrywayProps, VaseState } from './entryway';
 export { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';
