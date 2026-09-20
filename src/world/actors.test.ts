@@ -9,7 +9,9 @@ import {
   advance,
   createWorld,
   isWalkable,
+  roomHash,
   seededRandom,
+  type ActorId,
   type ActorView,
   type Point,
   type RoomId,
@@ -352,5 +354,60 @@ describe('the dice the Cast is given', () => {
 
   it('produces different streams from different seeds', () => {
     expect(seededRandom(1)()).not.toBe(seededRandom(2)());
+  });
+});
+
+// 43: the Cast is wherever the visitor is
+/**
+ * Who the visitor finds in the Game Room and the Activity Room.
+ *
+ * Ruled by the owner on 2026-09-20 and written into all four design notes: the
+ * Boy, the Girl and the three cats are in whichever Room is open. Both Rooms
+ * shipped with only the cats in them, because "is the couple in the Room the
+ * visitor is in?" had never been answered. The marks below are the design
+ * notes' own — `design/11-game-room.md` §4.3.1 and `design/12-activity-room.md`
+ * §4.3 — so this is a check of the two Rooms and not of the placing code.
+ */
+describe('the Cast in whichever Room the visitor is in', () => {
+  /** Walk in the way a door link does: through the hash the router reads. */
+  function walkInto(world: World, room: RoomId): World {
+    return advance(world, { type: 'hash-changed', hash: roomHash(room) });
+  }
+
+  function who(world: World, id: ActorId): ActorView {
+    const view = actorView(world, id);
+    if (!view) throw new Error(`${id} should be standing in the apartment.`);
+    return view;
+  }
+
+  it('stands the Boy and the Girl beside their poufs in the Game Room', () => {
+    // The interim standing marks (§4.3.1): the seated stills S09 and S10 do not
+    // exist, and a standing placeholder on a seated mark clips through a pouf.
+    const world = walkInto(createWorld(plainArrival), 'games');
+    expect(who(world, 'girl').at).toEqual({ x: 560, y: 800 });
+    expect(who(world, 'girl').facing).toBe('right');
+    expect(who(world, 'boy').at).toEqual({ x: 940, y: 795 });
+    expect(who(world, 'boy').facing).toBe('left');
+    // Nobody is mid-walk, and nobody was pulled onto the floor from off it: a
+    // clamped mark would come back as some other point.
+    for (const id of ['boy', 'girl'] as const) {
+      expect(who(world, id).moving).toBe(false);
+      expect(isWalkable('games', who(world, id).at)).toBe(true);
+    }
+  });
+
+  it('puts the whole Cast in the Game Room, the two of them clear of each other', () => {
+    const world = walkInto(createWorld(plainArrival), 'games');
+    expect([...actorsIn(world, 'games')].map(actor => actor.id).sort()).toEqual([
+      'boy',
+      'girl',
+      'luna',
+      'mica',
+      'mira',
+    ]);
+    expect(actorsIn(world, 'entryway')).toEqual([]);
+    // A figure is about 105 units across (§4.3.1), so two marks further apart
+    // than that are two sprites that do not touch.
+    expect(Math.abs(who(world, 'boy').at.x - who(world, 'girl').at.x)).toBeGreaterThan(105);
   });
 });
