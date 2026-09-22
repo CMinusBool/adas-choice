@@ -129,7 +129,13 @@ export function renderWholeCell(image, mask, region, { frame, seat }) {
   const out = blank(frame.width, frame.height);
   const sourceWidth = region.x1 - region.x0;
   const sourceHeight = region.y1 - region.y0;
-  const scale = Math.min(frame.width / sourceWidth, frame.height / sourceHeight);
+  // The same headroom `build-cycle.mjs` leaves around a Cycle frame's content, so a whole cell
+  // scaled to "fill" its target box still clears the edge-bleed rule: a raw generation's own cell
+  // is drawn to whatever margin the illustrator happened to leave, not to this ticket's target
+  // frame, and a figure that reaches the raw cell's edge in one frame of a moving Beat otherwise
+  // scales to touch the built frame's edge exactly, which is a property of the fit, not a defect
+  // in the generation.
+  const scale = Math.min((frame.width - MARGIN.side) / sourceWidth, (frame.height - MARGIN.top) / sourceHeight);
   const width = Math.max(1, Math.round(sourceWidth * scale));
   const height = Math.max(1, Math.round(sourceHeight * scale));
   const offsetX = Math.round((frame.width - width) / 2);
