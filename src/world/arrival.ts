@@ -33,7 +33,7 @@ import { distance, type Point } from './stage';
 
 /** How far the arrival has got. */
 export type ArrivalState =
-  /** Not started. The hall is as the visitor found it: the settled tableau. */
+  /** Not started. The hall is the script's first frame: empty, the door shut. */
   | 'pending'
   /** Running. The hall started empty and is filling up. */
   | 'playing'
@@ -343,13 +343,21 @@ export function finishArrival(
   arrival: ArrivalSlice,
 ): { readonly arrival: ArrivalSlice; readonly cues: readonly ArrivalCue[] } {
   if (arrival.state === 'done') return { arrival, cues: [] };
-  // A `pending` arrival never emptied the hall, so there is nothing to catch up.
-  const cues = arrival.state === 'pending' ? [] : crossed(arrival.seconds, ARRIVAL_SECONDS);
+  // 59: a `pending` arrival has emptied the hall already, so all of it is
+  // caught up — the cues at t 0 included, which a window opening at 0 skips.
+  const cues = arrival.state === 'pending' ? CUES : crossed(arrival.seconds, ARRIVAL_SECONDS);
   return { arrival: { state: 'done', startedAt: arrival.startedAt, seconds: ARRIVAL_SECONDS, sfx: [] }, cues };
 }
 
-/** How far into the script the page should be painting. */
+/**
+ * How far into the script the page should be painting.
+ *
+ * 59: a `pending` arrival paints its first second, not its last. The page
+ * waits behind the loading screen and then a beat more before it knocks, and
+ * the hall it shows through all of that is the one the door opens onto.
+ */
 function playhead(arrival: ArrivalSlice): number {
+  if (arrival.state === 'pending') return 0;
   return arrival.state === 'playing' ? Math.max(0, arrival.seconds) : ARRIVAL_SECONDS;
 }
 
@@ -365,7 +373,8 @@ function stateAt<T>(cues: ReadonlyArray<readonly [number, T]>, seconds: number, 
  *
  * Folded out of the script every time rather than stored, so a Prop can never
  * disagree with the clock — and so the settled tableau is simply the script read
- * at its last second, which is what both the `pending` and the `done` hall show.
+ * at its last second, which is what the `done` hall shows, and the `pending`
+ * hall is the same script read at its first.
  */
 export function propsAt(arrival: ArrivalSlice): EntrywayProps {
   const seconds = playhead(arrival);
