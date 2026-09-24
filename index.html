@@ -336,8 +336,14 @@
           Every Prop is placed in stage units with `--x --y --w --h`, which
           `styles.css` turns into percentages of the 1600 x 900 stage, so the
           numbers here are the design note's and mean the same place at every
-          width. The Room's artwork is drawn in CSS until ticket 36 lands the
-          generated images; nothing here names a file that does not exist.
+          width.
+
+          36: the art drop. Every surface below is the delivered image named
+          by its own `data-still`, over a box that is the design note's —
+          except the two S01 carries inside it, the doorway and the screen
+          sheet, which are measured off the delivered backdrop
+          (`scripts/art/measure-rect.mjs`; the numbers and their provenance
+          are in `public/assets/cinema/manifest.json`).
 
           07: this is also the Room's stage, so the Cast walks on it.
         -->
@@ -350,38 +356,35 @@
         <div class="cinema-room">
         <div class="stage stage-cinema" data-stage="cinema">
           <div class="cinema-room-art" aria-hidden="true">
-            <span class="cinema-cornice"></span>
-            <span class="cinema-floor"></span>
-            <span class="cinema-prop cinema-rug" style="--x:190;--y:740;--w:600;--h:140"></span>
-            <span class="cinema-prop cinema-sconce" style="--x:640;--y:180;--w:40;--h:60"></span>
-            <span class="cinema-prop cinema-screen" style="--x:210;--y:80;--w:420;--h:245">
-              <span class="screen-case"></span>
-              <span class="screen-sheet"></span>
-              <span class="screen-cord"></span>
-            </span>
+            <!-- S01: the empty Room — wall, cornice, sconce, screen, floor and
+                 rug in one opaque image, drawn with an empty doorway. -->
+            <span class="cinema-prop cinema-backdrop" data-still="assets/cinema/backdrop.png" style="--x:0;--y:0;--w:1600;--h:900"></span>
           </div>
-          <!-- P4: the door back to the Entryway, a link like every other door. -->
-          <a class="cinema-prop cinema-door" href="#/entryway" style="--x:40;--y:270;--w:130;--h:370" aria-label="回到玄關" data-i18n-aria="backToEntryway"><span class="door-leaf" aria-hidden="true"></span></a>
+          <!-- P4: the door back to the Entryway, a link like every other door.
+               Its box is S01's doorway as measured (72, 149, 224 x 446), not
+               the note's 40-170 target, and the S36 leaf fills it: cell 1 is
+               the shut leaf the Arrival swings, cell 2 ships unread. -->
+          <a class="cinema-prop cinema-door" href="#/entryway" style="--x:72;--y:149;--w:224;--h:446" aria-label="回到玄關" data-i18n-aria="backToEntryway"><span class="door-leaf" aria-hidden="true" data-still="assets/cinema/door-leaf.png"></span></a>
           <!-- P7-P9 and P21: three shelves you can tell apart from across the
                Room — colour, crown silhouette and ornament, then the plaque. -->
+          <!-- 36: each shelf's image (S02-S04) is wider and taller than its
+               120 x 380 button, because its crown ornament rises above it; it
+               stands on the button's base, centred, at its own --art-w/--art-h. -->
           <button class="cinema-prop cinema-shelf" type="button" data-shelf="comedy" style="--x:690;--y:260;--w:120;--h:380" aria-label="喜劇書架：點一下，讓他挑三部片" data-i18n-aria="shelfComedyAria">
-            <span class="shelf-ornament" aria-hidden="true"><span class="balloon"></span><span class="balloon"></span><span class="balloon"></span><span class="popcorn"></span></span>
-            <span class="shelf-body" aria-hidden="true"><span class="cubby"></span><span class="cubby"></span><span class="cubby"></span></span>
+            <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-comedy.png" style="--art-w:160;--art-h:470"></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfComedy">喜劇</span>
           </button>
           <!-- P19: the lucky cat 招財貓, Mira's Breakable, on the comedy
                shelf's bottom cubby floor (design 13 §7). Ticket 09 owns the
                knock and the state; the visitor cannot break it by clicking. -->
-          <div class="cinema-prop cinema-lucky-cat" data-breakable="cinema-lucky-cat" data-breakable-state="intact" role="img" aria-label="一隻招財貓" data-i18n-aria="luckyCatIntact" style="--x:726;--y:544;--w:44;--h:44"></div>
-          <div class="cinema-prop cinema-lucky-cat-broken" data-breakable="cinema-lucky-cat" data-breakable-state="broken" role="img" aria-label="摔成三塊的招財貓，手還在招" data-i18n-aria="luckyCatBroken" style="--x:700;--y:650;--w:90;--h:30" hidden></div>
+          <div class="cinema-prop cinema-lucky-cat" data-breakable="cinema-lucky-cat" data-breakable-state="intact" role="img" aria-label="一隻招財貓" data-i18n-aria="luckyCatIntact" data-still="assets/cinema/lucky-cat.png" style="--x:726;--y:544;--w:44;--h:44"></div>
+          <div class="cinema-prop cinema-lucky-cat-broken" data-breakable="cinema-lucky-cat" data-breakable-state="broken" role="img" aria-label="摔成三塊的招財貓，手還在招" data-i18n-aria="luckyCatBroken" data-still="assets/cinema/lucky-cat-broken.png" style="--x:700;--y:650;--w:90;--h:30" hidden></div>
           <button class="cinema-prop cinema-shelf" type="button" data-shelf="romance" style="--x:824;--y:260;--w:120;--h:380" aria-label="愛情書架：點一下，讓他挑三部片" data-i18n-aria="shelfRomanceAria">
-            <span class="shelf-ornament" aria-hidden="true"><span class="roses"></span><span class="fairy-lights"></span></span>
-            <span class="shelf-body" aria-hidden="true"><span class="cubby"></span><span class="cubby"></span><span class="cubby"></span></span>
+            <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-romance.png" style="--art-w:140;--art-h:450"></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfRomance">愛情</span>
           </button>
           <button class="cinema-prop cinema-shelf" type="button" data-shelf="horror" style="--x:958;--y:260;--w:120;--h:380" aria-label="恐怖書架：點一下，讓他挑三部片" data-i18n-aria="shelfHorrorAria">
-            <span class="shelf-ornament" aria-hidden="true"><span class="candle"></span><span class="skull"></span><span class="talisman"></span></span>
-            <span class="shelf-body" aria-hidden="true"><span class="cubby"></span><span class="cubby"></span><span class="cubby"></span></span>
+            <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-horror.png" style="--art-w:160;--art-h:460"></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfHorror">恐怖</span>
           </button>
           <!-- P10-P11: the Poster board. The three slots are filled by
@@ -390,30 +393,29 @@
                `<button>` for a Poster that is not up is one more Tab stop for
                nothing. The container is placed off the board's padding box, so
                its three 132 x 196 slots land on stage x 1125 / 1279 / 1433. -->
-          <section class="cinema-prop cinema-board" style="--x:1110;--y:300;--w:470;--h:320" aria-label="釘在牆上的海報" data-i18n-aria="boardLabel">
-            <span class="board-pin" aria-hidden="true"></span>
-            <span class="board-pin" aria-hidden="true"></span>
-            <span class="board-ghost" aria-hidden="true"></span>
+          <section class="cinema-prop cinema-board" data-still="assets/cinema/board.png" style="--x:1110;--y:300;--w:470;--h:320" aria-label="釘在牆上的海報" data-i18n-aria="boardLabel">
             <p class="board-empty" data-i18n="boardEmpty">牆上還空著。先選一排書架。</p>
             <div class="board-slots" data-poster-slots></div>
           </section>
           <!-- P12-P14: her teal beanbag, his coral one, the reel cabinet between. -->
-          <span class="cinema-prop cinema-beanbag beanbag-girl" style="--x:230;--y:690;--w:180;--h:110" aria-hidden="true"></span>
-          <span class="cinema-prop cinema-beanbag beanbag-boy" style="--x:570;--y:690;--w:180;--h:110" aria-hidden="true"></span>
-          <span class="cinema-prop cinema-cabinet" style="--x:430;--y:730;--w:140;--h:100" aria-hidden="true"><span class="cabinet-knob"></span></span>
+          <span class="cinema-prop cinema-beanbag beanbag-girl" data-still="assets/cinema/beanbag-girl.png" style="--x:230;--y:690;--w:180;--h:110" aria-hidden="true"></span>
+          <span class="cinema-prop cinema-beanbag beanbag-boy" data-still="assets/cinema/beanbag-boy.png" style="--x:570;--y:690;--w:180;--h:110" aria-hidden="true"></span>
+          <span class="cinema-prop cinema-cabinet" data-still="assets/cinema/cabinet.png" style="--x:430;--y:730;--w:140;--h:100" aria-hidden="true"></span>
           <!-- P18: the film can, Míca's Breakable, lying on the cabinet top
-               (design 13 §7). Ticket 09 owns the knock and the state. -->
-          <div class="cinema-prop cinema-film-can" data-breakable="cinema-film-can" data-breakable-state="intact" role="img" aria-label="一盒膠卷" data-i18n-aria="filmCanIntact" style="--x:470;--y:706;--w:60;--h:24"></div>
-          <div class="cinema-prop cinema-film-can-broken" data-breakable="cinema-film-can" data-breakable-state="broken" role="img" aria-label="被貓推下去的膠卷盒，底片散了一地" data-i18n-aria="filmCanBroken" style="--x:290;--y:800;--w:180;--h:80" hidden></div>
+               (design 13 §7). Ticket 09 owns the knock and the state. 36: the
+               delivered tin is drawn a little from above, 60 x 38 rather than
+               the note's 60 x 24, so its box grows upward off the same base. -->
+          <div class="cinema-prop cinema-film-can" data-breakable="cinema-film-can" data-breakable-state="intact" role="img" aria-label="一盒膠卷" data-i18n-aria="filmCanIntact" data-still="assets/cinema/film-can.png" style="--x:470;--y:692;--w:60;--h:38"></div>
+          <div class="cinema-prop cinema-film-can-broken" data-breakable="cinema-film-can" data-breakable-state="broken" role="img" aria-label="被貓推下去的膠卷盒，底片散了一地" data-i18n-aria="filmCanBroken" data-still="assets/cinema/film-can-broken.png" style="--x:290;--y:800;--w:180;--h:80" hidden></div>
           <!-- P15-P17: one machine, two affordances. The motor switch is low on
                the base plate and red; the film gate is the machine's mouth, high
                and cream, and stays disabled until ticket 20 loads a reel. -->
-          <span class="cinema-prop cinema-projector" style="--x:445;--y:600;--w:110;--h:130" aria-hidden="true">
-            <span class="projector-spindle"></span>
-            <span class="projector-spindle"></span>
-            <span class="projector-body"></span>
-            <span class="projector-lens"></span>
-          </span>
+          <!-- 36: S09 is the machine at rest, S11 its spindles turning over
+               the spindle region while the motor or a Film runs, and S10 the
+               reel that sits on the front spindle once one is loaded. -->
+          <span class="cinema-prop cinema-projector" data-still="assets/cinema/projector.png" style="--x:440;--y:600;--w:120;--h:130" aria-hidden="true"></span>
+          <span class="cinema-prop cinema-spindles" data-still="assets/cinema/spindles.png" style="--x:455;--y:600;--w:90;--h:60" aria-hidden="true"></span>
+          <span class="cinema-prop cinema-reel" data-still="assets/cinema/reel.png" style="--x:475;--y:600;--w:60;--h:60" aria-hidden="true"></span>
           <button class="cinema-prop projector-motor" type="button" data-music-source="cinema" aria-pressed="false" data-label-start="projectorMotorStart" data-label-stop="projectorMotorStop" style="--x:520;--y:700;--w:36;--h:28" hidden>
             <span class="motor-cap" aria-hidden="true"></span>
             <span class="motor-plate" aria-hidden="true">♪</span>
@@ -432,10 +434,11 @@
             there is a picture: `src/dom/cinema-room.ts` shows them.
           -->
           <span class="cinema-prop cinema-dim" aria-hidden="true" style="--x:0;--y:0;--w:1600;--h:900" hidden></span>
-          <span class="cinema-prop cinema-beam" aria-hidden="true" style="--x:210;--y:95;--w:420;--h:595" hidden></span>
+          <span class="cinema-prop cinema-beam" aria-hidden="true" style="--x:445;--y:148;--w:848;--h:517" hidden></span>
           <!--
-            §10: the screen sheet's own box (220, 100, 400 x 225), holding the
-            Bumper and then the title card.
+            §10: the screen sheet's own box, holding the Bumper and then the
+            title card. 36: measured off the delivered S01 at (727, 148,
+            566 x 316); the note's target was (220, 100, 400 x 225).
 
             The Bumper is drawn here in CSS and SVG from the design note's own
             shapes and colours (§10.2) — no generated frames, so it is crisp at
@@ -448,7 +451,7 @@
             the end of the trail. The Film's own strings come from
             `src/world/films.ts`; the studio's come from `src/copy.ts`.
           -->
-          <div class="cinema-prop cinema-film" style="--x:220;--y:100;--w:400;--h:225" hidden>
+          <div class="cinema-prop cinema-film" style="--x:727;--y:148;--w:566;--h:316" hidden>
             <div class="bumper" aria-hidden="true">
               <span class="bumper-ground"></span>
               <!-- Ahead of the beanbags in the markup, because the tails come
@@ -490,6 +493,39 @@
               <span class="film-year"></span>
               <a class="film-slate-link" target="_blank" rel="noopener" hidden data-i18n="detailsLink">在 Apple TV 找到它</a>
             </div>
+          </div>
+          <!-- 36: the nine Posters' images, S17-S25, one per Film. A Poster is
+               built by `src/dom/cinema-room.ts` only once it is pinned, so its
+               file is declared here, where the loading gate and
+               `assert-built-page.mjs` can see it, and the painter copies the
+               surface and the frame off the declaration by Film id. The four
+               fractions are the painted frame inside the 600 x 800 image, as
+               `measure-rect.mjs --frame` measured it: the flat Poster is the
+               image clipped to them, the expanded one the image whole. -->
+          <div class="poster-arts" hidden>
+            <span data-poster-art="knives-out" data-still="assets/cinema/poster-knives-out.png" style="--frame-x:0.1533;--frame-y:0.1237;--frame-w:0.6983;--frame-h:0.7638"></span>
+            <span data-poster-art="kung-fu-hustle" data-still="assets/cinema/poster-kung-fu-hustle.png" style="--frame-x:0.1433;--frame-y:0.07;--frame-w:0.7167;--frame-h:0.8113"></span>
+            <span data-poster-art="eat-drink-man-woman" data-still="assets/cinema/poster-eat-drink-man-woman.png" style="--frame-x:0.1233;--frame-y:0.1388;--frame-w:0.76;--frame-h:0.7438"></span>
+            <span data-poster-art="crazy-rich-asians" data-still="assets/cinema/poster-crazy-rich-asians.png" style="--frame-x:0.245;--frame-y:0.1275;--frame-w:0.5017;--frame-h:0.6575"></span>
+            <span data-poster-art="about-time" data-still="assets/cinema/poster-about-time.png" style="--frame-x:0.1417;--frame-y:0.1025;--frame-w:0.7233;--frame-h:0.7775"></span>
+            <span data-poster-art="in-the-mood-for-love" data-still="assets/cinema/poster-in-the-mood-for-love.png" style="--frame-x:0.175;--frame-y:0.2263;--frame-w:0.655;--frame-h:0.6663"></span>
+            <span data-poster-art="mr-vampire" data-still="assets/cinema/poster-mr-vampire.png" style="--frame-x:0.17;--frame-y:0.1263;--frame-w:0.6933;--frame-h:0.72"></span>
+            <span data-poster-art="get-out" data-still="assets/cinema/poster-get-out.png" style="--frame-x:0.1467;--frame-y:0.1275;--frame-w:0.71;--frame-h:0.765"></span>
+            <span data-poster-art="detention" data-still="assets/cinema/poster-detention.png" style="--frame-x:0.1283;--frame-y:0.1338;--frame-w:0.7367;--frame-h:0.755"></span>
+          </div>
+          <!-- 36: delivered and declared, so they preload and are checked in
+               `dist/`, but not yet played: no painter steps a Cinema Beat or
+               carries the held scroll bundle (S16). Hidden until one does. -->
+          <div class="beats" data-beats="cinema" hidden>
+            <span data-beat="cinema-S26" data-still="assets/cinema/boy-sits-beanbag.png"></span>
+            <span data-beat="cinema-S27" data-still="assets/cinema/girl-sits-beanbag.png"></span>
+            <span data-beat="cinema-S28" data-still="assets/cinema/boy-rummages-shelf.png"></span>
+            <span data-beat="cinema-S29" data-still="assets/cinema/boy-pins-poster.png"></span>
+            <span data-beat="cinema-S30" data-still="assets/cinema/boy-searches-cabinet.png"></span>
+            <span data-beat="cinema-S31" data-still="assets/cinema/boy-loads-reel.png"></span>
+            <span data-beat="cinema-S32" data-still="assets/cinema/mica-knocks-can.png"></span>
+            <span data-beat="cinema-S33" data-still="assets/cinema/mira-knocks-cat.png"></span>
+            <span data-held="scroll-bundle" data-still="assets/cinema/scroll-bundle.png"></span>
           </div>
         </div>
         <!-- 19, §4.6: what an expanded Poster opens onto. The Film's own

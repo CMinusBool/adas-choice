@@ -277,17 +277,19 @@ html.dialog-open { overflow: hidden; }
    polygon in `src/world/actors.ts` and the Cast's marks alike. `--u` is one
    stage unit as a length, for the type, borders and radii inside a Prop.
 
-   All of it is drawn in CSS. Ticket 32 is generating this Room's artwork and
-   ticket 36 lands it; until then nothing here names a file, so the built page
-   has no URL that could 404. */
+   36: the art drop. Every surface is now the delivered image a Prop names in
+   its own `data-still` (ticket 32's generations, built into
+   `public/assets/cinema/`); what is left here is only what a Prop does with
+   its image. The Bumper, the title card, the beam and the dim are still drawn,
+   because the design note never made them images. */
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .stage-cinema {
   --u: .0625cqw;
-  --wall: #3a2f3b; --floor: #4a3730; --cream: #efe6d6; --walnut: #5a3f31;
+  --cream: #efe6d6;
   container-type: inline-size;
   overflow: hidden;
   border-radius: 14px;
-  background: linear-gradient(to bottom, #2f2631 0 6.7%, var(--wall) 6.7% 71.1%, var(--floor) 71.1%);
+  background: #2f2631;
 }
 /* A Prop is a box in stage units, turned into percentages of the stage - the
    same arithmetic `src/dom/actors.ts` does for an Actor's feet point. All four
@@ -334,64 +336,46 @@ html.dialog-open { overflow: hidden; }
    keyboard and by nothing else. An expansion the pointer drives needs them. */
 .stage-cinema button.cinema-poster { pointer-events: auto; }
 
-/* P1-P3, P5, P6: the empty Room. */
-.cinema-cornice { position: absolute; left: 0; right: 0; top: 6.7%; height: calc(var(--u) * 6); background: #6b5344; }
-.cinema-floor { position: absolute; left: 0; right: 0; top: 71.1%; bottom: 0; background: repeating-linear-gradient(90deg, #4a3730 0 calc(var(--u) * 76), #43312b calc(var(--u) * 76) calc(var(--u) * 80)); }
-.cinema-rug { border-radius: 50% / 40%; background: radial-gradient(ellipse at 50% 50%, #7a4a52, #5d3a3c 62%, #4d3134); opacity: .9; }
-.cinema-sconce { border-radius: calc(var(--u) * 6); background: linear-gradient(#c79a4e, #8a6a34); box-shadow: 0 0 calc(var(--u) * 150) calc(var(--u) * 60) #ffca8033; }
-.cinema-screen .screen-case { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--u) * 20); border-radius: calc(var(--u) * 4); background: #17141a; }
-.cinema-screen .screen-sheet { position: absolute; left: calc(var(--u) * 10); top: calc(var(--u) * 20); width: calc(var(--u) * 400); height: calc(var(--u) * 225); background: linear-gradient(#efe6d6, #e2d6c2); box-shadow: inset 0 0 calc(var(--u) * 40) #00000022; }
-.cinema-screen .screen-cord { position: absolute; left: calc(var(--u) * 408); top: calc(var(--u) * 245); width: calc(var(--u) * 4); height: calc(var(--u) * 35); background: #d8cbb6; }
+/* P1-P3, P5, P6: the empty Room, S01 — wall, cornice, sconce, screen, floor
+   and rug in one opaque image, under everything else on the stage. */
+.stage-cinema .cinema-backdrop { z-index: 0; }
 
-/* P4: the door, with the hallway leaking round it. */
-.cinema-door { border-radius: calc(var(--u) * 6); background: var(--walnut); box-shadow: 0 0 calc(var(--u) * 40) #ffca8022; transition: box-shadow .25s; }
-.cinema-door .door-leaf { position: absolute; inset: calc(var(--u) * 15); border-radius: calc(var(--u) * 4); background: linear-gradient(100deg, #ffd9a0 0 12%, #6a4a39 12%); }
+/* P4: the doorway S01 leaves empty, and the S36 leaf that fills it. The box is
+   the doorway as measured off S01, and the leaf's two-cell sheet — shut, then
+   open — shows its shut cell through the whole swing, which `.stage[data-door]`
+   at the end of the file still drives. The hallway glow comes up on hover and
+   focus only: the ruling of 2026-09-20 put no light round a shut door. */
+.cinema-door { transition: box-shadow .25s; }
+.cinema-door .door-leaf { position: absolute; inset: 0; background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; }
 .cinema-door:hover, .cinema-door:focus-visible { box-shadow: 0 0 calc(var(--u) * 90) #ffca8066; outline: none; }
 .cinema-door:focus-visible .door-leaf { outline: 3px solid var(--pink); outline-offset: 2px; }
 
 /* P7-P9: the three shelves. Colour, crown silhouette and ornament each say the
-   genre on their own, so any one of them surviving a small screen is enough. */
+   genre on their own, so any one of them surviving a small screen is enough —
+   and since ticket 36 all three are painted into S02-S04, the horror shelf's
+   4-degree lean included, so nothing here rotates it any more. */
 .cinema-shelf { z-index: 640; overflow: visible; transition: filter .2s; }
 /* `--glow` is the rim light a shelf comes up in. It is the trim colour, except
    on the horror shelf, whose trim is nearly black: there it is the candle's
    sick green, which is that shelf's own colour in the design note's table. */
-.cinema-shelf[data-shelf="comedy"] { --body: #f2c14e; --trim: #e39b2d; --cap: #e8703a; --glow: #e39b2d; }
-.cinema-shelf[data-shelf="romance"] { --body: #e86f8f; --trim: #b8405e; --cap: #f5a3c5; --glow: #f5a3c5; }
-.cinema-shelf[data-shelf="horror"] { --body: #3e2a4f; --trim: #1f1528; --cap: #14101a; --glow: #8fd14f; transform: rotate(-4deg); transform-origin: bottom center; }
-.cinema-shelf .shelf-body { position: absolute; inset: 0; display: flex; flex-direction: column; gap: calc(var(--u) * 8); padding: calc(var(--u) * 12) calc(var(--u) * 10) calc(var(--u) * 52); background: var(--body); border: calc(var(--u) * 6) solid var(--trim); }
-.cinema-shelf .cubby { flex: 1; background: repeating-linear-gradient(90deg, var(--cap) 0 calc(var(--u) * 9), #00000055 calc(var(--u) * 9) calc(var(--u) * 12), var(--cap) calc(var(--u) * 12) calc(var(--u) * 21), #00000055 calc(var(--u) * 21) calc(var(--u) * 24)), #2a2028; }
-.cinema-shelf[data-shelf="comedy"] .shelf-body { border-radius: calc(var(--u) * 30) calc(var(--u) * 30) calc(var(--u) * 6) calc(var(--u) * 6); }
-.cinema-shelf[data-shelf="romance"] .shelf-body { border-radius: calc(var(--u) * 6); }
-.cinema-shelf[data-shelf="horror"] .shelf-body { clip-path: polygon(50% 0, 100% 10%, 100% 100%, 0 100%, 0 10%); }
-/* The crown ornament stands clear of the shelf and never rises above y 180. */
-.cinema-shelf .shelf-ornament { position: absolute; left: 0; right: 0; bottom: 100%; height: calc(var(--u) * 80); }
-.shelf-ornament > span { position: absolute; }
-.shelf-ornament .balloon { width: calc(var(--u) * 26); height: calc(var(--u) * 32); border-radius: 50%; background: #f2c14e; box-shadow: 0 calc(var(--u) * 16) 0 calc(var(--u) * -14) #e39b2d; }
-.shelf-ornament .balloon:nth-child(1) { left: calc(var(--u) * 6); top: 0; }
-.shelf-ornament .balloon:nth-child(2) { left: calc(var(--u) * 32); top: calc(var(--u) * -6); background: #e8703a; }
-.shelf-ornament .balloon:nth-child(3) { left: calc(var(--u) * 58); top: calc(var(--u) * 2); background: #f6d98a; }
-.shelf-ornament .popcorn { right: calc(var(--u) * 4); bottom: 0; width: calc(var(--u) * 42); height: calc(var(--u) * 34); border-radius: calc(var(--u) * 4) calc(var(--u) * 4) calc(var(--u) * 10) calc(var(--u) * 10); background: repeating-linear-gradient(90deg, #e8524a 0 calc(var(--u) * 7), #f6efe4 calc(var(--u) * 7) calc(var(--u) * 14)); box-shadow: 0 calc(var(--u) * -6) 0 calc(var(--u) * -3) #f6efe4; }
-/* Romance: a heart cut into the crown, roses and a string of warm lights. */
-.shelf-ornament .roses { left: 50%; bottom: 0; translate: -50% 0; width: calc(var(--u) * 46); height: calc(var(--u) * 38); border-radius: calc(var(--u) * 6) calc(var(--u) * 6) calc(var(--u) * 16) calc(var(--u) * 16); background: radial-gradient(circle at 30% 30%, #d5304f calc(var(--u) * 9), transparent 0), radial-gradient(circle at 68% 26%, #ef5570 calc(var(--u) * 8), transparent 0), linear-gradient(#3f6b46, #2c4b31); }
-.shelf-ornament .fairy-lights { left: 0; right: 0; bottom: calc(var(--u) * -4); height: calc(var(--u) * 6); background: repeating-linear-gradient(90deg, #ffd9a0 0 calc(var(--u) * 5), transparent calc(var(--u) * 5) calc(var(--u) * 16)); }
-.cinema-shelf[data-shelf="romance"] .shelf-body::before { content: ""; position: absolute; left: 50%; top: calc(var(--u) * -34); translate: -50% 0; width: calc(var(--u) * 44); height: calc(var(--u) * 40); background: var(--trim); clip-path: path("M22 40C22 40 0 24 0 12A11 11 0 0 1 22 8 11 11 0 0 1 44 12C44 24 22 40 22 40Z"); }
-/* Horror: a green candle flame, a skull and a talisman slip, red marks only. */
-.shelf-ornament .candle { left: calc(var(--u) * 20); bottom: 0; width: calc(var(--u) * 14); height: calc(var(--u) * 46); background: #cdbfae; box-shadow: 0 0 calc(var(--u) * 70) calc(var(--u) * 14) #8fd14f33; }
-.shelf-ornament .candle::after { content: ""; position: absolute; left: 50%; bottom: 100%; translate: -50% 0; width: calc(var(--u) * 12); height: calc(var(--u) * 20); border-radius: 50% 50% 40% 40%; background: #8fd14f; }
-.shelf-ornament .skull { right: calc(var(--u) * 14); bottom: 0; width: calc(var(--u) * 28); height: calc(var(--u) * 26); border-radius: 50% 50% 40% 40%; background: #ddd4c6; }
-.shelf-ornament .talisman { right: calc(var(--u) * -10); bottom: calc(var(--u) * -20); width: calc(var(--u) * 16); height: calc(var(--u) * 46); background: repeating-linear-gradient(#f1d163 0 calc(var(--u) * 10), #c8392f calc(var(--u) * 10) calc(var(--u) * 13)); }
+.cinema-shelf[data-shelf="comedy"] { --glow: #e39b2d; }
+.cinema-shelf[data-shelf="romance"] { --glow: #f5a3c5; }
+.cinema-shelf[data-shelf="horror"] { --glow: #8fd14f; }
+/* Each image is its shelf plus the ornament on its crown, so it is taller and
+   wider than the 120 x 380 button: it stands on the button's base, centred,
+   at the `--art-w` x `--art-h` stage units its own element declares. */
+.cinema-shelf .shelf-art { position: absolute; bottom: 0; left: calc(var(--u) * (120 - var(--art-w)) / 2); width: calc(var(--u) * var(--art-w)); height: calc(var(--u) * var(--art-h)); }
 /* P21: the brass plaque on each plinth, muted until the shelf is attended. */
 .cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--u) * 12); width: calc(var(--u) * 100); padding: calc(var(--u) * 2) 0; border-radius: calc(var(--u) * 4); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--u) * 20); line-height: 1.2; text-align: center; opacity: .78; transition: opacity .2s; }
 .cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--u) * 30) var(--glow)) brightness(1.08); outline: none; }
 .cinema-shelf:hover .shelf-plaque, .cinema-shelf:focus-visible .shelf-plaque, .cinema-shelf.is-attended .shelf-plaque { opacity: 1; }
-.cinema-shelf:focus-visible .shelf-body { outline: 3px solid var(--pink); outline-offset: 3px; }
+.cinema-shelf:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
 
-/* P10: the felt board, bare until he pins Posters to it. */
-.cinema-board { display: grid; place-items: center; padding: calc(var(--u) * 12); border: calc(var(--u) * 12) solid var(--walnut); background: #4a3a3f; }
-.cinema-board .board-pin { position: absolute; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f0d18a, #9a7a3a); }
-.cinema-board .board-pin:nth-child(1) { left: 12%; top: 14%; }
-.cinema-board .board-pin:nth-child(2) { right: 18%; bottom: 20%; }
-.cinema-board .board-ghost { position: absolute; left: 34%; top: 16%; width: calc(var(--u) * 132); height: calc(var(--u) * 196); background: #ffffff0b; }
+/* P10: the felt board, bare until he pins Posters to it. Its walnut frame,
+   stray pins and the paler rectangle where a poster once hung are all in S05.
+   The 12-unit border and padding stay, transparent, because the Poster slots
+   below are placed off the padding box; the image paints the border box. */
+.cinema-board { display: grid; place-items: center; padding: calc(var(--u) * 12); border: calc(var(--u) * 12) solid transparent; background-origin: border-box; }
 .cinema-board .board-empty { position: relative; margin: 0; max-width: calc(var(--u) * 330); color: #c8b9bd; font-size: calc(var(--u) * 26); line-height: 1.6; text-align: center; }
 
 /* 18: P11, the three Poster slots.
@@ -402,29 +386,43 @@ html.dialog-open { overflow: hidden; }
    put slots 2 and 3 at 1279 and 1433. `--u` is the stage unit, so the three
    land on the same spot at every shell width, like every other Prop here. */
 .cinema-board .board-slots { position: absolute; left: calc(var(--u) * 3); top: calc(var(--u) * 38); display: flex; gap: calc(var(--u) * 22); }
-/* Every Poster is the same stock, so nine originals read as one set: cream
-   paper, a deckled margin, and a genre stripe in the shelf's own body colour
-   that says which shelf it came from long after the shelf is out of mind. The
-   painted art is ticket 36's; until it lands the frame holds that Film's
-   genre ground with a low horizon and a soft vignette, which is the shared
-   composition rule the delivered artwork also follows. */
-.cinema-poster { position: relative; flex: 0 0 auto; width: calc(var(--u) * 132); height: calc(var(--u) * 196); padding: 0; border: 0; background: #f1e6cf; box-shadow: 0 calc(var(--u) * 6) calc(var(--u) * 16) #00000055; cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1); }
-.cinema-poster[data-shelf="comedy"] { --stripe: #f2c14e; --ground: #d9a441; --horizon: #8a4f2b; }
-.cinema-poster[data-shelf="romance"] { --stripe: #e86f8f; --ground: #6e1f2e; --horizon: #2d6d61; }
-.cinema-poster[data-shelf="horror"] { --stripe: #3e2a4f; --ground: #26234f; --horizon: #4a6b34; }
-.cinema-poster .poster-stripe { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 6); height: calc(var(--u) * 10); background: var(--stripe); }
-.cinema-poster .poster-ground { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); top: calc(var(--u) * 20); bottom: calc(var(--u) * 34); background: linear-gradient(var(--ground) 0 72%, var(--horizon) 72%); box-shadow: inset 0 0 calc(var(--u) * 26) calc(var(--u) * 10) #00000044; }
+/* 36: every Poster is its Film's own image (S17-S25): the framed Poster
+   painted in the middle of a 600 x 800 canvas — cream stock, genre stripe and
+   all — with its characters spilling out over the frame onto a transparent
+   ground. `src/dom/cinema-room.ts` copies the surface and the frame's four
+   measured fractions onto the button from the image's declaration in
+   `index.html`, and everything below is arithmetic on them.
+
+   The slot stays the design note's 132 x 196, so the board, the pins and the
+   Boy's marks do not move. The painted frame is 196 units tall and as wide as
+   its own proportions make it — 112 to 150 units across the nine, since no two
+   generations drew the same frame — centred in the slot, because stretching a
+   painting to a slot it was not drawn for is the one thing this must not do.
+   `.75` is the canvas's own 600 x 800. */
+.cinema-poster {
+  --art-h: calc(var(--u) * 196 / var(--frame-h));
+  --art-w: calc(var(--art-h) * .75);
+  --frame-width: calc(var(--art-w) * var(--frame-w));
+  --frame-left: calc((var(--u) * 132 - var(--frame-width)) / 2);
+  position: relative; flex: 0 0 auto; width: calc(var(--u) * 132); height: calc(var(--u) * 196); padding: 0; border: 0; background: none; overflow: visible; filter: drop-shadow(0 calc(var(--u) * 6) calc(var(--u) * 8) #00000066); cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1);
+}
+/* Clipped to the frame at rest, and unclipped as the Poster grows (below), so
+   what spills out emerges from behind the frame's edges rather than fading in. */
+.cinema-poster .poster-art { position: absolute; top: calc(var(--art-h) * var(--frame-y) * -1); left: calc(var(--frame-left) - var(--art-w) * var(--frame-x)); width: var(--art-w); height: var(--art-h); background: var(--still) 0 0 / 100% 100% no-repeat; clip-path: inset(calc(var(--frame-y) * 100%) calc((1 - var(--frame-x) - var(--frame-w)) * 100%) calc((1 - var(--frame-y) - var(--frame-h)) * 100%) calc(var(--frame-x) * 100%)); pointer-events: none; }
 /* The caption is DOM text, never drawn into the artwork: that is what keeps a
    Poster bilingual and free of generated lettering. Two lines of 13-unit type
    sit inside the design note's 28-unit strip, which is what the longest titles
    need — "Eat Drink Man Woman", "In the Mood for Love" — while the Chinese
-   titles, none longer than five characters, stay on one. */
-.cinema-poster .poster-caption { position: absolute; left: calc(var(--u) * 6); right: calc(var(--u) * 6); bottom: calc(var(--u) * 4); height: calc(var(--u) * 28); display: grid; place-items: center; color: #2b2230; font-size: calc(var(--u) * 13); line-height: 1.05; text-align: center; text-wrap: balance; overflow: hidden; }
-/* Two brass pins at the top corners, pressed in as the Poster unrolls. */
+   titles, none longer than five characters, stay on one. The delivered
+   frames leave no blank strip at the bottom for it, so since ticket 36 the
+   caption brings its own cream stock, inside the painted frame's bottom edge. */
+.cinema-poster .poster-caption { position: absolute; left: calc(var(--frame-left) + var(--u) * 6); right: calc(var(--frame-left) + var(--u) * 6); bottom: calc(var(--u) * 4); height: calc(var(--u) * 28); display: grid; place-items: center; border-radius: calc(var(--u) * 2); background: #f1e6cf; color: #2b2230; font-size: calc(var(--u) * 13); line-height: 1.05; text-align: center; text-wrap: balance; overflow: hidden; }
+/* Two brass pins at the painted frame's top corners, pressed in as the Poster
+   unrolls. */
 .cinema-poster .poster-pin { position: absolute; top: calc(var(--u) * -5); width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f7e2a6, #9a7a3a); box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 5) #00000077; animation: poster-pin-push .18s .32s backwards; }
-.cinema-poster .poster-pin:nth-of-type(1) { left: calc(var(--u) * 8); }
-.cinema-poster .poster-pin:nth-of-type(2) { right: calc(var(--u) * 8); }
-.cinema-poster:hover, .cinema-poster:focus-visible { outline: none; box-shadow: 0 calc(var(--u) * 10) calc(var(--u) * 26) #000000aa; }
+.cinema-poster .poster-art + .poster-pin { left: calc(var(--frame-left) + var(--u) * 8); }
+.cinema-poster .poster-pin + .poster-pin { right: calc(var(--frame-left) + var(--u) * 8); }
+.cinema-poster:hover, .cinema-poster:focus-visible { outline: none; filter: drop-shadow(0 calc(var(--u) * 10) calc(var(--u) * 16) #000000aa); }
 .cinema-poster:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
 @keyframes poster-unroll { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes poster-pin-push { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
@@ -432,12 +430,9 @@ html.dialog-open { overflow: hidden; }
 
    Hover or focus grows the Poster about its own centre over 450 ms, and the
    characters and props that were tucked behind the frame come out over its
-   edges: `.poster-spill` is clipped to the frame at rest and opens past it as
-   the Poster grows, which is the delivered artwork's own arrangement — one
-   image, clipped flat and unclipped expanded, so the two states cannot drift
-   apart. Until ticket 36 lands that image the spill is three CSS shapes in
-   the Film's genre colours, and it is replaced together with `.poster-ground`
-   rather than separately.
+   edges: `.poster-art` is clipped to the frame at rest and opens past it as
+   the Poster grows — one image, clipped flat and unclipped expanded, so the
+   two states cannot drift apart.
 
    Slot 3 sits 90 units left of where it would grow to, which is the design
    note's clamp keeping the widest Poster inside the stage. The scale steps up
@@ -446,48 +441,43 @@ html.dialog-open { overflow: hidden; }
    220 CSS px floor on a phone: the same section forbids a Poster taller than
    the stage, and at that width the details card below the stage is what
    carries the reading. */
-.cinema-poster { transition: scale .45s cubic-bezier(.22, .75, .2, 1), translate .45s cubic-bezier(.22, .75, .2, 1), box-shadow .2s; }
+.cinema-poster { transition: scale .45s cubic-bezier(.22, .75, .2, 1), translate .45s cubic-bezier(.22, .75, .2, 1), filter .2s; }
 .cinema-poster.is-expanded { z-index: 20; scale: 1.6; }
 .cinema-poster.is-expanded[data-poster-slot="3"] { translate: calc(var(--u) * -90); }
 @container (max-width: 900px) { .cinema-poster.is-expanded { scale: 2.2; } }
 @container (max-width: 620px) { .cinema-poster.is-expanded { scale: 2.9; } }
-/* Behind the stock, so what is inside the frame stays hidden by it and only
-   what breaks the edge is ever seen. */
-.cinema-poster .poster-spill { position: absolute; inset: 0; z-index: -1; clip-path: inset(0); opacity: 0; pointer-events: none; transition: clip-path .45s cubic-bezier(.22, .75, .2, 1), opacity .2s; }
-.cinema-poster.is-expanded .poster-spill { clip-path: inset(-26% -34%); opacity: 1; }
-.poster-spill > span { position: absolute; box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 8) #00000066; }
-.poster-spill .spill-figure { left: -20%; bottom: 8%; width: 34%; height: 56%; border-radius: 46% 46% 28% 28% / 32% 32% 12% 12%; background: linear-gradient(var(--horizon), var(--ground)); }
-.poster-spill .spill-figure::before { content: ""; position: absolute; left: 50%; top: -17%; translate: -50% 0; width: 52%; aspect-ratio: 1; border-radius: 50%; background: var(--stripe); }
-.poster-spill .spill-prop-a { right: -18%; top: -13%; width: 28%; aspect-ratio: 1; border-radius: 50%; background: var(--stripe); }
-.poster-spill .spill-prop-b { right: -12%; bottom: -9%; width: 34%; height: 15%; border-radius: calc(var(--u) * 6) / 50%; background: var(--horizon); }
+.cinema-poster .poster-art { transition: clip-path .45s cubic-bezier(.22, .75, .2, 1); }
+.cinema-poster.is-expanded .poster-art { clip-path: inset(0); }
 
 /* While his arm is in a bay its tubes rattle, which is the whole of what the
    rummage Beat looks like until the Boy's own frames are drawn. */
-.cinema-shelf.is-rummaging .shelf-body { animation: shelf-rummage .18s steps(2, end) infinite; }
+.cinema-shelf.is-rummaging .shelf-art { animation: shelf-rummage .18s steps(2, end) infinite; }
 @keyframes shelf-rummage { from { translate: 0 0; } 50% { translate: calc(var(--u) * 1) calc(var(--u) * -1); } to { translate: 0 0; } }
 
 /* P12-P14: the beanbags and the reel cabinet the projector stands on. */
-.cinema-beanbag { z-index: 800; border-radius: 48% 52% 44% 56% / 62% 58% 42% 38%; }
-.beanbag-girl { background: radial-gradient(circle at 38% 30%, #3a9bb5, #287f98 60%, #1d5f72); }
-.beanbag-boy { background: radial-gradient(circle at 38% 30%, #e5836f, #d76451 60%, #a64535); }
-.cinema-cabinet { z-index: 830; border-radius: calc(var(--u) * 5); background: linear-gradient(#6a4a39, #4c342a); border: calc(var(--u) * 4) solid #3a2820; }
-.cinema-cabinet .cabinet-knob { position: absolute; right: 12%; top: 46%; width: calc(var(--u) * 10); height: calc(var(--u) * 10); border-radius: 50%; background: #c79a4e; }
+.cinema-beanbag { z-index: 800; }
+.cinema-cabinet { z-index: 830; }
 
-/* 09: the Cinema Room's two Breakables. Simple placeholder shapes, like the
-   other three Breakables' — the artwork is ticket 36's, and neither is
+/* 09: the Cinema Room's two Breakables, S12-S15 since ticket 36. Neither is
    clickable: the visitor cannot break either by hand. */
-.cinema-film-can { z-index: 831; border-radius: 40% / 50%; background: linear-gradient(100deg, #7a8a6f 0 55%, #5c6b52 55%); box-shadow: inset 0 0 0 calc(var(--u) * 2) #3f4a38; }
-.cinema-film-can-broken { z-index: 871; background: linear-gradient(#5c6b52 0 34%, transparent 34%) no-repeat 0 0 / 34% 60%, repeating-linear-gradient(100deg, #2a241f 0 6%, #17130f 6% 10%) no-repeat 30% 20% / 68% 40%; }
-.cinema-lucky-cat { z-index: 640; border-radius: 40% 40% 50% 50%; background: linear-gradient(#f6efe4 0 70%, #d9524a 70% 84%, #f0d18a 84%); }
-.cinema-lucky-cat-broken { z-index: 680; background: radial-gradient(closest-side, #f6efe4 0 90%, transparent 90%) no-repeat 4% 30% / 30% 60%, radial-gradient(closest-side, #f6efe4 0 90%, transparent 90%) no-repeat 60% 10% / 26% 50%, radial-gradient(closest-side, #d9524a 0 90%, transparent 90%) no-repeat 82% 40% / 18% 40%; }
+.cinema-film-can { z-index: 831; }
+.cinema-film-can-broken { z-index: 871; }
+.cinema-lucky-cat { z-index: 640; }
+.cinema-lucky-cat-broken { z-index: 680; }
 
-/* P15-P17: the projector, and its two affordances. */
+/* P15-P17: the projector, and its two affordances. S09 is the machine at rest;
+   S11, its spindles turning, lies over the spindle region only while the motor
+   or a Film is running, and steps through its four cells in 0.4 s; S10, the
+   reel, sits on the front spindle once one is loaded — which is when the gate
+   stops being disabled. All three read the state the projector's own two
+   buttons already carry, so nothing in `src/dom/` had to learn about them. */
 .cinema-projector { z-index: 831; }
-.cinema-projector .projector-body { position: absolute; left: 0; bottom: 0; width: calc(var(--u) * 110); height: calc(var(--u) * 80); border-radius: calc(var(--u) * 8); background: linear-gradient(#4b4a52, #2a282f); }
-.cinema-projector .projector-spindle { position: absolute; top: 0; width: calc(var(--u) * 40); height: calc(var(--u) * 40); border-radius: 50%; border: calc(var(--u) * 5) solid #6d6b76; }
-.cinema-projector .projector-spindle:nth-child(1) { left: calc(var(--u) * 10); }
-.cinema-projector .projector-spindle:nth-child(2) { left: calc(var(--u) * 58); }
-.cinema-projector .projector-lens { position: absolute; left: calc(var(--u) * -6); bottom: calc(var(--u) * 46); width: calc(var(--u) * 26); height: calc(var(--u) * 22); border-radius: calc(var(--u) * 4); background: #23212a; box-shadow: inset 0 0 0 calc(var(--u) * 3) #6d6b76; }
+.stage-cinema .cinema-spindles { z-index: 832; display: none; background-size: 400% 100%; background-position: 0 0; }
+.stage-cinema:has(.projector-motor[aria-pressed="true"], .projector-gate[aria-pressed="true"]) .cinema-spindles { display: block; animation: cinema-spindles .4s steps(4, end) infinite; }
+@keyframes cinema-spindles { from { background-position: 0 0; } to { background-position: 133.333% 0; } }
+.stage-cinema .cinema-reel { z-index: 832; display: none; }
+.stage-cinema:has(.projector-gate[aria-disabled="false"]) .cinema-reel { display: block; }
+.motion-off .cinema-spindles { animation: none; }
 /* Both controls pad their hit area out to the 44 CSS px floor without moving
    the painted Prop, which is smaller than a fingertip at every shell width. */
 .projector-gate::before, .projector-motor::before { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: max(100%, 44px); height: max(100%, 44px); }
@@ -536,7 +526,7 @@ html.dialog-open { overflow: hidden; }
   .cinema-room:has(.poster-details:not([hidden])) .cinema-shelf { pointer-events: none; }
 }
 
-.motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap, .motion-off .cinema-poster, .motion-off .poster-spill, .motion-off .details-link, .motion-off .details-close { transition: none; }
+.motion-off .cinema-shelf, .motion-off .cinema-door, .motion-off .shelf-plaque, .motion-off .motor-cap, .motion-off .cinema-poster, .motion-off .poster-art, .motion-off .details-link, .motion-off .details-close { transition: none; }
 /* Motion off is the visitor's own choice, so the Poster is simply on the wall:
    the unroll, the pins and the shelf's rattle all resolve to their end state.
    A system reduced-motion request is covered by the block above instead. */
@@ -563,9 +553,10 @@ html.dialog-open { overflow: hidden; }
 .stage-cinema .cinema-dim { z-index: 900; pointer-events: none; background: rgba(20, 12, 28, .55); animation: cinema-dim-in .4s ease-out both; }
 @keyframes cinema-dim-in { from { opacity: 0; } to { opacity: 1; } }
 /* P20: the beam, a cone from the lens up to the screen's bottom edge. The
-   percentages are the lens at stage (452, 673) and the sheet's lower corners
-   at (220, 325) and (620, 325), read inside this Prop's own box. */
-.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(57.6% 97.1%, 2.4% 38.7%, 97.6% 38.7%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
+   percentages are the note's aperture at stage (450, 660) and the lower
+   corners of the sheet as measured off S01, (727, 464) and (1293, 464), read
+   inside this Prop's own box (445, 148, 848 x 517). */
+.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(.6% 99%, 33.25% 61.1%, 100% 61.1%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
 
 /* §10: the screen sheet, once there is something on it. */
 .stage-cinema .cinema-film { z-index: 905; overflow: hidden; background: #0b070f; box-shadow: 0 0 calc(var(--u) * 90) calc(var(--u) * 20) #ffe6b02e; }
@@ -668,12 +659,13 @@ html.dialog-open { overflow: hidden; }
 
 /* The narrow stage. A 400-unit screen is 88 CSS px on a phone, and a title
    card nobody can read is not a title card: the picture grows out of the
-   screen towards the middle of the stage and its type steps up with it, which
+   screen about the sheet's own centre (36: the measured sheet's, 1010 x 306,
+   kept inside the stage) and its type steps up with it, which
    is the ladder ticket 19 arrived at for the expanded Poster and the same
    reasoning — below a certain width the reading is what the Room is for. The
    link keeps its 44 px floor at every width, like both projector controls. */
 @container (max-width: 900px) {
-  .stage-cinema .cinema-film { left: 11%; top: 10%; width: 56%; height: 35%; }
+  .stage-cinema .cinema-film { left: 38.4%; top: 9.4%; width: 49.5%; height: 49.1%; }
   .film-title-main { font-size: calc(var(--u) * 52); }
   .film-title-other { font-size: calc(var(--u) * 26); }
   .film-year { font-size: calc(var(--u) * 23); }
@@ -683,7 +675,7 @@ html.dialog-open { overflow: hidden; }
   .bumper-presents { font-size: calc(var(--u) * 21); }
 }
 @container (max-width: 620px) {
-  .stage-cinema .cinema-film { left: 8%; top: 7%; width: 74%; height: 50%; }
+  .stage-cinema .cinema-film { left: 29.5%; top: 1%; width: 67.2%; height: 66.7%; }
   .film-title-main { font-size: calc(var(--u) * 74); }
   .film-title-other { font-size: calc(var(--u) * 37); }
   .film-year { font-size: calc(var(--u) * 32); }

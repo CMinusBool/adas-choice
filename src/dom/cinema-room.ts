@@ -64,6 +64,13 @@ const LEAVE_MS = 700;
  */
 const POSTER_LEAVE_MS = 250;
 
+/**
+ * What a Poster takes off its `[data-poster-art]` declaration: the surface
+ * `src/dom/artwork.ts` resolved from its `data-still`, and the painted frame's
+ * place inside the image as fractions of its width and height.
+ */
+const POSTER_ART_PROPERTIES = ['--still', '--frame-x', '--frame-y', '--frame-w', '--frame-h'] as const;
+
 const isShelf = (value: string | undefined): value is CinemaShelf =>
   (CINEMA_SHELVES as readonly string[]).includes(value ?? '');
 
@@ -271,8 +278,11 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
    * an `aria-label`, so the visible caption and the announced name cannot drift
    * apart when the language changes.
    *
-   * No file is named: the painted artwork is ticket 36's, and until it lands
-   * the stock, the genre stripe and the ground are drawn in CSS.
+   * No file is named here either. Ticket 36's painted Poster — one image per
+   * Film, the frame with its spill round it — is declared in `index.html` as
+   * `[data-poster-art]`, where the loading gate and `assert-built-page.mjs` can
+   * see it; this copies that declaration's surface and measured frame onto the
+   * Poster, and `styles.css` clips the image to the frame until it expands.
    */
   function buildPoster(film: FilmId, slot: number, language: Language): HTMLElement {
     const element = document.createElement('button');
@@ -282,11 +292,14 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
     element.dataset.film = film;
     element.dataset.shelf = filmById(film).shelf;
     element.innerHTML =
+      '<span class="poster-art" aria-hidden="true"></span>' +
       '<span class="poster-pin" aria-hidden="true"></span><span class="poster-pin" aria-hidden="true"></span>' +
-      '<span class="poster-spill" aria-hidden="true"><span class="spill-figure"></span>' +
-      '<span class="spill-prop-a"></span><span class="spill-prop-b"></span></span>' +
-      '<span class="poster-stripe" aria-hidden="true"></span><span class="poster-ground" aria-hidden="true"></span>' +
       '<span class="poster-caption"></span><span class="poster-hint visually-hidden"></span>';
+    const art = document.querySelector<HTMLElement>(`[data-poster-art="${film}"]`);
+    for (const property of POSTER_ART_PROPERTIES) {
+      const value = art?.style.getPropertyValue(property);
+      if (value) element.style.setProperty(property, value);
+    }
     title(element, film, language);
     return element;
   }
@@ -317,8 +330,6 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
     board?.classList.toggle('has-posters', pinned.length > 0);
     const empty = board?.querySelector<HTMLElement>('.board-empty');
     if (empty) empty.hidden = pinned.length > 0;
-    const ghost = board?.querySelector<HTMLElement>('.board-ghost');
-    if (ghost) ghost.hidden = pinned.length > 0;
   }
 
   /**
