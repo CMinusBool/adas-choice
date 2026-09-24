@@ -1466,8 +1466,14 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 .entryway-stage .at { z-index: var(--z, 0); }
 .stage-caption { max-width: 52ch; margin: 1rem auto 0; text-align: center; }
 
-/* The Props the arrival moves. */
-.entryway-stage .prop { border: 0; padding: 0; }
+/* The Props the arrival moves.
+   58: and a Prop that is a control drops the UA button face along with its
+   border and padding. The radio is a `<button>`; until ticket 33 `.prop-radio`
+   cleared the face with `background: transparent`, and the drop took that
+   shorthand out because it would also clear the `--still` image. The face
+   then showed through radio.png's transparent corners as a grey rectangle.
+   The PNG's alpha was never the problem. */
+.entryway-stage .prop { border: 0; padding: 0; background-color: transparent; }
 /* The leaf sorts at 600 shut and 665 open, so the Cast appears from behind it
    as it swings in — which is why `--z` is set here and not in the markup. */
 .prop-front-door { --z: 600; background-size: 200% 100%; background-position: 0 0; transform-origin: left center; transition: transform .6s ease; }
