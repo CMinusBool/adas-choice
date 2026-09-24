@@ -43,6 +43,9 @@
  * - counts `requestAnimationFrame` callbacks and measures whether an Actor's position
  *   advanced over two seconds — the check the pane could not do — with motion on and
  *   again with reduced motion emulated;
+ * - waits, before any screenshot, for the Room to be at rest — the whole Cast on its
+ *   stage and none of it drawn by an arrival Beat — and reports that Cast as `atRest`,
+ *   so the Entryway is pictured after its 11.9 s arrival rather than 2 s into it;
  * - measures whether the Room **fits** each of `--fit-at`'s viewports without the page
  *   scrolling, reporting the document's scroll height and the Room's own bottom edge
  *   side by side so the two can never be confused for each other again;
@@ -118,6 +121,21 @@ const MOTION_WINDOW_MS = 2000;
  * as it was.
  */
 const MOTION_CAP_MS = 6000;
+
+/**
+ * How long a pass waits for the Room to be at rest before its screenshots (ticket 58).
+ *
+ * `WATCH` stops at the first movement it sees, which in the Entryway is the Girl
+ * stepping off the threshold about 1.4 s into an 11.9 s arrival: the Boy is not
+ * through the door until 2.2 s and the cats are not out of the backpack until 9.35 s
+ * to 11.85 s, the coats go up at 6.9 s and 8.05 s, the backpack lands at 4.65 s. So
+ * the `actors` that `WATCH` reports is who had come in by the moment motion was
+ * proved, and a screenshot taken straight after it is a frame from early in the
+ * arrival. Ticket 33's verifier read that as "1 Actor, no coats, no backpack". The
+ * doorstep (0.6 s) plus the arrival plus slack is under 15 s; every other Room is at
+ * rest at once, because its whole Cast is on the stage from its first frame.
+ */
+const AT_REST_CAP_MS = 15000;
 
 /** How often the full-motion pass re-checks for movement while it waits. */
 const MOTION_POLL_MS = 100;
@@ -447,6 +465,37 @@ const WATCH = async ({ room, windowMs, capMs, pollMs, movedPx }) => {
 };
 
 /**
+ * Wait until the whole Cast is standing on this Room's stage, and say how many that was.
+ *
+ * "At rest" is read off the page rather than off a clock or a route name: every Actor
+ * the document has (`.actor`, on a stage or parked in `#cast`) is on this Room's stage,
+ * and none is `is-acted` — hidden while an arrival Beat draws them. That is true from
+ * the first frame in a Room whose Cast walks in together, and true in the Entryway only
+ * once the last cat is out of the backpack. `atRest: false` after `capMs` is a Room
+ * whose Cast never all arrived, which is the thing worth reporting.
+ */
+const AT_REST = async ({ room, capMs, pollMs }) => {
+  const stage = document.querySelector(`[data-stage="${room}"]`);
+  const cast = () => document.querySelectorAll('.actor').length;
+  const standing = () =>
+    stage ? [...stage.querySelectorAll('.actor')].filter(actor => !actor.classList.contains('is-acted')) : [];
+  const started = Date.now();
+  let atRest = false;
+  while (true) {
+    atRest = cast() > 0 && standing().length === cast();
+    if (atRest || Date.now() - started >= capMs) break;
+    await new Promise(resolve => setTimeout(resolve, pollMs));
+  }
+  return {
+    atRest,
+    waitedMs: Date.now() - started,
+    actors: standing().length,
+    cast: cast(),
+    who: standing().map(actor => actor.dataset.actor ?? '?'),
+  };
+};
+
+/**
  * Does the Room fit the viewport, or does the visitor have to scroll?
  *
  * ADR 0004 turns on this one number and nobody had measured it: ticket 45's
@@ -537,6 +586,10 @@ async function walkRoutes(context, { baseUrl, routes, outDir, ticket, reduced, w
       });
       result.lang = result.watch.lang;
       result.moving = result.watch.maxPx > MOVED_PX;
+
+      // Ticket 58: the pictures are of the Room at rest, not of whichever frame of
+      // an arrival the motion check happened to stop on.
+      result.rest = await page.evaluate(AT_REST, { room: route, capMs: AT_REST_CAP_MS, pollMs: MOTION_POLL_MS });
 
       for (const width of widths) {
         await page.setViewportSize(width.size);
@@ -669,7 +722,10 @@ async function main() {
 function summarise(result) {
   if (!result || !result.watch) return { actors: 0, frames: 0, moving: false, maxPx: 0 };
   return {
+    // Who was on the stage when motion was first proved. In the Entryway that is an
+    // early frame of the arrival; `atRest` below is the Cast the Room ends up with.
     actors: result.watch.actors,
+    atRest: result.rest ?? null,
     frames: result.watch.frames,
     maxPx: result.watch.maxPx,
     moving: result.watch.maxPx > MOVED_PX,
