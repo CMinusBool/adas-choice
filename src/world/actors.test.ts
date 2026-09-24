@@ -22,8 +22,12 @@ import {
 // place the identity promise every Room change leans on can be read.
 import { createActors, gatherInto, placeActor } from './actors';
 
-/** A visitor arriving with nothing stored, no reduced-motion request, no hash. */
-const plainArrival: WorldInputs = { hash: '', storedLanguage: null, reducedMotion: false };
+/**
+ * A visitor arriving with no reduced-motion request and no hash, in a tab that
+ * has had the Entryway's arrival — 59: so the Cast is at home in the hall to be
+ * walked about, rather than waiting outside the front door to come in.
+ */
+const plainArrival: WorldInputs = { hash: '', storedLanguage: null, reducedMotion: false, arrived: true };
 
 /** The demonstration Actor, who the apartment always places. */
 function boy(world: World): ActorView {

@@ -288,6 +288,14 @@ export function createWorld(inputs: WorldInputs): World {
   // out, which is the opposite of arriving.
   const settled = arriving === ENTRYWAY || inputs.reducedMotion;
   const roomArrival = createRoomArrival(arriving, settled, settled ? {} : marksIn(cast, arriving));
+  // 14: the Entryway. The arrival is over before it starts for a visitor who
+  // has already had it, who asked for stillness, or who opened the page in
+  // another Room — all three find the Cast at home in the settled tableau.
+  // 59: and one it is still to play empties the hall **now**, for ticket 51's
+  // reason: the wait behind the loading screen, and the beat of empty hall
+  // after it, are the arrival's opening shot rather than the tableau it ends on.
+  const arrival = createArrival(inputs.arrived === true || inputs.reducedMotion || arriving !== ENTRYWAY);
+  const emptied = !settled || arrival.state === 'pending';
   return {
     language: resolveLanguage(inputs.storedLanguage),
     motion: createMotion(inputs.reducedMotion),
@@ -297,7 +305,7 @@ export function createWorld(inputs: WorldInputs): World {
     // 06: audio — nothing about sound survives the visit, so it takes no input.
     audio: createAudio(),
     // end 06
-    actors: settled ? cast : clearRoom(cast, arriving),
+    actors: emptied ? clearRoom(cast, arriving) : cast,
     // 08: nobody has decided anything yet; the first tick tells them the time.
     cats: createCats(),
     // 17: cinema
@@ -307,12 +315,7 @@ export function createWorld(inputs: WorldInputs): World {
     activities: createActivities(),
     // 45: the Game Room's wall, at rest and on the first of the three Portals.
     portals: createPortals(),
-    // 14: the Entryway. The arrival is over before it starts for a visitor who
-    // has already had it, who asked for stillness, or who opened the page in
-    // another Room — all three find the Cast at home in the settled tableau.
-    arrival: createArrival(
-      inputs.arrived === true || inputs.reducedMotion || parseRoute(inputs.hash) !== ENTRYWAY,
-    ),
+    arrival,
     roomArrival,
     broken: new Set(inputs.brokenBreakables ?? []),
   };
@@ -449,11 +452,9 @@ export function advance(world: World, event: WorldEvent): World {
     // 14: the Entryway
     case 'arrival-started': {
       const arrival = startArrival(world.arrival);
-      // The hall the arrival opens on is empty: nobody is home until they come
-      // through the door, and an Actor nobody has placed has nowhere to be.
-      if (arrival !== world.arrival) {
-        return { ...world, arrival, actors: clearRoom(world.actors, ENTRYWAY) };
-      }
+      // The hall the arrival opens on is already empty: 59 cleared it as the
+      // arrival was made, so nobody is home until they come through the door.
+      if (arrival !== world.arrival) return { ...world, arrival };
       // 44: the page opened on one of the other three Rooms instead, so what
       // was waiting behind the loading screen is that Room's own entrance.
       return withRoomStarted(world);

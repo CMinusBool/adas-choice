@@ -57,15 +57,21 @@ function standsAt(world: World, actor: ActorId, point: { x: number; y: number })
   expect(view!.room).toBe('entryway');
 }
 
+/** A visitor who opens the page on the Entryway in a tab that has had the arrival. */
+const cameHomeAlready: WorldInputs = { ...plainArrival, arrived: true };
+
+/** The loading screen gone: nothing was declared, so nothing is waited for. */
+const opened = (world: World) => advance(world, { type: 'assets-declared', urls: [] });
+
 describe('the settled tableau', () => {
-  it('is where the whole Cast stands before the arrival has played', () => {
-    const world = createWorld(plainArrival);
+  it('is where the whole Cast stands in a tab that has had the arrival', () => {
+    const world = createWorld(cameHomeAlready);
     for (const [actor, mark] of TABLEAU) standsAt(world, actor, mark);
     expect(actorsIn(world, 'entryway')).toHaveLength(5);
   });
 
   it('faces the Boy left and the Girl right, as the tableau describes them', () => {
-    const world = createWorld(plainArrival);
+    const world = createWorld(cameHomeAlready);
     expect(actorView(world, 'boy')!.facing).toBe('left');
     expect(actorView(world, 'girl')!.facing).toBe('right');
   });
@@ -80,6 +86,57 @@ describe('the settled tableau', () => {
     const entryway = advance(world, { type: 'hash-changed', hash: '#/entryway' });
     expect(actorsIn(entryway, 'entryway')).toHaveLength(5);
     for (const [actor, mark] of TABLEAU) standsAt(entryway, actor, mark);
+  });
+});
+
+// 59: the hall the page opens on is the arrival's first frame, not its last.
+// It used to be the settled tableau, so the visitor saw all five of them home,
+// coats hung and the backpack on the bench, for the 600 ms the page waits
+// before knocking — and then watched everyone blink out as the door opened.
+describe('the hall before the arrival has started', () => {
+  /** The hall at t 0 of the script (§5.2): nobody in, nothing brought in. */
+  const OPENING_PROPS = { frontDoor: 'closed', backpack: 'carried', girlCoat: 'worn', boyParka: 'worn' };
+
+  it('is the arrival’s opening state behind the loading screen', () => {
+    const world = createWorld(plainArrival);
+    expect(arrivalView(world).state).toBe('pending');
+    expect(whoIsHome(world)).toEqual([]);
+    expect(entrywayProps(world)).toEqual(OPENING_PROPS);
+  });
+
+  it('is still the opening state once the loading screen has lifted', () => {
+    const world = opened(createWorld(plainArrival));
+    expect(arrivalView(world).state).toBe('pending');
+    expect(whoIsHome(world)).toEqual([]);
+    expect(entrywayProps(world)).toEqual(OPENING_PROPS);
+    expect(arrivalView(world).beats).toEqual([]);
+  });
+
+  it('is the same hall the arrival’s first tick paints', () => {
+    const waiting = opened(createWorld(plainArrival));
+    const firstTick = advance(advance(waiting, { type: 'arrival-started' }), { type: 'actor-tick', now: clock });
+    expect(whoIsHome(firstTick)).toEqual(whoIsHome(waiting));
+    expect(entrywayProps(firstTick)).toEqual(entrywayProps(waiting));
+  });
+
+  it('puts the whole Cast on the tableau when motion is paused before it starts', () => {
+    const paused = advance(opened(createWorld(plainArrival)), { type: 'motion-toggled' });
+    expect(arrivalView(paused).state).toBe('done');
+    for (const [actor, mark] of TABLEAU) standsAt(paused, actor, mark);
+    expect(entrywayProps(paused)).toEqual({ frontDoor: 'closed', backpack: 'open', girlCoat: 'hung', boyParka: 'hung' });
+  });
+
+  it('puts the whole Cast on the tableau when the visitor’s system asks for stillness before it starts', () => {
+    const stilled = advance(createWorld(plainArrival), { type: 'reduced-motion-changed', reducedMotion: true });
+    expect(arrivalView(stilled).state).toBe('done');
+    for (const [actor, mark] of TABLEAU) standsAt(stilled, actor, mark);
+  });
+
+  it('lands a full Cast in the Room whose Door is taken before it starts', () => {
+    const left = advance(opened(createWorld(plainArrival)), { type: 'hash-changed', hash: '#/games' });
+    expect(arrivalView(left).state).toBe('done');
+    const arrived = advance(left, { type: 'visitor-input' });
+    expect(actorsIn(arrived, 'games')).toHaveLength(5);
   });
 });
 
