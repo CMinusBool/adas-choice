@@ -66,45 +66,18 @@
           Prop's base line, which is how a Prop interleaves with the Cast's own
           `z-index: round(y)`.
 
-          Everything inside `.entryway-backdrop` and `.entryway-props` is drawn
-          in CSS, standing in for the artwork of tickets 31 and 33: the
-          backdrop is shot S01 and each Prop is a shot of its own. When those
-          land, each placeholder becomes an element with a `data-still` and
-          this scenery goes.
+          33: the artwork landed. The backdrop is shot S01, drawn as one
+          Prop; every other Prop below names its own `data-still`, which
+          is ticket 31's shot of it. Nothing here is drawn in CSS any more.
         -->
         <div class="entryway-pan">
           <div class="stage entryway-stage" data-stage="entryway">
-            <div class="entryway-backdrop" aria-hidden="true">
-              <div class="at eb-cornice" style="--x:0;--y:0;--w:1600;--h:36"></div>
-              <div class="at eb-wall" style="--x:0;--y:36;--w:1600;--h:549"></div>
-              <div class="at eb-skirting" style="--x:0;--y:585;--w:1600;--h:15"></div>
-              <div class="at eb-floor" style="--x:0;--y:600;--w:1600;--h:300"></div>
-              <div class="at eb-runner" style="--x:560;--y:690;--w:740;--h:130"></div>
-              <div class="at eb-doorframe" style="--x:70;--y:236;--w:200;--h:364"></div>
-              <div class="at eb-stairwell" style="--x:84;--y:250;--w:172;--h:350"></div>
-              <div class="at eb-mat" style="--x:100;--y:602;--w:160;--h:38"></div>
-              <div class="at eb-rail" style="--x:380;--y:300;--w:190;--h:16"></div>
-              <div class="at eb-hook" style="--x:396;--y:316;--w:8;--h:8"></div>
-              <div class="at eb-hook" style="--x:446;--y:316;--w:8;--h:8"></div>
-              <div class="at eb-hook" style="--x:496;--y:316;--w:8;--h:8"></div>
-              <div class="at eb-hook" style="--x:546;--y:316;--w:8;--h:8"></div>
-              <div class="at eb-bench" style="--x:300;--y:512;--w:270;--h:18"></div>
-              <div class="at eb-legs" style="--x:312;--y:530;--w:246;--h:70"></div>
-              <div class="at eb-door" style="--x:600;--y:236;--w:180;--h:364"></div>
-              <div class="at eb-leaf eb-leaf-games" style="--x:614;--y:250;--w:152;--h:350"></div>
-              <div class="at eb-photo" style="--x:870;--y:260;--w:100;--h:100"></div>
-              <div class="at eb-cord" style="--x:949;--y:36;--w:2;--h:74"></div>
-              <div class="at eb-lamp" style="--x:900;--y:110;--w:100;--h:62"></div>
-              <div class="at eb-table" style="--x:840;--y:452;--w:220;--h:18"></div>
-              <div class="at eb-legs" style="--x:852;--y:470;--w:196;--h:130"></div>
-              <div class="at eb-door" style="--x:1120;--y:236;--w:180;--h:364"></div>
-              <div class="at eb-leaf eb-leaf-cinema" style="--x:1134;--y:250;--w:152;--h:350"></div>
-              <div class="at eb-porthole" style="--x:1190;--y:310;--w:40;--h:40"></div>
-              <div class="at eb-clock" style="--x:1315;--y:280;--w:70;--h:70"></div>
-              <div class="at eb-door" style="--x:1400;--y:236;--w:180;--h:364"></div>
-              <div class="at eb-leaf eb-leaf-activities" style="--x:1414;--y:250;--w:152;--h:350"></div>
-              <span class="placeholder-tag eb-tag" data-i18n="placeholder">暫代</span>
-            </div>
+            <!-- 33: S01, the one full-stage backdrop image - cornice, wall,
+                 skirting, floor, runner, hook rail, bench, hall table, photo,
+                 lamp and clock, with the three Room doors closed and their
+                 pictogram tags painted in. No front-door leaf drawn in: it
+                 swings, so it is its own asset (S02) layered on top below. -->
+            <div class="at prop eb-backdrop" aria-hidden="true" data-still="assets/entryway/backdrop.png" style="--x:0;--y:0;--w:1600;--h:900;--z:1"></div>
             <!--
               14: the Props the arrival moves. `src/dom/entryway.ts` shows and
               hides these off the world model's own Prop states; none of them
@@ -112,11 +85,11 @@
               visitor watches happen.
             -->
             <div class="entryway-props" aria-hidden="true">
-              <div class="at prop prop-front-door" data-prop="frontDoor" style="--x:84;--y:250;--w:172;--h:350"></div>
-              <div class="at prop prop-girl-coat" data-prop="girlCoat" style="--x:400;--y:324;--w:100;--h:148;--z:472" hidden></div>
-              <div class="at prop prop-boy-parka" data-prop="boyParka" style="--x:450;--y:324;--w:100;--h:158;--z:482" hidden></div>
-              <div class="at prop prop-backpack" data-prop="backpack" style="--x:310;--y:424;--w:100;--h:88;--z:512" hidden><span class="backpack-window"></span></div>
-              <div class="at prop prop-monstera" style="--x:1430;--y:560;--w:170;--h:320;--z:880"></div>
+              <div class="at prop prop-front-door" data-prop="frontDoor" data-still="assets/entryway/door-leaf.png" style="--x:84;--y:250;--w:172;--h:350"></div>
+              <div class="at prop prop-girl-coat" data-prop="girlCoat" data-still="assets/entryway/girl-coat.png" style="--x:400;--y:324;--w:100;--h:148;--z:472" hidden></div>
+              <div class="at prop prop-boy-parka" data-prop="boyParka" data-still="assets/entryway/boy-parka.png" style="--x:450;--y:324;--w:100;--h:158;--z:482" hidden></div>
+              <div class="at prop prop-backpack" data-prop="backpack" data-still="assets/entryway/backpack.png" style="--x:310;--y:424;--w:100;--h:88;--z:512" hidden></div>
+              <div class="at prop prop-monstera" data-still="assets/entryway/monstera.png" style="--x:1430;--y:560;--w:170;--h:320;--z:880"></div>
             </div>
             <!--
               14: the Room's Breakable (§4.2). Míca's alone, never focusable,
@@ -124,8 +97,8 @@
               reaches for it. Two elements rather than one, so whichever is
               standing is the one assistive technology is told about.
             -->
-            <div class="at prop prop-vase" data-prop="vaseIntact" role="img" aria-label="玄關桌上插著乾燥花的花瓶" data-i18n-aria="vaseIntact" style="--x:975;--y:300;--w:75;--h:152;--z:452"></div>
-            <div class="at prop prop-vase-broken" data-prop="vaseBroken" role="img" aria-label="摔碎的花瓶，乾燥花散了一地" data-i18n-aria="vaseBroken" style="--x:950;--y:622;--w:150;--h:50;--z:672" hidden></div>
+            <div class="at prop prop-vase" data-prop="vaseIntact" role="img" aria-label="玄關桌上插著乾燥花的花瓶" data-i18n-aria="vaseIntact" data-still="assets/entryway/vase-intact.png" style="--x:975;--y:300;--w:75;--h:152;--z:452"></div>
+            <div class="at prop prop-vase-broken" data-prop="vaseBroken" role="img" aria-label="摔碎的花瓶，乾燥花散了一地" data-i18n-aria="vaseBroken" data-still="assets/entryway/vase-broken.png" style="--x:950;--y:622;--w:150;--h:50;--z:672" hidden></div>
             <!--
               14: the three doors, now transparent rectangles over the painted
               door frames rather than a row of cards below the Room. They are
@@ -139,17 +112,27 @@
             </nav>
             <!-- 06: audio — this Room's Music Source is the hall radio (§4.1),
                  standing on the hall table where the backdrop paints it. -->
-            <button class="at prop prop-radio" type="button" data-music-source="entryway" aria-pressed="false" style="--x:840;--y:375;--w:120;--h:87;--z:462" hidden>
-              <span class="radio-body" aria-hidden="true"><span class="radio-dial"></span><span class="radio-grille"></span></span>
+            <button class="at prop prop-radio" type="button" data-music-source="entryway" aria-pressed="false" data-still="assets/entryway/radio.png" style="--x:840;--y:375;--w:120;--h:87;--z:462" hidden>
               <span class="radio-notes" aria-hidden="true"><span>♪</span><span>♪</span><span>♪</span></span>
               <span class="sr-only" data-i18n="entrywayRadio">玄關的收音機</span>
               <span class="sr-only" data-music-source-label>還沒有音樂可以播放</span>
             </button>
-            <!-- 14: the arrival's box and duet Beats (§6.4). The painter plays
-                 whichever the model names and skips one with no layer here,
-                 which is every one of them until ticket 33 drops the sheets in;
-                 the Cast then simply walks the arrival rather than acting it. -->
-            <div class="beats" data-beats="entryway" aria-hidden="true"></div>
+            <!-- 33: the arrival's box and duet Beats, S15-S22 (design note
+                 section 6.4). The painter plays whichever the model names
+                 and hides the rest; a Beat with no layer here is skipped.
+                 S23/S24 (the vase knock) have no layer: no in-between
+                 frames are drawn for that Breakable yet (ticket 09), same
+                 as the Activity Room's own unconsumed Beat. -->
+            <div class="beats" data-beats="entryway" aria-hidden="true">
+              <div class="at" data-beat="S15" data-still="assets/entryway/backpack-down.png" hidden></div>
+              <div class="at" data-beat="S16" data-still="assets/entryway/coat-off.png" hidden></div>
+              <div class="at" data-beat="S17" data-still="assets/entryway/hang-coat-1.png" hidden></div>
+              <div class="at" data-beat="S18" data-still="assets/entryway/hang-coat-2.png" hidden></div>
+              <div class="at" data-beat="S19" data-still="assets/entryway/girl-kneel.png" hidden></div>
+              <div class="at" data-beat="S20" data-still="assets/entryway/mica-out.png" hidden></div>
+              <div class="at" data-beat="S21" data-still="assets/entryway/mira-out.png" hidden></div>
+              <div class="at" data-beat="S22" data-still="assets/entryway/luna-out.png" hidden></div>
+            </div>
           </div>
         </div>
         <p class="room-lede stage-caption" data-i18n="entrywayLede">外套先掛著。三扇門通往其他房間，想去哪一間都可以。</p>
