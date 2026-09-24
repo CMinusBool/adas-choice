@@ -1,0 +1,786 @@
+{
+  "schema": "cinema-manifest/1",
+  "note": "Provenance for the Cinema Room's delivered art (COOP-001 ticket 36). The raw generations live in the main checkout's .scratch/COOP-001-apartment/art/generated/32-cinema-room/ (gitignored) and travel here only as sha256s; each source.path is the kept attempt ticket 32's manifest names and its 2026-09-25 approval confirms (S02 attempt-v3-nocat, S22 and S24 attempt-v3-painted). Every file rebuilds byte for byte from that source with the builtBy line. Beats keep the design note's frame proportions at the source's own resolution (pxPerUnit), never upscaled past it.",
+  "identitySource": "art/characters/v2 — the version 2 Character Sheets, referenced by every Cast shot, never a generated asset",
+  "assets": [
+    {
+      "file": "backdrop.png",
+      "shot": "S01",
+      "name": "Empty room backdrop (regenerated: empty dark doorway at P4, no leaf, per 2026-09-20 ruling)",
+      "kept": "attempt-2-doorway",
+      "frames": 1,
+      "columns": 1,
+      "frame": "1600x900",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s01-room/attempt-2-doorway/strip-raw.png",
+        "sha256": "bce2948db3f309b38dddd1c06cb56e072c0ea1ce1a886ba849f03f1ef9d67c19"
+      },
+      "sha256": "00792d4da7371fee4c4c75d54f95e543ac442ef98e97910e0ee212be8a414a0a",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 1600x900 --fit contain --seat centre --key alpha",
+      "placed": "0, 0, 1600 x 900",
+      "motionPhase": null,
+      "measured": {
+        "doorway": {
+          "rect": {
+            "x": 72,
+            "y": 149,
+            "width": 224,
+            "height": 446
+          },
+          "by": "scripts/art/measure-rect.mjs --inside dark:48 --seed 185,380"
+        },
+        "sheet": {
+          "rect": {
+            "x": 727,
+            "y": 148,
+            "width": 566,
+            "height": 316
+          },
+          "by": "scripts/art/measure-rect.mjs --inside light:120 --seed 1000,300"
+        },
+        "note": "Stage units equal pixels here (1600 x 900). The design note targeted the door at 40-170 x 270-640 and the sheet at 220-620 x 100-325; the delivered S01 has them where these say, and the markup follows the measurement."
+      }
+    },
+    {
+      "file": "shelf-comedy.png",
+      "shot": "S02",
+      "name": "Comedy shelf",
+      "kept": "attempt-v3-nocat",
+      "frames": 1,
+      "columns": 1,
+      "frame": "320x940",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s02-comedy-shelf/attempt-v3-nocat/strip-raw.png",
+        "sha256": "1729ad602680b36d55aa3c4da5f0522c63f084b1e621d8d3e384533a5d87e13a"
+      },
+      "sha256": "0152082322da365226ae7442ce9fc2980d6f9b2b82756dd86268a2ccc74db1df",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 320x940 --fit content --seat bottom --key alpha",
+      "placed": "button 690, 260, 120 x 380; image 160 x 470 on its base",
+      "motionPhase": null
+    },
+    {
+      "file": "shelf-romance.png",
+      "shot": "S03",
+      "name": "Romance shelf",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "280x900",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s03-romance-shelf/attempt-1/strip-raw.png",
+        "sha256": "cff9c5446cfc70699be034790c37162c043f86bfa616b385121a36e92ba27a63"
+      },
+      "sha256": "be1330abb8c906c5a7ab9c8a93e8f58c7a52b96352f072325bb4d479e7b2fa26",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 280x900 --fit content --seat bottom --key alpha",
+      "placed": "button 824, 260, 120 x 380; image 140 x 450 on its base",
+      "motionPhase": null
+    },
+    {
+      "file": "shelf-horror.png",
+      "shot": "S04",
+      "name": "Horror shelf",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "320x920",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s04-horror-shelf/attempt-1/strip-raw.png",
+        "sha256": "8963204259c922f801a0290741aad4ebdf5ec7a35fcc065adadfe4996b060e29"
+      },
+      "sha256": "cfdf2cca3fbff14f82b0cdbb979c9dbe77011d6a072a860266a09f018ab0bb45",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 320x920 --fit content --seat bottom --key alpha",
+      "placed": "button 958, 260, 120 x 380; image 160 x 460 on its base",
+      "motionPhase": null
+    },
+    {
+      "file": "board.png",
+      "shot": "S05",
+      "name": "Poster board, empty",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "940x640",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s05-poster-board/attempt-1/strip-raw.png",
+        "sha256": "88e502eefe8de9339ece19636259f3bdb94d841f453b6612dd7bfe99cd483c78"
+      },
+      "sha256": "1e5ae68af1db814ebcf4db594f4be7f97db6817bf33daeee5483cc0363a95ae0",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 940x640 --fit content --seat centre --key alpha",
+      "placed": "1110, 300, 470 x 320",
+      "motionPhase": null
+    },
+    {
+      "file": "beanbag-girl.png",
+      "shot": "S06",
+      "name": "Girl's beanbag, empty",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "360x220",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s06-girl-beanbag/attempt-1/strip-raw.png",
+        "sha256": "23f9e83cc1eaa121d0e874f60c5fa9f00175a80ebcd706aa5dc58f2e19be7e1c"
+      },
+      "sha256": "6e7af818e451e5eb80ea8d9872495c1b287b1af0a7cc4b15f2a410373d813a52",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 360x220 --fit content --seat bottom --key '#00FF00'",
+      "placed": "230, 690, 180 x 110",
+      "motionPhase": null
+    },
+    {
+      "file": "beanbag-boy.png",
+      "shot": "S07",
+      "name": "Boy's beanbag, empty",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "360x220",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s07-boy-beanbag/attempt-1/strip-raw.png",
+        "sha256": "2168550d22ef2b4f951080874fe62bf1fb19f6d86106600cc0636afee330dbc9"
+      },
+      "sha256": "1ba563b73176b2f38302547d9da27d050f1ad547ef2f8236952f100eed2d7e4c",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 360x220 --fit content --seat bottom --key alpha",
+      "placed": "570, 690, 180 x 110",
+      "motionPhase": null
+    },
+    {
+      "file": "cabinet.png",
+      "shot": "S08",
+      "name": "Reel cabinet, closed",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "280x200",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s08-reel-cabinet/attempt-v2-matte/strip-raw.png",
+        "sha256": "9817f73b6281286e35e467f6e25a0ff0035b691591f87c1a3a497e190aee7e9d"
+      },
+      "sha256": "1658487df0d77cad77bb4da01aa1eb9e75a1b475fcdd803c802e8515db673fa1",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 280x200 --fit content --seat bottom --key alpha",
+      "placed": "430, 730, 140 x 100",
+      "motionPhase": null
+    },
+    {
+      "file": "projector.png",
+      "shot": "S09",
+      "name": "Projector, empty spindles, lamp off",
+      "kept": "attempt-2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "240x260",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s09-projector/attempt-2-matte/strip-raw.png",
+        "sha256": "b4de3f7cc7842ecbbddace67c71e4d1d92d91ce2bf257d9ecd6c4da9cf3d480f"
+      },
+      "sha256": "a6fa180107968f66fe42b9026e1ee2164e1d3979287bedd85c554f972488df4c",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 240x260 --fit content --seat bottom --key alpha",
+      "placed": "440, 600, 120 x 130",
+      "motionPhase": null
+    },
+    {
+      "file": "reel.png",
+      "shot": "S10",
+      "name": "Film reel on its spindle",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "120x120",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s10-film-reel/attempt-v2-matte/strip-raw.png",
+        "sha256": "90b066a0cb139e4029297aaa6838bf134e304495ee0a9a57112d3b7bfc98bbfc"
+      },
+      "sha256": "94bc909d79a6e6a97177f6714e590fe8eeea3251e67502ab40480b4f3ec36593",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 120x120 --fit content --seat centre --key alpha",
+      "placed": "475, 600, 60 x 60, shown once a reel is loaded",
+      "motionPhase": null
+    },
+    {
+      "file": "spindles.png",
+      "shot": "S11",
+      "name": "Spindles turning (Cycle)",
+      "kept": "attempt-v2-matte",
+      "frames": 4,
+      "columns": 4,
+      "frame": "180x120",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s11-spindles-cycle/attempt-v2-matte/strip-raw.png",
+        "sha256": "d54505e6efa35c016958470bd309ec47ec0cee546e0fc165171c783f608b3116"
+      },
+      "sha256": "133ce66e22fca1f07bcf0e9799017c116c0e5d7d6ba10988afd7da941ad362f4",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 180x120 --frames 4 --columns 4 --fit content --seat bottom --key alpha",
+      "placed": "455, 600, 90 x 60, stepping while the motor or a Film runs",
+      "validated": "check-assets.mjs --beat --frames 4 --columns 4 --frame 180x120: pass",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "film-can.png",
+      "shot": "S12",
+      "name": "Film can, intact",
+      "kept": "attempt-v2-matte-retry1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "120x76",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s12-film-can-intact/attempt-v2-matte-retry1/strip-raw.png",
+        "sha256": "a39bb237b52035196a3f4c57eb71ad77da35ce69797669c2401f867d1473eb49"
+      },
+      "sha256": "de3376d868d81b2f3120b550cf89960c5b7fcfe1d9fc7a43d90962d0d85185e7",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 120x76 --fit content --seat bottom --key '#00FF00'",
+      "placed": "470, 692, 60 x 38",
+      "motionPhase": null
+    },
+    {
+      "file": "film-can-broken.png",
+      "shot": "S13",
+      "name": "Film can, broken",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "360x160",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s13-film-can-broken/attempt-v2-matte/strip-raw.png",
+        "sha256": "76ca0f9d3a64dad3bf4554dfcf681431ea57953b0e19c8c0c489132b00f61aa5"
+      },
+      "sha256": "e2a34a2c4449dce46a93ed1ed1ed7b7d6f2c49b7091f5b7aaf67bdd53f0622b6",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 360x160 --fit content --seat bottom --key alpha",
+      "placed": "290, 800, 180 x 80",
+      "motionPhase": null
+    },
+    {
+      "file": "lucky-cat.png",
+      "shot": "S14",
+      "name": "Lucky cat 招財貓, intact",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "88x88",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s14-lucky-cat-intact/attempt-v2-matte/strip-raw.png",
+        "sha256": "25daddf046d6ff52c595903499f5b1620a2b563fed7c1aa763cb5472f042e703"
+      },
+      "sha256": "e5e3883d444cad3703524d1bcb3f74a961b2aea784661b2386d5878f1de33022",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 88x88 --fit content --seat bottom --key alpha",
+      "placed": "726, 544, 44 x 44",
+      "motionPhase": null
+    },
+    {
+      "file": "lucky-cat-broken.png",
+      "shot": "S15",
+      "name": "Lucky cat, broken",
+      "kept": "attempt-v2-matte-retry1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "180x60",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s15-lucky-cat-broken/attempt-v2-matte-retry1/strip-raw.png",
+        "sha256": "80c5ae6e90711672f0c07c6cbd8329a096551df7307aba4471629ed33fd6065b"
+      },
+      "sha256": "cdb3ad71b3b47161f9fd150e14e362a47fe308a4e9c23a1aa3f51e6ec0e3d962",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 180x60 --fit content --seat bottom --key alpha",
+      "placed": "700, 650, 90 x 30",
+      "motionPhase": null
+    },
+    {
+      "file": "scroll-bundle.png",
+      "shot": "S16",
+      "name": "Scroll bundle",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "140x80",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s16-scroll-bundle/attempt-v2-matte/strip-raw.png",
+        "sha256": "795f0cf075d630bd5223d3d9ddc84553999ab21ca4a91915281a9e174be44029"
+      },
+      "sha256": "269792d63f6f253b10f01a17c99f597b25bb1aee33f4d38620ff10b05b2ba496",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 140x80 --fit content --seat centre --key '#00FF00'",
+      "placed": "declared, not placed: nothing carries a held item yet",
+      "motionPhase": null
+    },
+    {
+      "file": "poster-knives-out.png",
+      "shot": "S17",
+      "name": "Poster: knives-out",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "600x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s17-knives-out/attempt-v2-matte/strip-raw.png",
+        "sha256": "a185bf671a780a202e229abc3c232c2bbd7961b199b18f9f72cf80c9cecf7067"
+      },
+      "sha256": "f26fff5bc0fc0bd8720cdf8ada97a224c1737bdb60ec9d4cc82738c56b54a46b",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 600x800 --fit contain --seat centre --key alpha",
+      "film": "knives-out",
+      "measured": {
+        "frame": {
+          "x": 92,
+          "y": 99,
+          "width": 419,
+          "height": 611
+        },
+        "by": "scripts/art/measure-rect.mjs --inside paper:175 --frame",
+        "inset": {
+          "top": 0.1238,
+          "right": 0.1483,
+          "bottom": 0.1125,
+          "left": 0.1533
+        }
+      },
+      "placed": "declared in the hidden .poster-arts block; src/dom/cinema-room.ts copies it onto a pinned Poster",
+      "motionPhase": null
+    },
+    {
+      "file": "poster-kung-fu-hustle.png",
+      "shot": "S18",
+      "name": "Poster: kung-fu-hustle",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "600x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s18-kung-fu-hustle/attempt-v2-matte/strip-raw.png",
+        "sha256": "6cf67e9433c82e194a251281b0e571c8a2ae7773fe5fb9334ab2b13c0bf4c850"
+      },
+      "sha256": "4f02e5413be7bdbcf26364cd243d004c181fa8c4c8d8c906669e35d21f472462",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 600x800 --fit contain --seat centre --key alpha",
+      "film": "kung-fu-hustle",
+      "measured": {
+        "frame": {
+          "x": 86,
+          "y": 56,
+          "width": 430,
+          "height": 649
+        },
+        "by": "scripts/art/measure-rect.mjs --inside paper:175 --frame",
+        "inset": {
+          "top": 0.07,
+          "right": 0.14,
+          "bottom": 0.1188,
+          "left": 0.1433
+        }
+      },
+      "placed": "declared in the hidden .poster-arts block; src/dom/cinema-room.ts copies it onto a pinned Poster",
+      "motionPhase": null
+    },
+    {
+      "file": "poster-eat-drink-man-woman.png",
+      "shot": "S19",
+      "name": "Poster: eat-drink-man-woman",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "600x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s19-eat-drink-man-woman/attempt-v2-matte/strip-raw.png",
+        "sha256": "cdf311a0fe7ad350974248cdb3857ca42a67d4e243bc81a010547ed8207c7adb"
+      },
+      "sha256": "b231fcbb7054d7a9fc41769fc2a7f24809c20368ef89f7cbf59c8e72c8a1b2b5",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 600x800 --fit contain --seat centre --key alpha",
+      "film": "eat-drink-man-woman",
+      "measured": {
+        "frame": {
+          "x": 74,
+          "y": 111,
+          "width": 456,
+          "height": 595
+        },
+        "by": "scripts/art/measure-rect.mjs --inside paper:175 --frame",
+        "inset": {
+          "top": 0.1388,
+          "right": 0.1167,
+          "bottom": 0.1175,
+          "left": 0.1233
+        }
+      },
+      "placed": "declared in the hidden .poster-arts block; src/dom/cinema-room.ts copies it onto a pinned Poster",
+      "motionPhase": null
+    },
+    {
+      "file": "poster-crazy-rich-asians.png",
+      "shot": "S20",
+      "name": "Poster: crazy-rich-asians",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "600x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s20-crazy-rich-asians/attempt-v2-matte/strip-raw.png",
+        "sha256": "22235d05260e82aa0d7123e802f49f567109fb13ac12489c24449c26c00e3114"
+      },
+      "sha256": "65b3a13d5c9a244aaf390e4527045397621069cc8fc138a62a0906f3a53210bf",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 600x800 --fit contain --seat centre --key alpha",
+      "film": "crazy-rich-asians",
+      "measured": {
+        "frame": {
+          "x": 147,
+          "y": 102,
+          "width": 301,
+          "height": 526
+        },
+        "by": "scripts/art/measure-rect.mjs --inside paper:175 --frame",
+        "inset": {
+          "top": 0.1275,
+          "right": 0.2533,
+          "bottom": 0.215,
+          "left": 0.245
+        }
+      },
+      "placed": "declared in the hidden .poster-arts block; src/dom/cinema-room.ts copies it onto a pinned Poster",
+      "motionPhase": null
+    },
+    {
+      "file": "poster-about-time.png",
+      "shot": "S21",
+      "name": "Poster: about-time",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "600x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s21-about-time/attempt-v2-matte/strip-raw.png",
+        "sha256": "022fb0e0b191e9302933556bb99c5dc01d90cb9a5bc11ecddd6cee9987b41526"
+      },
+      "sha256": "d37f1a261d2084b4476535b3ab011706d5a994a052e93977702fb3830755f521",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 600x800 --fit contain --seat centre --key alpha",
+      "film": "about-time",
+      "measured": {
+        "frame": {
+          "x": 85,
+          "y": 82,
+          "width": 434,
+          "height": 622
+        },
+        "by": "scripts/art/measure-rect.mjs --inside paper:175 --frame",
+        "inset": {
+          "top": 0.1025,
+          "right": 0.135,
+          "bottom": 0.12,
+          "left": 0.1417
+        }
+      },
+      "placed": "declared in the hidden .poster-arts block; src/dom/cinema-room.ts copies it onto a pinned Poster",
+      "motionPhase": null
+    },
+    {
+      "file": "poster-in-the-mood-for-love.png",
+      "shot": "S22",
+      "name": "Poster: in-the-mood-for-love",
+      "kept": "attempt-v3-painted",
+      "frames": 1,
+      "columns": 1,
+      "frame": "600x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s22-in-the-mood-for-love/attempt-v3-painted/strip-raw.png",
+        "sha256": "1a8aa57fb39d9ecf91f79738b3e430f768fa31fe238959cadd761365d7ae1f82"
+      },
+      "sha256": "26405ed976f11f7768a0fbfff477be76e49f39ca94250d5f59155146db2d043a",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 600x800 --fit contain --seat centre --key alpha",
+      "film": "in-the-mood-for-love",
+      "measured": {
+        "frame": {
+          "x": 105,
+          "y": 181,
+          "width": 393,
+          "height": 533
+        },
+        "by": "scripts/art/measure-rect.mjs --inside paper:175 --frame",
+        "inset": {
+          "top": 0.2263,
+          "right": 0.17,
+          "bottom": 0.1075,
+          "left": 0.175
+        }
+      },
+      "placed": "declared in the hidden .poster-arts block; src/dom/cinema-room.ts copies it onto a pinned Poster",
+      "motionPhase": null
+    },
+    {
+      "file": "poster-mr-vampire.png",
+      "shot": "S23",
+      "name": "Poster: mr-vampire",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "600x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s23-mr-vampire/attempt-v2-matte/strip-raw.png",
+        "sha256": "97c16c037c3c370144c6c9a8815e58126f056945ef38978b45cc764a53c26d89"
+      },
+      "sha256": "8f8756019d450615dfe8b0045ca078e1aea68ac79e59f9576fb8b303dc5aea66",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 600x800 --fit contain --seat centre --key alpha",
+      "film": "mr-vampire",
+      "measured": {
+        "frame": {
+          "x": 102,
+          "y": 101,
+          "width": 416,
+          "height": 576
+        },
+        "by": "scripts/art/measure-rect.mjs --inside paper:175 --frame",
+        "inset": {
+          "top": 0.1263,
+          "right": 0.1367,
+          "bottom": 0.1538,
+          "left": 0.17
+        }
+      },
+      "placed": "declared in the hidden .poster-arts block; src/dom/cinema-room.ts copies it onto a pinned Poster",
+      "motionPhase": null
+    },
+    {
+      "file": "poster-get-out.png",
+      "shot": "S24",
+      "name": "Poster: get-out",
+      "kept": "attempt-v3-painted",
+      "frames": 1,
+      "columns": 1,
+      "frame": "600x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s24-get-out/attempt-v3-painted/strip-raw.png",
+        "sha256": "e0b998c0b8c486268431436c80d16ff577dce791bc511c73747d94b694f72649"
+      },
+      "sha256": "404e0b885424fcccad706c93698f557f1cb3589d141c87df8580fd8ddbcbfaa6",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 600x800 --fit contain --seat centre --key alpha",
+      "film": "get-out",
+      "measured": {
+        "frame": {
+          "x": 88,
+          "y": 102,
+          "width": 426,
+          "height": 612
+        },
+        "by": "scripts/art/measure-rect.mjs --inside paper:175 --frame",
+        "inset": {
+          "top": 0.1275,
+          "right": 0.1433,
+          "bottom": 0.1075,
+          "left": 0.1467
+        }
+      },
+      "placed": "declared in the hidden .poster-arts block; src/dom/cinema-room.ts copies it onto a pinned Poster",
+      "motionPhase": null
+    },
+    {
+      "file": "poster-detention.png",
+      "shot": "S25",
+      "name": "Poster: detention",
+      "kept": "attempt-v2-matte",
+      "frames": 1,
+      "columns": 1,
+      "frame": "600x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s25-detention/attempt-v2-matte/strip-raw.png",
+        "sha256": "25ec34a4cc028125a1a93204726732f58e0b83fd3acdd9b01bac29af8d95f215"
+      },
+      "sha256": "10e6660fd16778bd088234d834ffe8d23950bbc237bcda68dc26ab305aa502a7",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 600x800 --fit contain --seat centre --key alpha",
+      "film": "detention",
+      "measured": {
+        "frame": {
+          "x": 77,
+          "y": 107,
+          "width": 442,
+          "height": 604
+        },
+        "by": "scripts/art/measure-rect.mjs --inside paper:175 --frame",
+        "inset": {
+          "top": 0.1338,
+          "right": 0.135,
+          "bottom": 0.1113,
+          "left": 0.1283
+        }
+      },
+      "placed": "declared in the hidden .poster-arts block; src/dom/cinema-room.ts copies it onto a pinned Poster",
+      "motionPhase": null
+    },
+    {
+      "file": "boy-sits-beanbag.png",
+      "shot": "S26",
+      "name": "Boy sits into coral beanbag (Beat)",
+      "kept": "attempt-v2-matte",
+      "frames": 8,
+      "columns": 4,
+      "frame": "364x476",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s26-boy-sits-beanbag/attempt-v2-matte/strip-raw.png",
+        "sha256": "652a934047667724f98c022cd8bf8f2435e29e93794e4ea38a033059aedf6d86"
+      },
+      "sha256": "234d5499edd1d87e88d4962f28954c770042d24daf734ee800b280d9daef01b3",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 364x476 --frames 8 --columns 4 --fit contain --seat bottom --key alpha",
+      "stageFrame": "260 x 340",
+      "pxPerUnit": 1.4,
+      "placed": "declared in the hidden .beats[data-beats=\"cinema\"] block, not played: no painter steps a Cinema Beat yet",
+      "validated": "check-assets.mjs --beat --frames 8 --columns 4 --frame 364x476: pass",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "girl-sits-beanbag.png",
+      "shot": "S27",
+      "name": "Girl sits into teal beanbag (Beat)",
+      "kept": "attempt-v2-matte",
+      "frames": 8,
+      "columns": 4,
+      "frame": "364x476",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s27-girl-sits-beanbag/attempt-v2-matte/strip-raw.png",
+        "sha256": "5d34216dfdf31005ec0a7fd5b1797573f997d938a53390fb317293a821814101"
+      },
+      "sha256": "68fc54b32f37dffc17cd7cf9c4d5da868fdf87c171debb7d7f8ee1263b0e5cab",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 364x476 --frames 8 --columns 4 --fit contain --seat bottom --key alpha",
+      "stageFrame": "260 x 340",
+      "pxPerUnit": 1.4,
+      "placed": "declared in the hidden .beats[data-beats=\"cinema\"] block, not played: no painter steps a Cinema Beat yet",
+      "validated": "check-assets.mjs --beat --frames 8 --columns 4 --frame 364x476: pass",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "boy-rummages-shelf.png",
+      "shot": "S28",
+      "name": "Boy rummages a shelf (Beat)",
+      "kept": "attempt-v2-matte",
+      "frames": 12,
+      "columns": 4,
+      "frame": "216x360",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s28-boy-rummages-shelf/attempt-v2-matte/strip-raw.png",
+        "sha256": "6eb315fd955c783cb3cfea980cc866ad49d01ae51b5c4c90bc6f0b70c0247226"
+      },
+      "sha256": "c9a981bce0a4c9a9923c650b367828fd9f1f48790b7b8b06705c40016fb404d0",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 216x360 --frames 12 --columns 4 --fit contain --seat bottom --key alpha",
+      "stageFrame": "240 x 400",
+      "pxPerUnit": 0.9,
+      "placed": "declared in the hidden .beats[data-beats=\"cinema\"] block, not played: no painter steps a Cinema Beat yet",
+      "validated": "check-assets.mjs --beat --frames 12 --columns 4 --frame 216x360: pass",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "boy-pins-poster.png",
+      "shot": "S29",
+      "name": "Boy pins a Poster (Beat)",
+      "kept": "attempt-v2-matte",
+      "frames": 10,
+      "columns": 4,
+      "frame": "192x320",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s29-boy-pins-poster/attempt-v2-matte/strip-raw.png",
+        "sha256": "c20813d431d7f3e0117084edc892690c0ed216d6b276ed2418615fa6b35544fe"
+      },
+      "sha256": "1d79c15a3f6918964c9e00db6170a157f0a3856ee8f21865f145d0deb98558dd",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 192x320 --frames 10 --columns 4 --fit contain --seat bottom --key '#00FF00'",
+      "stageFrame": "240 x 400",
+      "pxPerUnit": 0.8,
+      "placed": "declared in the hidden .beats[data-beats=\"cinema\"] block, not played: no painter steps a Cinema Beat yet",
+      "validated": "check-assets.mjs --beat --frames 10 --columns 4 --frame 192x320: pass",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "boy-searches-cabinet.png",
+      "shot": "S30",
+      "name": "Boy searches the cabinet (Beat)",
+      "kept": "attempt-v2-matte",
+      "frames": 12,
+      "columns": 4,
+      "frame": "240x320",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s30-boy-searches-cabinet/attempt-v2-matte/strip-raw.png",
+        "sha256": "a462ae0a76b98d739cc86f802abe43c98294e7e58ab2a685a2c72a13552c612f"
+      },
+      "sha256": "48a0945010bc526f94724997803d7b6368c3bff71a72b293cbe5fe432c29d459",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 240x320 --frames 12 --columns 4 --fit contain --seat bottom --key alpha",
+      "stageFrame": "300 x 400",
+      "pxPerUnit": 0.8,
+      "placed": "declared in the hidden .beats[data-beats=\"cinema\"] block, not played: no painter steps a Cinema Beat yet",
+      "validated": "check-assets.mjs --beat --frames 12 --columns 4 --frame 240x320: pass",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "boy-loads-reel.png",
+      "shot": "S31",
+      "name": "Boy loads the reel (Beat)",
+      "kept": "attempt-v2-matte-retry1",
+      "frames": 10,
+      "columns": 4,
+      "frame": "256x336",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s31-boy-loads-reel/attempt-v2-matte-retry1/strip-raw.png",
+        "sha256": "0df768d5e0ca51839d914a9c96612fac04344ed048f32e89c060c0e73839d4e9"
+      },
+      "sha256": "5b48f77d1159546fb9c6a41052f0d4662ab9951f407aaa3deedd396ddc2df753",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 256x336 --frames 10 --columns 4 --fit contain --seat bottom --key alpha",
+      "stageFrame": "320 x 420",
+      "pxPerUnit": 0.8,
+      "placed": "declared in the hidden .beats[data-beats=\"cinema\"] block, not played: no painter steps a Cinema Beat yet",
+      "validated": "check-assets.mjs --beat --frames 10 --columns 4 --frame 256x336: pass",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "mica-knocks-can.png",
+      "shot": "S32",
+      "name": "Míca knocks the film can (Beat)",
+      "kept": "attempt-v2-matte-retry1",
+      "frames": 16,
+      "columns": 4,
+      "frame": "256x256",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s32-mica-knocks-can/attempt-v2-matte-retry1/strip-raw.png",
+        "sha256": "62c6eecf93a45c13ddccb27ccc15518ca5b3f5c927b90b3c92b694ceca247e0b"
+      },
+      "sha256": "f3e6a928efb71d894202a78b10d8521ce8647ac5e6174dd23a0d32150b57caac",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 256x256 --frames 16 --columns 4 --fit contain --seat bottom --key alpha",
+      "stageFrame": "320 x 320",
+      "pxPerUnit": 0.8,
+      "placed": "declared in the hidden .beats[data-beats=\"cinema\"] block, not played: no painter steps a Cinema Beat yet",
+      "validated": "check-assets.mjs --beat --frames 16 --columns 4 --frame 256x256: pass",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "mira-knocks-cat.png",
+      "shot": "S33",
+      "name": "Mira knocks the lucky cat (Beat)",
+      "kept": "attempt-v2-matte",
+      "frames": 12,
+      "columns": 4,
+      "frame": "312x338",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s33-mira-knocks-cat/attempt-v2-matte/strip-raw.png",
+        "sha256": "452a880d56eb863dbc2a5aeb0eeeed0bcb68b8c70452f96df6ed2c3a30b4f67f"
+      },
+      "sha256": "1b58711473d2347ac3f217ffdb04d7b89eba24a34618d2f01c0f68c67cb790fc",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 312x338 --frames 12 --columns 4 --fit contain --seat bottom --key alpha",
+      "stageFrame": "240 x 260",
+      "pxPerUnit": 1.3,
+      "placed": "declared in the hidden .beats[data-beats=\"cinema\"] block, not played: no painter steps a Cinema Beat yet",
+      "validated": "check-assets.mjs --beat --frames 12 --columns 4 --frame 312x338: pass",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "door-leaf.png",
+      "shot": "S36",
+      "name": "Door leaf, shut and open (added 2026-09-20)",
+      "kept": "attempt-v2-matte-retry1",
+      "frames": 2,
+      "columns": 2,
+      "frame": "390x892",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s36-door-leaf/attempt-v2-matte-retry1/strip-raw.png",
+        "sha256": "b965d56ec697f11e3eed75f5ca7d3681b9f57d7d94f38d838c1d08ca42ab7b1c"
+      },
+      "sha256": "7dc96205cf419a884a4df5d92f6e0ac427cd2bfd620fa0896940d7b44d53c6b6",
+      "builtBy": "scripts/art/crop-cell.mjs (the strip's halves 0,0-768,1024 and 768,0-1536,1024) + scripts/art/build-prop.mjs@1 --frame 390x892 --fit content --seat bottom --key alpha, each + scripts/art/stack-cells.mjs",
+      "placed": "fills the measured doorway, 72, 149, 224 x 446 (cell 1 read, stretched 1.15x across)",
+      "validated": "check-assets.mjs --beat --frames 2 --columns 2 --frame 390x892: pass",
+      "motionPhase": null
+    }
+  ],
+  "deferred": [
+    {
+      "shot": "S34",
+      "reason": "optional seated idle; not generated (ticket 32 manifest: deferred)"
+    },
+    {
+      "shot": "S35",
+      "reason": "optional seated idle; not generated (ticket 32 manifest: deferred)"
+    }
+  ]
+}
