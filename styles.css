@@ -602,14 +602,21 @@ html.dialog-open { overflow: hidden; }
 .bumper-art { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bumper-frame { fill: none; stroke: #8a6a34; stroke-width: 3; stroke-dasharray: 960; animation: bumper-draw 4s linear both; }
 @keyframes bumper-draw { 0%, 40% { stroke-dashoffset: 960; } 60%, 100% { stroke-dashoffset: 0; } }
-/* Míca's broad black tail with its light-brown middle patch, and Mira's
-   slender one with four dark rings and a dark tip: the two cats, named by the
-   only part of them the visitor ever sees over the back of a beanbag. */
+/* Míca's broad black tail with its light-brown middle patch, Mira's slender
+   one with four dark rings and a dark tip, and Luna's short solid-black one
+   (ticket 61, the owner's ruling of 2026-09-24): the three cats, named by the
+   only part of them the visitor ever sees over the back of a beanbag. Luna's
+   is her v2 Character Sheet's: about half the others' length, thick at the
+   root and curling over at the end, in her own black base, with no ring and
+   no patch. It rides the same pop-up and wave as the other two, and the
+   reduced-motion and motion-off rules below still it by the same
+   `.bumper-tails > *` selector. */
 .tail-mica { fill: none; stroke: #2b2630; stroke-width: 13; stroke-linecap: round; }
 .tail-mica-patch { fill: none; stroke: #b08050; stroke-width: 10; stroke-linecap: round; }
 .tail-mira { fill: none; stroke: #d8cbb6; stroke-width: 7; stroke-linecap: round; }
 .tail-mira-rings { fill: none; stroke: #3a3038; stroke-width: 7; stroke-dasharray: 4 9; }
 .tail-mira-tip { fill: #3a3038; }
+.tail-luna { fill: none; stroke: #2B2724; stroke-width: 9; stroke-linecap: round; }
 .bumper-tails { transform-origin: 200px 88px; animation: bumper-wave 4s ease-in-out both; }
 .bumper-tails > * { animation: bumper-tail-up 4s linear both; }
 @keyframes bumper-tail-up { 0%, 46% { opacity: 0; } 53%, 100% { opacity: 1; } }
