@@ -8,7 +8,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { measureRect, parseInside } from './measure-rect.mjs';
+import { measureFrame, measureRect, parseInside } from './measure-rect.mjs';
 import { blank } from '../png.mjs';
 
 /** Paint an opaque rectangle, x1/y1 exclusive. */
@@ -62,6 +62,25 @@ test('a seed outside the drawing is refused rather than measured as nothing', ()
   const image = blank(50, 50);
   fill(image, [10, 10, 20, 20]);
   assert.throws(() => measureRect(image, opaque, { seed: [40, 40] }), /seed/);
+});
+
+// A Poster's spill is not polite: on the delivered Knives Out a figure stands in front of the
+// frame's whole left edge for half its height, so a rectangle grown outward from the centre walks
+// straight over it. The frame's four edges are the only long straight lines in the image, and
+// most of each is still exposed, so voting for them finds the frame where growing does not.
+test('a frame is found by its edges when figures cover much of them', () => {
+  const image = blank(300, 400);
+  fill(image, [50, 60, 250, 340]);            // the frame, 200 x 280
+  fill(image, [10, 60, 70, 250]);             // a figure over the top two-thirds of the left edge
+  fill(image, [150, 20, 290, 90]);            // one leaning over the top-right corner
+  fill(image, [30, 300, 200, 390]);           // one in front of most of the bottom edge
+  assert.deepEqual(measureFrame(image, opaque), { x: 50, y: 60, width: 200, height: 280 });
+  assert.notDeepEqual(measureRect(image, opaque, { seed: [150, 200] }), { x: 50, y: 60, width: 200, height: 280 });
+});
+
+test('a frame with no straight edge at all is refused', () => {
+  const image = blank(100, 100);
+  assert.throws(() => measureFrame(image, opaque), /edge/);
 });
 
 test('an unknown inside rule is refused', () => {
