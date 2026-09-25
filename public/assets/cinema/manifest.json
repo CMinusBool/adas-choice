@@ -55,7 +55,7 @@
       },
       "sha256": "0152082322da365226ae7442ce9fc2980d6f9b2b82756dd86268a2ccc74db1df",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 320x940 --fit content --seat bottom --key alpha",
-      "placed": "button 690, 260, 120 x 380; image 160 x 470 on its base",
+      "placed": "button 1310, 374, 84 x 266 (the note's 120 x 380 at --scale .7, ticket 63); image 160 x 470 on its base, at the same scale",
       "motionPhase": null
     },
     {
@@ -72,7 +72,7 @@
       },
       "sha256": "be1330abb8c906c5a7ab9c8a93e8f58c7a52b96352f072325bb4d479e7b2fa26",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 280x900 --fit content --seat bottom --key alpha",
-      "placed": "button 824, 260, 120 x 380; image 140 x 450 on its base",
+      "placed": "button 1404, 374, 84 x 266 (the note's 120 x 380 at --scale .7, ticket 63); image 140 x 450 on its base, at the same scale",
       "motionPhase": null
     },
     {
@@ -89,7 +89,7 @@
       },
       "sha256": "cfdf2cca3fbff14f82b0cdbb979c9dbe77011d6a072a860266a09f018ab0bb45",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 320x920 --fit content --seat bottom --key alpha",
-      "placed": "button 958, 260, 120 x 380; image 160 x 460 on its base",
+      "placed": "button 1498, 374, 84 x 266 (the note's 120 x 380 at --scale .7, ticket 63); image 160 x 460 on its base, at the same scale",
       "motionPhase": null
     },
     {
@@ -106,7 +106,7 @@
       },
       "sha256": "1e5ae68af1db814ebcf4db594f4be7f97db6817bf33daeee5483cc0363a95ae0",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 940x640 --fit content --seat centre --key alpha",
-      "placed": "1110, 300, 470 x 320",
+      "placed": "310, 255, 399.5 x 272 (the note's 470 x 320 at --scale .85, ticket 63)",
       "motionPhase": null
     },
     {
@@ -260,7 +260,7 @@
       },
       "sha256": "e5e3883d444cad3703524d1bcb3f74a961b2aea784661b2386d5878f1de33022",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 88x88 --fit content --seat bottom --key alpha",
-      "placed": "726, 544, 44 x 44",
+      "placed": "1335, 573, 31 x 31 (ticket 63: with the comedy shelf, at its scale)",
       "motionPhase": null
     },
     {
@@ -277,7 +277,7 @@
       },
       "sha256": "cdb3ad71b3b47161f9fd150e14e362a47fe308a4e9c23a1aa3f51e6ec0e3d962",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 180x60 --fit content --seat bottom --key alpha",
-      "placed": "700, 650, 90 x 30",
+      "placed": "1317, 647, 63 x 21 (ticket 63: with the comedy shelf, at its scale)",
       "motionPhase": null
     },
     {

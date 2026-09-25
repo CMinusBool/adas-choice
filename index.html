@@ -348,7 +348,8 @@
           07: this is also the Room's stage, so the Cast walks on it.
         -->
         <!-- 19: the stage and the details panel share one positioned column,
-             so the panel can sit over the shelves' zone on a wide shell and
+             so the panel can sit on the stage on a wide shell (63: over the
+             floor below the screen and the shelves' feet) and
              drop below the stage on a narrow one (design note §4.6) without
              either of them leaving the Room's own width. The stage keeps its
              own indentation: the wrapper is a new parent, not a rewrite of
@@ -370,20 +371,29 @@
           <!-- 36: each shelf's image (S02-S04) is wider and taller than its
                120 x 380 button, because its crown ornament rises above it; it
                stands on the button's base, centred, at its own --art-w/--art-h. -->
-          <button class="cinema-prop cinema-shelf" type="button" data-shelf="comedy" style="--x:690;--y:260;--w:120;--h:380" aria-label="喜劇書架：點一下，讓他挑三部片" data-i18n-aria="shelfComedyAria">
+          <!-- 63: S01 hangs its screen at (727, 148, 566 x 316), right of
+               centre, and the note's shelves stood in front of it. They stand
+               in the corner right of the screen now, on the note's 640 base,
+               and that wall is 307 units wide where three shelves at the note's
+               size need 428: so each is drawn at --scale .7 of it. Every
+               number inside a shelf stays the note's (the 120 x 380 button,
+               --art-w/--art-h, the plaque) and `styles.css` scales them; the
+               box here is the scaled one, 84 x 266, still 10 apart. -->
+          <button class="cinema-prop cinema-shelf" type="button" data-shelf="comedy" style="--x:1310;--y:374;--w:84;--h:266;--scale:.7" aria-label="喜劇書架：點一下，讓他挑三部片" data-i18n-aria="shelfComedyAria">
             <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-comedy.png" style="--art-w:160;--art-h:470"></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfComedy">喜劇</span>
           </button>
           <!-- P19: the lucky cat 招財貓, Mira's Breakable, on the comedy
                shelf's bottom cubby floor (design 13 §7). Ticket 09 owns the
-               knock and the state; the visitor cannot break it by clicking. -->
-          <div class="cinema-prop cinema-lucky-cat" data-breakable="cinema-lucky-cat" data-breakable-state="intact" role="img" aria-label="一隻招財貓" data-i18n-aria="luckyCatIntact" data-still="assets/cinema/lucky-cat.png" style="--x:726;--y:544;--w:44;--h:44"></div>
-          <div class="cinema-prop cinema-lucky-cat-broken" data-breakable="cinema-lucky-cat" data-breakable-state="broken" role="img" aria-label="摔成三塊的招財貓，手還在招" data-i18n-aria="luckyCatBroken" data-still="assets/cinema/lucky-cat-broken.png" style="--x:700;--y:650;--w:90;--h:30" hidden></div>
-          <button class="cinema-prop cinema-shelf" type="button" data-shelf="romance" style="--x:824;--y:260;--w:120;--h:380" aria-label="愛情書架：點一下，讓他挑三部片" data-i18n-aria="shelfRomanceAria">
+               knock and the state; the visitor cannot break it by clicking.
+               63: both moved and scaled with the shelf, off its base. -->
+          <div class="cinema-prop cinema-lucky-cat" data-breakable="cinema-lucky-cat" data-breakable-state="intact" role="img" aria-label="一隻招財貓" data-i18n-aria="luckyCatIntact" data-still="assets/cinema/lucky-cat.png" style="--x:1335;--y:573;--w:31;--h:31"></div>
+          <div class="cinema-prop cinema-lucky-cat-broken" data-breakable="cinema-lucky-cat" data-breakable-state="broken" role="img" aria-label="摔成三塊的招財貓，手還在招" data-i18n-aria="luckyCatBroken" data-still="assets/cinema/lucky-cat-broken.png" style="--x:1317;--y:647;--w:63;--h:21" hidden></div>
+          <button class="cinema-prop cinema-shelf" type="button" data-shelf="romance" style="--x:1404;--y:374;--w:84;--h:266;--scale:.7" aria-label="愛情書架：點一下，讓他挑三部片" data-i18n-aria="shelfRomanceAria">
             <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-romance.png" style="--art-w:140;--art-h:450"></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfRomance">愛情</span>
           </button>
-          <button class="cinema-prop cinema-shelf" type="button" data-shelf="horror" style="--x:958;--y:260;--w:120;--h:380" aria-label="恐怖書架：點一下，讓他挑三部片" data-i18n-aria="shelfHorrorAria">
+          <button class="cinema-prop cinema-shelf" type="button" data-shelf="horror" style="--x:1498;--y:374;--w:84;--h:266;--scale:.7" aria-label="恐怖書架：點一下，讓他挑三部片" data-i18n-aria="shelfHorrorAria">
             <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-horror.png" style="--art-w:160;--art-h:460"></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfHorror">恐怖</span>
           </button>
@@ -392,8 +402,15 @@
                absent here: an empty slot is not a thing on the wall, and a
                `<button>` for a Poster that is not up is one more Tab stop for
                nothing. The container is placed off the board's padding box, so
-               its three 132 x 196 slots land on stage x 1125 / 1279 / 1433. -->
-          <section class="cinema-prop cinema-board" data-still="assets/cinema/board.png" style="--x:1110;--y:300;--w:470;--h:320" aria-label="釘在牆上的海報" data-i18n-aria="boardLabel">
+               its three 132 x 196 slots land 15 / 169 / 323 units in from the
+               board's left edge, 50 down, in the board's own units.
+
+               63: the board hangs on the wall between the door and the screen,
+               under the sconce and clear of the furniture below it. That wall is
+               424 units wide where the note's board is 470, so it is drawn at
+               --scale .85: 399.5 x 272, its slots' centres at stage x 379 / 510
+               / 641, y 381. -->
+          <section class="cinema-prop cinema-board" data-still="assets/cinema/board.png" style="--x:310;--y:255;--w:399.5;--h:272;--scale:.85" aria-label="釘在牆上的海報" data-i18n-aria="boardLabel">
             <p class="board-empty" data-i18n="boardEmpty">牆上還空著。先選一排書架。</p>
             <div class="board-slots" data-poster-slots></div>
           </section>

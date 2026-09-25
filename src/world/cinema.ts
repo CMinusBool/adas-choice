@@ -26,6 +26,11 @@ export const CINEMA_SHELVES: readonly CinemaShelf[] = ['comedy', 'romance', 'hor
  *
  * A shelf mark is the bay's left edge less 18 units, so the Boy's reaching hand
  * lands in the bay while its crown and plaque stay visible past him.
+ *
+ * 63: the shelves stand in the corner right of S01's screen and the board
+ * hangs between the door and the screen, so these follow them there: a board
+ * mark is under its Poster slot's centre, at the back of the walkable band so
+ * no beanbag is drawn over his feet while he pins.
  */
 export const CINEMA_MARKS = {
   /** His coral beanbag, and his home in this Room. */
@@ -33,17 +38,17 @@ export const CINEMA_MARKS = {
   /** Her teal beanbag. */
   girlSeat: { x: 320, y: 800 },
   shelves: {
-    comedy: { x: 672, y: 700 },
-    romance: { x: 806, y: 700 },
-    horror: { x: 940, y: 700 },
+    comedy: { x: 1292, y: 700 },
+    romance: { x: 1386, y: 700 },
+    horror: { x: 1480, y: 700 },
   },
   /** Right of the reel cabinet, clear of anything the cats spill. */
   cabinet: { x: 612, y: 850 },
   /** In front of each Poster slot, for the pinning this Room grows later. */
   boardSlots: [
-    { x: 1191, y: 700 },
-    { x: 1345, y: 700 },
-    { x: 1499, y: 700 },
+    { x: 379, y: 665 },
+    { x: 510, y: 665 },
+    { x: 641, y: 665 },
   ],
 } as const satisfies Record<string, Point | Readonly<Record<string, Point>> | readonly Point[]>;
 
