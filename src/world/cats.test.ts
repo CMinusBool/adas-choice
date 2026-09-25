@@ -352,12 +352,15 @@ describe('a Breakable falling on two rolls', () => {
    * are the case the review found, and the hall table is not one of the
    * Entryway's roam marks — the only thing that ever takes her there is a
    * knock, which is what makes the walk below unambiguous.
+   *
+   * 68: and the fall she was going to still comes, late — it waits for her to
+   * get there and hold her knock rather than going over from across the hall.
    */
   it('cannot knock a Breakable down after a hand has stopped her on the way to it', () => {
     const mark = breakableById('entryway-vase').mark;
     const step = 100;
     let now = clock;
-    let world = createWorld({ ...plainArrival, random: seededRandom(1) });
+    let world = createWorld({ ...plainArrival, random: always(0.25) });
     const frames: { world: World; now: number }[] = [];
     while (frames.length < 1200 && breakableState(world, 'entryway-vase') === 'intact') {
       now += step;
@@ -384,21 +387,22 @@ describe('a Breakable falling on two rolls', () => {
     expect(cat(petted, 'mica').moving).toBe(false);
     expect(Math.hypot(stopped.x - mark.x, stopped.y - mark.y)).toBeGreaterThan(CAT_CLEARANCE);
 
-    // The fuss lasts 1.6 s and the vase's Beat 2.3 s, so the break this test
-    // exists for landed about 3.9 s after the hand. Ten seconds covers it.
+    // The fuss lasts 1.6 s, the rest of the walk a few more and the vase's
+    // Beat 2.3 s. Twenty seconds covers it.
     let after = petted;
-    for (let tick = 1; tick <= 100; tick += 1) {
+    for (let tick = 1; tick <= 200 && breakableState(after, 'entryway-vase') === 'intact'; tick += 1) {
       after = advance(after, { type: 'actor-tick', now: midway.now + tick * step });
-      // The one thing that may never happen: it goes over with her elsewhere.
-      if (breakableState(after, 'entryway-vase') === 'broken') {
-        expect(cat(after, 'mica').at).toEqual(mark);
-      }
+      clock = midway.now + tick * step;
     }
+    // It still goes over — and the one thing that may never happen is that it
+    // goes over with her elsewhere.
+    expect(breakableState(after, 'entryway-vase')).toBe('broken');
+    expect(cat(after, 'mica').at).toEqual(mark);
   });
 
   it('stays broken for the rest of the visit once it has gone over', () => {
-    const world = walkInto(createWorld({ ...plainArrival, random: seededRandom(1) }), 'games');
-    const broken = run(world, 60000, 100);
+    const world = walkInto(createWorld({ ...plainArrival, random: always(0.25) }), 'games');
+    const broken = run(world, 70000, 100);
     expect(breakableState(broken, 'snow-globe')).toBe('broken');
     // Another two minutes in the Room does not somehow un-break it, or break
     // it a second time and make a second sound.
