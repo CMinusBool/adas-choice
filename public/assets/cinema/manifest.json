@@ -163,18 +163,19 @@
     {
       "file": "projector.png",
       "shot": "S09",
-      "name": "Projector, empty spindles, lamp off",
-      "kept": "attempt-2-matte",
+      "name": "Projector, empty spindles, lamp off, lens up-right towards the screen",
+      "kept": "attempt-4",
       "frames": 1,
       "columns": 1,
       "frame": "240x260",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s09-projector/attempt-2-matte/strip-raw.png",
-        "sha256": "b4de3f7cc7842ecbbddace67c71e4d1d92d91ce2bf257d9ecd6c4da9cf3d480f"
+        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s09-projector/attempt-4/strip-raw.png",
+        "sha256": "8ca2362b786decb2d987d32f86f773b4186e61547ea26931008ba4470818d409"
       },
-      "sha256": "a6fa180107968f66fe42b9026e1ee2164e1d3979287bedd85c554f972488df4c",
+      "sha256": "4467f96ccff2d8323061f3b7cd579fdce342077e49f8b47d8bb24c6e89951ede",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 240x260 --fit content --seat bottom --key alpha",
       "placed": "440, 600, 120 x 130",
+      "note": "Re-dropped by ticket 66. The owner approved attempt-4 on 2026-09-25 (ticket 65, option a); ticket 32's manifest still names attempt-2-matte as kept, so this entry is the one exception to the note above. The machine is drawn mirrored against ticket 65's brief. Measured off this file in stage units: motor switch cap 467-474 x 703-711, gate door 512-531 x 685-710, lens mouth centre 549.5, 648, front spindle and rear spindle as ticket 65 reports them. Replaces attempt-2-matte (sha256 b4de3f7c..., built a6fa1801...).",
       "motionPhase": null
     },
     {
