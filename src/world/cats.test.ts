@@ -343,6 +343,87 @@ describe('a Breakable falling on two rolls', () => {
     expect(heard).toContain('snow-globe-smash');
   });
 
+  it('does not fall at all when the first roll says no, however long the visitor stays', () => {
+    const world = walkInto(createWorld({ ...plainArrival, random: always(0.75) }), 'games');
+    const { at, heard } = fallMoment(world, 'snow-globe', 300000, 100);
+    expect(at).toBeNull();
+    expect(heard).not.toContain('snow-globe-smash');
+  });
+
+  /**
+   * Across forty seeded afternoons: about half of them see it fall, every fall
+   * is inside the minute (plus the walk and hold of a cat who could not make
+   * it in time), and the same seed replays the same answer to the tick.
+   */
+  it('falls inside the minute after the Arrival on about half of all seeds, the same way twice', () => {
+    const moments: (number | null)[] = [];
+    for (let seed = 1; seed <= 40; seed += 1) {
+      const replays = [0, 1].map(() => {
+        const world = walkInto(createWorld({ ...plainArrival, random: seededRandom(seed) }), 'games');
+        const start = clock + 16;
+        const { at } = fallMoment(world, 'snow-globe', 90000);
+        return at === null ? null : at - start;
+      });
+      expect(replays[1]).toBe(replays[0]);
+      moments.push(replays[0]);
+    }
+    const falls = moments.filter((at): at is number => at !== null);
+    expect(falls.length).toBeGreaterThan(10);
+    expect(falls.length).toBeLessThan(30);
+    for (const at of falls) {
+      expect(at).toBeGreaterThanOrEqual(0);
+      // The minute, plus Luna's longest walk across the Game Room and her hold.
+      expect(at).toBeLessThanOrEqual(60000 + 10000 + breakableById('snow-globe').knockMs);
+    }
+  });
+
+  /**
+   * The mug's mark is nobody's roam mark, so Mira standing on it means a knock
+   * and nothing else — and a mug the tab already broke is never rolled for.
+   */
+  it('never rolls for a Breakable that is already broken', () => {
+    const mark = breakableById('activity-pencil-mug').mark;
+    let world = walkInto(
+      createWorld({ ...plainArrival, random: always(0.25), brokenBreakables: ['activity-pencil-mug'] }),
+      'activities',
+    );
+    const heard: string[] = [];
+    for (let tick = 0; tick < 700; tick += 1) {
+      clock += 100;
+      world = advance(world, { type: 'actor-tick', now: clock });
+      heard.push(...catSfx(world));
+      const mira = cat(world, 'mira');
+      expect(Math.hypot(mira.at.x - mark.x, mira.at.y - mark.y)).toBeGreaterThan(1);
+    }
+    expect(heard).not.toContain('mug-smash');
+    expect(breakableState(world, 'activity-pencil-mug')).toBe('broken');
+  });
+
+  it('is called off by leaving the Room before the moment, and rolled again on the way back in', () => {
+    let roll = 0.25;
+    const random = () => roll;
+    const world = walkInto(createWorld({ ...plainArrival, random }), 'games');
+    // Ten seconds of the fifteen, then out to the hall.
+    const early = fallMoment(world, 'snow-globe', 10000);
+    expect(early.at).toBeNull();
+    const hall = walkInto(early.world, 'entryway');
+    // Back in, where the new first roll says no: the fall that was coming
+    // before the visitor left does not come, then or ever.
+    roll = 0.75;
+    const back = walkInto(hall, 'games');
+    const declined = fallMoment(back, 'snow-globe', 120000, 100);
+    expect(declined.at).toBeNull();
+    // Staying does not roll again; only another entry does.
+    roll = 0.25;
+    const stayed = fallMoment(declined.world, 'snow-globe', 70000, 100);
+    expect(stayed.at).toBeNull();
+    const again = walkInto(walkInto(stayed.world, 'entryway'), 'games');
+    const start = clock + 16;
+    const { at } = fallMoment(again, 'snow-globe', 70000);
+    expect(at).not.toBeNull();
+    expect(at! - start).toBeGreaterThanOrEqual(15000);
+  });
+
   /**
    * A fuss ends the errand, not only the walk.
    *
