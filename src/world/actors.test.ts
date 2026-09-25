@@ -393,20 +393,41 @@ describe('the Cast in whichever Room the visitor is in', () => {
     return view;
   }
 
-  it('stands the Boy and the Girl beside their poufs in the Game Room', () => {
-    // The interim standing marks (§4.3.1): the seated stills S09 and S10 do not
-    // exist, and a standing placeholder on a seated mark clips through a pouf.
+  it('seats the Boy and the Girl on their poufs in the Game Room', () => {
+    // 34: the seated stills S09 and S10 have landed, so the interim standing
+    // marks of §4.3.1 are gone and the homes are the seated marks of §4.3.
     const world = walkInto(createWorld(plainArrival), 'games');
-    expect(who(world, 'girl').at).toEqual({ x: 560, y: 800 });
+    expect(who(world, 'girl').at).toEqual({ x: 620, y: 780 });
     expect(who(world, 'girl').facing).toBe('right');
-    expect(who(world, 'boy').at).toEqual({ x: 940, y: 795 });
+    expect(who(world, 'boy').at).toEqual({ x: 880, y: 775 });
     expect(who(world, 'boy').facing).toBe('left');
     // Nobody is mid-walk, and nobody was pulled onto the floor from off it: a
     // clamped mark would come back as some other point.
     for (const id of ['boy', 'girl'] as const) {
       expect(who(world, id).moving).toBe(false);
+      expect(who(world, id).seated).toBe(true);
       expect(isWalkable('games', who(world, id).at)).toBe(true);
     }
+  });
+
+  it('seats nobody who is still walking to the pouf, or standing anywhere else', () => {
+    // Seated is what the DOM swaps a standing sprite for a seated still on, so
+    // it must hold only once the walk is over and only on the seated mark.
+    const arriving = advance(createWorld(plainArrival), { type: 'hash-changed', hash: roomHash('games') });
+    const midway = run(arriving, 1200);
+    expect(who(midway, 'girl').seated).toBe(false);
+    expect(who(midway, 'boy').seated).toBe(false);
+    const settled = runUntil(midway, world => !who(world, 'girl').moving && !who(world, 'boy').moving);
+    expect(who(settled, 'girl').seated).toBe(true);
+    expect(who(settled, 'boy').seated).toBe(true);
+    // Sent off the pouf, she stands again; the cats never sit on a mark.
+    const paused = advance(walkInto(createWorld(plainArrival), 'games'), { type: 'motion-toggled' });
+    const up = advance(paused, { type: 'actor-sent', actor: 'girl', goal: { x: 300, y: 700 } });
+    expect(who(up, 'girl').seated).toBe(false);
+    for (const cat of ['mica', 'mira', 'luna'] as const) expect(who(up, cat).seated).toBe(false);
+    // The Entryway and the Activity Room have no seated marks.
+    expect(who(createWorld(plainArrival), 'girl').seated).toBe(false);
+    expect(who(walkInto(createWorld(plainArrival), 'activities'), 'girl').seated).toBe(false);
   });
 
   it('puts the whole Cast in the Game Room, the two of them clear of each other', () => {
@@ -461,8 +482,8 @@ describe('the Cast in whichever Room the visitor is in', () => {
     expect(who(wandered, 'boy').at).toEqual({ x: 300, y: 700 });
 
     const back = walkInto(walkInto(wandered, 'activities'), 'games');
-    expect(who(back, 'boy').at).toEqual({ x: 940, y: 795 });
-    expect(who(back, 'girl').at).toEqual({ x: 560, y: 800 });
+    expect(who(back, 'boy').at).toEqual({ x: 880, y: 775 });
+    expect(who(back, 'girl').at).toEqual({ x: 620, y: 780 });
   });
 
   it('hands the Cast back by identity when the Room being entered moved nobody', () => {

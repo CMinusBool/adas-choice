@@ -102,10 +102,10 @@ describe('a Room arrival', () => {
  *
  * Taken from the notes rather than from `HOMES`, so that these are a check of
  * the table as well as of the arrival that walks the Cast to it. The Game
- * Room's pair are §4.3.1's interim standing marks and go when S09 and S10 land.
+ * Room's pair are §4.3's seated marks, since S09 and S10 landed (ticket 34).
  */
 const MARKS: Readonly<Record<'games' | 'cinema' | 'activities', Readonly<Record<'boy' | 'girl', readonly [number, number, 'left' | 'right']>>>> = {
-  games: { boy: [940, 795, 'left'], girl: [560, 800, 'right'] },
+  games: { boy: [880, 775, 'left'], girl: [620, 780, 'right'] },
   cinema: { boy: [660, 800, 'left'], girl: [320, 800, 'right'] },
   activities: { boy: [868, 744, 'left'], girl: [762, 742, 'right'] },
 };

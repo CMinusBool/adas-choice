@@ -210,6 +210,11 @@ export interface ActorView {
   readonly moving: boolean;
   /** How far along its current route the Actor is, from 0 to 1. */
   readonly progress: number;
+  /**
+   * Sitting on a seated mark, walk over: the moment a Room with a seated still
+   * for this Actor paints that still in place of the standing sprite.
+   */
+  readonly seated: boolean;
 }
 
 function view(actor: ActorState): ActorView {
@@ -222,7 +227,19 @@ function view(actor: ActorState): ActorView {
     cycle: actor.cycle,
     moving: actor.route.length > 0,
     progress: actor.distance > 0 ? Math.min(1, Math.max(0, 1 - remaining / actor.distance)) : 1,
+    seated: isSeated(actor),
   };
+}
+
+/** On its Room's seated mark and no longer walking to it. */
+function isSeated(actor: ActorState): boolean {
+  const home = HOMES[actor.room]?.[actor.id];
+  return (
+    home?.seated === true &&
+    actor.route.length === 0 &&
+    actor.at.x === home.at.x &&
+    actor.at.y === home.at.y
+  );
 }
 
 export function actorViews(slice: ActorsSlice): readonly ActorView[] {
@@ -440,6 +457,8 @@ interface Home {
   readonly facing: Facing;
   /** Goals to walk between on arrival. Left out, the Actor simply stands there. */
   readonly patrol?: readonly Point[];
+  /** The mark is a seat: once there, the Actor is `seated` (see `ActorView`). */
+  readonly seated?: true;
 }
 
 /** No patrol, shared by every standing Actor so a home can be compared by identity. */
@@ -473,16 +492,14 @@ const HOMES: Partial<Record<RoomId, Partial<Record<ActorId, Home>>>> = {
     boy: { at: CINEMA_MARKS.boySeat, facing: 'left' },
     girl: { at: CINEMA_MARKS.girlSeat, facing: 'right' },
   },
-  // 43: the Game Room, `design/11-game-room.md` §4.3.1 — the *interim* marks.
-  // Their real homes are seated on the poufs, and the seated stills S09 and S10
-  // do not exist: a standing placeholder dropped on a seated mark clips through
-  // the pouf and reads as broken rather than as unfinished. So the two of them
-  // stand beside their poufs instead, which is a home like any other, and the
-  // poufs G17 and G18 stay visible. When the stills land these two marks become
-  // the seated ones — (620, 780) and (880, 775) — and §4.3.1 is deleted.
+  // 34: the Game Room, `design/11-game-room.md` §4.3 — the two of them sat on
+  // their poufs, which is what the seated stills S09 and S10 draw. Ticket 43's
+  // interim standing marks beside the poufs (§4.3.1) went when the stills
+  // landed: a seated mark is where `src/dom/seats.ts` swaps the standing sprite
+  // for the still, and the still carries its pouf.
   games: {
-    boy: { at: { x: 940, y: 795 }, facing: 'left' },
-    girl: { at: { x: 560, y: 800 }, facing: 'right' },
+    boy: { at: { x: 880, y: 775 }, facing: 'left', seated: true },
+    girl: { at: { x: 620, y: 780 }, facing: 'right', seated: true },
   },
   // 43: the Activity Room, `design/12-activity-room.md` §4.3 — H-Boy and
   // H-Girl, the two of them standing on the rug and turned towards each other.

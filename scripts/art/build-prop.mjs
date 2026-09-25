@@ -17,7 +17,10 @@
 // crop line falls and by how much everything scales.
 //
 // node scripts/art/build-prop.mjs <strip.png> --out <file.png> --frame <W>x<H>
-//   [--frames 1] [--columns 1] [--seat bottom|centre] [--fit content|contain] [--key '#00FF00' | alpha]
+//   [--frames 1] [--columns 1] [--seat bottom|centre] [--fit content|contain|fill] [--key '#00FF00' | alpha]
+//
+// `--fit fill` is for an opaque backdrop only, one frame: the whole raw image resampled onto the
+// whole frame, edge to edge, with none of the headroom `contain` leaves (ticket 34).
 //
 // `--fit content` (the default) finds the tight alpha bounding box per cell and scales it, exactly
 // as `build-cycle.mjs` does for a Cycle frame — right for anything generated with transparent
@@ -70,7 +73,10 @@ export function parseArguments(argv) {
   if (!options.out) throw new Error('--out <file.png> is required.');
   if (!options.frame) throw new Error('--frame <W>x<H> is required.');
   if (!['bottom', 'centre'].includes(options.seat)) throw new Error('--seat is bottom or centre.');
-  if (!['content', 'contain'].includes(options.fit)) throw new Error('--fit is content or contain.');
+  if (!['content', 'contain', 'fill'].includes(options.fit)) throw new Error('--fit is content, contain or fill.');
+  if (options.fit === 'fill' && (options.frames !== 1 || options.columns !== 1)) {
+    throw new Error('--fit fill resamples one opaque image onto one frame; a sheet keeps its painted proportions.');
+  }
   return options;
 }
 
@@ -125,10 +131,13 @@ export function renderContent(image, mask, cell, { frame, scale, seat }) {
  * the mask covers is what makes every other sheet in this drop binary; a Beat gets the same
  * treatment, just without the content-bbox re-centring that would flatten its motion.
  */
-export function renderWholeCell(image, mask, region, { frame, seat }) {
+export function renderWholeCell(image, mask, region, { frame, seat, fill = false }) {
   const out = blank(frame.width, frame.height);
   const sourceWidth = region.x1 - region.x0;
   const sourceHeight = region.y1 - region.y0;
+  // `--fit fill`: a backdrop is the bottom of its stage, so it covers the whole frame with no
+  // headroom — the two axes may then scale by a hair apart (1672 x 940 onto 1600 x 900 is 0.9569
+  // against 0.9574), which the metrics record rather than a crop hides.
   // The same headroom `build-cycle.mjs` leaves around a Cycle frame's content, so a whole cell
   // scaled to "fill" its target box still clears the edge-bleed rule: a raw generation's own cell
   // is drawn to whatever margin the illustrator happened to leave, not to this ticket's target
@@ -136,8 +145,8 @@ export function renderWholeCell(image, mask, region, { frame, seat }) {
   // scales to touch the built frame's edge exactly, which is a property of the fit, not a defect
   // in the generation.
   const scale = Math.min((frame.width - MARGIN.side) / sourceWidth, (frame.height - MARGIN.top) / sourceHeight);
-  const width = Math.max(1, Math.round(sourceWidth * scale));
-  const height = Math.max(1, Math.round(sourceHeight * scale));
+  const width = fill ? frame.width : Math.max(1, Math.round(sourceWidth * scale));
+  const height = fill ? frame.height : Math.max(1, Math.round(sourceHeight * scale));
   const offsetX = Math.round((frame.width - width) / 2);
   const offsetY = seat === 'bottom' ? frame.height - height : Math.round((frame.height - height) / 2);
   for (let dy = 0; dy < height; dy++) {
@@ -181,10 +190,11 @@ export function main(argv = process.argv.slice(2)) {
   let scale = null;
   let cellsInfo = [];
 
-  if (options.fit === 'contain') {
+  if (options.fit === 'contain' || options.fit === 'fill') {
     const { mask, source } = buildMask(image, { mode: options.mask, key: options.key ?? '#00FF00' });
     maskSource = source;
-    rendered = regions.map(region => renderWholeCell(image, mask, region, { frame: options.frame, seat: options.seat }));
+    const fill = options.fit === 'fill';
+    rendered = regions.map(region => renderWholeCell(image, mask, region, { frame: options.frame, seat: options.seat, fill }));
     cellsInfo = regions.map((region, index) => ({
       index: index + 1,
       region: `${region.x0},${region.y0}-${region.x1},${region.y1}`,
