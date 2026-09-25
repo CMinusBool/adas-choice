@@ -11,7 +11,6 @@ import {
   isWalkable,
   roomHash,
   seededRandom,
-  seedFromSearch,
   type ActorId,
   type ActorView,
   type Point,
@@ -362,16 +361,6 @@ describe('the dice the Cast is given', () => {
 
   it('produces different streams from different seeds', () => {
     expect(seededRandom(1)()).not.toBe(seededRandom(2)());
-  });
-
-  // 68: a harness replays one afternoon by asking the page for its seed.
-  it('takes a seed from the page’s query string, and nothing else for one', () => {
-    expect(seedFromSearch('?seed=42')).toBe(42);
-    expect(seedFromSearch('?lang=en&seed=7')).toBe(7);
-    expect(seedFromSearch('')).toBeUndefined();
-    expect(seedFromSearch('?seed=')).toBeUndefined();
-    expect(seedFromSearch('?seed=abc')).toBeUndefined();
-    expect(seedFromSearch('?reseed=3')).toBeUndefined();
   });
 });
 

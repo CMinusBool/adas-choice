@@ -14,7 +14,7 @@ import { mountMotion, prefersReducedMotion } from './dom/motion';
 import { mountRooms } from './dom/rooms';
 import { mountSound } from './dom/sound'; // 06: audio
 import type { Mount, Painter } from './dom/painter';
-import { advance, createWorld, seedFromSearch, seededRandom, type World, type WorldEvent } from './world';
+import { advance, createWorld, seededRandom, type World, type WorldEvent } from './world';
 
 /**
  * The DOM layer's composition root.
@@ -25,12 +25,15 @@ import { advance, createWorld, seedFromSearch, seededRandom, type World, type Wo
  * file and one more entry in this list.
  */
 // 68: `?seed=N` replays one afternoon, so a harness can say when a Breakable
-// falls; without it the visit is the model's own default seed, as ever.
-const seed = seedFromSearch(location.search);
+// falls. 70: without one, the dice are seeded from the clock, so every page load
+// rolls its own afternoon — whether each Breakable falls, and when. The model
+// never reads the URL or the clock itself; it is handed the seed's stream.
+const askedSeed = new URLSearchParams(location.search).get('seed');
+const seed = askedSeed !== null && /^\d+$/.test(askedSeed) ? Number(askedSeed) : Date.now();
 
 let world: World = createWorld({
   hash: location.hash,
-  random: seed === undefined ? undefined : seededRandom(seed),
+  random: seededRandom(seed),
   storedLanguage: readStoredLanguage(),
   reducedMotion: prefersReducedMotion(),
   arrived: readStoredArrival(), // 14: the Entryway

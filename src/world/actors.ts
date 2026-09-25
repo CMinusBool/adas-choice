@@ -148,23 +148,11 @@ export function seededRandom(seed: number): RandomSource {
   };
 }
 
-/** The seed used when the DOM layer offers none, so tests need not pass one. */
-export const DEFAULT_SEED = 20260911;
-
 /**
- * 68: a seed asked for in the page's query string — `?seed=42` — or `undefined`
- * for none.
- *
- * How `scripts/verify/breakable-fall.mjs` opens the page on the same afternoon
- * it has just played through the model: one seed and one clock give the same
- * falls twice, so the harness can say when to look. A visitor never sends one,
- * and without it the page is the same `DEFAULT_SEED` visit it always was.
- * Parsed by hand because the model has no `URLSearchParams`.
+ * The seed used when no `random` is handed in, so tests need not pass one. The
+ * page always hands one in: `?seed=N`, or the clock (`src/main.ts`).
  */
-export function seedFromSearch(search: string): number | undefined {
-  const found = /(?:^\?|&)seed=(\d+)(?:&|$)/.exec(search);
-  return found ? Number(found[1]) : undefined;
-}
+export const DEFAULT_SEED = 20260911;
 
 /** Everything the model keeps about one Actor. Private to this file. */
 interface ActorState {

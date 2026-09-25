@@ -31,7 +31,7 @@ export { isAudible, isMusicSourceOn, isRoomMusicAudible, soundIsOn } from './wor
 export type { Point, Polygon } from './stage';
 export { STAGE_HEIGHT, STAGE_WIDTH } from './stage';
 export type { ActorId, ActorView, ActorsSlice, CycleId, Facing, RandomSource } from './actors';
-export { ACTOR_IDS, isWalkable, seedFromSearch, seededRandom } from './actors';
+export { ACTOR_IDS, isWalkable, seededRandom } from './actors';
 export { actorView, actorsIn } from './world';
 
 // 17: the Cinema Room — its marks, its shelves, and who is sitting down.
