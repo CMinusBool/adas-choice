@@ -439,7 +439,8 @@ export function advance(world: World, event: WorldEvent): World {
       // the same clock, through the same cues and the same walking.
       const entrance = tickRoomArrival(cued.roomArrival, event.now);
       const opened = entrance.arrival === cued.roomArrival ? cued : { ...cued, roomArrival: entrance.arrival };
-      const shown = applyCues(opened, entrance.cues, motionIsOn(opened), opened.roomArrival.room);
+      const cuedIn = applyCues(opened, entrance.cues, motionIsOn(opened), opened.roomArrival.room);
+      const shown = withBoyAttending(cuedIn, entrance.cues, motionIsOn(cuedIn));
       const actors = tickActors(shown.actors, event.now, motionIsOn(shown));
       const ticked = actors === shown.actors ? shown : { ...shown, actors };
       // 18: the same tick is the Cinema Room's clock: the errand's Beats end
@@ -1110,7 +1111,31 @@ function withRoomArrivalSettled(world: World): World {
   const settled = settleRoomArrival(world.roomArrival);
   if (settled.arrival === world.roomArrival) return world;
   const placed = applyCues({ ...world, roomArrival: settled.arrival }, settled.cues, false, settled.arrival.room);
-  return { ...placed, actors: settleActors(placed.actors) };
+  return withBoyAttending({ ...placed, actors: settleActors(placed.actors) }, settled.cues, false);
+}
+
+/**
+ * 70: the Boy sent on to the shelf that has the visitor's attention, wherever
+ * the Room's entrance had just put him.
+ *
+ * A pointer already resting on a shelf reports it while the entrance is still
+ * bringing him in. Before he is through the Door there is nobody to send, and
+ * the entrance's own cues walk him to his beanbag — or, cut short, place him in
+ * it — because that is the mark it took down when the Door opened. So whenever
+ * a cue has just placed or sent him, and a shelf is attended while he is
+ * seated, he goes on to that shelf's mark instead. The fix is tied to the
+ * mark, which follows the shelf, and to the cue that moved him, not to any
+ * moment in the entrance; he goes at the pace the entrance sent him at.
+ */
+function withBoyAttending(world: World, cues: readonly ArrivalCue[], motionOn: boolean): World {
+  const shelf = world.cinema.attended;
+  if (shelf === null || world.cinema.step !== 'seated') return world;
+  if (world.rooms.current !== 'cinema' || world.roomArrival.room !== 'cinema') return world;
+  if (!cues.some(cue => cue.kind !== 'sfx' && cue.actor === 'boy')) return world;
+  let cycle: CycleId = 'walk';
+  for (const cue of cues) if (cue.kind === 'send' && cue.actor === 'boy') cycle = cue.cycle ?? 'walk';
+  const actors = sendActor(world.actors, 'boy', boyMark(shelf), cycle, motionOn);
+  return actors === world.actors ? world : { ...world, actors };
 }
 
 /** How far the Room the visitor is in has got with letting them in. */
