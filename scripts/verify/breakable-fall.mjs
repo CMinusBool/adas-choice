@@ -195,15 +195,12 @@ const RECORDER = () => {
     for (const entry of records) {
       const target = entry.target;
       if (!(target instanceof Element)) continue;
-      // The Entryway's vase predates the `data-breakable` pair and is found by
-      // `data-prop` (`src/dom/entryway.ts`); every other Breakable by the pair.
-      const vase = target.getAttribute('data-prop');
-      const id = target.getAttribute('data-breakable') ?? (vase === 'vaseIntact' || vase === 'vaseBroken' ? 'entryway-vase' : null);
+      const id = target.getAttribute('data-breakable');
       if (id === null) continue;
       log.push({
         at: Number(performance.now().toFixed(1)),
         id,
-        state: target.getAttribute('data-breakable-state') ?? (vase === 'vaseBroken' ? 'broken' : 'intact'),
+        state: target.getAttribute('data-breakable-state'),
         attribute: entry.attributeName,
         falling: target.classList.contains('is-breakable-falling'),
         hidden: target.hasAttribute('hidden'),
@@ -219,11 +216,7 @@ const RECORDER = () => {
 /** Wait for the swap (or the window to run out), then read the recorder back. */
 const WATCH_FALL = async ({ breakable, forMs, inRoom }) => {
   const startedAt = performance.now();
-  // The same two ways of naming a Breakable's Props as the recorder above.
-  const propOf = (id, state) =>
-    id === 'entryway-vase'
-      ? document.querySelector(`[data-prop="${state === 'broken' ? 'vaseBroken' : 'vaseIntact'}"]`)
-      : document.querySelector(`[data-breakable="${id}"][data-breakable-state="${state}"]`);
+  const propOf = (id, state) => document.querySelector(`[data-breakable="${id}"][data-breakable-state="${state}"]`);
   if (!propOf(breakable, 'intact')) return { error: `no intact Prop for ${breakable} in this Room` };
   const broken = propOf(breakable, 'broken');
   if (!broken) return { error: 'the Breakable has no broken Prop' };

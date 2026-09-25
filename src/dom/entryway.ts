@@ -6,20 +6,17 @@ import {
   isCurrentRoom,
   isInteractive,
   motionIsOn,
-  vaseState,
   type ActorId,
   type ArrivalView,
   type Box,
   type EntrywayProps,
-  type VaseState,
   type World,
 } from '../world';
-import { whenFallen } from './breakables';
 import { type Dispatch, type Painter } from './painter';
 import { playSfx } from './sound';
 
 /**
- * Paint the Entryway: its Props, its Breakable, and the arrival.
+ * Paint the Entryway: its Props and the arrival.
  *
  * Every decision has already been made in `src/world/arrival.ts` — which Beat
  * is playing, which state each Prop is in, who is walking where, what should be
@@ -144,7 +141,7 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
     return acted;
   }
 
-  let painted: { arrival: World['arrival']; vase: VaseState } | null = null;
+  let painted: World['arrival'] | null = null;
   return (next: World) => {
     world = next;
     openTheDoor();
@@ -154,37 +151,12 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
     for (const name of arrival.sfx) playSfx(name);
     if (arrival.state === 'done') rememberArrival();
 
-    const vase = vaseState(next);
-    const previousVase = painted?.vase;
-    if (painted && painted.arrival === next.arrival && previousVase === vase) return;
-    painted = { arrival: next.arrival, vase };
+    if (painted === next.arrival) return;
+    painted = next.arrival;
 
     showProps(entrywayProps(next));
-    // Each of the vase's two Props has one sentence of its own and says it in
-    // whichever state it is shown in, so the sentences are the markup's
-    // `data-i18n-aria` and `src/dom/language.ts` sweeps them like any other —
-    // the same arrangement the other four Breakables ship with. All that is
-    // left here is which of the two is on the table.
-    //
-    // Ticket 48: the same wobble-tip-fall the other four Breakables play,
-    // motion-on only, before the swap to broken. Motion off, or a vase that
-    // was already broken when this tab loaded, swaps immediately exactly as
-    // ticket 09 shipped it.
-    if (previousVase !== undefined && previousVase !== vase && vase === 'broken' && motionIsOn(next)) {
-      const intact = props.get('vaseIntact')!;
-      // Ticket 51: and the swap happens whether the fall finished or a Room
-      // change cut it short, which is `whenFallen`'s whole job — otherwise the
-      // vase is left standing, mid-topple, in a hall nobody is in.
-      whenFallen(intact, () => {
-        intact.hidden = true;
-        intact.classList.remove('is-breakable-falling');
-        props.get('vaseBroken')!.hidden = false;
-      });
-      intact.classList.add('is-breakable-falling');
-    } else {
-      props.get('vaseIntact')!.hidden = vase !== 'intact';
-      props.get('vaseBroken')!.hidden = vase !== 'broken';
-    }
+    // The vase is a Breakable like the other four, painted by
+    // `src/dom/breakables.ts` off its `data-breakable` pair (ticket 70).
 
     const acted = playBeats(arrival);
     for (const [id, element] of cast) {

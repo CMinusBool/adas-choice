@@ -2,17 +2,16 @@ import { BREAKABLE_IDS, breakableState, motionIsOn, type BreakableId, type World
 import { type Dispatch, type Painter } from './painter';
 
 /**
- * Every Breakable in the apartment but the Entryway's vase.
+ * Every Breakable in the apartment, the Entryway's vase included.
  *
- * The vase is `src/dom/entryway.ts`'s own — it was built before this pattern
- * existed, and its two Props are found by `data-prop`, not `data-breakable` —
- * so this file paints the other four, all of which carry the generic
- * `data-breakable="<id>"` / `data-breakable-state="intact"|"broken"` pair
- * tickets 15, 16 and this one shipped. What both files agree on is the world
- * model's single `broken` set (`src/world/world.ts`) and the one place either
- * of them remembers it: session storage, read once at start-up and written
- * back here whenever anything changes, for every Breakable including the
- * vase — a new tab has nothing stored and finds the whole apartment whole.
+ * Each one is two Props carrying the generic `data-breakable="<id>"` /
+ * `data-breakable-state="intact"|"broken"` pair tickets 15, 16 and 09 shipped.
+ * The vase predates the pair and was painted by `src/dom/entryway.ts` off its
+ * `data-prop`s until ticket 70 gave it the pair too, so this file is the one
+ * place a Breakable is painted. What it paints is the world model's single
+ * `broken` set (`src/world/world.ts`), remembered in session storage: read
+ * once at start-up and written back here whenever anything changes — a new
+ * tab has nothing stored and finds the whole apartment whole.
  */
 
 /** Session storage remembers what has broken for this tab, and no longer. */
@@ -66,11 +65,8 @@ const FALLING_CLASS = 'is-breakable-falling';
  * a Room the visitor had walked out of, still carrying the falling class, to go
  * over again from its first frame when they came back. Whichever event arrives
  * first wins and the other is dropped, so the swap still happens exactly once.
- *
- * `src/dom/entryway.ts` reaches for this for the vase, which is the one
- * Breakable that predates this file.
  */
-export function whenFallen(element: HTMLElement, settle: () => void) {
+function whenFallen(element: HTMLElement, settle: () => void) {
   const done = () => {
     element.removeEventListener('animationend', done);
     element.removeEventListener('animationcancel', done);
@@ -108,7 +104,6 @@ export const mountBreakables = (_dispatch: Dispatch, _initial: World): Painter =
       // broke earlier arrives already broken out of session storage — and
       // without this guard it fell over again on every single reload, which is
       // a cat that is not there knocking over something already on the floor.
-      // `src/dom/entryway.ts` guards its own vase the same way.
       if (state === 'broken' && previous === 'intact' && motionIsOn(world) && intact) {
         whenFallen(intact, () => swapToState(els, state));
         intact.classList.add(FALLING_CLASS);
