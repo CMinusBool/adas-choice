@@ -5,6 +5,7 @@ import { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';
 import type { RoomId } from './rooms';
 import {
   STAGE_WIDTH,
+  WALK_SPEED,
   clampInto,
   containsPoint,
   distance,
@@ -41,7 +42,7 @@ export type CycleId = 'idle' | 'walk' | 'run';
 export type Facing = 'left' | 'right';
 
 /** How fast each Cycle carries an Actor, in stage units per second. */
-const CYCLE_SPEED: Record<CycleId, number> = { idle: 0, walk: 190, run: 430 };
+const CYCLE_SPEED: Record<CycleId, number> = { idle: 0, walk: WALK_SPEED, run: 430 };
 
 // 44: a Room's arrival
 /**

@@ -8,10 +8,21 @@
  * them by `container width / 1600`. An Actor's position is its feet point, the
  * bottom-centre of its sprite, which is also what makes depth a y-sort.
  *
- * Everything below is plain geometry: no Actor, no Room, no time.
+ * Everything below is plain geometry — no Actor, no Room, no time — but for
+ * the one speed the Cast and the cats both reckon distances with.
  */
 export const STAGE_WIDTH = 1600;
 export const STAGE_HEIGHT = 900;
+
+/**
+ * How fast a walk carries anybody across the stage, in stage units per second.
+ *
+ * The walk Cycle's speed in `actors.ts`, and the speed a cat in `cats.ts`
+ * reckons her walk to a knock at. It lives here because both of them import
+ * this file and `actors.ts` imports `cats.ts`, so neither could take it from the
+ * other.
+ */
+export const WALK_SPEED = 190;
 
 /** A place on a stage, in stage units. */
 export interface Point {

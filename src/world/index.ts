@@ -75,7 +75,7 @@ export { catSfx, isBeingPetted, knockingDown } from './world';
 export type { Breakable } from './cats';
 export { BREAKABLE_IDS, breakableById, knockBeat } from './cats';
 // 68: the two rolls — whether it falls this visit, and where in the minute.
-export { FALL_CHANCE, FALL_WINDOW_MS } from './cats';
+export { FALL_WINDOW_MS, LATE_CAT_MS } from './cats';
 
 // 18: the nine Films, and the rummage that pins three of them to the wall.
 // 19: `FilmPairing` is what the panel's meta line turns into a copy key.

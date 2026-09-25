@@ -5,6 +5,8 @@ import {
   CAT_CLEARANCE,
   CAT_IDS,
   CAT_MARKS,
+  FALL_WINDOW_MS,
+  LATE_CAT_MS,
   ROOM_IDS,
   actorView,
   actorsIn,
@@ -408,8 +410,8 @@ describe('a Breakable falling on two rolls', () => {
     expect(falls.length).toBeLessThan(30);
     for (const at of falls) {
       expect(at).toBeGreaterThanOrEqual(0);
-      // The minute, plus Luna's longest walk across the Game Room and her hold.
-      expect(at).toBeLessThanOrEqual(60000 + 10000 + breakableById('snow-globe').knockMs);
+      // The minute, plus the most a cat who could not make it may add.
+      expect(at).toBeLessThanOrEqual(FALL_WINDOW_MS + LATE_CAT_MS);
     }
   });
 

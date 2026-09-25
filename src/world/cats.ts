@@ -3,7 +3,7 @@ import type { ActorId } from './actors';
 // 09: the hall table's mark is the Entryway's own, written down once there.
 import { ENTRYWAY_MARKS } from './entryway';
 import type { RoomId } from './rooms';
-import { distance, type Point } from './stage';
+import { STAGE_WIDTH, WALK_SPEED, distance, type Point } from './stage';
 
 /**
  * The three cats, as something that decides for itself.
@@ -305,10 +305,9 @@ export function breakableById(breakable: BreakableId): Breakable {
 /**
  * The first roll: how likely a Breakable still standing when the visitor walks
  * into its Room is to go over during that visit. Rolled once per Breakable per
- * entry, the moment the Room's Arrival ends (the orchestrator's default for
- * ticket 68, pending the owner).
+ * entry, the moment the Room's Arrival ends.
  */
-export const FALL_CHANCE = 0.5;
+const FALL_CHANCE = 0.5;
 
 /**
  * The second roll's range, in milliseconds: a fall the first roll allowed lands
@@ -319,20 +318,12 @@ export const FALL_CHANCE = 0.5;
 export const FALL_WINDOW_MS = 60000;
 
 /**
- * How fast a cat walks, in stage units per second — `actors.ts`'s walk Cycle,
- * which is what she walks to a knock in. Written down again rather than
- * imported because `actors.ts` imports this file; the two only have to agree
- * roughly, since a cat who reckons short sets off early and waits on her mark,
- * and one who reckons long is late and the fall waits for her.
- */
-const CAT_WALK_SPEED = 190;
-
-/**
- * How long a cat reckons a walk takes, in milliseconds, erring on the long side:
- * a route bends round furniture, so the straight line is a floor, not the walk.
+ * How long a cat reckons a walk takes, in milliseconds, at the walk Cycle's
+ * speed and erring on the long side: a route bends round furniture, so the
+ * straight line is a floor, not the walk.
  */
 function walkMs(from: Point, to: Point): number {
-  return (distance(from, to) / CAT_WALK_SPEED) * 1000 * 1.25 + 300;
+  return (distance(from, to) / WALK_SPEED) * 1000 * 1.25 + 300;
 }
 
 /**
@@ -341,7 +332,16 @@ function walkMs(from: Point, to: Point): number {
  * be that close to setting off for her Breakable goes to it instead, and waits
  * there, so no wander ever makes her late.
  */
-const WANDER_LEAD_MS = walkMs({ x: 0, y: 0 }, { x: 1600, y: 0 });
+const WANDER_LEAD_MS = walkMs({ x: 0, y: 0 }, { x: STAGE_WIDTH, y: 0 });
+
+/**
+ * The late-cat allowance: the most a fall can land after the moment rolled for
+ * it, in milliseconds, when its cat could not make that moment — a walk clean
+ * across the stage and the longest knock. So every fall of a visit lands inside
+ * `FALL_WINDOW_MS + LATE_CAT_MS` of its Arrival's end, which is the window
+ * `scripts/verify/breakable-fall.mjs` watches for.
+ */
+export const LATE_CAT_MS = WANDER_LEAD_MS + Math.max(...BREAKABLE_IDS.map(id => BREAKABLES[id].knockMs));
 
 /** One Breakable the first roll let fall, and where in the minute the second put it. */
 interface Fall {
@@ -513,10 +513,16 @@ export function tickCats(
   const knocked: BreakableId[] = [];
   let falls: FallPlan = slice.falls ?? rollFalls(room, broken, now, random);
   const fallsAt = (fall: Fall) => falls.rolledAt + fall.afterMs;
+  // The falls still to come for Breakables still standing: this cat's own, or
+  // everybody else's. Read afresh each time, because a knock this tick takes
+  // its fall out of `falls`.
+  const fallsStillDue = (cat: CatId, hers: boolean): readonly Fall[] =>
+    falls.pending.filter(fall => (BREAKABLES[fall.breakable].owner === cat) === hers && !broken.has(fall.breakable));
   const fallFor = (cat: CatId): Fall | null =>
-    falls.pending
-      .filter(fall => BREAKABLES[fall.breakable].owner === cat && !broken.has(fall.breakable))
-      .reduce<Fall | null>((soonest, fall) => (soonest && soonest.afterMs <= fall.afterMs ? soonest : fall), null);
+    fallsStillDue(cat, true).reduce<Fall | null>(
+      (soonest, fall) => (soonest && soonest.afterMs <= fall.afterMs ? soonest : fall),
+      null,
+    );
   // Updated as each cat decides, so two of them settling on the same tick still
   // see each other's choice rather than both reaching for the same mark.
   const goals = new Map<CatId, Point | null>(slice.minds.map(mind => [mind.id, mind.goal]));
@@ -552,7 +558,7 @@ export function tickCats(
         // before the moment rolled; a late one starts it the moment she
         // arrives, and it falls when the knock is done, never before the moment.
         goals.set(mind.id, null);
-        const fall = falls.pending.find(candidate => candidate.breakable === knocking);
+        const fall = fallsStillDue(mind.id, true).find(candidate => candidate.breakable === knocking);
         const { knockMs } = BREAKABLES[knocking];
         if (fall && now < fallsAt(fall) - knockMs) return next({});
         return next({ knockUntil: fall ? Math.max(now + knockMs, fallsAt(fall)) : now + knockMs });
@@ -598,9 +604,7 @@ export function tickCats(
     if (!reached(mind.restUntil, now, REST_MS)) return next({ restUntil: due(mind.restUntil, now, REST_MS, random) });
 
     // Nobody else settles on the mark of a Breakable still due to fall.
-    const reserved = falls.pending
-      .filter(other => BREAKABLES[other.breakable].owner !== mind.id && !broken.has(other.breakable))
-      .map(other => BREAKABLES[other.breakable].mark);
+    const reserved = fallsStillDue(mind.id, false).map(other => BREAKABLES[other.breakable].mark);
     const goal = freeMark(room, mind.id, places, goals, random, reserved);
     // Nowhere free is a cat that stays put and asks again shortly, which is
     // what keeps two of them off one mark without any of them queueing.
