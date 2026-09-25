@@ -466,11 +466,25 @@ html.dialog-open { overflow: hidden; }
 .cinema-poster[data-poster-slot="2"] { --slot-x: 235; }
 .cinema-poster[data-poster-slot="3"] { --slot-x: 389; }
 @container (max-width: 900px) { .cinema-poster { --grow: 2.2; --to-x: 363.5; --to-y: 450; } }
-@container (max-width: 620px) { .cinema-poster { --grow: 2.9; } }
+@container (max-width: 620px) { .cinema-poster { --grow: 2.65; } }
 .cinema-poster.is-expanded {
   z-index: 20;
   scale: calc(var(--grow) / var(--scale));
   translate: calc(var(--u) / var(--scale) * (var(--to-x) - var(--at-x))) calc(var(--u) / var(--scale) * (var(--to-y) - var(--at-y)));
+}
+/* Growing at a point of its own takes the Poster out from under a pointer that
+   was resting on its slot, and a Poster the pointer has left closes: it would
+   open and close under a still pointer for as long as the visitor held it
+   there. So while it is open it keeps its slot as well, a transparent box that
+   is its resting slot run back through its own translate and scale. */
+.cinema-poster.is-expanded::before {
+  --k: calc(var(--grow) / var(--scale));
+  content: "";
+  position: absolute;
+  left: calc(var(--u) * (66 - (66 + (var(--to-x) - var(--at-x)) / var(--scale)) / var(--k)));
+  top: calc(var(--u) * (98 - (98 + (var(--to-y) - var(--at-y)) / var(--scale)) / var(--k)));
+  width: calc(var(--u) * 132 / var(--k));
+  height: calc(var(--u) * 196 / var(--k));
 }
 /* The expanded Poster comes off the wall over the furniture and the Cast, which
    all sort above the board's 640; the details card still sorts above it. */
@@ -552,6 +566,17 @@ html.dialog-open { overflow: hidden; }
      of the screen) and of the door, and over shelves that are inert while a
      Poster is open. */
   .poster-details { position: absolute; left: 46.25%; top: 54%; width: 53.125%; max-height: 44.5%; margin: 0; z-index: 910; overflow-y: auto; overscroll-behavior: contain; font-size: .8125rem; box-shadow: 0 24px 80px #000a; }
+  /* That strip is wide and low, so the card reads across it: the choice
+     straight under the Film's name, where it is in view without scrolling the
+     card, and the story beside the reason. */
+  .poster-details { display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "title title" "meta meta" "actions actions" "premise-label reason-label" "premise reason"; column-gap: 1.4rem; align-content: start; padding: 1rem 1.2rem; }
+  .poster-details .details-title { grid-area: title; }
+  .poster-details .details-meta { grid-area: meta; }
+  .poster-details .details-label:nth-of-type(1) { grid-area: premise-label; }
+  .poster-details .details-premise { grid-area: premise; }
+  .poster-details .details-label:nth-of-type(2) { grid-area: reason-label; }
+  .poster-details .details-reason { grid-area: reason; }
+  .poster-details .details-actions { grid-area: actions; margin-top: .7rem; }
   /* A shelf the card is lying over cannot be clicked through it: the visitor
      is reading a Film, not choosing a genre (§4.6). */
   .cinema-room:has(.poster-details:not([hidden])) .cinema-shelf { pointer-events: none; }
