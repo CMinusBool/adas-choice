@@ -549,8 +549,13 @@ html.dialog-open { overflow: hidden; }
 .motion-off .cinema-spindles { animation: none; }
 /* Both controls pad their hit area out to the 44 CSS px floor without moving
    the painted Prop, which is smaller than a fingertip at every shell width. */
-.projector-gate::before, .projector-motor::before { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: max(100%, 44px); height: max(100%, 44px); }
-/* High on the machine, cream, and dim: the mouth a reel goes into. Ticket 20
+.projector-gate::before, .projector-motor::before { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: max(100%, 44px); height: max(100%, 44px); }
+/* 66: S09 draws the switch and the gate door 52 units apart, which is under 44 px on any stage
+   narrower than 1354 px, so centred pads overlapped and the gate (832) swallowed the switch (640).
+   Each pad now grows away from the other, and the two meet at x 496, halfway between them. */
+.projector-motor::before { left: auto; right: calc(var(--u) * -8); translate: 0 -50%; }
+.projector-gate::before { left: calc(var(--u) * -16); translate: 0 -50%; }
+/* Over S09's side door, lower right since 66, cream, and dim: where a reel goes in. Ticket 20
    enables it, and until then it says so rather than pretending. */
 .stage-cinema button.projector-gate { z-index: 832; border-radius: calc(var(--u) * 6); border: calc(var(--u) * 4) dashed #efe6d680; background: #efe6d611; cursor: not-allowed; }
 .projector-gate:focus-visible { outline: 3px solid var(--cream); outline-offset: 2px; }
@@ -638,7 +643,7 @@ html.dialog-open { overflow: hidden; }
    percentages are the note's aperture at stage (450, 660) and the lower
    corners of the sheet as measured off S01, (727, 464) and (1293, 464), read
    inside this Prop's own box (445, 148, 848 x 517). */
-.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(.6% 99%, 33.25% 61.1%, 100% 61.1%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
+.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(12.32% 96.71%, 33.25% 61.1%, 100% 61.1%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
 
 /* §10: the screen sheet, once there is something on it. */
 .stage-cinema .cinema-film { z-index: 905; overflow: hidden; background: #0b070f; box-shadow: 0 0 calc(var(--u) * 90) calc(var(--u) * 20) #ffe6b02e; }
