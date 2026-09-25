@@ -56,8 +56,10 @@
  * can pixel-diff one run against the last approved one; this script does no diffing.
  *
  * Output: a JSON summary on stdout and at `<effort>/notes/screens/<NN>-summary.json`.
- * Exit 0 all clear, 1 when a route failed to load or a console error was seen, 2 on a
- * usage error, 3 when Playwright is not on this host.
+ * Exit 0 all clear, 1 when a route failed to load, a console error was seen or a Room's
+ * Cast never moved with motion on (ticket 70: that used to exit 0 and was only visible
+ * as `moving: false` in the summary), 2 on a usage error, 3 when Playwright is not on
+ * this host.
  *
  * ## Usage
  *
@@ -454,15 +456,15 @@ const WATCH = async ({ room, windowMs, capMs, pollMs, movedPx }) => {
     const end = last.get(actor);
     return { actor, dx: end.x - start.x, dy: end.y - start.y };
   };
-  const farthest = () =>
-    Math.max(0, ...[...first.keys()].map(travel).map(({ dx, dy }) => Math.abs(dx) + Math.abs(dy)));
+  /** The furthest any one Actor has got, as a Manhattan distance; 0 with nobody seen. */
+  const farthest = moves => Math.max(0, ...moves.map(({ dx, dy }) => Math.abs(dx) + Math.abs(dy)));
   look();
   const cap = Math.max(capMs ?? windowMs, windowMs, pollMs);
   const deadline = opened + cap;
   while (Date.now() < deadline) {
     await new Promise(resolve => setTimeout(resolve, pollMs));
     look();
-    if (farthest() > movedPx) break;
+    if (farthest([...first.keys()].map(travel)) > movedPx) break;
   }
   watching = false;
   const moved = [...first.keys()].map(travel).map(({ actor, dx, dy }) => ({
@@ -476,7 +478,7 @@ const WATCH = async ({ room, windowMs, capMs, pollMs, movedPx }) => {
     watchedMs: Date.now() - opened,
     frames,
     moved,
-    maxPx: moved.length === 0 ? 0 : Math.max(...moved.map(entry => Math.abs(entry.dx) + Math.abs(entry.dy))),
+    maxPx: farthest(moved),
     motionOff: document.documentElement.classList.contains('motion-off'),
     reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
     lang: document.documentElement.lang,
@@ -726,15 +728,23 @@ async function main() {
 
   const errors = summary.routes.reduce((total, route) => total + route.consoleErrors.length, 0);
   const failed = summary.routes.filter(route => !route.ok).map(route => route.route);
+  // Ticket 70: a Room whose Cast stands still with motion on is a failure, not
+  // a line in the JSON nobody reads. A route that never loaded is already in
+  // `failed` and is not counted twice.
+  const still = summary.routes
+    .filter(route => route.ok && !route.motion.withMotion.moving)
+    .map(route => route.route);
   summary.consoleErrorCount = errors;
   summary.failedRoutes = failed;
+  summary.stillWithMotion = still;
   summary.screenshotCount = summary.routes.reduce((total, route) => total + route.screenshots.length, 0);
-  summary.ok = errors === 0 && failed.length === 0;
+  summary.ok = errors === 0 && failed.length === 0 && still.length === 0;
 
   const summaryPath = path.join(outDir, `${options.ticket}-summary.json`);
   writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`);
   console.log(JSON.stringify(summary, null, 2));
   console.error(`room-shots: ${summary.screenshotCount} PNG(s) and ${summaryPath}`);
+  if (still.length > 0) console.error(`room-shots: nobody moved with motion on in ${still.join(', ')}`);
   process.exit(summary.ok ? 0 : 1);
 }
 
