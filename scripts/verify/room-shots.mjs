@@ -388,38 +388,47 @@ const SETTLED = () => {
  * which is the one check the embedded pane could never make: there `visibilityState` is
  * `hidden`, rAF never fires, and every Actor sits exactly where the model first put it.
  *
- * `read()` re-queries `.actor` on the stage every time it is called rather than closing
- * over one snapshot taken before the window opens. `SETTLED` only means the loading
- * screen is gone; with full motion `attach()` in `src/dom/actors.ts` has not necessarily
- * reparented the Cast onto the stage yet, so a snapshot taken too early carries an empty
- * NodeList through the whole window and the check reports nobody there and nothing
- * moving. Before opening the window, this also gives the Cast up to `attachTimeoutMs` to
- * attach — capped well under `windowMs` so a Room that genuinely has no Actors on its
- * stage does not hang, it just samples an empty stage as it always could.
+ * Each Actor is measured against **where it was first seen standing**, keyed by its
+ * `data-actor`, not against one snapshot of the stage taken as the window opens
+ * (ticket 69). A snapshot cannot see an Actor that comes onto the stage after it was
+ * taken, and since ticket 59 that is every Actor in the Entryway: its hall is empty
+ * until the Arrival places the Girl on the threshold, 1.4 s into the script and so
+ * about 2 s after `SETTLED` once the 600 ms doorstep is added. The old snapshot waited
+ * up to 1 s for somebody to attach, gave up, carried an empty list through the whole
+ * window and reported 0 px however far the Cast walked. Ticket 55's green only held
+ * because the hall used to show its finished tableau for the first 600 ms, which is
+ * the flash ticket 59 removed. Measuring per Actor from its first sighting also stops
+ * a late arrival from shifting the others' indices (ticket 54's `read()` re-query
+ * exists for the same reason, and still runs on every poll).
+ *
+ * "Standing" means drawn: an Actor that is `is-acted` — hidden while an arrival Beat
+ * draws it — has a zero box, and comparing a zero box against a real one would be a
+ * false positive of hundreds of pixels. It is left out of that poll and picked up
+ * again where it reappears, which is real travel: the model walked it while the Beat
+ * stood in for it.
  *
  * Sampling itself (ticket 55) polls for movement rather than sleeping for one fixed
  * span: it re-reads every `pollMs` and stops as soon as any Actor has moved more than
  * `movedPx`, up to `capMs`. A Room whose Arrival is already walking when the window
- * opens — every Room but the Entryway — exits on an early poll at close to the old
- * fixed-window cost; a Room held still for a beat before it starts (the Entryway's
- * door-opening hold) gets the rest of `capMs` to prove it eventually moves. A Room that
- * never moves, playing or reduced, pays the full `capMs` exactly as it paid the full
- * `windowMs` before — the poll changes when a positive answer arrives, not the cost of
- * a negative one.
+ * opens — every Room but the Entryway — exits on an early poll; the Entryway, empty
+ * until its Girl steps in, exits on the first poll after she starts walking. A Room
+ * with no Actors at all, or one that never moves, pays the full `capMs` and reports
+ * 0 px — no hang and no false positive, which is ticket 54's bounded-wait guarantee.
+ *
+ * `actors` and `who` are who was standing on the stage at the moment the window
+ * closed, and `watchedMs` is when that was, counted from the window opening — so an
+ * Entryway reading can be checked against the script (the Girl alone until the Boy
+ * steps in at 2.2 s) rather than against the five of the settled tableau.
  */
 const WATCH = async ({ room, windowMs, capMs, pollMs, movedPx }) => {
   const stage = document.querySelector(`[data-stage="${room}"]`);
-  const query = () => (stage ? [...stage.querySelectorAll('.actor')] : []);
   const read = () =>
-    query().map(actor => {
-      const box = actor.getBoundingClientRect();
-      return { actor: actor.dataset.actor ?? '?', x: box.left, y: box.top };
-    });
-  const attachTimeoutMs = Math.min(windowMs, 1000);
-  const attachDeadline = Date.now() + attachTimeoutMs;
-  while (query().length === 0 && Date.now() < attachDeadline) {
-    await new Promise(resolve => setTimeout(resolve, 20));
-  }
+    (stage ? [...stage.querySelectorAll('.actor')] : [])
+      .filter(actor => !actor.classList.contains('is-acted'))
+      .map(actor => {
+        const box = actor.getBoundingClientRect();
+        return { actor: actor.dataset.actor ?? '?', x: box.left, y: box.top };
+      });
   let frames = 0;
   let watching = true;
   const count = () => {
@@ -428,33 +437,43 @@ const WATCH = async ({ room, windowMs, capMs, pollMs, movedPx }) => {
     requestAnimationFrame(count);
   };
   requestAnimationFrame(count);
-  const before = read();
-  const distance = current =>
-    before.length === 0
-      ? 0
-      : Math.max(...before.map((start, index) => {
-          const end = current[index] ?? start;
-          return Math.abs(end.x - start.x) + Math.abs(end.y - start.y);
-        }));
+  const opened = Date.now();
+  /** Where each Actor was first seen standing, and where it was last seen. */
+  const first = new Map();
+  const last = new Map();
+  let standing = [];
+  const look = () => {
+    standing = read();
+    for (const seen of standing) {
+      if (!first.has(seen.actor)) first.set(seen.actor, seen);
+      last.set(seen.actor, seen);
+    }
+  };
+  const travel = actor => {
+    const start = first.get(actor);
+    const end = last.get(actor);
+    return { actor, dx: end.x - start.x, dy: end.y - start.y };
+  };
+  const farthest = () =>
+    Math.max(0, ...[...first.keys()].map(travel).map(({ dx, dy }) => Math.abs(dx) + Math.abs(dy)));
+  look();
   const cap = Math.max(capMs ?? windowMs, windowMs, pollMs);
-  const deadline = Date.now() + cap;
-  let after = before;
+  const deadline = opened + cap;
   while (Date.now() < deadline) {
     await new Promise(resolve => setTimeout(resolve, pollMs));
-    after = read();
-    if (distance(after) > movedPx) break;
+    look();
+    if (farthest() > movedPx) break;
   }
   watching = false;
-  const moved = before.map((start, index) => {
-    const end = after[index] ?? start;
-    return {
-      actor: start.actor,
-      dx: Number((end.x - start.x).toFixed(2)),
-      dy: Number((end.y - start.y).toFixed(2)),
-    };
-  });
+  const moved = [...first.keys()].map(travel).map(({ actor, dx, dy }) => ({
+    actor,
+    dx: Number(dx.toFixed(2)),
+    dy: Number(dy.toFixed(2)),
+  }));
   return {
-    actors: after.length,
+    actors: standing.length,
+    who: standing.map(seen => seen.actor),
+    watchedMs: Date.now() - opened,
     frames,
     moved,
     maxPx: moved.length === 0 ? 0 : Math.max(...moved.map(entry => Math.abs(entry.dx) + Math.abs(entry.dy))),
@@ -722,9 +741,12 @@ async function main() {
 function summarise(result) {
   if (!result || !result.watch) return { actors: 0, frames: 0, moving: false, maxPx: 0 };
   return {
-    // Who was on the stage when motion was first proved. In the Entryway that is an
-    // early frame of the arrival; `atRest` below is the Cast the Room ends up with.
+    // Who was on the stage when motion was first proved, and how far into the window
+    // that was. In the Entryway that is an early frame of the arrival — the Girl, alone
+    // on the hall floor — and `atRest` below is the Cast the Room ends up with.
     actors: result.watch.actors,
+    who: result.watch.who,
+    watchedMs: result.watch.watchedMs,
     atRest: result.rest ?? null,
     frames: result.watch.frames,
     maxPx: result.watch.maxPx,

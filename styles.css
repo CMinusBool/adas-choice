@@ -82,6 +82,21 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
 .site-footer { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding: 1.6rem 0 2rem; border-top: 1px solid var(--line); font-size: .8125rem; color: var(--quiet); }
 .site-footer > span:first-child { color: var(--muted); }
 .footer-heart { font-size: 1.2rem; color: var(--pink); vertical-align: -.06em; padding-right: .2rem; }
+/* From 1080 px up the footer rides in the header band, between the wordmark and
+   the controls, so the first screenful is the whole Room (ticket 67). The header
+   is a subgrid of the shell: the wordmark and the controls size the two outer
+   columns and the footer gets what is left between them, so it can wrap but never
+   overlap either. It stays last in the markup, so it is still the page's
+   contentinfo and still read last. Below 1080 px it is back in the flow under the
+   Room, where the narrow Rooms scroll anyway. */
+@media (min-width: 1080px) {
+  .page-shell { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 1.5rem; }
+  .site-header { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; grid-row: 1; }
+  .site-header > .wordmark { grid-column: 1; justify-self: start; }
+  .site-header > .header-actions { grid-column: 3; }
+  .apartment { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
+  .site-footer { grid-column: 2; grid-row: 1; align-self: center; justify-self: center; flex-direction: column; align-items: center; gap: 0; margin: 0; padding: 0; border-top: 0; line-height: 1.5; text-align: center; }
+}
 :focus-visible { outline: 2px solid var(--pink); outline-offset: 5px; }
 .skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 20; padding: .7rem 1rem; border-radius: 8px; background: var(--pink); color: var(--bg); transform: translateY(-200%); }
 .skip-link:focus { transform: translateY(0); }
@@ -327,6 +342,12 @@ html.dialog-open { overflow: hidden; }
 /* Every Cinema Prop sorts at one depth; the Room has no Prop the Cast walks
    behind, so it needs no per-Prop key. */
 .stage-cinema .cinema-prop { z-index: 640; }
+/* 63: a Prop drawn smaller than its design note's size says how much smaller in
+   its own `--scale`, and inside it `--u` is the note's unit at that scale — so
+   every number written inside a shelf or the board below stays the note's, and
+   only the box in `index.html` is the scaled one. S01's walls either side of the
+   screen are narrower than the note's shelves and board. */
+.stage-cinema .cinema-shelf, .stage-cinema .cinema-board { --u: calc(.0625cqw * var(--scale, 1)); }
 /* The stage swallows pointer events so the Cast never blocks a click; the
    Props the visitor can actually use take theirs back. */
 .stage-cinema a.cinema-prop, .stage-cinema button.cinema-prop { pointer-events: auto; }
@@ -380,11 +401,12 @@ html.dialog-open { overflow: hidden; }
 
 /* 18: P11, the three Poster slots.
 
-   Offsets are from the board's padding box, which starts at stage (1122, 312)
-   because the walnut frame is a 12-unit border: 3 and 38 units in from there
-   puts slot 1 at the design note's (1125, 350), and 132-wide slots 22 apart
-   put slots 2 and 3 at 1279 and 1433. `--u` is the stage unit, so the three
-   land on the same spot at every shell width, like every other Prop here. */
+   Offsets are from the board's padding box, which starts 12 units in because
+   the walnut frame is a 12-unit border: 3 and 38 units in from there puts slot
+   1 at the board's (15, 50), and 132-wide slots 22 apart put slots 2 and 3 at
+   169 and 323. `--u` is the board's unit (the note's, at its `--scale`), so
+   the three land on the same spot at every shell width, like every other Prop
+   here. */
 .cinema-board .board-slots { position: absolute; left: calc(var(--u) * 3); top: calc(var(--u) * 38); display: flex; gap: calc(var(--u) * 22); }
 /* 36: every Poster is its Film's own image (S17-S25): the framed Poster
    painted in the middle of a 600 x 800 canvas — cream stock, genre stripe and
@@ -434,18 +456,54 @@ html.dialog-open { overflow: hidden; }
    the Poster grows — one image, clipped flat and unclipped expanded, so the
    two states cannot drift apart.
 
-   Slot 3 sits 90 units left of where it would grow to, which is the design
-   note's clamp keeping the widest Poster inside the stage. The scale steps up
-   as the stage narrows (the stage is the container), because a Poster 1.6x a
-   51 px frame is not a Poster anyone can look at. It does not reach the note's
-   220 CSS px floor on a phone: the same section forbids a Poster taller than
-   the stage, and at that width the details card below the stage is what
-   carries the reading. */
-.cinema-poster { transition: scale .45s cubic-bezier(.22, .75, .2, 1), translate .45s cubic-bezier(.22, .75, .2, 1), filter .2s; }
-.cinema-poster.is-expanded { z-index: 20; scale: 1.6; }
-.cinema-poster.is-expanded[data-poster-slot="3"] { translate: calc(var(--u) * -90); }
-@container (max-width: 900px) { .cinema-poster.is-expanded { scale: 2.2; } }
-@container (max-width: 620px) { .cinema-poster.is-expanded { scale: 2.9; } }
+   `--grow` is how big an expanded Poster is against the note's 132 x 196, and
+   it steps up as the stage narrows (the stage is the container), because a
+   Poster 1.6x a 51 px frame is not a Poster anyone can look at. It does not
+   reach the note's 220 CSS px floor on a phone: the same section forbids a
+   Poster taller than the stage, and at that width the details card below the
+   stage is what carries the reading.
+
+   63: and wherever it hung, it grows at one point, `--to-x`/`--to-y` in stage
+   units, which keeps it off S01's screen (x 727 on) with a Film playing: the
+   middle of the wall between the door and the screen, and at the two narrow
+   widths, where it is taller and wider than that wall, the middle of the stage
+   left of the screen, over the door. `--at-x`/`--at-y` is where the slot's
+   own centre is on the stage, off the board's box and `--scale`. */
+.cinema-poster {
+  --grow: 1.6;
+  --at-x: calc(var(--x) + var(--scale) * var(--slot-x));
+  --at-y: calc(var(--y) + var(--scale) * 148);
+  --to-x: 511.5;
+  --to-y: var(--at-y);
+  transition: scale .45s cubic-bezier(.22, .75, .2, 1), translate .45s cubic-bezier(.22, .75, .2, 1), filter .2s;
+}
+.cinema-poster[data-poster-slot="1"] { --slot-x: 81; }
+.cinema-poster[data-poster-slot="2"] { --slot-x: 235; }
+.cinema-poster[data-poster-slot="3"] { --slot-x: 389; }
+@container (max-width: 900px) { .cinema-poster { --grow: 2.2; --to-x: 363.5; --to-y: 450; } }
+@container (max-width: 620px) { .cinema-poster { --grow: 2.65; } }
+.cinema-poster.is-expanded {
+  z-index: 20;
+  scale: calc(var(--grow) / var(--scale));
+  translate: calc(var(--u) / var(--scale) * (var(--to-x) - var(--at-x))) calc(var(--u) / var(--scale) * (var(--to-y) - var(--at-y)));
+}
+/* Growing at a point of its own takes the Poster out from under a pointer that
+   was resting on its slot, and a Poster the pointer has left closes: it would
+   open and close under a still pointer for as long as the visitor held it
+   there. So while it is open it keeps its slot as well, a transparent box that
+   is its resting slot run back through its own translate and scale. */
+.cinema-poster.is-expanded::before {
+  --k: calc(var(--grow) / var(--scale));
+  content: "";
+  position: absolute;
+  left: calc(var(--u) * (66 - (66 + (var(--to-x) - var(--at-x)) / var(--scale)) / var(--k)));
+  top: calc(var(--u) * (98 - (98 + (var(--to-y) - var(--at-y)) / var(--scale)) / var(--k)));
+  width: calc(var(--u) * 132 / var(--k));
+  height: calc(var(--u) * 196 / var(--k));
+}
+/* The expanded Poster comes off the wall over the furniture and the Cast, which
+   all sort above the board's 640; the details card still sorts above it. */
+.stage-cinema .cinema-board:has(.cinema-poster.is-expanded) { z-index: 905; }
 .cinema-poster .poster-art { transition: clip-path .45s cubic-bezier(.22, .75, .2, 1); }
 .cinema-poster.is-expanded .poster-art { clip-path: inset(0); }
 
@@ -518,9 +576,22 @@ html.dialog-open { overflow: hidden; }
 .details-close:hover { background: #ffffff0f; }
 @keyframes poster-details-in { from { opacity: 0; } to { opacity: 1; } }
 @media (min-width: 1080px) {
-  /* (540,280)-(1030,640) in stage units: left of the board, clear of slot 1
-     expanded, and over shelves that are inert while a Poster is open. */
-  .poster-details { position: absolute; left: 33.75%; top: 24%; width: 31.5%; max-height: 66%; margin: 0; z-index: 910; overflow-y: auto; overscroll-behavior: contain; font-size: .8125rem; box-shadow: 0 24px 80px #000a; }
+  /* 63: (740,486)-(1590,887) in stage units: the floor below S01's screen and
+     the shelves' feet, clear of the screen, of every expanded Poster (all left
+     of the screen) and of the door, and over shelves that are inert while a
+     Poster is open. */
+  .poster-details { position: absolute; left: 46.25%; top: 54%; width: 53.125%; max-height: 44.5%; margin: 0; z-index: 910; overflow-y: auto; overscroll-behavior: contain; font-size: .8125rem; box-shadow: 0 24px 80px #000a; }
+  /* That strip is wide and low, so the card reads across it: the choice
+     straight under the Film's name, where it is in view without scrolling the
+     card, and the story beside the reason. */
+  .poster-details { display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "title title" "meta meta" "actions actions" "premise-label reason-label" "premise reason"; column-gap: 1.4rem; align-content: start; padding: 1rem 1.2rem; }
+  .poster-details .details-title { grid-area: title; }
+  .poster-details .details-meta { grid-area: meta; }
+  .poster-details .details-label:nth-of-type(1) { grid-area: premise-label; }
+  .poster-details .details-premise { grid-area: premise; }
+  .poster-details .details-label:nth-of-type(2) { grid-area: reason-label; }
+  .poster-details .details-reason { grid-area: reason; }
+  .poster-details .details-actions { grid-area: actions; margin-top: .7rem; }
   /* A shelf the card is lying over cannot be clicked through it: the visitor
      is reading a Film, not choosing a genre (§4.6). */
   .cinema-room:has(.poster-details:not([hidden])) .cinema-shelf { pointer-events: none; }

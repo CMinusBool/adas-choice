@@ -75,13 +75,16 @@ export const CAT_MARKS: Record<RoomId, readonly Point[]> = {
     { x: 1300, y: 840 },
   ],
   // The Cinema Room: the reel cabinet's left side and the comedy bay are the
-  // two Breakable marks, so a cat is already where ticket 09 wants one.
+  // two Breakable marks, so a cat is already where ticket 09 wants one. 63: the
+  // comedy bay went to the corner right of the screen, so its mark went with
+  // it, and the right-hand mark it would have crowded came to the middle of the
+  // floor, under the screen.
   cinema: [
     { x: 200, y: 700 },
     { x: 392, y: 850 },
-    { x: 790, y: 690 },
+    { x: 1380, y: 675 },
     { x: 1180, y: 840 },
-    { x: 1450, y: 700 },
+    { x: 960, y: 700 },
   ],
   // The Activity Room: the note's own three rest marks, the door a cat comes
   // in through, and the floor between the stations.
@@ -577,8 +580,10 @@ export function tickCats(
       // could still be under way when she ought to leave.
       const deciding = mind.goal !== null || reached(mind.restUntil, now, REST_MS);
       if (now >= leaveAt || (deciding && now >= leaveAt - WANDER_LEAD_MS)) {
-        // Another cat still sitting on her mark is waited out rather than
-        // walked into: she stays where she is, and the fall waits with her.
+        // Another cat still sitting on her mark, or heading for it, is waited
+        // out rather than walked into: she stays where she is, and the fall
+        // waits with her. (63 found the knock walking onto a cat already sat
+        // on a mark that is a roam mark too; this is that rule, kept.)
         if (!farEnough(breakable.mark, claims(places, mind.id, goals))) {
           goals.set(mind.id, null);
           return next({ goal: null });
