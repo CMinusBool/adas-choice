@@ -554,12 +554,15 @@ export function tickCats(
     if (mind.knocking !== null) {
       const knocking = mind.knocking;
       if (mind.knockUntil === null) {
-        // Just arrived at the mark. The hold before it falls starts now, or
-        // later if she is early: it falls on the moment rolled, never before.
+        // On the mark. Her knock is a Beat of its own length that ends as the
+        // thing goes over, so an early cat waits here and starts it `knockMs`
+        // before the moment rolled; a late one starts it the moment she
+        // arrives, and it falls when the knock is done, never before the moment.
         goals.set(mind.id, null);
         const fall = falls.pending.find(candidate => candidate.breakable === knocking);
-        const holdUntil = now + BREAKABLES[knocking].knockMs;
-        return next({ knockUntil: fall ? Math.max(holdUntil, fallsAt(fall)) : holdUntil });
+        const { knockMs } = BREAKABLES[knocking];
+        if (fall && now < fallsAt(fall) - knockMs) return next({});
+        return next({ knockUntil: fall ? Math.max(now + knockMs, fallsAt(fall)) : now + knockMs });
       }
       if (now < mind.knockUntil) return next({});
       // It falls.
