@@ -18,12 +18,14 @@
 //
 // node scripts/art/build-prop.mjs <strip.png> --out <file.png> --frame <W>x<H>
 //   [--frames 1] [--columns 1] [--seat bottom|centre] [--fit content|contain|fill] [--key '#00FF00' | alpha]
-//   [--pack grid|shapes]
+//   [--pack grid|shapes] [--airborne 10[,11...]]
 //
 // `--pack shapes` (with `--fit contain`, ticket 57) is for a Beat whose generator did not keep its
 // figures on the grid: each figure is cut out as its own connected shape, taken in the grid's
 // reading order by the cell its middle falls in, scaled by the raw cell's contain scale and seated
 // on its frame's bottom edge, centred. A strip that is not exactly one shape per frame is refused.
+// `--airborne` names the frames that are in the air (S22's hop, frame 10): each keeps the lift its
+// feet had above the highest feet of its row's grounded frames, scaled with it.
 //
 // `--fit fill` is for an opaque backdrop only, one frame: the whole raw image resampled onto the
 // whole frame, edge to edge, with none of the headroom `contain` leaves (ticket 34).
@@ -48,7 +50,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 export function parseArguments(argv) {
   const options = {
     input: null, out: null, frames: 1, columns: 1, frame: null,
-    seat: 'bottom', fit: 'content', key: null, mask: 'auto', metrics: null, pack: 'grid',
+    seat: 'bottom', fit: 'content', key: null, mask: 'auto', metrics: null, pack: 'grid', airborne: [],
   };
   for (let index = 0; index < argv.length; index++) {
     const argument = argv[index];
@@ -64,6 +66,7 @@ export function parseArguments(argv) {
     else if (argument === '--fit') options.fit = next();
     else if (argument === '--metrics') options.metrics = next();
     else if (argument === '--pack') options.pack = next();
+    else if (argument === '--airborne') options.airborne = next().split(',').map(Number);
     else if (argument === '--key') {
       const value = next();
       if (value === 'alpha') options.mask = 'alpha';
@@ -87,6 +90,12 @@ export function parseArguments(argv) {
   if (!['grid', 'shapes'].includes(options.pack)) throw new Error('--pack is grid or shapes.');
   if (options.pack === 'shapes' && options.fit !== 'contain') {
     throw new Error('--pack shapes keeps the scale --fit contain gives a raw cell; pass --fit contain with it.');
+  }
+  if (options.airborne.length) {
+    if (options.pack !== 'shapes' || options.seat !== 'bottom') throw new Error('--airborne lifts a frame off its floor, so it needs --pack shapes and --seat bottom.');
+    for (const frame of options.airborne) {
+      if (!Number.isInteger(frame) || frame < 1 || frame > options.frames) throw new Error(`--airborne takes frame numbers 1-${options.frames}, comma-separated.`);
+    }
   }
   return options;
 }
@@ -165,7 +174,7 @@ export function shapesInReadingOrder(image, mask, { frames, columns }) {
 }
 
 /** Same averaging `build-cycle.mjs`'s `renderFrame` uses, seating on either edge instead of always the bottom. */
-export function renderContent(image, mask, cell, { frame, scale, seat }) {
+export function renderContent(image, mask, cell, { frame, scale, seat, lift = 0 }) {
   const out = blank(frame.width, frame.height);
   if (cell.empty) return out;
   const [bx0, by0] = cell.bbox;
@@ -174,7 +183,7 @@ export function renderContent(image, mask, cell, { frame, scale, seat }) {
   const width = Math.max(1, Math.round(sourceWidth * scale));
   const height = Math.max(1, Math.round(sourceHeight * scale));
   const offsetX = Math.round((frame.width - width) / 2);
-  const offsetY = seat === 'bottom' ? frame.height - height : Math.round((frame.height - height) / 2);
+  const offsetY = seat === 'bottom' ? frame.height - height - lift : Math.round((frame.height - height) / 2);
   for (let dy = 0; dy < height; dy++) {
     for (let dx = 0; dx < width; dx++) {
       const sx0 = bx0 + (dx / width) * sourceWidth;
@@ -262,6 +271,29 @@ export function renderWholeCell(image, mask, region, { frame, seat, fill = false
   return out;
 }
 
+/**
+ * `--airborne`: how far, in raw px, each named frame's feet sit above its row's floor.
+ *
+ * The grounded frames' feet do not share one line across the strip (S22: 39-65 raw px above the
+ * cell bottom), so the floor is taken per row, at the highest feet among the row's grounded frames.
+ * That keeps a hop from coming out lower than the frames it lands among. Frames not named are
+ * grounded and get no lift, so naming a frame is the art call and this only measures it.
+ */
+export function airborneLifts(shapes, regions, { airborne, columns }) {
+  const lifts = new Array(shapes.length).fill(0);
+  const named = new Set(airborne.map(frame => frame - 1));
+  const gap = index => regions[index].y1 - 1 - shapes[index].cell.bbox[3];
+  for (const index of named) {
+    const row = Math.floor(index / columns);
+    const grounded = shapes.map((_, other) => other).filter(other => Math.floor(other / columns) === row && !named.has(other));
+    if (!grounded.length) throw new Error(`--airborne: frame ${index + 1}'s row has no grounded frame to measure its floor from.`);
+    const floor = Math.max(...grounded.map(gap));
+    if (gap(index) <= floor) throw new Error(`--airborne: frame ${index + 1}'s feet are not above its row's grounded feet.`);
+    lifts[index] = gap(index) - floor;
+  }
+  return lifts;
+}
+
 export function main(argv = process.argv.slice(2)) {
   const options = parseArguments(argv);
   const resolved = resolve(options.input);
@@ -283,16 +315,24 @@ export function main(argv = process.argv.slice(2)) {
     const cellHeight = regions[0].y1 - regions[0].y0;
     scale = Math.min((options.frame.width - MARGIN.side) / cellWidth, (options.frame.height - MARGIN.top) / cellHeight);
     const shapes = shapesInReadingOrder(image, mask, { frames: options.frames, columns: options.columns });
+    const lifts = airborneLifts(shapes, regions, options);
     shapes.forEach(({ cell }, index) => {
       if (Math.round(cell.width * scale) > options.frame.width - MARGIN.side || Math.round(cell.height * scale) > options.frame.height - MARGIN.top) {
         throw new Error(`--pack shapes: frame ${index + 1}'s shape is ${cell.width}x${cell.height}, larger than a raw cell allows.`);
       }
+      const lift = lifts[index] ? Math.round(lifts[index] * scale) : 0;
+      if (Math.round(cell.height * scale) + lift > options.frame.height - MARGIN.top) {
+        throw new Error(`--airborne: frame ${index + 1} lifted ${lift} px no longer fits its ${options.frame.height} px frame.`);
+      }
     });
-    rendered = shapes.map(({ mask: own, cell }) => renderContent(image, own, cell, { frame: options.frame, scale, seat: options.seat }));
+    rendered = shapes.map(({ mask: own, cell }, index) => renderContent(image, own, cell, {
+      frame: options.frame, scale, seat: options.seat, lift: lifts[index] ? Math.round(lifts[index] * scale) : 0,
+    }));
     cellsInfo = shapes.map(({ cell }, index) => ({
       index: index + 1,
       shape: `${cell.bbox[0]},${cell.bbox[1]}-${cell.bbox[2]},${cell.bbox[3]}`,
       width: cell.width, height: cell.height, pixels: cell.pixels,
+      ...(lifts[index] ? { airborne: true, liftRaw: lifts[index], lift: Math.round(lifts[index] * scale) } : {}),
     }));
   } else if (options.fit === 'contain' || options.fit === 'fill') {
     const { mask, source } = buildMask(image, { mode: options.mask, key: options.key ?? '#00FF00' });

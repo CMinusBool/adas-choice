@@ -130,6 +130,33 @@ test('--pack shapes stops on a strip that is not one shape per frame, rather tha
   assert.throws(() => quietly(argv), /two shapes in cell 1/);
 });
 
+// S22's frame 10 is a hop: seated on the frame's floor it would be a cat standing still. A frame
+// named `--airborne` keeps the lift its feet had in the strip above the feet of the grounded
+// frames in its row; every other frame stays on its bottom edge.
+test('--pack shapes keeps an --airborne frame\'s lift above its row\'s grounded feet', () => {
+  const directory = temporary();
+  const input = join(directory, 'raw.png');
+  const out = join(directory, 'beat.png');
+  // Row 2's cells end at y 79. The yellow figure stands 10 rows above that (feet on y 69); the
+  // white one is in the air, feet on y 59, so 10 raw rows higher than the grounded figure.
+  writeFileSync(input, encodePng(keyedStrip(80, 80, [
+    [10, 5, 19, 24, RED],
+    [50, 10, 59, 29, BLUE],
+    [12, 50, 21, 69, YELLOW],
+    [55, 45, 64, 59, WHITE],
+  ])));
+  assert.equal(quietly([input, '--out', out, '--frames', '4', '--columns', '2', '--frame', '60x60', '--fit', 'contain', '--pack', 'shapes', '--airborne', '4']), 0);
+  const sheet = decodePng(readFileSync(out));
+  const frame = { width: 60, height: 60 };
+  // The grounded frame is unchanged: 14 x 28 on the bottom row.
+  const third = frameBox(sheet, frame, 0, 1, YELLOW);
+  assert.deepEqual([third.x0, third.y0, third.x1, third.y1], [23, 32, 36, 59]);
+  // The airborne one is 10 x 15 raw, so 14 x 21 at 1.4, lifted 10 x 1.4 = 14 rows off the bottom
+  // row: feet on row 45, top on row 25.
+  const fourth = frameBox(sheet, frame, 1, 1, WHITE);
+  assert.deepEqual([fourth.x0, fourth.y0, fourth.x1, fourth.y1], [23, 25, 36, 45]);
+});
+
 test('--fit fill is refused for anything but one frame', () => {
   // Filling each cell of a sheet would stretch every frame to the box: a Prop keeps its painted
   // proportions, and only a single opaque backdrop is resampled whole.

@@ -317,8 +317,8 @@
         "sha256": "68dc07518e39c57baa64fb2649efebeaf9eddc4ef9b9c9f37e58f5cc2d56391d"
       },
       "references": [{ "path": "art/characters/v3/luna-character-sheet-v3.png", "sha256": "efb442307e6aec93e478f7a4a801cd393b1807723ebc4181ed5b19a2442d1239" }],
-      "builtBy": "scripts/art/build-prop.mjs@1 --frames 12 --columns 4 --frame 690x654 --fit contain --pack shapes --seat bottom --key #00FF00",
-      "note": "A box Beat, delivered at the design note's 1.5 px/unit (2.9 MB, under its 3 MB ceiling). Re-dropped by ticket 57 from ticket 56's v3 Luna, re-packed by position (--pack shapes): the generator drew 12 separate cats but not on an even grid (frames 03, 09 and 10 reach 3-5 px over a cell line), so each cat is cut out as its own connected shape in reading order, scaled by the raw cell's own contain scale (1.7865, the grid cut's) and seated bottom-centre in its frame. That seats frame 10's mid-air hop on the frame's floor. The coat is keyed out as drawn (about #2E2520), not recoloured. Checked with check-assets.mjs --beat.",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frames 12 --columns 4 --frame 690x654 --fit contain --pack shapes --airborne 10 --seat bottom --key #00FF00",
+      "note": "A box Beat, delivered at the design note's 1.5 px/unit (2.9 MB, under its 3 MB ceiling). Re-dropped by ticket 57 from ticket 56's v3 Luna, re-packed by position (--pack shapes): the generator drew 12 separate cats but not on an even grid (frames 03, 09 and 10 reach 3-5 px over a cell line), so each cat is cut out as its own connected shape in reading order, scaled by the raw cell's own contain scale (1.7865, the grid cut's) and seated bottom-centre in its frame. Frame 10 is the hop and is named --airborne (the orchestrator's art call, 2026-09-26): it keeps its feet 77 raw px (138 px built) above row 3's grounded feet, taken from the landing frames 11 and 12, and every grounded frame stays on its bottom edge. The coat is keyed out as drawn (about #2E2520), not recoloured. Checked with check-assets.mjs --beat.",
       "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
