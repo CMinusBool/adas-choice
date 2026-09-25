@@ -1,18 +1,45 @@
+import type { RoomId } from './rooms';
+
 /**
  * The stage: the logical space every Room is laid out in.
  *
- * A Room's stage is a 16:9 canvas of 1600 x 900 units with its origin at the
- * top-left, x to the right and y downward. Walkable areas, Props, doors and
- * Actor positions are all expressed in these units, so the same numbers mean
- * the same place at every screen width — the DOM layer only ever multiplies
- * them by `container width / 1600`. An Actor's position is its feet point, the
- * bottom-centre of its sprite, which is also what makes depth a y-sort.
+ * A Room's stage is a 16:9 canvas in units, with its origin at the top-left, x
+ * to the right and y downward. How many units across it is belongs to the Room,
+ * in `STAGES`; the unit itself is the same in every Room (the Boy is 300 of them
+ * to the crown), so a bigger Room is more units across, not bigger units.
+ * Walkable areas, Props, doors and Actor positions are all expressed in these
+ * units, so the same numbers mean the same place at every screen width — the DOM
+ * layer only ever turns them into percentages of the Room's own width and
+ * height. An Actor's position is its feet point, the bottom-centre of its sprite,
+ * which is also what makes depth a y-sort.
  *
- * Everything below is plain geometry — no Actor, no Room, no time — but for
- * the one speed the Cast and the cats both reckon distances with.
+ * Everything below is plain geometry — no Actor, no time — but for the stage
+ * table and the one speed the Cast and the cats both reckon distances with.
  */
-export const STAGE_WIDTH = 1600;
-export const STAGE_HEIGHT = 900;
+
+/** A stage's size in units: exactly 16:9, in whole units. */
+export interface StageSize {
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * Every Room's stage, keyed by Room id (81, design 75 §2.1).
+ *
+ * Every Room still stands on the 1600 x 900 stage it has always had: this is
+ * the expand step, and the Room tickets that put each Room at true size change
+ * only its entry here. Two things outside the model repeat these numbers and
+ * are held to them by `scripts/check-stages.test.mjs`: each stage's
+ * `--stage-w` / `--stage-h` in `styles.css`, which is what turns units into
+ * percentages there, and each Room's backdrop — its box in `index.html` and the
+ * `stage` its manifest entry is stretched to.
+ */
+export const STAGES: Readonly<Record<RoomId, StageSize>> = {
+  entryway: { width: 1600, height: 900 },
+  games: { width: 1600, height: 900 },
+  cinema: { width: 1600, height: 900 },
+  activities: { width: 1600, height: 900 },
+};
 
 /**
  * How fast a walk carries anybody across the stage, in stage units per second.

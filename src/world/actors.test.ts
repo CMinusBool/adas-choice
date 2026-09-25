@@ -2,8 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   ROOM_IDS,
-  STAGE_HEIGHT,
-  STAGE_WIDTH,
+  STAGES,
   actorView,
   actorsIn,
   advance,
@@ -139,7 +138,7 @@ describe('staying on the floor', () => {
   /** A point somewhere in a Room's walkable area, by rejection sampling. */
   function somewhereWalkable(room: RoomId, random: () => number): Point {
     for (let attempt = 0; attempt < 500; attempt++) {
-      const point = { x: random() * STAGE_WIDTH, y: random() * STAGE_HEIGHT };
+      const point = { x: random() * STAGES[room].width, y: random() * STAGES[room].height };
       if (isWalkable(room, point)) return point;
     }
     throw new Error(`Could not find a walkable point in the ${room}.`);
@@ -201,17 +200,18 @@ describe('the floor every Room stands on', () => {
    * Every Room's walkable area has to lie inside its own stage.
    *
    * The DOM layer paints an Actor by taking its position as a fraction of the
-   * 1600 x 900 stage, so a Room whose floor ran off the stage would put an
+   * Room's own stage, so a Room whose floor ran off the stage would put an
    * Actor outside the Room it is standing in. Three of the four floors are
    * placeholders until each Room's design pass replaces them, which is exactly
    * when this is worth having.
    */
   it('never lets a Room be walkable outside its stage', () => {
     for (const room of ROOM_IDS) {
+      const { width, height } = STAGES[room];
       let inside = 0;
-      for (let x = -200; x <= STAGE_WIDTH + 200; x += 20) {
-        for (let y = -200; y <= STAGE_HEIGHT + 200; y += 20) {
-          const offStage = x < 0 || x > STAGE_WIDTH || y < 0 || y > STAGE_HEIGHT;
+      for (let x = -200; x <= width + 200; x += 20) {
+        for (let y = -200; y <= height + 200; y += 20) {
+          const offStage = x < 0 || x > width || y < 0 || y > height;
           if (offStage) expect(isWalkable(room, { x, y })).toBe(false);
           else if (isWalkable(room, { x, y })) inside++;
         }

@@ -28,8 +28,8 @@ export { isAudible, isMusicSourceOn, isRoomMusicAudible, soundIsOn } from './wor
 // end 06
 
 // 07: actors — the Cast, where it is, and the floor it is allowed to stand on.
-export type { Point, Polygon } from './stage';
-export { STAGE_HEIGHT, STAGE_WIDTH } from './stage';
+export type { Point, Polygon, StageSize } from './stage';
+export { STAGES } from './stage';
 export type { ActorId, ActorView, ActorsSlice, CycleId, Facing, RandomSource } from './actors';
 export { ACTOR_IDS, isWalkable, seededRandom } from './actors';
 export { actorView, actorsIn } from './world';
