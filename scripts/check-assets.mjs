@@ -9,7 +9,7 @@
 //   node scripts/check-assets.mjs                     # every sheet index.html declares
 //   node scripts/check-assets.mjs <path> ...          # named sheets
 //   node scripts/check-assets.mjs --json              # machine-readable, for the orchestrator
-//   node scripts/check-assets.mjs --palette art/characters/v2/palette.json
+//   node scripts/check-assets.mjs --palette art/characters/v3/palette.json
 //   node scripts/check-assets.mjs --beat <path> --frames N --columns N --frame WxH
 //
 // A path that `index.html` declares inherits that layer's `data-frames` and

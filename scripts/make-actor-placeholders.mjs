@@ -7,14 +7,14 @@
 // one neutral standing frame per Actor per facing, cut mechanically out of the
 // Character Sheet's turnaround row. Mechanically is the point: a crop cannot
 // invent a face, so identity cannot drift on the way through this script, and
-// `art/characters/v2/` stays the only source any of it came from.
+// `art/characters/v3/` stays the only source any of it came from.
 //
 // The shot list that replaces these lives beside the effort's notes; the
 // contract they are cut to is in CLAUDE.md under "Cycle assets travel as a set".
 //
 // Needs the Character Sheets, which are deliberately not in the repository:
 //
-//   node scripts/make-actor-placeholders.mjs ../path/to/art/characters/v2
+//   node scripts/make-actor-placeholders.mjs ../path/to/art/characters/v3
 //
 // Not wired into any npm script — it runs once, by hand, and its output is
 // committed.
@@ -96,9 +96,11 @@ const FRAME = {
  * right-facing and the painter mirrors them.
  */
 /**
- * Measured against the **version 2** sheets, which is the set this script now
- * reads. Version 1's bands are not reusable: v2 is a fresh set of generations
- * and its figures land on different pixels.
+ * Measured against the **version 2** sheets. The script now reads version 3,
+ * which is version 2 byte for byte except Luna's recoloured coat, so the
+ * figures sit on the same pixels and the bands hold. Version 1's bands are not
+ * reusable: v2 was a fresh set of generations and its figures land on
+ * different pixels.
  *
  * Each band clears the sheet title above (it overlaps the x range of the
  * left-hand views) and the caption below, both of which are drawing that `lift`
@@ -118,17 +120,17 @@ const CROPS = [
   { actor: 'luna', shape: 'cat', facing: 'right', view: 'Right side', band: { x0: 834, x1: 1231, y0: 143, y1: 482 } },
 ];
 
-const sheetDirectory = resolve(process.argv[2] ?? 'art/characters/v2');
+const sheetDirectory = resolve(process.argv[2] ?? 'art/characters/v3');
 const output = fileURLToPath(new URL('../public/assets/actors/', import.meta.url));
 
 const sheets = new Map();
 function sheet(actor) {
   if (!sheets.has(actor)) {
-    const path = join(sheetDirectory, `${actor}-character-sheet-v2.png`);
+    const path = join(sheetDirectory, `${actor}-character-sheet-v3.png`);
     const bytes = readFileSync(path);
     sheets.set(actor, {
       image: decodePng(bytes),
-      file: `${actor}-character-sheet-v2.png`,
+      file: `${actor}-character-sheet-v3.png`,
       sha256: createHash('sha256').update(bytes).digest('hex'),
     });
   }
@@ -341,7 +343,7 @@ writeFileSync(
         'These are not Cycles. Each file is one neutral standing frame cut mechanically out of a Character Sheet turnaround, shipped so that the Actor system could be built and seen before any animation frames exist. Replace every one of them with generated artwork; the shot list for that is in the effort notes and the contract is in CLAUDE.md.',
       madeBy: 'scripts/make-actor-placeholders.mjs',
       madeOn: new Date().toISOString().slice(0, 10),
-      identitySource: 'art/characters/v2 — the version 2 Character Sheets, never a generated asset',
+      identitySource: 'art/characters/v3 — the version 3 Character Sheets, never a generated asset',
       missing: 'Every run Cycle, every walking frame, and the left facing of the Boy and the Girl.',
       ...(existing.schema ? { schema: existing.schema } : {}),
       cycles: existing.cycles ?? [],

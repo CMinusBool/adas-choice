@@ -14,7 +14,7 @@
 //
 //   node scripts/art/build-cycle.mjs <strip.png | frames-dir> --out <sheet.png> [--actor boy]
 //     [--frames 8] [--columns 4] [--key '#00FF00' | --key alpha] [--frame 192x320]
-//     [--fps 10] [--mirror] [--palette art/characters/v2/palette.json]
+//     [--fps 10] [--mirror] [--palette art/characters/v3/palette.json]
 //     [--metrics <path>] [--provenance <illustrator manifest.json>] [--shot <id>]
 //     [--apply] [--no-manifest]
 //
