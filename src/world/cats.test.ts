@@ -19,6 +19,7 @@ import {
   roomHash,
   seededRandom,
   type ActorView,
+  type BreakableId,
   type CatId,
   type RoomId,
   type World,
@@ -303,10 +304,42 @@ describe('a cat and her own Breakable', () => {
     expect(new Set(BREAKABLE_IDS.map(id => breakableById(id).sfx)).size).toBe(BREAKABLE_IDS.length);
   });
 
-  it('occasionally knocks her own Breakable down, with its own breaking sound', () => {
-    const world = walkInto(createWorld({ ...plainArrival, random: seededRandom(1) }), 'games');
-    const { world: after, heard } = listen(world, 60000, 100);
-    expect(breakableState(after, 'snow-globe')).toBe('broken');
+});
+
+/**
+ * 68: a Breakable falls on two rolls — whether, then when within 60 s.
+ *
+ * Both rolls come off the world's own `RandomSource`, so a source that answers
+ * the same number every time is a source whose two rolls say exactly that
+ * number: 0.25 is "yes" (under the 50% chance) and "a quarter of the way into
+ * the minute", 15 s; 0.75 is "no". The minute is counted from the end of the
+ * Room's Arrival, which `walkInto` ends at once with a key press.
+ */
+describe('a Breakable falling on two rolls', () => {
+  const always = (value: number) => () => value;
+
+  /** The clock on the tick this Breakable went over, or `null` if it never did. */
+  function fallMoment(world: World, id: BreakableId, ms: number, step = 16): { world: World; at: number | null; heard: string[] } {
+    const until = clock + ms;
+    const heard: string[] = [];
+    let next = world;
+    while (clock < until) {
+      clock += step;
+      next = advance(next, { type: 'actor-tick', now: clock });
+      heard.push(...catSfx(next));
+      if (breakableState(next, id) === 'broken') return { world: next, at: clock, heard };
+    }
+    return { world: next, at: null, heard };
+  }
+
+  it('falls at the moment the second roll places it, with its own breaking sound', () => {
+    const world = walkInto(createWorld({ ...plainArrival, random: always(0.25) }), 'games');
+    const start = clock + 16;
+    const { at, heard } = fallMoment(world, 'snow-globe', 70000);
+    expect(at).not.toBeNull();
+    // Never earlier than rolled, and Luna is there in time for it.
+    expect(at! - start).toBeGreaterThanOrEqual(15000);
+    expect(at! - start).toBeLessThan(15000 + 100);
     expect(heard).toContain('snow-globe-smash');
   });
 
