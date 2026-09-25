@@ -82,6 +82,21 @@ h2 { margin: 0 0 1rem; font-size: clamp(1.5rem, 1.8vw, 1.85rem); font-weight: 69
 .site-footer { display: flex; justify-content: space-between; gap: 1rem; margin-top: 2.5rem; padding: 1.6rem 0 2rem; border-top: 1px solid var(--line); font-size: .8125rem; color: var(--quiet); }
 .site-footer > span:first-child { color: var(--muted); }
 .footer-heart { font-size: 1.2rem; color: var(--pink); vertical-align: -.06em; padding-right: .2rem; }
+/* From 1080 px up the footer rides in the header band, between the wordmark and
+   the controls, so the first screenful is the whole Room (ticket 67). The header
+   is a subgrid of the shell: the wordmark and the controls size the two outer
+   columns and the footer gets what is left between them, so it can wrap but never
+   overlap either. It stays last in the markup, so it is still the page's
+   contentinfo and still read last. Below 1080 px it is back in the flow under the
+   Room, where the narrow Rooms scroll anyway. */
+@media (min-width: 1080px) {
+  .page-shell { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 1.5rem; }
+  .site-header { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; grid-row: 1; }
+  .site-header > .wordmark { grid-column: 1; justify-self: start; }
+  .site-header > .header-actions { grid-column: 3; }
+  .apartment { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
+  .site-footer { grid-column: 2; grid-row: 1; align-self: center; justify-self: center; flex-direction: column; align-items: center; gap: 0; margin: 0; padding: 0; border-top: 0; line-height: 1.5; text-align: center; }
+}
 :focus-visible { outline: 2px solid var(--pink); outline-offset: 5px; }
 .skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 20; padding: .7rem 1rem; border-radius: 8px; background: var(--pink); color: var(--bg); transform: translateY(-200%); }
 .skip-link:focus { transform: translateY(0); }
