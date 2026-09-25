@@ -343,11 +343,12 @@ html.dialog-open { overflow: hidden; }
    behind, so it needs no per-Prop key. */
 .stage-cinema .cinema-prop { z-index: 640; }
 /* 63: a Prop drawn smaller than its design note's size says how much smaller in
-   its own `--scale`, and inside it `--u` is the note's unit at that scale — so
-   every number written inside a shelf or the board below stays the note's, and
-   only the box in `index.html` is the scaled one. S01's walls either side of the
-   screen are narrower than the note's shelves and board. */
-.stage-cinema .cinema-shelf, .stage-cinema .cinema-board { --u: calc(.0625cqw * var(--scale, 1)); }
+   its own `--scale`, and inside it `--note-u` is the note's unit at that scale —
+   so every number written inside a shelf or the board below stays the note's,
+   and only the box in `index.html` is the scaled one. `--u` is still the stage
+   unit in there, as it is everywhere on the stage. S01's walls either side of
+   the screen are narrower than the note's shelves and board. */
+.stage-cinema .cinema-shelf, .stage-cinema .cinema-board { --note-u: calc(var(--u) * var(--scale, 1)); }
 /* The stage swallows pointer events so the Cast never blocks a click; the
    Props the visitor can actually use take theirs back. */
 .stage-cinema a.cinema-prop, .stage-cinema button.cinema-prop { pointer-events: auto; }
@@ -385,10 +386,10 @@ html.dialog-open { overflow: hidden; }
 /* Each image is its shelf plus the ornament on its crown, so it is taller and
    wider than the 120 x 380 button: it stands on the button's base, centred,
    at the `--art-w` x `--art-h` stage units its own element declares. */
-.cinema-shelf .shelf-art { position: absolute; bottom: 0; left: calc(var(--u) * (120 - var(--art-w)) / 2); width: calc(var(--u) * var(--art-w)); height: calc(var(--u) * var(--art-h)); }
+.cinema-shelf .shelf-art { position: absolute; bottom: 0; left: calc(var(--note-u) * (120 - var(--art-w)) / 2); width: calc(var(--note-u) * var(--art-w)); height: calc(var(--note-u) * var(--art-h)); }
 /* P21: the brass plaque on each plinth, muted until the shelf is attended. */
-.cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--u) * 12); width: calc(var(--u) * 100); padding: calc(var(--u) * 2) 0; border-radius: calc(var(--u) * 4); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--u) * 20); line-height: 1.2; text-align: center; opacity: .78; transition: opacity .2s; }
-.cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--u) * 30) var(--glow)) brightness(1.08); outline: none; }
+.cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--note-u) * 12); width: calc(var(--note-u) * 100); padding: calc(var(--note-u) * 2) 0; border-radius: calc(var(--note-u) * 4); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--note-u) * 20); line-height: 1.2; text-align: center; opacity: .78; transition: opacity .2s; }
+.cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--note-u) * 30) var(--glow)) brightness(1.08); outline: none; }
 .cinema-shelf:hover .shelf-plaque, .cinema-shelf:focus-visible .shelf-plaque, .cinema-shelf.is-attended .shelf-plaque { opacity: 1; }
 .cinema-shelf:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
 
@@ -396,18 +397,18 @@ html.dialog-open { overflow: hidden; }
    stray pins and the paler rectangle where a poster once hung are all in S05.
    The 12-unit border and padding stay, transparent, because the Poster slots
    below are placed off the padding box; the image paints the border box. */
-.cinema-board { display: grid; place-items: center; padding: calc(var(--u) * 12); border: calc(var(--u) * 12) solid transparent; background-origin: border-box; }
-.cinema-board .board-empty { position: relative; margin: 0; max-width: calc(var(--u) * 330); color: #c8b9bd; font-size: calc(var(--u) * 26); line-height: 1.6; text-align: center; }
+.cinema-board { display: grid; place-items: center; padding: calc(var(--note-u) * 12); border: calc(var(--note-u) * 12) solid transparent; background-origin: border-box; }
+.cinema-board .board-empty { position: relative; margin: 0; max-width: calc(var(--note-u) * 330); color: #c8b9bd; font-size: calc(var(--note-u) * 26); line-height: 1.6; text-align: center; }
 
 /* 18: P11, the three Poster slots.
 
    Offsets are from the board's padding box, which starts 12 units in because
    the walnut frame is a 12-unit border: 3 and 38 units in from there puts slot
    1 at the board's (15, 50), and 132-wide slots 22 apart put slots 2 and 3 at
-   169 and 323. `--u` is the board's unit (the note's, at its `--scale`), so
+   169 and 323. `--note-u` is the board's unit (the note's, at its `--scale`), so
    the three land on the same spot at every shell width, like every other Prop
    here. */
-.cinema-board .board-slots { position: absolute; left: calc(var(--u) * 3); top: calc(var(--u) * 38); display: flex; gap: calc(var(--u) * 22); }
+.cinema-board .board-slots { position: absolute; left: calc(var(--note-u) * 3); top: calc(var(--note-u) * 38); display: flex; gap: calc(var(--note-u) * 22); }
 /* 36: every Poster is its Film's own image (S17-S25): the framed Poster
    painted in the middle of a 600 x 800 canvas — cream stock, genre stripe and
    all — with its characters spilling out over the frame onto a transparent
@@ -422,11 +423,13 @@ html.dialog-open { overflow: hidden; }
    painting to a slot it was not drawn for is the one thing this must not do.
    `.75` is the canvas's own 600 x 800. */
 .cinema-poster {
-  --art-h: calc(var(--u) * 196 / var(--frame-h));
+  --slot-w: 132;
+  --slot-h: 196;
+  --art-h: calc(var(--note-u) * var(--slot-h) / var(--frame-h));
   --art-w: calc(var(--art-h) * .75);
   --frame-width: calc(var(--art-w) * var(--frame-w));
-  --frame-left: calc((var(--u) * 132 - var(--frame-width)) / 2);
-  position: relative; flex: 0 0 auto; width: calc(var(--u) * 132); height: calc(var(--u) * 196); padding: 0; border: 0; background: none; overflow: visible; filter: drop-shadow(0 calc(var(--u) * 6) calc(var(--u) * 8) #00000066); cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1);
+  --frame-left: calc((var(--note-u) * var(--slot-w) - var(--frame-width)) / 2);
+  position: relative; flex: 0 0 auto; width: calc(var(--note-u) * var(--slot-w)); height: calc(var(--note-u) * var(--slot-h)); padding: 0; border: 0; background: none; overflow: visible; filter: drop-shadow(0 calc(var(--note-u) * 6) calc(var(--note-u) * 8) #00000066); cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1);
 }
 /* Clipped to the frame at rest, and unclipped as the Poster grows (below), so
    what spills out emerges from behind the frame's edges rather than fading in. */
@@ -438,13 +441,13 @@ html.dialog-open { overflow: hidden; }
    titles, none longer than five characters, stay on one. The delivered
    frames leave no blank strip at the bottom for it, so since ticket 36 the
    caption brings its own cream stock, inside the painted frame's bottom edge. */
-.cinema-poster .poster-caption { position: absolute; left: calc(var(--frame-left) + var(--u) * 6); right: calc(var(--frame-left) + var(--u) * 6); bottom: calc(var(--u) * 4); height: calc(var(--u) * 28); display: grid; place-items: center; border-radius: calc(var(--u) * 2); background: #f1e6cf; color: #2b2230; font-size: calc(var(--u) * 13); line-height: 1.05; text-align: center; text-wrap: balance; overflow: hidden; }
+.cinema-poster .poster-caption { position: absolute; left: calc(var(--frame-left) + var(--note-u) * 6); right: calc(var(--frame-left) + var(--note-u) * 6); bottom: calc(var(--note-u) * 4); height: calc(var(--note-u) * 28); display: grid; place-items: center; border-radius: calc(var(--note-u) * 2); background: #f1e6cf; color: #2b2230; font-size: calc(var(--note-u) * 13); line-height: 1.05; text-align: center; text-wrap: balance; overflow: hidden; }
 /* Two brass pins at the painted frame's top corners, pressed in as the Poster
    unrolls. */
-.cinema-poster .poster-pin { position: absolute; top: calc(var(--u) * -5); width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f7e2a6, #9a7a3a); box-shadow: 0 calc(var(--u) * 3) calc(var(--u) * 5) #00000077; animation: poster-pin-push .18s .32s backwards; }
-.cinema-poster .poster-art + .poster-pin { left: calc(var(--frame-left) + var(--u) * 8); }
-.cinema-poster .poster-pin + .poster-pin { right: calc(var(--frame-left) + var(--u) * 8); }
-.cinema-poster:hover, .cinema-poster:focus-visible { outline: none; filter: drop-shadow(0 calc(var(--u) * 10) calc(var(--u) * 16) #000000aa); }
+.cinema-poster .poster-pin { position: absolute; top: calc(var(--note-u) * -5); width: calc(var(--note-u) * 14); height: calc(var(--note-u) * 14); border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f7e2a6, #9a7a3a); box-shadow: 0 calc(var(--note-u) * 3) calc(var(--note-u) * 5) #00000077; animation: poster-pin-push .18s .32s backwards; }
+.cinema-poster .poster-art + .poster-pin { left: calc(var(--frame-left) + var(--note-u) * 8); }
+.cinema-poster .poster-pin + .poster-pin { right: calc(var(--frame-left) + var(--note-u) * 8); }
+.cinema-poster:hover, .cinema-poster:focus-visible { outline: none; filter: drop-shadow(0 calc(var(--note-u) * 10) calc(var(--note-u) * 16) #000000aa); }
 .cinema-poster:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
 @keyframes poster-unroll { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes poster-pin-push { from { opacity: 0; scale: .4; } to { opacity: 1; scale: 1; } }
@@ -468,11 +471,16 @@ html.dialog-open { overflow: hidden; }
    middle of the wall between the door and the screen, and at the two narrow
    widths, where it is taller and wider than that wall, the middle of the stage
    left of the screen, over the door. `--at-x`/`--at-y` is where the slot's
-   own centre is on the stage, off the board's box and `--scale`. */
+   own centre is on the stage, off the board's box and `--scale`; `--slot-x`/
+   `--slot-y` is that centre on the board in note units — the 12-unit frame, the
+   slots' offset of 3 across and 38 down inside it, and half a slot — so 81
+   across for the first slot, 154 more for each after it, and 148 down for all
+   three. */
 .cinema-poster {
   --grow: 1.6;
+  --slot-y: 148;
   --at-x: calc(var(--x) + var(--scale) * var(--slot-x));
-  --at-y: calc(var(--y) + var(--scale) * 148);
+  --at-y: calc(var(--y) + var(--scale) * var(--slot-y));
   --to-x: 511.5;
   --to-y: var(--at-y);
   transition: scale .45s cubic-bezier(.22, .75, .2, 1), translate .45s cubic-bezier(.22, .75, .2, 1), filter .2s;
@@ -482,10 +490,14 @@ html.dialog-open { overflow: hidden; }
 .cinema-poster[data-poster-slot="3"] { --slot-x: 389; }
 @container (max-width: 900px) { .cinema-poster { --grow: 2.2; --to-x: 363.5; --to-y: 450; } }
 @container (max-width: 620px) { .cinema-poster { --grow: 2.65; } }
+/* `--expanded-scale` is how many times its slot an open Poster is drawn:
+   `--grow` of the note's size, on a board drawn at `--scale` of it. It travels
+   in stage units, so its translate is in `--u`. */
 .cinema-poster.is-expanded {
+  --expanded-scale: calc(var(--grow) / var(--scale));
   z-index: 20;
-  scale: calc(var(--grow) / var(--scale));
-  translate: calc(var(--u) / var(--scale) * (var(--to-x) - var(--at-x))) calc(var(--u) / var(--scale) * (var(--to-y) - var(--at-y)));
+  scale: var(--expanded-scale);
+  translate: calc(var(--u) * (var(--to-x) - var(--at-x))) calc(var(--u) * (var(--to-y) - var(--at-y)));
 }
 /* Growing at a point of its own takes the Poster out from under a pointer that
    was resting on its slot, and a Poster the pointer has left closes: it would
@@ -493,13 +505,12 @@ html.dialog-open { overflow: hidden; }
    there. So while it is open it keeps its slot as well, a transparent box that
    is its resting slot run back through its own translate and scale. */
 .cinema-poster.is-expanded::before {
-  --k: calc(var(--grow) / var(--scale));
   content: "";
   position: absolute;
-  left: calc(var(--u) * (66 - (66 + (var(--to-x) - var(--at-x)) / var(--scale)) / var(--k)));
-  top: calc(var(--u) * (98 - (98 + (var(--to-y) - var(--at-y)) / var(--scale)) / var(--k)));
-  width: calc(var(--u) * 132 / var(--k));
-  height: calc(var(--u) * 196 / var(--k));
+  left: calc(var(--note-u) * (var(--slot-w) / 2 - (var(--slot-w) / 2 + (var(--to-x) - var(--at-x)) / var(--scale)) / var(--expanded-scale)));
+  top: calc(var(--note-u) * (var(--slot-h) / 2 - (var(--slot-h) / 2 + (var(--to-y) - var(--at-y)) / var(--scale)) / var(--expanded-scale)));
+  width: calc(var(--note-u) * var(--slot-w) / var(--expanded-scale));
+  height: calc(var(--note-u) * var(--slot-h) / var(--expanded-scale));
 }
 /* The expanded Poster comes off the wall over the furniture and the Cast, which
    all sort above the board's 640; the details card still sorts above it. */
@@ -510,7 +521,7 @@ html.dialog-open { overflow: hidden; }
 /* While his arm is in a bay its tubes rattle, which is the whole of what the
    rummage Beat looks like until the Boy's own frames are drawn. */
 .cinema-shelf.is-rummaging .shelf-art { animation: shelf-rummage .18s steps(2, end) infinite; }
-@keyframes shelf-rummage { from { translate: 0 0; } 50% { translate: calc(var(--u) * 1) calc(var(--u) * -1); } to { translate: 0 0; } }
+@keyframes shelf-rummage { from { translate: 0 0; } 50% { translate: calc(var(--note-u) * 1) calc(var(--note-u) * -1); } to { translate: 0 0; } }
 
 /* P12-P14: the beanbags and the reel cabinet the projector stands on. */
 .cinema-beanbag { z-index: 800; }
