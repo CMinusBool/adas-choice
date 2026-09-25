@@ -18,6 +18,12 @@
 //
 // node scripts/art/build-prop.mjs <strip.png> --out <file.png> --frame <W>x<H>
 //   [--frames 1] [--columns 1] [--seat bottom|centre] [--fit content|contain|fill] [--key '#00FF00' | alpha]
+//   [--pack grid|shapes]
+//
+// `--pack shapes` (with `--fit contain`, ticket 57) is for a Beat whose generator did not keep its
+// figures on the grid: each figure is cut out as its own connected shape, taken in the grid's
+// reading order by the cell its middle falls in, scaled by the raw cell's contain scale and seated
+// on its frame's bottom edge, centred. A strip that is not exactly one shape per frame is refused.
 //
 // `--fit fill` is for an opaque backdrop only, one frame: the whole raw image resampled onto the
 // whole frame, edge to edge, with none of the headroom `contain` leaves (ticket 34).
@@ -42,7 +48,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 export function parseArguments(argv) {
   const options = {
     input: null, out: null, frames: 1, columns: 1, frame: null,
-    seat: 'bottom', fit: 'content', key: null, mask: 'auto', metrics: null,
+    seat: 'bottom', fit: 'content', key: null, mask: 'auto', metrics: null, pack: 'grid',
   };
   for (let index = 0; index < argv.length; index++) {
     const argument = argv[index];
@@ -57,6 +63,7 @@ export function parseArguments(argv) {
     else if (argument === '--seat') options.seat = next();
     else if (argument === '--fit') options.fit = next();
     else if (argument === '--metrics') options.metrics = next();
+    else if (argument === '--pack') options.pack = next();
     else if (argument === '--key') {
       const value = next();
       if (value === 'alpha') options.mask = 'alpha';
@@ -77,7 +84,84 @@ export function parseArguments(argv) {
   if (options.fit === 'fill' && (options.frames !== 1 || options.columns !== 1)) {
     throw new Error('--fit fill resamples one opaque image onto one frame; a sheet keeps its painted proportions.');
   }
+  if (!['grid', 'shapes'].includes(options.pack)) throw new Error('--pack is grid or shapes.');
+  if (options.pack === 'shapes' && options.fit !== 'contain') {
+    throw new Error('--pack shapes keeps the scale --fit contain gives a raw cell; pass --fit contain with it.');
+  }
   return options;
+}
+
+/**
+ * `--pack shapes`: the strip's figures as connected shapes (8-connected, over the mask), in the
+ * grid's reading order.
+ *
+ * The generator draws one figure per cell but not on an even grid, so a figure's ear or tail can sit
+ * a few pixels over its cell line (S22). Each shape belongs to the cell its box's middle falls in.
+ * Nothing is thresholded or merged: the strip must hold exactly one shape per declared frame, one to
+ * a cell, or it is a wrong generation and the build stops rather than guessing which piece is which.
+ */
+export function shapesInReadingOrder(image, mask, { frames, columns }) {
+  const { width, height } = image;
+  const rows = Math.ceil(frames / columns);
+  const labels = new Int32Array(width * height).fill(-1);
+  const shapes = [];
+  const stack = [];
+  for (let start = 0; start < width * height; start++) {
+    if (!mask[start] || labels[start] >= 0) continue;
+    const shape = { label: shapes.length, pixels: 0, x0: width, y0: height, x1: -1, y1: -1 };
+    labels[start] = shape.label;
+    stack.push(start);
+    while (stack.length) {
+      const at = stack.pop();
+      const x = at % width;
+      const y = (at - x) / width;
+      shape.pixels++;
+      if (x < shape.x0) shape.x0 = x;
+      if (x > shape.x1) shape.x1 = x;
+      if (y < shape.y0) shape.y0 = y;
+      if (y > shape.y1) shape.y1 = y;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+          const neighbour = ny * width + nx;
+          if (mask[neighbour] && labels[neighbour] < 0) { labels[neighbour] = shape.label; stack.push(neighbour); }
+        }
+      }
+    }
+    shapes.push(shape);
+  }
+  if (shapes.length !== frames) {
+    const smallest = Math.min(...shapes.map(one => one.pixels));
+    throw new Error(
+      `--pack shapes found ${shapes.length} shapes on the strip but --frames declares ${frames} ` +
+        `(the smallest is ${smallest} px): one figure per frame is the generation's job.`,
+    );
+  }
+  const byCell = new Map();
+  for (const shape of shapes) {
+    const column = Math.min(columns - 1, Math.floor(((shape.x0 + shape.x1 + 1) / 2) / (width / columns)));
+    const row = Math.min(rows - 1, Math.floor(((shape.y0 + shape.y1 + 1) / 2) / (height / rows)));
+    const cell = row * columns + column;
+    if (cell >= frames) throw new Error(`--pack shapes found a shape in spare cell ${cell + 1}; ${frames} frames were declared.`);
+    if (byCell.has(cell)) throw new Error(`--pack shapes found two shapes in cell ${cell + 1}.`);
+    byCell.set(cell, shape);
+  }
+  return [...byCell.keys()].sort((a, b) => a - b).map(cell => {
+    const shape = byCell.get(cell);
+    const own = new Uint8Array(width * height);
+    for (let y = shape.y0; y <= shape.y1; y++) {
+      for (let x = shape.x0; x <= shape.x1; x++) if (labels[y * width + x] === shape.label) own[y * width + x] = 1;
+    }
+    return {
+      mask: own,
+      cell: {
+        empty: false, pixels: shape.pixels, bbox: [shape.x0, shape.y0, shape.x1, shape.y1],
+        width: shape.x1 - shape.x0 + 1, height: shape.y1 - shape.y0 + 1,
+      },
+    };
+  });
 }
 
 /** Same averaging `build-cycle.mjs`'s `renderFrame` uses, seating on either edge instead of always the bottom. */
@@ -190,7 +274,27 @@ export function main(argv = process.argv.slice(2)) {
   let scale = null;
   let cellsInfo = [];
 
-  if (options.fit === 'contain' || options.fit === 'fill') {
+  if (options.pack === 'shapes') {
+    // The scale `--fit contain` gives the raw cell, shared by every shape: each figure comes out the
+    // size it was drawn at against its cell, and only where it stands in the frame changes.
+    const { mask, source } = buildMask(image, { mode: options.mask, key: options.key ?? '#00FF00' });
+    maskSource = source;
+    const cellWidth = regions[0].x1 - regions[0].x0;
+    const cellHeight = regions[0].y1 - regions[0].y0;
+    scale = Math.min((options.frame.width - MARGIN.side) / cellWidth, (options.frame.height - MARGIN.top) / cellHeight);
+    const shapes = shapesInReadingOrder(image, mask, { frames: options.frames, columns: options.columns });
+    shapes.forEach(({ cell }, index) => {
+      if (Math.round(cell.width * scale) > options.frame.width - MARGIN.side || Math.round(cell.height * scale) > options.frame.height - MARGIN.top) {
+        throw new Error(`--pack shapes: frame ${index + 1}'s shape is ${cell.width}x${cell.height}, larger than a raw cell allows.`);
+      }
+    });
+    rendered = shapes.map(({ mask: own, cell }) => renderContent(image, own, cell, { frame: options.frame, scale, seat: options.seat }));
+    cellsInfo = shapes.map(({ cell }, index) => ({
+      index: index + 1,
+      shape: `${cell.bbox[0]},${cell.bbox[1]}-${cell.bbox[2]},${cell.bbox[3]}`,
+      width: cell.width, height: cell.height, pixels: cell.pixels,
+    }));
+  } else if (options.fit === 'contain' || options.fit === 'fill') {
     const { mask, source } = buildMask(image, { mode: options.mask, key: options.key ?? '#00FF00' });
     maskSource = source;
     const fill = options.fit === 'fill';
@@ -231,6 +335,7 @@ export function main(argv = process.argv.slice(2)) {
     input: relativeToRoot(resolved),
     out: relativeToRoot(out),
     fit: options.fit,
+    pack: options.pack,
     seat: options.seat,
     frames: options.frames,
     columns: options.columns,
