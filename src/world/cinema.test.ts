@@ -249,6 +249,38 @@ describe('a bookshelf holding the visitor’s attention', () => {
     expect(attending('comedy', attended)).toBe(attended);
   });
 
+  // 70: the Room's entrance is still bringing him in when a pointer that was
+  // already over a shelf reports it. Where he ends up is the shelf's mark,
+  // wherever the shelf stands, not the beanbag his entrance was walking him to.
+  describe('while the Room’s entrance is still playing', () => {
+    /** Through the Door, with the entrance playing and nobody settled by input. */
+    const walkingIn = () => advance(createWorld(plainArrival), { type: 'hash-changed', hash: '#/cinema' });
+    const standingStill = (world: World) => {
+      const boy = actorView(world, 'boy');
+      return boy !== null && boy.room === 'cinema' && !boy.moving;
+    };
+
+    it('walks him in from the Door to a shelf attended before he has come through it', () => {
+      const attended = attending('horror', walkingIn());
+      const arrived = runUntil(attended, standingStill);
+      expect(who(arrived, 'boy').at).toEqual(CINEMA_MARKS.shelves.horror);
+      expect(attendedShelf(arrived)).toBe('horror');
+    });
+
+    it('puts him at the shelf, not in his beanbag, when the entrance is cut short', () => {
+      const midway = runUntil(walkingIn(), world => actorView(world, 'boy')?.room === 'cinema');
+      const cut = advance(attending('romance', midway), { type: 'visitor-input' });
+      expect(who(cut, 'boy').moving).toBe(false);
+      expect(who(cut, 'boy').at).toEqual(CINEMA_MARKS.shelves.romance);
+    });
+
+    it('still walks him home when attention has already left again', () => {
+      const away = attending(null, attending('comedy', walkingIn()));
+      const arrived = runUntil(away, standingStill);
+      expect(isSeated(arrived, 'boy')).toBe(true);
+    });
+  });
+
   it('lets go of the shelf when the visitor leaves the Room', () => {
     const left = advance(attending('comedy'), { type: 'hash-changed', hash: '#/entryway' });
     expect(attendedShelf(left)).toBe(null);
