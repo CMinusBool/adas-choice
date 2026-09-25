@@ -511,14 +511,7 @@ export function tickCats(
   const sends: CatSend[] = [];
   const sfx: string[] = [];
   const knocked: BreakableId[] = [];
-  // A clock that restarted — a test running a second visit — measures the
-  // minute again from now rather than waiting on a moment that will not come.
-  let falls: FallPlan =
-    slice.falls === null
-      ? rollFalls(room, broken, now, random)
-      : now < slice.falls.rolledAt
-        ? { ...slice.falls, rolledAt: now }
-        : slice.falls;
+  let falls: FallPlan = slice.falls ?? rollFalls(room, broken, now, random);
   const fallsAt = (fall: Fall) => falls.rolledAt + fall.afterMs;
   const fallFor = (cat: CatId): Fall | null =>
     falls.pending
