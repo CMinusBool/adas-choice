@@ -233,13 +233,13 @@
       "columns": 4,
       "frame": "315x600",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S17-hang-coat1/attempt-1/strip-raw.png",
-        "sha256": "f4a87dd54bdcf559cf1fba8e5e1bfee217971e443ad66ee779623824ffafa6b7"
+        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S17-hang-coat1/attempt-v2-style-2/strip-raw.png",
+        "sha256": "695882428e6336e9ea65c09c7d1daf73c8665a2c6c7028dfd6410b2542b30d7f"
       },
       "references": [{ "path": "art/characters/v2/boy-character-sheet-v2.png", "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477" }],
-      "builtBy": "scripts/art/build-prop.mjs@1 --frames 6 --columns 4 --frame 315x600 --fit contain --seat bottom",
-      "note": "A Beat; checked with check-assets.mjs --beat.",
-      "validatedAt": "2026-09-22",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frames 6 --columns 4 --frame 315x600 --fit contain --seat bottom --key #00FF00",
+      "note": "A Beat; checked with check-assets.mjs --beat. Re-dropped by ticket 57 from ticket 56's restyle (matte, and the coat and hands keep their side through frame 05). Frame 05 carries a 74x67 raw-px piece of the hung coat that the generator clipped square at its cell's top and right edges; it is in the owner-approved strip and ships as drawn.",
+      "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
     {
@@ -297,13 +297,13 @@
       "columns": 4,
       "frame": "345x540",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S21-mira-out/attempt-1/strip-raw.png",
-        "sha256": "84d99c0a66726b36a443a6f764b308d9984d824ec2841a85557951bff76ca16a"
+        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S21-mira-out/attempt-v2-style-3/strip-raw.png",
+        "sha256": "33f752bbb8d14d213c7f8292abc1aa04f209c896491d0d8addcbb1593c0bb7c5"
       },
       "references": [{ "path": "art/characters/v2/mira-character-sheet-v2.png", "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443" }],
-      "builtBy": "scripts/art/build-prop.mjs@1 --frames 8 --columns 4 --frame 345x540 --fit contain --seat bottom",
-      "note": "A box Beat. Checked with check-assets.mjs --beat.",
-      "validatedAt": "2026-09-22",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frames 8 --columns 4 --frame 345x540 --fit contain --seat bottom --key #00FF00",
+      "note": "A box Beat. Checked with check-assets.mjs --beat. Re-dropped by ticket 57 from ticket 56's restyle (the owner-granted third attempt, opaque RGB on #00FF00).",
+      "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
     {
@@ -313,13 +313,13 @@
       "columns": 4,
       "frame": "690x654",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S22-luna-out/attempt-1/strip-raw.png",
-        "sha256": "703fcac54b6930727ad2acd401b74d81c98b308553658a1e7420dbe1f6b9722a"
+        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S22-luna-out/attempt-v3-1/strip-raw.png",
+        "sha256": "68dc07518e39c57baa64fb2649efebeaf9eddc4ef9b9c9f37e58f5cc2d56391d"
       },
-      "references": [{ "path": "art/characters/v2/luna-character-sheet-v2.png", "sha256": "5105207b66635b00860672957942010ed132c1c21f8b86c239cb6083d508fe7f" }],
-      "builtBy": "scripts/art/build-prop.mjs@1 --frames 12 --columns 4 --frame 690x654 --fit contain --seat bottom",
-      "note": "A box Beat, delivered at the design note's 1.5 px/unit (2.4 MB, under its 3 MB ceiling, so the 1 px/unit fallback was not needed). Checked with check-assets.mjs --beat.",
-      "validatedAt": "2026-09-22",
+      "references": [{ "path": "art/characters/v3/luna-character-sheet-v3.png", "sha256": "efb442307e6aec93e478f7a4a801cd393b1807723ebc4181ed5b19a2442d1239" }],
+      "builtBy": "scripts/art/build-prop.mjs@1 --frames 12 --columns 4 --frame 690x654 --fit contain --pack shapes --seat bottom --key #00FF00",
+      "note": "A box Beat, delivered at the design note's 1.5 px/unit (2.9 MB, under its 3 MB ceiling). Re-dropped by ticket 57 from ticket 56's v3 Luna, re-packed by position (--pack shapes): the generator drew 12 separate cats but not on an even grid (frames 03, 09 and 10 reach 3-5 px over a cell line), so each cat is cut out as its own connected shape in reading order, scaled by the raw cell's own contain scale (1.7865, the grid cut's) and seated bottom-centre in its frame. That seats frame 10's mid-air hop on the frame's floor. The coat is keyed out as drawn (about #2E2520), not recoloured. Checked with check-assets.mjs --beat.",
+      "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
     {
@@ -345,12 +345,12 @@
       "columns": 4,
       "frame": "255x585",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S24-vase-falls/attempt-3/strip-raw.png",
-        "sha256": "e90dd286f9d6f95bfaa62ad390eba4d6b96e05ba09fbe5e0bb7e0ffb99c58f53"
+        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S24-vase-falls/attempt-v2-style-2/strip-raw.png",
+        "sha256": "5ec413435ffb6ee0ae30d2adb0d24afaea6dfd501804a7cc4383dc226ac35bf9"
       },
-      "builtBy": "scripts/art/build-prop.mjs@1 --frames 4 --columns 4 --frame 255x585 --fit contain --seat bottom",
-      "note": "Kept attempt-3, same reason as mica-vase.png. No Cast member in this shot. Checked with check-assets.mjs --beat. Ships with a glossier finish than S09's matte vase — the owner's approval of 2026-09-20 accepted this as-is, no regeneration.",
-      "validatedAt": "2026-09-22",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frames 4 --columns 4 --frame 255x585 --fit contain --seat bottom --key #00FF00",
+      "note": "No Cast member in this shot. Checked with check-assets.mjs --beat. Re-dropped by ticket 57 from ticket 56's restyle: the matte painted vase that replaces the glossy 3D one ticket 33 shipped (the owner ruled that finish a defect on 2026-09-22).",
+      "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     }
   ],
