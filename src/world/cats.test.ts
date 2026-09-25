@@ -15,6 +15,7 @@ import {
   createWorld,
   isBeingPetted,
   isWalkable,
+  knockingDown,
   pettingBeat,
   roomHash,
   seededRandom,
@@ -341,6 +342,41 @@ describe('a Breakable falling on two rolls', () => {
     expect(at! - start).toBeGreaterThanOrEqual(15000);
     expect(at! - start).toBeLessThan(15000 + 100);
     expect(heard).toContain('snow-globe-smash');
+  });
+
+  /**
+   * 70: an early cat waits on her mark and knocks at the last moment.
+   *
+   * Luna is at the snow globe long before its 15 s moment. Her knock is the
+   * Beat played over it, and it has to end as the globe goes over — so it
+   * starts `knockMs` before the fall, not when she got there.
+   */
+  it('plays her knock for its own length, ending on the moment it falls', () => {
+    const world = walkInto(createWorld({ ...plainArrival, random: always(0.25) }), 'games');
+    const { knockMs } = breakableById('snow-globe');
+    let next = world;
+    let knockStarted: number | null = null;
+    let onMarkAt: number | null = null;
+    const mark = breakableById('snow-globe').mark;
+    const until = clock + 70000;
+    while (clock < until && breakableState(next, 'snow-globe') === 'intact') {
+      clock += 16;
+      next = advance(next, { type: 'actor-tick', now: clock });
+      const luna = cat(next, 'luna');
+      if (onMarkAt === null && !luna.moving && luna.at.x === mark.x && luna.at.y === mark.y) onMarkAt = clock;
+      const knocking = knockingDown(next, 'luna');
+      if (knockStarted === null && knocking !== null) knockStarted = clock;
+      // Once started, she holds it until it goes over.
+      if (knockStarted !== null && breakableState(next, 'snow-globe') === 'intact') expect(knocking).toBe('snow-globe');
+    }
+    const fellAt = clock;
+    expect(breakableState(next, 'snow-globe')).toBe('broken');
+    expect(knockingDown(next, 'luna')).toBeNull();
+    // She was there early: long before the knock began.
+    expect(onMarkAt).not.toBeNull();
+    expect(knockStarted! - onMarkAt!).toBeGreaterThan(1000);
+    expect(fellAt - knockStarted!).toBeGreaterThanOrEqual(knockMs);
+    expect(fellAt - knockStarted!).toBeLessThan(knockMs + 50);
   });
 
   it('does not fall at all when the first roll says no, however long the visitor stays', () => {

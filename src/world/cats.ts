@@ -661,6 +661,16 @@ export function petCats(slice: CatsSlice, cat: CatId, now: number, motionOn: boo
   return { ...slice, minds, sfx: [meowOf(cat)] };
 }
 
+/**
+ * The Breakable this cat is knocking down right now, or `null`: from the start
+ * of her knock to the tick it falls, and never while she is only walking to it.
+ * The knock Beat's own question, as `isPetted` is the petting Beat's.
+ */
+export function knockOf(slice: CatsSlice, cat: CatId): BreakableId | null {
+  const mind = slice.minds.find(candidate => candidate.id === cat);
+  return mind && mind.knockUntil !== null ? mind.knocking : null;
+}
+
 /** Is this cat having a fuss made of it right now? The Beat's own question. */
 export function isPetted(slice: CatsSlice, cat: CatId): boolean {
   return slice.minds.some(mind => mind.id === cat && mind.pettedUntil !== null);

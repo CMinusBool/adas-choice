@@ -67,7 +67,7 @@ export { arrivalView, breakableState, entrywayProps, vaseState } from './world';
 // 08: the three cats — who they are, and where a Room lets them stand.
 export type { CatId, CatsSlice } from './cats';
 export { CAT_CLEARANCE, CAT_IDS, CAT_MARKS, isCat, meowOf, pettingBeat } from './cats';
-export { catSfx, isBeingPetted } from './world';
+export { catSfx, isBeingPetted, knockingDown } from './world';
 
 // 09: the apartment's five Breakables — who owns each one, where she knocks
 // it down, how long that takes and what it sounds like going over, all on one

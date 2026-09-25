@@ -35,6 +35,7 @@ import {
   arriveCats,
   createCats,
   isPetted,
+  knockOf,
   petCats,
   tickCats,
   type BreakableId,
@@ -956,6 +957,11 @@ export function catSfx(world: World): readonly string[] {
 /** Is this cat being fussed over? What its petting Beat hangs on. */
 export function isBeingPetted(world: World, cat: CatId): boolean {
   return isPetted(world.cats, cat);
+}
+
+/** 70: the Breakable this cat is knocking down, or `null`. What its knock Beat hangs on. */
+export function knockingDown(world: World, cat: CatId): BreakableId | null {
+  return knockOf(world.cats, cat);
 }
 
 // 16: the Activity Room
