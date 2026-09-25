@@ -1,5 +1,6 @@
 // 44: a Room's arrival
 import {
+  DOORSTEP_MS,
   ROOM_IDS,
   isInteractive,
   roomArrivalSfx,
@@ -26,9 +27,6 @@ import { playSfx } from './sound';
  * The Cast is painted by `src/dom/actors.ts` like any other Actor, because an
  * Actor walking in through a door is just an Actor walking.
  */
-
-/** How long after the apartment opens the Door of a Room opened on swings. */
-const DOORSTEP_MS = 400;
 
 export const mountArrival = (dispatch: Dispatch): Painter => {
   /**
@@ -112,7 +110,7 @@ export const mountArrival = (dispatch: Dispatch): Painter => {
   function openTheDoor(world: World) {
     if (knocked || !isInteractive(world) || roomArrivalState(world) !== 'pending') return;
     knocked = true;
-    setTimeout(() => dispatch({ type: 'arrival-started' }), DOORSTEP_MS);
+    setTimeout(() => dispatch({ type: 'arrival-started' }), DOORSTEP_MS[world.rooms.current]);
   }
 
   const painted = new Map<RoomId, DoorState>();

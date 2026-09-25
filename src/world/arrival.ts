@@ -43,6 +43,18 @@ export type ArrivalState =
 /** How long the whole script runs, in seconds (§5.2). */
 export const ARRIVAL_SECONDS = 11.9;
 
+/**
+ * How long after the apartment opens on a Room the page reports
+ * `arrival-started`, in milliseconds.
+ *
+ * The Entryway's is design note §5.1's beat of the empty hall before anything
+ * moves in it; every other Room's is the moment before its Door swings. The wait
+ * itself is the page's to keep, because the model holds no timer — this is only
+ * its length, written once for `src/dom/entryway.ts`, `src/dom/arrival.ts` and
+ * `scripts/verify/breakable-fall.mjs`, which has to know when the clock started.
+ */
+export const DOORSTEP_MS: Readonly<Record<RoomId, number>> = { entryway: 600, games: 400, cinema: 400, activities: 400 };
+
 /** A shot in the design note's shot list (§6.4), by its id there. */
 export type BeatId = 'S15' | 'S16' | 'S17' | 'S18' | 'S19' | 'S20' | 'S21' | 'S22';
 

@@ -11,11 +11,11 @@
  * by source reading alone, which is how a dead animation stays dead.
  *
  * That attempt could not have worked. **The apartment does not use
- * `Math.random` for any of this.** `createWorld` in `src/world/world.ts` falls
- * back to `seededRandom(DEFAULT_SEED)` (`src/world/actors.ts`) and `src/main.ts`
- * passes no `random`, so the cats' whole itinerary is deterministic from load.
- * Stubbing `Math.random` changes nothing in the model; it only perturbs the
- * Game Room's particle field, which is the one place the DOM layer rolls dice.
+ * `Math.random` for any of this.** `src/main.ts` hands `createWorld` a
+ * `seededRandom` stream — seeded from `?seed=N`, or from the clock when there
+ * is none (ticket 70) — so the cats' whole itinerary is deterministic from the
+ * seed. Stubbing `Math.random` changes nothing in the model; it only perturbs
+ * the Game Room's particle field, which is the one place the DOM layer rolls dice.
  *
  * Which means no forcing is needed at all — and, since ticket 68, no table of
  * when to look either. A Breakable falls on two rolls off the model's own dice:
@@ -23,17 +23,19 @@
  * the Room's Arrival ends (`FALL_WINDOW_MS`). The hand-copied table this file
  * used to carry was wrong within a ticket of being written (ticket 51 found the
  * mug at 126.6 s against the table's 7.8 s), so this script now **plays the
- * visit through the model itself**: it bundles `src/world/` with esbuild, opens
- * the same Room with the same seed on the model's clock, and reads off which
- * Breakables fall and when. The page is then opened on that seed with
- * `?seed=N` (`seedFromSearch` in the model), so both run one afternoon.
+ * visit through the model itself**: it loads `src/world/` through
+ * `scripts/world-model.mjs`, opens the same Room with the same seed on the
+ * model's clock, and reads off which Breakables fall and when. The page is then
+ * opened on that seed with `?seed=N` (`src/main.ts` reads it), so both run one
+ * afternoon.
  *
  * `--seed knock` (the default) takes the first seed of a fixed, scattered
  * list whose rolls bring something in the Room down; `--seed none` the first
  * whose rolls bring nothing down; a number is that seed. The report names the
  * seed, so any run can be repeated with `--seed <N>`. The default `--for` is the whole window
  * whatever the seed: the doorstep and the Arrival, the minute, the longest a
- * cat can take to get there late, and the 620 ms fall.
+ * cat can take to get there late, and the 620 ms fall — every length but the
+ * fall's read off the model (`DOORSTEP_MS`, `FALL_WINDOW_MS`, `LATE_CAT_MS`).
  *
  * ## What it does
  *
@@ -62,31 +64,17 @@
  *   node scripts/verify/breakable-fall.mjs --base-url http://localhost:4173 --room games --seed 7
  */
 
-import { Buffer } from 'node:buffer';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+import { loadWorldModel } from '../world-model.mjs';
 import { loadPlaywright, startServer } from './room-shots.mjs';
 
 const ROOMS = ['entryway', 'games', 'cinema', 'activities'];
 
 /** `styles.css`: `.is-breakable-falling` runs `breakable-fall` for 620 ms. */
 const FALL_MS = 620;
-
-/**
- * How long a cat who could not make the moment can add to it, in ms: a walk
- * clean across the stage at the walk Cycle's 190 units/s is 8.4 s, and she
- * holds her knock (at most 2.3 s, the vase) once she is there.
- */
-const LATE_CAT_MS = 12_000;
-
-/**
- * `src/dom/arrival.ts` and `src/dom/entryway.ts`: the page dispatches
- * `arrival-started` this long after the loading screen goes, which is when
- * this script starts watching. The model's clock below starts at the dispatch.
- */
-const DOORSTEP_MS = { entryway: 600, games: 400, cinema: 400, activities: 400 };
 
 /** The model's tick, in ms: a 60 Hz frame, as near the page's rAF as it gets. */
 const TICK_MS = 16;
@@ -134,24 +122,6 @@ function parseArguments(argv) {
 }
 
 /**
- * The world model, exactly as the page bundles it: `src/world/index.ts` through
- * esbuild (Vite's own dependency), imported from memory. Pure TypeScript with
- * no DOM, which is what lets a Node script run the same afternoon the page does.
- */
-async function loadModel(repoRoot) {
-  const esbuild = await import('esbuild');
-  const built = await esbuild.build({
-    entryPoints: [path.join(repoRoot, 'src', 'world', 'index.ts')],
-    bundle: true,
-    format: 'esm',
-    platform: 'neutral',
-    write: false,
-    logLevel: 'silent',
-  });
-  return import(`data:text/javascript;base64,${Buffer.from(built.outputFiles[0].text).toString('base64')}`);
-}
-
-/**
  * One visit to the Room on the model's clock, as the page opens it here: no
  * session storage, motion on, this seed, `arrival-started` at 0 ms and a tick
  * every frame after it. Answers when both arrivals were over and when each of
@@ -173,7 +143,7 @@ function playVisit(model, room, seed) {
     world = model.advance(world, { type: 'actor-tick', now });
     if (arrivalEndsMs === null && model.roomArrivalState(world) === 'done' && model.arrivalView(world).state === 'done') {
       arrivalEndsMs = now;
-      horizon = now + model.FALL_WINDOW_MS + LATE_CAT_MS;
+      horizon = now + model.FALL_WINDOW_MS + model.LATE_CAT_MS;
     }
     for (const id of breakables) {
       if (!(id in falls) && model.breakableState(world, id) === 'broken') falls[id] = now;
@@ -317,7 +287,7 @@ async function watch(browser, { baseUrl, room, seed, reduced, breakable, inRoom,
     [BROKEN_STORAGE_KEY, alreadyBroken ? JSON.stringify([breakable]) : null],
   );
   await page.addInitScript(RECORDER);
-  // The query string is the page's seed (`seedFromSearch`); the hash its Room.
+  // The query string is the page's seed (`src/main.ts`); the hash its Room.
   await page.goto(`${baseUrl.replace(/\/$/, '')}/?seed=${seed}#/${room}`, { waitUntil: 'load', timeout: 30_000 });
   await page.waitForFunction(SETTLED, null, { timeout: 30_000 });
   const result = await page.evaluate(WATCH_FALL, { breakable, forMs, inRoom });
@@ -329,7 +299,7 @@ async function main() {
   const options = parseArguments(process.argv.slice(2));
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
   const room = options.room;
-  const model = await loadModel(repoRoot);
+  const model = await loadWorldModel(repoRoot);
   const visit = chooseVisit(model, room, options.seed);
   const knocks = visit.first !== null;
   // The one this run watches: what the model says falls first, or — for a
@@ -337,12 +307,15 @@ async function main() {
   // them held to staying up.
   const breakable = knocks ? visit.first.breakable : visit.breakables[0];
   // When the page should show it broken, counted from when this script starts
-  // watching: the doorstep, then the model's own clock, then the fall the
-  // painter plays before it swaps the broken Prop in.
-  const expectedAtMs = knocks ? DOORSTEP_MS[room] + visit.first.atMs + FALL_MS : null;
+  // watching, which is the loading screen going: the doorstep the page waits before
+  // it dispatches `arrival-started`, then the model's own clock, which starts
+  // at that dispatch, then the fall the painter plays before it swaps the
+  // broken Prop in.
+  const doorstepMs = model.DOORSTEP_MS[room];
+  const expectedAtMs = knocks ? doorstepMs + visit.first.atMs + FALL_MS : null;
   // The whole window, whatever this seed rolled: the doorstep and the Arrival,
   // the minute, a late cat, and the fall itself.
-  const forMs = options.forMs ?? DOORSTEP_MS[room] + visit.arrivalEndsMs + model.FALL_WINDOW_MS + LATE_CAT_MS + FALL_MS;
+  const forMs = options.forMs ?? doorstepMs + visit.arrivalEndsMs + model.FALL_WINDOW_MS + model.LATE_CAT_MS + FALL_MS;
 
   const playwright = await loadPlaywright();
   const server = options.launch

@@ -1,4 +1,5 @@
 import {
+  DOORSTEP_MS,
   ENTRYWAY,
   arrivalView,
   entrywayProps,
@@ -33,14 +34,6 @@ import { playSfx } from './sound';
 
 /** Session storage remembers the arrival for this tab, and no longer. */
 const ARRIVED_STORAGE_KEY = 'ada-arrived';
-
-/**
- * How long after the apartment opens the Cast comes through the door.
- *
- * Design note §5.1: the visitor gets a beat of the empty hall before anything
- * moves in it, which is the shot the arrival opens on.
- */
-const DOORSTEP_MS = 600;
 
 /**
  * Has this tab already been shown the arrival?
@@ -106,7 +99,8 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
     if (knocked || arrivalView(world).state !== 'pending') return;
     if (!isInteractive(world) || !isCurrentRoom(world, ENTRYWAY) || !motionIsOn(world)) return;
     knocked = true;
-    setTimeout(() => dispatch({ type: 'arrival-started' }), DOORSTEP_MS);
+    // Design note §5.1: a beat of the empty hall before the Cast comes in.
+    setTimeout(() => dispatch({ type: 'arrival-started' }), DOORSTEP_MS[ENTRYWAY]);
   }
 
   function showProps(states: EntrywayProps) {
