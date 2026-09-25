@@ -1019,25 +1019,9 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 /* This Room writes each box's sort key inline on the element itself. */
 #room-games .stage [data-box] { margin: 0; padding: 0; border: 0; }
 
-/* G2-G5, G20: the backdrop. One image once ticket 34 lands (S01); three bands
-   and two shapes until then. */
-.stage-backdrop {
-  background:
-    radial-gradient(60% 22% at 90% 86%, #FFD9A82e, transparent 70%),
-    linear-gradient(to bottom,
-      var(--wall) 0 62%, #29424C 62% 68.889%,
-      #3A2A22 68.889% 71.111%,
-      #8A6647 71.111% 100%);
-}
-.prop-rug {
-  border-radius: calc(10 * var(--u));
-  background: linear-gradient(to bottom,
-    #4A3340 0 16%, #287F98 16% 23%, #4A3340 23% 68%, #B76E85 68% 75%, #4A3340 75% 100%);
-}
-.prop-cat-bed {
-  border-radius: 50%;
-  background: radial-gradient(closest-side, #6E4A56 0 52%, #B76E85 52% 100%);
-}
+/* G2-G5, G20: the backdrop. Since ticket 34 it is S01, one opaque image with
+   the wall, the skirting, the floor, the rug and the cat bed painted in, so it
+   takes its surface from its `data-still` and nothing here draws one. */
 /* G1: the cornice. An ordinary band inside the stage now that there is no wall
    unit bolted above it; the 6-unit highlight is the bottom 15% of its 40. */
 .prop-cornice { background: linear-gradient(to bottom, #22343C 0 85%, #3D5B66 85% 100%); }
@@ -1317,80 +1301,44 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 
 
 /* G11-G16, G19: the sideboard and what stands on it, the lamp, and the table
-   that is the front edge of the doll's house. */
-/* The image box reaches up to y 468 because the console and the stack of game
-   cases stand above the surface at y 540 (G13, G14) — so only those two are
-   drawn up there and the rest of the band is wall, which the Portals show
-   through. An opaque slab here would take the bottom 62 units off all three. */
-.prop-sideboard {
-  background:
-    /* G13: the console and its two controllers, at (700,504)-(880,540) */
-    linear-gradient(to bottom, #4A4F55 0 55%, #2A2D31 55% 100%)
-      no-repeat calc(400 * var(--u)) calc(36 * var(--u)) / calc(180 * var(--u)) calc(36 * var(--u)),
-    /* G14: three game cases leaning together, at (940,468)-(1010,540) */
-    linear-gradient(to right, #D9483B 0 30%, #EAD9C2 30% 64%, #4DA3D9 64% 100%)
-      no-repeat calc(640 * var(--u)) 0 / calc(70 * var(--u)) calc(72 * var(--u));
-}
-.prop-sideboard::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  /* y 540, which is 72 units down this box. */
-  top: calc(72 * var(--u));
-  bottom: 0;
-  border-radius: calc(4 * var(--u));
-  background: linear-gradient(to bottom, #8C6440 0 15%, var(--oak) 15% 100%);
-  box-shadow: inset 0 calc(-3 * var(--u)) 0 #3A2A22, 0 calc(6 * var(--u)) calc(18 * var(--u)) #0006;
-}
-/* The pole stands at x 1470 with its foot on the floor line, and the shade
-   hangs over it from the arc; the arc itself is behind the shade at this size,
-   so it is not drawn. Offsets are stage units from the box's own corner. */
-.prop-lamp {
-  background:
-    linear-gradient(to bottom, var(--brass), #A8823F)
-      no-repeat calc(75.5 * var(--u)) calc(54 * var(--u)) / calc(9 * var(--u)) calc(340 * var(--u)),
-    radial-gradient(closest-side, var(--brass) 0 100%, transparent 100%)
-      no-repeat calc(52 * var(--u)) calc(382 * var(--u)) / calc(56 * var(--u)) calc(12 * var(--u));
-}
-.prop-lamp::after {
-  content: "";
-  position: absolute;
-  left: 9%;
-  right: 9%;
-  top: 0;
-  height: calc(54 * var(--u));
-  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) calc(9 * var(--u)) calc(9 * var(--u));
-  background: linear-gradient(to bottom, #EAD9C2, #D3BE9F 76%, var(--bulb) 76%);
-  box-shadow: 0 calc(18 * var(--u)) calc(46 * var(--u)) #ffd9a82e;
-}
+   that is the front edge of the doll's house. Since ticket 34 each of them is
+   its delivered S-shot, painted by its `data-still` into the box the note gives
+   it: the image is drawn at the painting's own proportions, seated on the box's
+   bottom edge and centred across it, so a painting narrower or shorter than its
+   box leaves the rest of the box transparent. Nothing here draws a surface.
+   The sideboard's image box still reaches up to y 468 because the console and
+   the game cases stand above its top (G13, G14, baked into S02). */
+
+/* G17, G18 and S09, S10: a pouf shows while its seated still does not, and the
+   still stands in for its Actor's sprite — `src/dom/seats.ts` names who is
+   seated on the stage's `data-seated`, and the model decides when. */
 .prop-pouf {
   border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
   box-shadow: inset 0 calc(-6 * var(--u)) calc(10 * var(--u)) #0000004d;
 }
 .prop-pouf-girl { background: radial-gradient(closest-side at 42% 28%, #35A0BE, #287F98); }
 .prop-pouf-boy { background: radial-gradient(closest-side at 42% 28%, #E8806E, #D76451); }
-.prop-table {
-  border-radius: calc(6 * var(--u));
-  background:
-    /* a pink mug and a cream one, and a bowl of crisps */
-    radial-gradient(closest-side, #E8A0BE 0 92%, transparent 92%) no-repeat 22% 16% / calc(46 * var(--u)) calc(30 * var(--u)),
-    radial-gradient(closest-side, #EAD9C2 0 92%, transparent 92%) no-repeat 42% 16% / calc(46 * var(--u)) calc(30 * var(--u)),
-    radial-gradient(closest-side, #D9A55E 0 92%, transparent 92%) no-repeat 72% 18% / calc(80 * var(--u)) calc(34 * var(--u)),
-    linear-gradient(to bottom, #6E4C35 0 34%, #5C3F2C 34% 100%);
-  box-shadow: 0 calc(-4 * var(--u)) calc(16 * var(--u)) #0006;
-}
+#room-games .stage .prop-seated { display: none; }
+#room-games .stage[data-seated~="girl"] .prop-seated[data-seat="girl"],
+#room-games .stage[data-seated~="boy"] .prop-seated[data-seat="boy"] { display: block; }
+#room-games .stage[data-seated~="girl"] .prop-pouf-girl,
+#room-games .stage[data-seated~="boy"] .prop-pouf-boy,
+#room-games .stage[data-seated~="girl"] .actor[data-actor="girl"],
+#room-games .stage[data-seated~="boy"] .actor[data-actor="boy"] { visibility: hidden; }
 
 /* G12: the boombox, and this Room's Music Source. The whole machine is the
    control, so the hit box is padded out to 44 px at every width and the label
-   lives in a `.sr-only` span. */
+   lives in a `.sr-only` span. S03 is two cells, off and on: the lit cassette
+   window, the pilot and the bloom are all in the second one. */
 .prop-boombox {
-  background: none;
   cursor: pointer;
+  background-size: 200% 100%;
+  background-position: 0 0;
   /* The painted box is 68 x 38 px at the narrow shell, so the hit area is grown
      around it rather than the artwork being made unreadably large. */
   outline-offset: calc(3 * var(--u));
 }
+.prop-boombox[aria-pressed="true"] { background-position: 100% 0; }
 .prop-boombox::after {
   content: "";
   position: absolute;
@@ -1400,121 +1348,63 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
   height: max(44px, 100%);
   transform: translate(-50%, -50%);
 }
-.boombox-body {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: 1fr 1.15fr 1fr;
-  align-items: center;
-  gap: calc(5 * var(--u));
-  padding: calc(8 * var(--u));
-  border-radius: calc(7 * var(--u));
-  background: linear-gradient(to bottom, #4A4F55, #3B3F44);
-  box-shadow: inset 0 0 0 calc(2 * var(--u)) #2A2D31;
-}
-.boombox-grille {
-  height: 72%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, #8F959C 0 34%, #B9BEC4 34% 100%);
-}
-.boombox-window {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  height: 58%;
-  border-radius: calc(3 * var(--u));
-  background: #1B1E21;
-  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #2A2D31;
-}
+/* The two tape spindles, DOM discs over the painted reels (§5.1: CSS, not
+   artwork, so they stay crisp). S03's reels sit at (68.5, 62.5) and
+   (91.5, 62.5) in the 160 x 90 box, as measured off the delivered cells; the
+   discs only come up while the machine is on, and turn only with motion on. */
 .spindle {
-  width: calc(14 * var(--u));
-  height: calc(14 * var(--u));
-  border-radius: 50%;
-  border: calc(3 * var(--u)) solid #5A6068;
-  /* The teeth, so a turning spindle reads as turning. */
-  background: conic-gradient(#5A6068 0 12%, transparent 12% 38%, #5A6068 38% 50%, transparent 50% 88%, #5A6068 88% 100%);
-}
-.boombox-keys {
+  display: none;
   position: absolute;
-  left: 22%;
-  right: 22%;
-  bottom: calc(4 * var(--u));
-  height: calc(7 * var(--u));
-  border-radius: calc(2 * var(--u));
-  background: repeating-linear-gradient(to right, #D9483B 0 14%, #3B3F44 14% 20%);
+  top: calc(58 * var(--u));
+  width: calc(9 * var(--u));
+  height: calc(9 * var(--u));
+  border-radius: 50%;
+  border: calc(1.5 * var(--u)) solid #6B4C1E;
+  /* The teeth, so a turning spindle reads as turning. */
+  background: conic-gradient(#6B4C1E 0 12%, transparent 12% 38%, #6B4C1E 38% 50%, transparent 50% 88%, #6B4C1E 88% 100%);
 }
-/* On: the window lights, the pilot glows, the spindles turn. The lit window
-   alone carries the state, so with motion off nothing is lost. */
-.prop-boombox[aria-pressed="true"] .boombox-window {
-  background: linear-gradient(to bottom, #F2B85A, #C98F33);
-  box-shadow: inset 0 0 0 calc(1.5 * var(--u)) #2A2D31, 0 0 calc(14 * var(--u)) #f2b85a66;
-}
+.spindle { left: calc(64 * var(--u)); }
+.spindle + .spindle { left: calc(87 * var(--u)); }
 .prop-boombox[aria-pressed="true"] .spindle {
+  display: block;
   animation: spindle-turn .9s linear infinite;
-  border-color: #6B4C1E;
 }
-.prop-boombox[aria-pressed="true"] .spindle:last-child { animation-duration: 1.4s; }
+.prop-boombox[aria-pressed="true"] .spindle + .spindle { animation-duration: 1.4s; }
 @keyframes spindle-turn { to { transform: rotate(1turn); } }
 .motion-off .spindle { animation: none !important; }
 
 /* G15: Luna's snow globe, the only Breakable in this Room. Ticket 09 swaps the
-   two states over; nothing here is clickable, and the visitor cannot break it. */
-/* 60 x 64 units: 50 x 54 px at the reference width and 13 px across at the
-   narrow shell, which is why it is a distinct silhouette on a stand rather
-   than a detail among others. */
-.prop-globe {
-  background:
-    radial-gradient(closest-side, #ffffffb3 0 55%, transparent 60%)
-      no-repeat calc(13 * var(--u)) calc(9 * var(--u)) / calc(13 * var(--u)) calc(9 * var(--u)),
-    linear-gradient(to bottom, #F6E7CF 0 62%, #C2705E 62%)
-      no-repeat calc(24 * var(--u)) calc(26 * var(--u)) / calc(13 * var(--u)) calc(14 * var(--u)),
-    radial-gradient(closest-side, #A9CFDAd9 0 90%, #7FB0C0 90%)
-      no-repeat 0 0 / calc(60 * var(--u)) calc(46 * var(--u)),
-    linear-gradient(to bottom, #5C3F2C 0 40%, #33210F 40%)
-      no-repeat calc(13 * var(--u)) calc(46 * var(--u)) / calc(34 * var(--u)) calc(18 * var(--u));
-}
-/* 120 x 46 units, anchored bottom-left at (1210, 692). */
-.prop-globe-broken {
-  background:
-    conic-gradient(from .56turn, #C6DCE4cc 0 7%, transparent 7%)
-      no-repeat calc(38 * var(--u)) calc(8 * var(--u)) / calc(22 * var(--u)) calc(22 * var(--u)),
-    conic-gradient(from .04turn, #E2EFF4cc 0 8%, transparent 8%)
-      no-repeat calc(74 * var(--u)) calc(4 * var(--u)) / calc(26 * var(--u)) calc(26 * var(--u)),
-    linear-gradient(to right, #5C3F2C, #33210F)
-      no-repeat calc(6 * var(--u)) calc(28 * var(--u)) / calc(34 * var(--u)) calc(14 * var(--u)),
-    radial-gradient(closest-side, #F6E7CF 0 80%, transparent 80%)
-      no-repeat calc(96 * var(--u)) calc(24 * var(--u)) / calc(20 * var(--u)) calc(18 * var(--u)),
-    /* the dark wet patch soaking into the planks, glitter stranded in it */
-    radial-gradient(closest-side, #4A3226e6 0 62%, #4A322680 62%, transparent 100%)
-      no-repeat 50% 100% / 100% calc(30 * var(--u));
-}
+   two states over; nothing here is clickable, and the visitor cannot break it.
+   S04 intact, 60 x 64 units on the sideboard; S05 broken, 120 x 46 units,
+   anchored bottom-left at (1210, 692). Both paint from their `data-still`. */
 
 /* G6: the door back to the Entryway — the Entryway's own Game door, seen from
    this side. The text `.room-exit` at the top of the Room leads out too; §8.3
-   asks the owner whether both should stay. */
+   asks the owner whether both should stay. Since ticket 34 the casing and the
+   dark opening are painted into S01, and the link's box is that casing as
+   measured, (45,114)-(286,539); the S17 leaf fills the painted opening,
+   (67,136)-(265,535), and shows its shut cell through the whole swing, which
+   `.stage[data-door]` at the end of the file still drives. */
 .prop-door {
   border-radius: calc(4 * var(--u)) calc(4 * var(--u)) 0 0;
-  background: linear-gradient(to bottom, #6B4A34, #5C3F2C);
-  box-shadow: inset 0 0 0 calc(3 * var(--u)) #4A3320;
-  /* The hallway light in the gap. */
   overflow: hidden;
   transition: box-shadow .35s;
 }
 .prop-door .door-leaf {
   position: absolute;
-  left: 7.8%;
-  right: 7.8%;
-  top: 4%;
-  bottom: 0;
-  border-radius: calc(3 * var(--u)) calc(3 * var(--u)) 0 0;
-  background: linear-gradient(to right, #FFE2B4 0 6%, #3F6B7A 6% 100%);
+  left: 9.13%;
+  right: 8.71%;
+  top: 5.18%;
+  bottom: 0.94%;
+  background-size: 200% 100%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
   transform-origin: left center;
   transform: perspective(600px) rotateY(-12deg);
   transition: transform .35s;
 }
 .prop-door:hover, .prop-door:focus-visible {
-  box-shadow: inset 0 0 0 calc(3 * var(--u)) #4A3320, 0 0 calc(24 * var(--u)) #ffd9a840;
+  box-shadow: 0 0 calc(24 * var(--u)) #ffd9a840;
 }
 /* The leaf lifting under the cursor is stated once, at the foot of the file
    with the rest of the Door's angles, because it has to beat them and only

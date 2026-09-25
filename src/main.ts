@@ -12,6 +12,7 @@ import { mountLanguage, readStoredLanguage } from './dom/language';
 import { mountLoading } from './dom/loading';
 import { mountMotion, prefersReducedMotion } from './dom/motion';
 import { mountRooms } from './dom/rooms';
+import { mountSeats } from './dom/seats'; // 34: the seated stills
 import { mountSound } from './dom/sound'; // 06: audio
 import type { Mount, Painter } from './dom/painter';
 import { advance, createWorld, seededRandom, type World, type WorldEvent } from './world';
@@ -61,6 +62,7 @@ const mounts: Mount[] = [
   // `playSfx` and that painter is what hands the module the world to ask.
   mountArrival,
   mountActors, // 07: actors — the Cast stands on top of whatever the Room laid down.
+  mountSeats, // 34: a seated still stands in for a sprite the painter above has placed.
   // 08: the cats slice, after the Cast, because the petting Beat stands in for
   // a cat the painter above has just placed and takes its box from her.
   mountCats,

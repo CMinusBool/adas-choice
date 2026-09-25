@@ -47,7 +47,7 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   returns a `Painter`. A new slice is a new file plus one entry in `src/main.ts`'s `mounts` list,
   not a branch inside an existing painter. `src/dom/painter.ts` holds that contract and `byId`.
   Today, in mount order: `loading`, `language`, `motion`, `rooms`, `game-room`,
-  `cinema-room`, `activity-room`, `sound`, `arrival`, `actors`, `cats`, `entryway`, `breakables`. The
+  `cinema-room`, `activity-room`, `sound`, `arrival`, `actors`, `seats`, `cats`, `entryway`, `breakables`. The
   order is load bearing at both ends — `loading` first so the shell leaves `inert` before the router
   moves focus, `actors` after the Rooms so the Cast stands on top of whatever the Room laid down —
   and `arrival` sits after `sound` because the Door's own sounds go out through `playSfx`.
@@ -107,12 +107,9 @@ default (`lang="zh-Hant"`), ships `.nojekyll`, and resolves every local URL it r
   three `width`/`height` attributes on the `.game-art` images in `index.html`. (A Scene sprite is
   still skipped; it is an Actor's **Beat** that `check-assets.mjs --beat` checks, described under
   "Cycle assets travel as a set too" below.)
-  **The contract changed; the assets have not.** The six files in `public/assets/` are still the
-  square ones — 480x480 GIFs and posters, 1920x1440 sheets — and will be until the art lane
-  delivers (tickets 41 and 34). The markup already declares `width="360" height="576"`, so the
-  Portals squeeze a square Scene into a 5:8 ellipse today, and `index.html` says so where the
-  Portals are declared. That is expected, and it is the one place a reader should not take this
-  file's present tense for what is on disk.
+  Since ticket 34 the six files in `public/assets/` are the Portal-shaped ones — 360x576
+  posters and GIFs, 1440x1728 sheets — built from ticket 41's generations by
+  `scripts/art/build-scene.py`, whose GIF keeps `src/dom/game-room.ts`'s frame timings.
 - **Cycle assets travel as a set too**, and to their own contract. An Actor's Cycles live at
   `public/assets/actors/<actor>-<cycle>-<facing>.png` — `walk` and `run`, `left` and `right` — and
   are replaced together. Frames are laid left to right then top to bottom in a 4-column grid, 8

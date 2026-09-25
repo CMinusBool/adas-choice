@@ -1,0 +1,417 @@
+{
+  "schema": "game-room-manifest/1",
+  "note": "Provenance for the Game Room's delivered art (COOP-001 ticket 34). The raw generations live in the main checkout's .scratch/COOP-001-apartment/art/generated/41-game-room/ (gitignored) and travel here only as sha256s; each source is the attempt ticket 41's manifest marks kept and its 2026-09-25 approvals confirm (S02 attempt-5, S09 and S10 attempt-4, the S15 sheet attempt-3). Files are relative to public/assets/: the Props under game-room/, the three Scene sets at their existing names. Every Prop keeps the box it had before the drop (design 75's true-size boxes are not applied); `painted` is where the painting actually sits inside that box, so a later rescale can shrink the box to it without regenerating.",
+  "identitySource": "art/characters/v2 for S14, S15-still, S16 and S17-era shots; art/characters/v3 for the 2026-09-25 revisions (S02, S09, S10, S15 sheet) — as ticket 41 records",
+  "assets": [
+    {
+      "file": "game-room/backdrop.png",
+      "shot": "S01",
+      "name": "Empty Room backdrop",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "1600x900",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s01-room/attempt-1/strip-raw.png",
+        "sha256": "64bf82ce1e041841dd83e06b54633a6dab8ad4c9bd840768d9d8530097b5243a"
+      },
+      "sha256": "5c52715ad9d54f73b88cbe35a12a8d5cb40cad5d27b771e9f7e326ce2e5fe0f8",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 1600x900 --fit fill --seat centre --key alpha",
+      "sharedScale": null,
+      "placed": "0, 0, 1600 x 900 (today's box, kept: ticket 34 swaps the surface only)",
+      "painted": null,
+      "motionPhase": null
+    },
+    {
+      "file": "game-room/sideboard.png",
+      "shot": "S02",
+      "name": "Sideboard with the PS1 SCPH-1000, two digital controllers and two cases on top",
+      "kept": "attempt-5",
+      "frames": 1,
+      "columns": 1,
+      "frame": "2160x344",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s02-sideboard/attempt-5/strip-raw.png",
+        "sha256": "8d960c26b1f491bcf06ca8ed73ac089edd6d298347d281bd86b78de8784d676a"
+      },
+      "sha256": "e2b80a457f0648b7dbefaabd825e7139ee001d49f8c9ee64763f620376c1a3b4",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 2160x344 --fit content --seat bottom --key '#00FF00'",
+      "sharedScale": 0.5369,
+      "placed": "300, 468, 1080 x 172 (today's box, kept: ticket 34 swaps the surface only)",
+      "painted": {
+        "units": "523.5 x 171.0",
+        "box": "(578,469)-(1102,640)",
+        "paintedAspect": 3.063,
+        "boxAspect": 6.279,
+        "fillsWidth": 0.485,
+        "fillsHeight": 0.994
+      },
+      "motionPhase": null
+    },
+    {
+      "file": "game-room/boombox.png",
+      "shot": "S03",
+      "name": "Boombox, off and on (2 cells)",
+      "kept": "attempt-2",
+      "frames": 2,
+      "columns": 2,
+      "frame": "320x180",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s03-boombox/attempt-2/strip-raw.png",
+        "sha256": "bfe6e6687525eaeeb1ec36989ca8ffbdd2791e9629f46c9935e08295be1733a3"
+      },
+      "sha256": "b8caf2a0a4ad6ce2a82808fe90a7d4cfc42e802aa38402c6bbf98d008984dd62",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 320x180 --frames 2 --columns 2 --fit content --seat bottom --key '#00FF00'",
+      "sharedScale": 0.3271,
+      "placed": "340, 450, 160 x 90 (today's box, kept: ticket 34 swaps the surface only)",
+      "painted": {
+        "units": "158.0 x 81.0",
+        "box": "(341,459)-(499,540)",
+        "paintedAspect": 1.948,
+        "boxAspect": 1.778,
+        "fillsWidth": 0.988,
+        "fillsHeight": 0.9
+      },
+      "motionPhase": null
+    },
+    {
+      "file": "game-room/snow-globe.png",
+      "shot": "S04",
+      "name": "Snow globe, intact (Luna's Breakable)",
+      "kept": "attempt-2",
+      "frames": 1,
+      "columns": 1,
+      "frame": "120x128",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s04-snow-globe-intact/attempt-2/strip-raw.png",
+        "sha256": "b7141fc6366d813165a85cf28ab678724ca3f7e02bb0b9928741de22fec43b15"
+      },
+      "sha256": "b0787f1c4a35afebac45218214c50fcfff96aeb7da6ebf5889f0ff47d4bb62e2",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 120x128 --fit content --seat bottom --key '#00FF00'",
+      "sharedScale": 0.109,
+      "placed": "1240, 476, 60 x 64 (today's box, kept: ticket 34 swaps the surface only)",
+      "painted": {
+        "units": "51.5 x 63.0",
+        "box": "(1244,477)-(1296,540)",
+        "paintedAspect": 0.818,
+        "boxAspect": 0.938,
+        "fillsWidth": 0.858,
+        "fillsHeight": 0.984
+      },
+      "motionPhase": null
+    },
+    {
+      "file": "game-room/snow-globe-broken.png",
+      "shot": "S05",
+      "name": "Snow globe, broken",
+      "kept": "attempt-2",
+      "frames": 1,
+      "columns": 1,
+      "frame": "240x92",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s05-snow-globe-broken/attempt-2/strip-raw.png",
+        "sha256": "2e987754797d0b5c232244329dc5b95e3e785dbef3d1c411069efe9db6f519d5"
+      },
+      "sha256": "3391ae473b51c0f575a1e691a52faac5bcc3b6922e3f93bb1d8d25d338c12c2a",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 240x92 --fit content --seat bottom --key '#00FF00'",
+      "sharedScale": 0.1227,
+      "placed": "1210, 646, 120 x 46 (today's box, kept: ticket 34 swaps the surface only)",
+      "painted": {
+        "units": "118.0 x 42.5",
+        "box": "(1211,650)-(1329,692)",
+        "paintedAspect": 2.771,
+        "boxAspect": 2.609,
+        "fillsWidth": 0.983,
+        "fillsHeight": 0.924
+      },
+      "motionPhase": null
+    },
+    {
+      "file": "game-room/floor-lamp.png",
+      "shot": "S07",
+      "name": "Floor lamp",
+      "kept": "attempt-2",
+      "frames": 1,
+      "columns": 1,
+      "frame": "220x788",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s07-floor-lamp/attempt-2/strip-raw.png",
+        "sha256": "aca8cc7f24b629cb4aa2333757ff01cfccc3be48ceed4b98809c073992b1cf8b"
+      },
+      "sha256": "52d982caea0accc0ab2e781c3b51f2430597c59a94429d5cbfcf557822295be0",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 220x788 --fit content --seat bottom --key '#00FF00'",
+      "sharedScale": 0.3564,
+      "placed": "1390, 246, 110 x 394 (today's box, kept: ticket 34 swaps the surface only)",
+      "painted": {
+        "units": "108.0 x 293.0",
+        "box": "(1391,347)-(1499,640)",
+        "paintedAspect": 0.369,
+        "boxAspect": 0.279,
+        "fillsWidth": 0.982,
+        "fillsHeight": 0.744
+      },
+      "motionPhase": null
+    },
+    {
+      "file": "game-room/low-table.png",
+      "shot": "S08",
+      "name": "Low table, foreground",
+      "kept": "attempt-2",
+      "frames": 1,
+      "columns": 1,
+      "frame": "880x200",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s08-low-table/attempt-2/strip-raw.png",
+        "sha256": "5e5c4a333d3de1dc0f64c7e8787575eed41071e49284dd5418f2508709ce44d7"
+      },
+      "sha256": "34bf61385360f198392c8c3dbc32ec4ea5c84d93c427efc7aa9053a180c3c83b",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 880x200 --fit content --seat bottom --key '#00FF00'",
+      "sharedScale": 0.3736,
+      "placed": "560, 790, 440 x 100 (today's box, kept: ticket 34 swaps the surface only)",
+      "painted": {
+        "units": "347.0 x 99.0",
+        "box": "(607,791)-(954,890)",
+        "paintedAspect": 3.504,
+        "boxAspect": 4.4,
+        "fillsWidth": 0.789,
+        "fillsHeight": 0.99
+      },
+      "motionPhase": null
+    },
+    {
+      "file": "game-room/girl-pouf.png",
+      "shot": "S09",
+      "name": "The Girl sitting cross-legged on the teal pouf, playing",
+      "kept": "attempt-4",
+      "frames": 1,
+      "columns": 1,
+      "frame": "480x520",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s09-girl-pouf/attempt-4/strip-raw.png",
+        "sha256": "dbb74b9e4c8ae17fb8f6f28829837c628cb7a2b4c27713140b8b710a4aaed683"
+      },
+      "sha256": "0ab89c73be84e90a372176c90a309ad5c674a92633a389a343f82ef55a3d2c41",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 480x520 --fit content --seat bottom --key '#00FF00'",
+      "sharedScale": 0.4164,
+      "placed": "500, 520, 240 x 260 (today's box, kept: ticket 34 swaps the surface only)",
+      "painted": {
+        "units": "209.0 x 259.0",
+        "box": "(516,521)-(725,780)",
+        "paintedAspect": 0.807,
+        "boxAspect": 0.923,
+        "fillsWidth": 0.871,
+        "fillsHeight": 0.996
+      },
+      "motionPhase": null
+    },
+    {
+      "file": "game-room/boy-pouf.png",
+      "shot": "S10",
+      "name": "The Boy sitting on the coral pouf, playing",
+      "kept": "attempt-4",
+      "frames": 1,
+      "columns": 1,
+      "frame": "520x560",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s10-boy-pouf/attempt-4/strip-raw.png",
+        "sha256": "659397d51db57f68bb2f89463d939a6b549ad9aa13ec84a488e1d3529c2b35bd"
+      },
+      "sha256": "a236c8ada697eeb1b5b6c544e2d3add76acadc783cae073807201d1de12a7068",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 520x560 --fit content --seat bottom --key '#00FF00'",
+      "sharedScale": 0.4504,
+      "placed": "750, 495, 260 x 280 (today's box, kept: ticket 34 swaps the surface only)",
+      "painted": {
+        "units": "224.0 x 279.0",
+        "box": "(768,496)-(992,775)",
+        "paintedAspect": 0.802,
+        "boxAspect": 0.929,
+        "fillsWidth": 0.862,
+        "fillsHeight": 0.996
+      },
+      "motionPhase": null
+    },
+    {
+      "file": "game-room/door-leaf.png",
+      "shot": "S17",
+      "name": "Door leaf, shut and open (2 cells)",
+      "kept": "attempt-2",
+      "frames": 2,
+      "columns": 2,
+      "frame": "326x800",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s17-door-leaf/attempt-2/strip-raw.png",
+        "sha256": "cc4d4a1244e38400cffa0433b95524653d04506d82d12a7f7cdf69db7787097f"
+      },
+      "sha256": "4a17236367fe718fcb825c49665e3fc3fd36606cdc9c81c0d27696e2abe679ee",
+      "builtBy": "scripts/art/crop-cell.mjs (the strip's halves 0,0-634,1239 and 634,0-1269,1239) + scripts/art/build-prop.mjs@1 --frame 326x800 --fit content --seat bottom --key '#00FF00', each + scripts/art/stack-cells.mjs",
+      "sharedScale": {
+        "shut": 0.7988,
+        "open": 0.7074
+      },
+      "placed": "fills S01's measured opening (67,136)-(265,535), 198 x 399, inside the link's measured casing (45,114)-(286,539); cell 1 read, stretched 1.22x across (painted 0.403 wide per unit tall against the opening's 0.496)",
+      "motionPhase": null
+    },
+    {
+      "file": "operation-tango.webp",
+      "shot": "S14-still",
+      "name": "operation-tango, still poster",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "360x576",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s14-operation-tango-still/attempt-1/strip-raw.png",
+        "sha256": "8634c2e28af27cbfd8c88ab2140ef2ade9d9eb49b0d165355136658b79360d3c"
+      },
+      "sha256": "290b78538cadc684bc83a4b1f2030e1cbc59835ed39a3cb6d54789254d74be08",
+      "builtBy": "python scripts/art/build-scene.py --still <still> --sheet <sheet> --out public/assets/operation-tango",
+      "placed": "the Portal's reduced-motion <picture> source and data-still",
+      "resampled": "downscaled x0.3629 from 992 x 1586",
+      "motionPhase": null
+    },
+    {
+      "file": "operation-tango-sprite.webp",
+      "shot": "S14-sheet",
+      "name": "operation-tango, sprite sheet, 12 frames 4 x 3",
+      "kept": "attempt-2",
+      "frames": 12,
+      "columns": 4,
+      "frame": "360x576",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s14-operation-tango-sheet/attempt-2/strip-raw.png",
+        "sha256": "ab07ca2d2f9024428f3fd7a57e92e80b7b0f0b39a3a0f9804d57602433316098"
+      },
+      "sha256": "f7436f2c654fc6c93233493a60177e00fa60592c2ced29133b37990e59186b84",
+      "builtBy": "python scripts/art/build-scene.py --still <still> --sheet <sheet> --out public/assets/operation-tango",
+      "placed": "the Portal's .scene-sprite data-sheet",
+      "resampled": "upscaled x1.2576 from 1145 x 1374: the generation's 286.25 x 458 cells are exactly 5:8 but smaller than the contract's 360 x 576",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "operation-tango.gif",
+      "shot": "S14-sheet",
+      "name": "operation-tango, animated GIF, the sheet's 12 frames at game-room.ts's frameDurations, 4100 ms",
+      "kept": "attempt-2",
+      "frames": 12,
+      "columns": 1,
+      "frame": "360x576",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s14-operation-tango-sheet/attempt-2/strip-raw.png",
+        "sha256": "ab07ca2d2f9024428f3fd7a57e92e80b7b0f0b39a3a0f9804d57602433316098"
+      },
+      "sha256": "f2d38f587862aac0cd993d4a4ad7c6dbd6eb3d7ffc954fd4343bfd9070012185",
+      "builtBy": "python scripts/art/build-scene.py --still <still> --sheet <sheet> --out public/assets/operation-tango",
+      "placed": "the Portal's <img src> and data-animated",
+      "resampled": "upscaled x1.2576 from 1145 x 1374: the generation's 286.25 x 458 cells are exactly 5:8 but smaller than the contract's 360 x 576",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "lovers-in-a-dangerous-spacetime.webp",
+      "shot": "S15-still",
+      "name": "lovers-in-a-dangerous-spacetime, still poster",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "360x576",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s15-lovers-still/attempt-1/strip-raw.png",
+        "sha256": "7d7fc2298502627bf64fb2be1455f584beb7f55ce440fe69c9499742f2ac7cbd"
+      },
+      "sha256": "43fd1c01a4f6cfe57269dd0d5cc3ff8ae9a2043b2ab25008480a6777dcab9856",
+      "builtBy": "python scripts/art/build-scene.py --still <still> --sheet <sheet> --out public/assets/lovers-in-a-dangerous-spacetime",
+      "placed": "the Portal's reduced-motion <picture> source and data-still",
+      "resampled": "downscaled x0.3629 from 992 x 1586",
+      "motionPhase": null
+    },
+    {
+      "file": "lovers-in-a-dangerous-spacetime-sprite.webp",
+      "shot": "S15-sheet",
+      "name": "lovers-in-a-dangerous-spacetime, sprite sheet, 12 frames 4 x 3",
+      "kept": "attempt-3",
+      "frames": 12,
+      "columns": 4,
+      "frame": "360x576",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s15-lovers-sheet/attempt-3/strip-raw.png",
+        "sha256": "504d2f7403daf867f2b2a81b0341fe889a7ab77fe8ad81c358fb41af775fb749"
+      },
+      "sha256": "803824063925ac373c7fa408490058dd93a12e45f43cab2a49414198ae052ba2",
+      "builtBy": "python scripts/art/build-scene.py --still <still> --sheet <sheet> --out public/assets/lovers-in-a-dangerous-spacetime",
+      "placed": "the Portal's .scene-sprite data-sheet",
+      "resampled": "upscaled x1.2576 from 1145 x 1374: the generation's 286.25 x 458 cells are exactly 5:8 but smaller than the contract's 360 x 576",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "lovers-in-a-dangerous-spacetime.gif",
+      "shot": "S15-sheet",
+      "name": "lovers-in-a-dangerous-spacetime, animated GIF, the sheet's 12 frames at game-room.ts's frameDurations, 4100 ms",
+      "kept": "attempt-3",
+      "frames": 12,
+      "columns": 1,
+      "frame": "360x576",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s15-lovers-sheet/attempt-3/strip-raw.png",
+        "sha256": "504d2f7403daf867f2b2a81b0341fe889a7ab77fe8ad81c358fb41af775fb749"
+      },
+      "sha256": "d83be1a53ed8c28d88b2711b655fd61c860ed0fc78e50c6712a662af71600f40",
+      "builtBy": "python scripts/art/build-scene.py --still <still> --sheet <sheet> --out public/assets/lovers-in-a-dangerous-spacetime",
+      "placed": "the Portal's <img src> and data-animated",
+      "resampled": "upscaled x1.2576 from 1145 x 1374: the generation's 286.25 x 458 cells are exactly 5:8 but smaller than the contract's 360 x 576",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "heavenly-bodies.webp",
+      "shot": "S16-still",
+      "name": "heavenly-bodies, still poster",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "360x576",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s16-heavenly-bodies-still/attempt-1/strip-raw.png",
+        "sha256": "08e00fc3c79b9f74fab731bdaf352f75d1e61513593e8c6ba3a1ed06641d1653"
+      },
+      "sha256": "eb23cd73bed03be19301a4b6a20dd7a74b7c9d98ff387db890d193737a01d4be",
+      "builtBy": "python scripts/art/build-scene.py --still <still> --sheet <sheet> --out public/assets/heavenly-bodies",
+      "placed": "the Portal's reduced-motion <picture> source and data-still",
+      "resampled": "downscaled x0.3629 from 992 x 1586",
+      "motionPhase": null
+    },
+    {
+      "file": "heavenly-bodies-sprite.webp",
+      "shot": "S16-sheet",
+      "name": "heavenly-bodies, sprite sheet, 12 frames 4 x 3",
+      "kept": "attempt-2",
+      "frames": 12,
+      "columns": 4,
+      "frame": "360x576",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s16-heavenly-bodies-sheet/attempt-2/strip-raw.png",
+        "sha256": "9c462693564156e07b0e59cfd80cec358aa377a41997ce0022c0202dd9b58724"
+      },
+      "sha256": "4b53efa43ec5ad7f9aeafdda1dfa8d52ff3bc1a190cded16d24bea244b6c574e",
+      "builtBy": "python scripts/art/build-scene.py --still <still> --sheet <sheet> --out public/assets/heavenly-bodies",
+      "placed": "the Portal's .scene-sprite data-sheet",
+      "resampled": "upscaled x1.2576 from 1145 x 1374: the generation's 286.25 x 458 cells are exactly 5:8 but smaller than the contract's 360 x 576",
+      "motionPhase": "not verified"
+    },
+    {
+      "file": "heavenly-bodies.gif",
+      "shot": "S16-sheet",
+      "name": "heavenly-bodies, animated GIF, the sheet's 12 frames at game-room.ts's frameDurations, 4100 ms",
+      "kept": "attempt-2",
+      "frames": 12,
+      "columns": 1,
+      "frame": "360x576",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s16-heavenly-bodies-sheet/attempt-2/strip-raw.png",
+        "sha256": "9c462693564156e07b0e59cfd80cec358aa377a41997ce0022c0202dd9b58724"
+      },
+      "sha256": "16586ac053c3c2635cee278219ae354ce172b59e59b47f53ef90cbe43d4ff0fe",
+      "builtBy": "python scripts/art/build-scene.py --still <still> --sheet <sheet> --out public/assets/heavenly-bodies",
+      "placed": "the Portal's <img src> and data-animated",
+      "resampled": "upscaled x1.2576 from 1145 x 1374: the generation's 286.25 x 458 cells are exactly 5:8 but smaller than the contract's 360 x 576",
+      "motionPhase": "not verified"
+    }
+  ]
+}
