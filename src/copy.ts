@@ -89,6 +89,8 @@ const zhHant = {
   privacyNote: '這些資訊也會產生一組請求識別碼，並不代表能辨識你的真實身分。不會收集你的姓名或電子郵件。',
   sending: '正在送出小小的邀請…', sent: '邀請已送出，期待一起玩 ♡', unavailable: '暫時無法寄送邀請，還是可以先去 Steam 看看。',
   sendError: '邀請暫時無法送出，請稍後再試。', rateLimited: '邀請送得有點快，請稍等一下再試。', verifyError: '請重新完成安全驗證，再送出邀請。', checking: '正在做個小小的安全驗證…',
+  // 104: stands where the Turnstile widget was when it cannot run on this page at all.
+  verifyUnavailable: '安全驗證無法在這個網址載入，所以暫時無法從這裡寄送邀請。還是可以先去 Steam 看看。',
   tangoCategory: '默契滿分', tangoCaption: '你來入侵，我來潛入。', tangoPick: '首選推薦', tangoPlayers: '2 位玩家',
   tangoDescription: '一位特務，一位駭客。兩個畫面，各自握有不同線索。把話說清楚、抓準時機，就是你們一起解開謎題的關鍵。',
   tangoWhy: '巧妙的機制、互補的角色，還有那句一起喊出的「解開了！」。', tangoSetup: '線上合作・兩台裝置＋麥克風', tangoSetupNote: '一份遊戲＋免費 Friend Pass',
@@ -214,6 +216,7 @@ export const copy: Record<Language, Record<CopyKey, string>> = {
     privacyNote: 'These details also create a request fingerprint, which is not a unique identity. Your name and email address are not collected.',
     sending: 'Sending a little invitation…', sent: 'Invitation sent. Here’s to playing together ♡', unavailable: 'Invitations are unavailable right now. You can still check the game on Steam.',
     sendError: 'The invitation couldn’t be sent. Please try again later.', rateLimited: 'A few too many invitations. Please wait a little before trying again.', verifyError: 'Please complete a fresh security check and try again.', checking: 'One quick safety check…',
+    verifyUnavailable: 'The security check can’t load at this address, so the invitation can’t be sent from here. You can still check the game on Steam.',
     tangoCategory: 'The perfect partnership', tangoCaption: 'YOU HACK. I SNEAK.', tangoPick: 'BEST OVERALL', tangoPlayers: '2 players',
     tangoDescription: 'One agent. One hacker. Different clues on each screen. Talking through a problem and timing your moves together is the puzzle.',
     tangoWhy: 'Clever systems, complementary roles, and that shared “we cracked it” moment.', tangoSetup: 'Online · Two devices + microphones', tangoSetupNote: 'One copy + free Friend Pass',

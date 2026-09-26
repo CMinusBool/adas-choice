@@ -152,6 +152,8 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   const consent = byId<HTMLInputElement>('invite-consent');
   const sendButton = byId<HTMLButtonElement>('send-invite');
   const status = byId('invite-status');
+  const widgetSlot = byId('turnstile-widget');
+  const challengeNote = byId('turnstile-unavailable');
   const config: AdaConfig = window.ADA_CONFIG ?? { inviteEndpoint: '', turnstileSiteKey: '' };
   const notificationsReady = /^https:\/\/[a-z0-9.-]+\.workers\.dev\/invite$/.test(config.inviteEndpoint || '') && /^[A-Za-z0-9_-]{10,100}$/.test(config.turnstileSiteKey || '');
   const wideLayout = matchMedia(WIDE_LAYOUT);
@@ -547,6 +549,30 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     if (turnstileWidget !== null && window.turnstile) window.turnstile.remove(turnstileWidget);
     turnstileWidget = null;
     turnstileToken = '';
+    widgetSlot.hidden = false;
+    challengeNote.hidden = true;
+  }
+
+  /**
+   * 104: the Turnstile error codes that mean the widget cannot run on this page at
+   * all, whatever the visitor does: a site key or hostname the widget's dashboard
+   * refuses (110100, 110110, and 110200 — what `localhost` gets from a widget that
+   * lists only the published host), a bad parameter or a failed start (100xxx to
+   * 106xxx, 110420, 110430), a browser it does not support (110500, 110510), a clock
+   * or cache problem (200010, 200100), or its iframe failing to load (200500).
+   * Cloudflare paints each one as a bare "Unable to connect to website" box and keeps
+   * retrying. The rest — a timeout (11060x, 11062x) or a challenge that did not pass
+   * (300xxx, 600xxx) — the widget recovers from by itself, so it stays.
+   */
+  const cannotRunHere = (code: string) => /^(10[0-6]\d{3}|110(100|110|200|420|430|500|510)|200(010|100|500))$/.test(code);
+
+  /** 104: take the widget down and say so in the dialog's own words, in both languages. */
+  function challengeUnavailable() {
+    removeChallenge();
+    widgetSlot.hidden = true;
+    challengeNote.hidden = false;
+    setStatus('');
+    updateSendButton();
   }
 
   async function prepareChallenge() {
@@ -570,9 +596,16 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
         // failure message alone.
         callback: token => { if (run === dialogRun && consent.checked) { turnstileToken = token; if (!sendFailed) setStatus(''); updateSendButton(); } },
         'expired-callback': () => { turnstileToken = ''; updateSendButton(); setStatus('verifyError', true); },
-        'error-callback': () => { turnstileToken = ''; updateSendButton(); setStatus('verifyError', true); }
+        'error-callback': code => {
+          if (run !== dialogRun) return;
+          // 104: returning true tells Turnstile the error is handled, so it does not
+          // log it; the widget comes down once the callback has returned, so
+          // Turnstile is not left posting to an iframe that is already gone.
+          if (cannotRunHere(String(code))) { setTimeout(() => { if (run === dialogRun) challengeUnavailable(); }); return true; }
+          turnstileToken = ''; updateSendButton(); setStatus('verifyError', true);
+        }
       });
-    } catch { if (run === dialogRun) setStatus('verifyError', true); }
+    } catch { if (run === dialogRun) challengeUnavailable(); }
   }
 
   // 46: the panel's first action. The Invitation itself is untouched — same

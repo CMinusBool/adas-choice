@@ -42,7 +42,6 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [site] No Beat's motion phase has been checked by a machine. (22, 2026-09-18)
 - [site] The shipped Actor frames were cut from the v2 Character Sheets, while new art references v3. (64, 2026-09-25)
 - [site] At 390 × 844 the Entryway, the Game Room and the Activity Room scroll vertically, to 946, 990 and 1000 px. (74, 2026-09-26)
-- [site] Turnstile's CSP (`script-src` has no `blob:`) has been checked only from localhost, where Cloudflare refuses the hostname; the deployed page has not been probed. (50, 2026-09-26)
 - [site] Breakable persistence (kept across a reload, not into a new tab) lives in `src/dom/breakables.ts` and is checked by hand only; `world.test.ts` proves just the echo. (40, 2026-09-26)
 - [site] `room-shots` does not fail a Room that moves under reduced motion, its exit code has no unit test, and its "at rest" pictures of the Game Room, the Cinema and the Activity Room are taken 0.5 s into their Arrivals. (70, 2026-09-26)
 - [site] CONTEXT.md's Beat entry does not name the box Beat, the duet Beat or the costume sprite; they are defined only in a comment in `src/world/arrival.ts`. (10, 2026-09-26)

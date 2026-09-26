@@ -15,6 +15,13 @@
  *   failure, the failure message and `data-state="error"` are still on screen, in both
  *   languages, and the send button is back; withdrawing consent then clears it. A 200
  *   still says "sent".
+ * - **challenge** (ticket 104) — a Turnstile that cannot run here, in both languages: a
+ *   stub answering `render` with `error-callback('110200')` (the code the real widget gives
+ *   on a hostname its dashboard does not list), and no stub at all, so `api.js` itself
+ *   fails to load. Either way the dialog shows its own note where the widget was, and
+ *   none of Cloudflare's error box; the send button stays off, and withdrawing consent
+ *   takes the note down. A stub failing with `300010` (a challenge that did not pass,
+ *   which the widget retries by itself) keeps the widget and says "try again" instead.
  * - **hash** — `location.hash = '#/not-a-room'` from every Room ends at `#/entryway`
  *   with the Entryway's title focused, the rewrite adding no history entry, and Back
  *   returning to the Room left rather than to the junk.
@@ -43,7 +50,7 @@
  * ## Usage
  *
  *   node scripts/verify/controls.mjs --base-url http://localhost:4273/
- *   node scripts/verify/controls.mjs --launch preview [--port N] [--only slate,invitation,hash,sound,cats,pointers]
+ *   node scripts/verify/controls.mjs --launch preview [--port N] [--only slate,invitation,challenge,hash,sound,cats,pointers]
  */
 
 import path from 'node:path';
@@ -53,7 +60,7 @@ import { fileURLToPath } from 'node:url';
 import { loadPlaywright, startServer } from './room-shots.mjs';
 
 const ROOMS = ['entryway', 'games', 'cinema', 'activities'];
-const CHECKS = ['slate', 'invitation', 'hash', 'sound', 'cats', 'pointers'];
+const CHECKS = ['slate', 'invitation', 'challenge', 'hash', 'sound', 'cats', 'pointers'];
 
 /** The failure strings, copied from `src/copy.ts` so the check does not share the page's source. */
 const STATUS = {
@@ -76,6 +83,18 @@ const FAILURES = [
   { answer: 503, expect: 'sendError' },
   { answer: 403, expect: 'verifyError' },
   { answer: 'network', expect: 'sendError' },
+];
+
+/** The note a widget that cannot load leaves in its place, copied from `src/copy.ts` like `STATUS`. */
+const CHALLENGE_NOTE = {
+  'zh-Hant': '安全驗證無法在這個網址載入，所以暫時無法從這裡寄送邀請。還是可以先去 Steam 看看。',
+  en: 'The security check can’t load at this address, so the invitation can’t be sent from here. You can still check the game on Steam.',
+};
+
+const CHALLENGE_FAILURES = [
+  { cause: '110200', note: true },
+  { cause: 'script', note: true },
+  { cause: '300010', note: false },
 ];
 
 /** How long after `reset()` the stub hands over a fresh token, and when the message is read. */
@@ -138,6 +157,36 @@ function turnstileStub(afterReset) {
     },
     remove(id) {
       widgets.delete(id);
+    },
+  };
+}
+
+/**
+ * A Turnstile that cannot run here: it paints a stand-in for Cloudflare's own error box
+ * into the container, then calls `error-callback(code)` 300 ms after `render`.
+ */
+function failingTurnstileStub(code) {
+  const widgets = new Map();
+  let next = 0;
+  window.__turnstile = { renders: 0, removes: 0 };
+  window.turnstile = {
+    render(selector, options) {
+      const id = `stub-${++next}`;
+      widgets.set(id, options);
+      window.__turnstile.renders += 1;
+      const box = document.createElement('div');
+      box.className = 'stub-cloudflare-error';
+      box.dataset.stub = id;
+      box.textContent = 'Unable to connect to website';
+      (typeof selector === 'string' ? document.querySelector(selector) : selector).append(box);
+      setTimeout(() => { if (widgets.has(id)) options['error-callback']?.(code); }, 300);
+      return id;
+    },
+    reset() {},
+    remove(id) {
+      widgets.delete(id);
+      window.__turnstile.removes += 1;
+      document.querySelector(`[data-stub="${id}"]`)?.remove();
     },
   };
 }
@@ -331,6 +380,66 @@ async function checkInvitation(browser, baseUrl, network) {
       readings.push({ language, answer: 200, atMs: READ_AT_MS, wanted, ...shown, ok: shown.text === wanted && shown.state === 'ok' });
     } catch (error) {
       readings.push({ language, answer: 200, error: error.message, ok: false });
+    }
+  }
+  return readings;
+}
+
+// ------------------------------------------------------------------ challenge
+
+/** The dialog's reading 2 s after consent, once the widget has failed, and again after consent is withdrawn. */
+async function failOnce(browser, baseUrl, network, { language, cause }) {
+  const context = await sealedContext(browser, baseUrl, { viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' }, network);
+  // No stub for `script`: the sealed context aborts `challenges.cloudflare.com`, so `api.js` fails to load.
+  if (cause !== 'script') await context.addInitScript(failingTurnstileStub, cause);
+  const consoleErrors = [];
+  const read = () => {
+    const note = document.getElementById('turnstile-unavailable');
+    const widget = document.getElementById('turnstile-widget');
+    return {
+      note: note && !note.hidden && note.getBoundingClientRect().height > 0 ? note.textContent : null,
+      cloudflareBox: Boolean(widget.querySelector('.stub-cloudflare-error')),
+      widgetShowing: !widget.hidden,
+      status: document.getElementById('invite-status').textContent,
+      sendEnabled: !document.getElementById('send-invite').disabled,
+    };
+  };
+  try {
+    const page = await context.newPage();
+    await openRoom(page, baseUrl, 'games', consoleErrors);
+    if (language === 'en') await toEnglish(page);
+    await page.click('button.portal[data-game="tango"]');
+    await page.locator('#portal-invite').waitFor({ state: 'visible', timeout: 10_000 });
+    await page.click('#portal-invite');
+    await page.waitForFunction(() => document.getElementById('game-dialog').open);
+    await page.check('#invite-consent');
+    await page.waitForTimeout(2000);
+    const shown = await page.evaluate(read);
+    await page.uncheck('#invite-consent');
+    const afterWithdrawn = await page.evaluate(read);
+    // An aborted `api.js` is a failed request the check caused on purpose, not a page error.
+    const pageErrors = consoleErrors.filter(text => !(cause === 'script' && text.startsWith('Failed to load resource')));
+    return { ...shown, afterWithdrawn, pageErrors };
+  } finally {
+    await context.close();
+  }
+}
+
+async function checkChallenge(browser, baseUrl, network) {
+  const readings = [];
+  for (const language of ['zh-Hant', 'en']) {
+    for (const failure of CHALLENGE_FAILURES) {
+      try {
+        const shown = await failOnce(browser, baseUrl, network, { language, cause: failure.cause });
+        const ok = failure.note
+          ? shown.note === CHALLENGE_NOTE[language] && !shown.cloudflareBox && !shown.widgetShowing && shown.status === '' && !shown.sendEnabled
+            && shown.afterWithdrawn.note === null && shown.pageErrors.length === 0
+          : shown.note === null && shown.cloudflareBox && shown.widgetShowing && shown.status === STATUS[language].verifyError && !shown.sendEnabled
+            && shown.pageErrors.length === 0;
+        readings.push({ language, cause: failure.cause, wanted: failure.note ? CHALLENGE_NOTE[language] : STATUS[language].verifyError, ...shown, ok });
+      } catch (error) {
+        readings.push({ language, cause: failure.cause, error: error.message, ok: false });
+      }
     }
   }
   return readings;
@@ -641,7 +750,7 @@ async function main() {
   let browser = null;
   try {
     browser = await playwright.chromium.launch({ headless: true });
-    const run = { slate: checkSlate, invitation: checkInvitation, hash: checkHash, sound: checkSound, cats: checkCats, pointers: checkPointers };
+    const run = { slate: checkSlate, invitation: checkInvitation, challenge: checkChallenge, hash: checkHash, sound: checkSound, cats: checkCats, pointers: checkPointers };
     for (const check of options.only) results[check] = await run[check](browser, server.baseUrl, network);
   } finally {
     if (browser) await browser.close();
