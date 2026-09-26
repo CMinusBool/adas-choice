@@ -227,6 +227,8 @@ interface BeatCue {
   readonly hides: readonly ActorId[];
   /** Where in the sheet this run starts, for a sheet played in two halves. */
   readonly from?: number;
+  /** How many frames this run plays before it holds the last of them; the rest of the sheet by default. */
+  readonly plays?: number;
 }
 
 const box = (x0: number, y0: number, x1: number, y1: number): Box => ({
@@ -264,8 +266,9 @@ const BEATS: readonly BeatCue[] = [
   { id: 'S18', at: 7.05, seconds: 1, box: box(199, 60.8, 439, 460.8), frames: 8, columns: 4, fps: 8, hides: ['boy'] },
   // She goes down onto one knee and pulls the zip in frames 1-4, and frame 4 is
   // held for as long as the cats take; frames 5-8 stand her back up after Mira.
-  { id: 'S19', at: 7.1, seconds: 3.25, box: box(202.5, 147, 392.5, 491), frames: 4, columns: 4, fps: 8, hides: ['girl'] },
-  { id: 'S19', at: 10.35, seconds: 0.5, box: box(202.5, 147, 392.5, 491), frames: 4, columns: 4, fps: 8, hides: ['girl'], from: 4 },
+  // 100: one 8-frame sheet in a 4 x 2 grid, played in those two halves.
+  { id: 'S19', at: 7.1, seconds: 3.25, box: box(202.5, 147, 392.5, 491), frames: 8, columns: 4, fps: 8, hides: ['girl'], plays: 4 },
+  { id: 'S19', at: 10.35, seconds: 0.5, box: box(202.5, 147, 392.5, 491), frames: 8, columns: 4, fps: 8, hides: ['girl'], from: 4 },
   // The cats are not Actors while their Beat is playing, so a Beat hides nobody.
   // 82: the cats at real size (design 75 §0.5) — each sheet is drawn at the old
   // cat height, so its box shrinks by the cat's own factor about its
@@ -446,9 +449,11 @@ export function viewArrival(arrival: ArrivalSlice): ArrivalView {
     : BEATS.filter(beat => seconds >= beat.at && seconds < beat.at + beat.seconds).map(beat => ({
         id: beat.id,
         box: beat.box,
-        // A sheet that runs out before its Beat does holds its last frame: she
+        // A run that plays out before its Beat does holds its last frame: she
         // stays down on one knee for as long as the three of them take.
-        frame: (beat.from ?? 0) + Math.min(beat.frames - 1, Math.floor((seconds - beat.at) * beat.fps)),
+        frame:
+          (beat.from ?? 0) +
+          Math.min((beat.plays ?? beat.frames - (beat.from ?? 0)) - 1, Math.floor((seconds - beat.at) * beat.fps)),
         frames: beat.frames,
         columns: beat.columns,
         hides: beat.hides,
