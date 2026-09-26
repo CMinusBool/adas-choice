@@ -879,7 +879,7 @@
       },
       "sha256": "dc859c311d8a8147b729a0a75fed1faefcfc1c322d6e5b4b5046b64f6837e03a",
       "builtBy": "scripts/art/crop-cell.mjs (the strip's halves 0,0-570,1393 and 570,0-1129,1393) + scripts/art/build-prop.mjs@1 --frame 282x692 --fit content --seat bottom --key alpha, each (scale 0.4991 shut, 0.5007 open) + scripts/art/stack-cells.mjs",
-      "placed": "fills the measured doorway, 29.6, 116.2, 140.4 x 347.8; the shut leaf draws 138.4 x 345.8 units in it (-2.5% across, -1.2% down)",
+      "placed": "ticket 106: 28.88, 114.24, 142.37 x 348.15 (+0.3% across, -0.5% down), the box grown by the shut cell's transparent margins (2, 4, 2, 0 px of 282 x 692) so its drawn pixels meet the painted opening (29.89, 116.25)-(170.23, 462.39) edge to edge, 140.35 x 346.14 units; was 29.6, 116.2, 140.4 x 347.8, where the leaf drew 138.4 x 345.8 inside the opening. The open state swings this cell with no perspective, so it keeps the doorway's height at every page width",
       "validated": "check-assets.mjs --beat --frames 2 --columns 2 --frame 282x692: pass",
       "motionPhase": null,
       "knownIssue": "a smeared blotch in the open cell's light band (both attempts); cell 2 ships unread"

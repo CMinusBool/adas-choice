@@ -394,11 +394,15 @@
             <span class="cinema-prop cinema-backdrop" data-still="assets/cinema/backdrop.png" style="--x:0;--y:0;--w:1360;--h:765"></span>
           </div>
           <!-- P4: the door back to the Entryway, a link like every other door.
-               92: its box is ticket 91's repainted doorway as measured on the
-               1360 x 765 stage (29.6, 116.2, 140.4 x 347.8; design 75's D6 is
-               (29,116)-(171,464)), and ticket 90's leaf fills it: cell 1 is
-               the shut leaf the Arrival swings, cell 2 ships unread. -->
-          <a class="cinema-prop cinema-door" href="#/entryway" style="--x:29.6;--y:116.2;--w:140.4;--h:347.8" aria-label="回到玄關" data-i18n-aria="backToEntryway"><span class="door-leaf" aria-hidden="true" data-still="assets/cinema/door-leaf.png"></span></a>
+               92: its box was ticket 91's repainted doorway as measured on the
+               1360 x 765 stage (design 75's D6 is (29,116)-(171,464)), and
+               ticket 90's leaf fills it: cell 1 is the shut leaf the Arrival
+               swings, cell 2 ships unread. 106: the box is the leaf's, not the
+               doorway's. Cell 1 draws its pixels at (2,4)-(280,692) of 282 x 692,
+               so the box is grown by those margins until the drawn leaf meets
+               the painted opening, (29.89,116.25)-(170.23,462.39), edge to edge:
+               142.37 x 348.15 units, the one door at +0.3% / -0.5%. -->
+          <a class="cinema-prop cinema-door" href="#/entryway" style="--x:28.88;--y:114.24;--w:142.37;--h:348.15" aria-label="回到玄關" data-i18n-aria="backToEntryway"><span class="door-leaf" aria-hidden="true" data-still="assets/cinema/door-leaf.png"></span></a>
           <!-- P7-P9 and P21: three shelves you can tell apart from across the
                Room — colour, crown silhouette and ornament, then the plaque. -->
           <!-- 73: the wall at true size on the 1360 x 765 stage, at design 80
