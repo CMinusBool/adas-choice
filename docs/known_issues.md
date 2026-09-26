@@ -57,3 +57,4 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [cinema] Each removed cap on the three caps-gone shelves leaves a dark hole with a faint tube-wall ring, and on the romance shelf the holes trim a sliver off the row-4 caps below. (77, 2026-09-26)
 - [cinema] The three Cinema shelves stand about a third shorter than design 80 draws them (comedy 249.5 of 380 units, romance 267.5 of 397, horror 273 of 413), and their caps are 17–24% under 15 units across, because the generations are squatter than the design. (79, 2026-09-26)
 - [cinema] Each shelf's top row of caps sits about 70 units lower than design 80 §5.1 places it, and the horror shelf's base is 4.25 units right of its canvas centre. (79, 2026-09-26)
+- [cinema] The Cinema door leaf's open cell has a smeared red, olive and grey blotch in the middle of its amber light band, which shows while the door stands open. (90, 2026-09-26)
