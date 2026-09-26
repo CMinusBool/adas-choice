@@ -34,6 +34,8 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [activities] At rest the cats cover parts of the draw station's label (盲畫大賽 / The Blind Portrait), and so does its tableau once Blind Portrait is chosen. (16, 2026-09-26)
 - [activities] A station card scrolls inside itself and keeps its scroll from one card to the next, so the second and third cards open with their titles scrolled off. (16, 2026-09-26)
 - [activities] The un-choose button's wording, 先不決定 / "Leave it open for now", shipped without an owner copy review. (50, 2026-09-26)
+- [site] Every door is one size, but 210 cm tall (350 units against the Boy's 300), not the intended 200 cm. (75, 2026-09-26)
+- [site] The apartment is not all at true size against the Boy (180 cm): each backdrop is scaled whole to the one door, so painted pieces keep the proportions they were drawn at, and the over-life pieces are listed per Room above. (75, 2026-09-26)
 - [site] Every Actor is one standing frame, so the Boy, the Girl and the three cats slide between marks with no leg moving, at up to 820 units/s when an Arrival hurries them. (22–30, 2026-09-18)
 - [site] The apartment is silent: no sound effect, Room Music or Film audio ships, the Bumper plays mute, and every Music Source's label says "not yet". (39, 2026-09-24)
 - [site] Each Room's Arrival begins with the whole Cast appearing on the door mark inside the threshold, the cats on the Girl's feet, and cutting an Arrival short snaps everyone onto their marks. (44, 2026-09-26)
