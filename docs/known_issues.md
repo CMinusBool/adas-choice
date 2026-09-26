@@ -77,3 +77,6 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [cinema] The Boy's seated still carries a beanbag about 22% wider than the empty one (the Girl's about 10%), and his runs about 20 units behind the reel cabinet. (92, 2026-09-26)
 - [cinema] The broken film can overlaps the bottom 7 units of the Girl's beanbag. (92, 2026-09-26)
 - [site] `room-shots` takes its desktop picture as soon as the whole Cast is on stage, mid-Arrival, so it shows the door open and the pair standing rather than the Room at rest. (92, 2026-09-26)
+- [cinema] At 390 px the motor switch and, once a Film is chosen, the projector gate each keep a 44-px pad over about 200 units of floor, so a cat walking there cannot be petted until she moves on. (103, 2026-09-26)
+- [cinema] The disabled projector gate no longer shows the `not-allowed` cursor on hover. (103, 2026-09-26)
+- [site] Where two cats stand within a pad of each other, a tap at the rear cat's feet pets the front one. (103, 2026-09-26)
