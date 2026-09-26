@@ -423,7 +423,7 @@ html.dialog-open { overflow: hidden; }
 .cinema-door:hover, .cinema-door:focus-visible { box-shadow: 0 0 calc(var(--u) * 90) #ffca8066; outline: none; }
 .cinema-door:focus-visible .door-leaf { outline: 3px solid var(--pink); outline-offset: 2px; }
 /* 106: the Cinema's leaf swings on its hinge edge with no perspective. The shared
-   `perspective(600px)` at the foot of the file is in page pixels, so on this 142-unit
+   `perspective(600px)` the foot of the file had (110 retired it) was in page pixels, so on this 142-unit
    leaf the swinging edge stood 19% taller than the doorway at 1440 x 900 and 6% at
    390, over the lintel and into the floor. Swung flat, the open leaf keeps the
    doorway's height and its hinge on the opening's left edge at every width. */
@@ -1552,7 +1552,7 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
   background-position: 0 0;
   background-repeat: no-repeat;
   transform-origin: left center;
-  transform: perspective(600px) rotateY(-12deg);
+  transform: rotateY(-12deg);
   transition: transform .35s;
 }
 .prop-door:hover, .prop-door:focus-visible {
@@ -1607,7 +1607,7 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
    and a step inside the threshold at y 426), so the Cast appears from behind it
    as it swings in — which is why `--z` is set here and not in the markup. */
 .prop-front-door { --z: 416; background-size: 200% 100%; background-position: 0 0; transform-origin: left center; transition: transform .6s ease; }
-.prop-front-door.is-open { --z: 470; transform: perspective(900px) rotateY(-62deg); }
+.prop-front-door.is-open { --z: 470; transform: rotateY(-62deg); }
 .prop-backpack { background-size: 200% 100%; background-position: 0 0; }
 .prop-backpack.is-open { background-position: 100% 0; }
 
@@ -1669,7 +1669,13 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
    when it does, the artwork replaces the surface and these two angles stay.
    Being properly shut is half the point: a leaf frozen ajar in a painting is
    not one anybody opens, which is why `closed` is stated here rather than left
-   to whatever each Room's placeholder was resting at. */
+   to whatever each Room's placeholder was resting at.
+
+   110: every leaf swings flat, with no `perspective()`. One written in px is in
+   page pixels, not stage units, so the open leaf's swinging edge grew with the
+   page and stood over the lintel and below the doorway's foot (ticket 106).
+   Flat, an open leaf keeps its doorway's height at every width, hinged on the
+   opening's left edge. `scripts/check-stages.test.mjs` pins it for every Room. */
 .stage[data-door] .door-leaf,
 .stage[data-door] .a-door-leaf {
   transform-origin: left center;
@@ -1679,13 +1685,13 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
 .stage[data-door="closed"] .door-leaf,
 .stage[data-door="closing"] .a-door-leaf,
 .stage[data-door="closed"] .a-door-leaf {
-  transform: perspective(600px) rotateY(0deg);
+  transform: rotateY(0deg);
 }
 .stage[data-door="opening"] .door-leaf,
 .stage[data-door="open"] .door-leaf,
 .stage[data-door="opening"] .a-door-leaf,
 .stage[data-door="open"] .a-door-leaf {
-  transform: perspective(600px) rotateY(-68deg);
+  transform: rotateY(-68deg);
 }
 /* The Door is still a link, and a link says so when it is pointed at: the Game
    Room's leaf lifts under the cursor. Only that Room's does — the other two
@@ -1700,7 +1706,7 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
    rule cannot match at all. `scripts/check-styles.mjs` now checks it. */
 .stage[data-door="closed"] .prop-door:hover .door-leaf,
 .stage[data-door="closed"] .prop-door:focus-visible .door-leaf {
-  transform: perspective(600px) rotateY(-20deg);
+  transform: rotateY(-20deg);
 }
 /* Motion is opt-outable, and the swing is motion: with it off the entrance
    does not play at all, so the leaf is simply shut and gets there without
