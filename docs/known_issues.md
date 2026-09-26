@@ -85,3 +85,5 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [cinema] The horror shelf's painted base is 4.25 units right of its button's centre. (73, 2026-09-26)
 - [cinema] The shelf crowns above the 80-unit-wide shelf buttons do not take hover. (73, 2026-09-26)
 - [entryway] When a cat knocks the vase over, the cat is not visible: S23 is not wired, so the vase falls with no cat beside it. (100, 2026-09-26)
+- [site] No real Invitation can be sent from `vite preview`: Turnstile refuses localhost (110200) and the Worker accepts only the https Pages origin, so the owner's one real send happens on the published site. (104, 2026-09-26)
+- [site] Headless Chromium on the Pages hostname gets Turnstile's interactive checkbox, so no automated check receives a real token. (104, 2026-09-26)
