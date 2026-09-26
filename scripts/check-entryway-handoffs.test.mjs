@@ -204,9 +204,11 @@ describe('the Entryway arrival hands every Actor to and from its Beats without a
     }
   });
 
-  test(`no hand-off moves the feet more than ${MAX_JUMP} units`, () => {
-    const jumps = handOffs
-      .map(one => ({ ...one, distance: gap(one.from, one.to) }))
+  test(`no hand-off moves the feet more than ${MAX_JUMP} units`, t => {
+    const measured = handOffs.map(one => ({ ...one, distance: gap(one.from, one.to) }));
+    // Every distance, on the test's own output, so a report can quote them.
+    for (const one of measured) t.diagnostic(`${one.actor} ${one.what} at ${one.seconds.toFixed(2)} s: ${one.distance.toFixed(1)} units`);
+    const jumps = measured
       .filter(one => one.distance > MAX_JUMP)
       .map(one => `${one.actor} ${one.what} at ${one.seconds.toFixed(2)} s: ${fmt(one.from)} → ${fmt(one.to)}, ${one.distance.toFixed(1)} units`);
     assert.deepEqual(jumps, []);

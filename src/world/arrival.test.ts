@@ -304,20 +304,22 @@ describe('the arrival and the rest of the apartment', () => {
   });
 
   /*
-   * 82: the cats at real size against the Boy (design 75 §0.5). Each cat-only
-   * Beat is the box its sheet was cut for shrunk about its bottom-centre, so its
-   * feet line and its middle stay where they were and only the figure gets
-   * smaller. 86 moved those bottom-centres onto the 1184 x 666 stage, to
-   * design 75 §4.2's (225,524), (286.5,574) and (366,633).
+   * 100: each cat's Beat is sized and placed off the cat its sheet draws, which
+   * only the sheet's pixels know, so `scripts/check-entryway-handoffs.test.mjs`
+   * holds S20–S22 at their Actors' heights and hands each cat to her sprite
+   * within 6 units. What the model keeps by itself is the moment: the cat lands
+   * on the tick her Beat ends, so she is never drawn twice or not at all.
    */
   it.each([
-    ['S20', 8.5, { x: 158.325, y: 333.5, width: 133.35, height: 190.5 }],
-    ['S21', 9.8, { x: 213.475, y: 345.4, width: 146.05, height: 228.6 }],
-    ['S22', 11, { x: 221.33, y: 358.756, width: 289.34, height: 274.244 }],
-  ] as const)('draws the cats’ Beat %s at real size, shrunk about its bottom-centre', (id, seconds, expected) => {
-    const beat = arrivalView(arriving(seconds)).beats.find(playing => playing.id === id);
-    expect(beat, `${id} should be playing at ${seconds} s`).toBeDefined();
-    for (const side of ['x', 'y', 'width', 'height'] as const) expect(beat!.box[side]).toBeCloseTo(expected[side], 6);
+    ['S20', 'mica', 8.1, 9.35],
+    ['S21', 'mira', 9.35, 10.35],
+    ['S22', 'luna', 10.35, 11.85],
+  ] as const)('hands %s’s cat to her sprite the moment it ends', (id, cat, starts, ends) => {
+    const playing = (seconds: number) => arrivalView(arriving(seconds)).beats.some(beat => beat.id === id);
+    const landed = (seconds: number) => actorView(arriving(seconds), cat)?.room === 'entryway';
+    expect([playing(starts + 0.05), landed(starts + 0.05)]).toEqual([true, false]);
+    expect([playing(ends - 0.02), landed(ends - 0.02)]).toEqual([true, false]);
+    expect([playing(ends + 0.02), landed(ends + 0.02)]).toEqual([false, true]);
   });
 
   /*

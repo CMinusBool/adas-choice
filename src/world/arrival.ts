@@ -239,17 +239,38 @@ const box = (x0: number, y0: number, x1: number, y1: number): Box => ({
 });
 
 /**
- * How much smaller each cat's Beats are drawn than their sheets were made for
- * (82, design 75 §0.5): the sheets were cut at the old cat heights, 96 / 96 /
- * 105 units, and the cats now stand 61 / 61 / 66 against the Boy's 300.
+ * How tall each cat stands, in stage units: the `data-height` on `#cast` in
+ * `index.html` (82, design 75 §0.5), which `scripts/check-entryway-handoffs.test.mjs`
+ * holds these Beats against.
  */
-const CAT_BEAT_SCALE = { mica: 0.635, mira: 0.635, luna: 0.629 } as const;
+const CAT_HEIGHTS = { mica: 61, mira: 61, luna: 66 } as const;
 
-/** A box scaled about its bottom-centre, so whatever stands on its floor stays put. */
-const shrunk = (from: Box, factor: number): Box => {
-  const width = from.width * factor;
-  const height = from.height * factor;
-  return { x: from.x + (from.width - width) / 2, y: from.y + from.height - height, width, height };
+/**
+ * The last frame of a cat's Beat, measured off its sheet in px: the cell it is
+ * drawn in, the figure's top and bottom rows, and the middle of its feet (the
+ * span of its lowest 12 px) — the same bottom-centre a Cycle frame is seated by.
+ */
+interface LastFrame {
+  readonly cell: { readonly width: number; readonly height: number };
+  readonly top: number;
+  readonly bottom: number;
+  readonly feetX: number;
+}
+
+/**
+ * 100: a cat's Beat box, drawn so the cat in its last frame is as tall as her
+ * Actor and her feet in that frame stand on the mark the Actor takes over on.
+ * Both are what the visitor sees at the hand-off, so the Beat hands over with
+ * no change of size and no step (`CLOSING.md` §7, 6 units).
+ */
+const landing = (last: LastFrame, height: number, mark: Point): Box => {
+  const perPx = height / (last.bottom - last.top);
+  return {
+    x: mark.x - last.feetX * perPx,
+    y: mark.y - last.bottom * perPx,
+    width: last.cell.width * perPx,
+    height: last.cell.height * perPx,
+  };
 };
 
 // 86: the Entryway on its 1184 x 666 stage (design 75 §4.2). A Beat keeps the
@@ -270,15 +291,18 @@ const BEATS: readonly BeatCue[] = [
   { id: 'S19', at: 7.1, seconds: 3.25, box: box(202.5, 147, 392.5, 491), frames: 8, columns: 4, fps: 8, hides: ['girl'], plays: 4 },
   { id: 'S19', at: 10.35, seconds: 0.5, box: box(202.5, 147, 392.5, 491), frames: 8, columns: 4, fps: 8, hides: ['girl'], from: 4 },
   // The cats are not Actors while their Beat is playing, so a Beat hides nobody.
-  // 82: the cats at real size (design 75 §0.5) — each sheet is drawn at the old
-  // cat height, so its box shrinks by the cat's own factor about its
-  // bottom-centre: Míca and Mira × 0.635 (96 → 61), Luna × 0.629 (105 → 66).
-  // 86: the boxes they were cut for, moved to design 75 §4.2's bottom-centres
-  // (225,524), (286.5,574) and (366,633); ticket 100 matches them to the cats.
-  // S23, Míca at the vase, has no cue yet; when it is wired it shrinks × 0.635.
-  { id: 'S20', at: 8.1, seconds: 1.25, box: shrunk(box(120, 224, 330, 524), CAT_BEAT_SCALE.mica), frames: 10, columns: 4, fps: 8, hides: [] },
-  { id: 'S21', at: 9.35, seconds: 1, box: shrunk(box(171.5, 214, 401.5, 574), CAT_BEAT_SCALE.mira), frames: 8, columns: 4, fps: 8, hides: [] },
-  { id: 'S22', at: 10.35, seconds: 1.5, box: shrunk(box(136, 197, 596, 633), CAT_BEAT_SCALE.luna), frames: 12, columns: 4, fps: 8, hides: [] },
+  // Each one ends on the moment its cat is placed on her mark, and hands over.
+  // 100: the sheets draw the cats 1.7-3 x their Actors (82's shrink by the
+  // Actors' own factor kept that), so each box is sized off the cat in its
+  // last frame — Míca sat, 240 px; Mira sat, 339 px; Luna sat looking back,
+  // 481 px — and placed so that frame's feet are on `EMica`, `EMira`, `ELuna`.
+  // That puts their first frames 294 / 238 / 345 units from the backpack's
+  // mouth on the bench seat (about (336,279)): the frames climb 7-60 units at
+  // this size, and the mouth is 226-320 above the marks.
+  // S23, Míca at the vase, has no cue yet; when it is wired it is sized the same way.
+  { id: 'S20', at: 8.1, seconds: 1.25, box: landing({ cell: { width: 315, height: 450 }, top: 179, bottom: 419, feetX: 180.5 }, CAT_HEIGHTS.mica, M.EMica), frames: 10, columns: 4, fps: 8, hides: [] },
+  { id: 'S21', at: 9.35, seconds: 1, box: landing({ cell: { width: 345, height: 540 }, top: 138, bottom: 477, feetX: 149 }, CAT_HEIGHTS.mira, M.EMira), frames: 8, columns: 4, fps: 8, hides: [] },
+  { id: 'S22', at: 10.35, seconds: 1.5, box: landing({ cell: { width: 690, height: 654 }, top: 173, bottom: 654, feetX: 346 }, CAT_HEIGHTS.luna, M.ELuna), frames: 12, columns: 4, fps: 8, hides: [] },
 ];
 
 /** Until when each of the two of them is still in their coat (§5.2). */
