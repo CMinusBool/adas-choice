@@ -289,7 +289,7 @@
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 10 --columns 4 --frame 315x450 --fit contain --seat bottom",
       "note": "A box Beat (design note §5.3): anchored on a fixed stage rectangle, not a feet point. Checked with check-assets.mjs --beat.",
       "scale": 0.635,
-      "placed": "82: the cats at real size (design 75 §0.5, Míca 96 → 61 units). The sheet is unchanged; its box in src/world/arrival.ts is (120,224)-(330,524) × 0.635 about its bottom-centre (225,524), so (158.3,333.5)-(291.7,524): design 75 §4.2's box on the 1184 x 666 stage (86).",
+      "placed": "100: sized off the cat in its last frame (Míca sat, 240 px) to her Actor's 61 units, 0.2542 units a px, and placed so that frame's feet (180.5, 419 px) stand on EMica (150,505): box (104.1,398.5)-(184.2,512.9) in src/world/arrival.ts. Its first frame is 294 units from the backpack's mouth (about (336,279)).",
       "validatedAt": "2026-09-22",
       "motionPhase": "not verified"
     },
@@ -307,7 +307,7 @@
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 8 --columns 4 --frame 345x540 --fit contain --seat bottom --key #00FF00",
       "note": "A box Beat. Checked with check-assets.mjs --beat. Re-dropped by ticket 57 from ticket 56's restyle (the owner-granted third attempt, opaque RGB on #00FF00).",
       "scale": 0.635,
-      "placed": "82: the cats at real size (design 75 §0.5, Mira 96 → 61 units). The sheet is unchanged; its box in src/world/arrival.ts is (171.5,214)-(401.5,574) × 0.635 about its bottom-centre (286.5,574), so (213.5,345.4)-(359.5,574): design 75 §4.2's box on the 1184 x 666 stage (86).",
+      "placed": "100: sized off the cat in its last frame (Mira sat, 339 px) to her Actor's 61 units, 0.1799 units a px, and placed so that frame's feet (149, 477 px) stand on EMira (309,549): box (282.2,463.2)-(344.3,560.3) in src/world/arrival.ts. Its first frame is 238 units from the backpack's mouth (about (336,279)).",
       "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
@@ -325,7 +325,7 @@
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 12 --columns 4 --frame 690x654 --fit contain --pack shapes --airborne 10 --seat bottom --key #00FF00",
       "note": "A box Beat, delivered at the design note's 1.5 px/unit (2.9 MB, under its 3 MB ceiling). Re-dropped by ticket 57 from ticket 56's v3 Luna, re-packed by position (--pack shapes): the generator drew 12 separate cats but not on an even grid (frames 03, 09 and 10 reach 3-5 px over a cell line), so each cat is cut out as its own connected shape in reading order, scaled by the raw cell's own contain scale (1.7865, the grid cut's) and seated bottom-centre in its frame. Frame 10 is the hop and is named --airborne (the orchestrator's art call, 2026-09-26): it keeps its feet 77 raw px (138 px built) above row 3's grounded feet, taken from the landing frames 11 and 12, and every grounded frame stays on its bottom edge. The coat is keyed out as drawn (about #2E2520), not recoloured. Checked with check-assets.mjs --beat.",
       "scale": 0.629,
-      "placed": "82: the cats at real size (design 75 §0.5, Luna 105 → 66 units). The sheet is unchanged; its box in src/world/arrival.ts is (136,197)-(596,633) × 0.629 about its bottom-centre (366,633), so (221.3,358.8)-(510.7,633): design 75 §4.2's box on the 1184 x 666 stage (86).",
+      "placed": "100: sized off the cat in its last frame (Luna sat looking back, 481 px) to her Actor's 66 units, 0.1372 units a px, and placed so that frame's feet (346, 654 px) stand on ELuna (466,599): box (418.5,509.3)-(513.2,599) in src/world/arrival.ts. Its first frame is 345 units from the backpack's mouth (about (336,279)).",
       "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },

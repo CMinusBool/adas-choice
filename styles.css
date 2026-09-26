@@ -307,6 +307,9 @@ html.dialog-open { overflow: hidden; }
 .actor.cat.is-fussed { display: none; }
 .motion-off .actor.cat { transition: none; }
 .actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
+/* 100: while the Entryway arrival has one of them in a costume it has a sprite for (S12, S13), that layer
+   stands in over the same feet and height, and the Cycle under it is hidden. src/dom/entryway.ts decides. */
+.actor.is-dressed > .cycle:not([data-costume]) { visibility: hidden; }
 
 
 /* 17: the Cinema Room.
@@ -1537,7 +1540,9 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
 .entryway-stage .door, .prop-radio { pointer-events: auto; }
 .entryway-stage .door { display: block; min-height: 0; padding: 0; border: 0; border-radius: 4px 4px 0 0; background: transparent; font-size: inherit; font-weight: inherit; transition: transform .25s, box-shadow .25s; }
 .entryway-stage .door:hover, .entryway-stage .door:focus-visible { background: transparent; transform: translateY(-3px); box-shadow: 0 0 34px 10px #f5a3c52e; }
-.door-plaque { position: absolute; left: 7.8%; top: 45%; width: 84.4%; height: 11%; display: grid; place-items: center; border-radius: 8px; background: #1b1620d9; color: var(--ink); font-size: clamp(.7rem, 1.35cqw, 1.05rem); font-weight: 650; letter-spacing: .02em; transition: background .25s, color .25s; }
+/* 100: a pill holds its label on one line, centred, in both languages: at least the 84.4 % of its door it
+   always was, and as wide as its label where that is wider ("The Activity Room" at 1440 and 390 px). */
+.door-plaque { position: absolute; left: 50%; translate: -50% 0; top: 45%; box-sizing: border-box; width: max-content; min-width: 84.4%; padding: 0 .6em; white-space: nowrap; height: 11%; display: grid; place-items: center; border-radius: 8px; background: #1b1620d9; color: var(--ink); font-size: clamp(.7rem, 1.35cqw, 1.05rem); font-weight: 650; letter-spacing: .02em; transition: background .25s, color .25s; }
 .entryway-stage .door:hover .door-plaque, .entryway-stage .door:focus-visible .door-plaque { background: var(--pink); color: #2a1520; }
 .entryway-stage { container-type: inline-size; }
 /* An Actor a Beat is drawing gives way to it, so the two are never both on. */

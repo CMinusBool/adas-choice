@@ -304,20 +304,54 @@ describe('the arrival and the rest of the apartment', () => {
   });
 
   /*
-   * 82: the cats at real size against the Boy (design 75 §0.5). Each cat-only
-   * Beat is the box its sheet was cut for shrunk about its bottom-centre, so its
-   * feet line and its middle stay where they were and only the figure gets
-   * smaller. 86 moved those bottom-centres onto the 1184 x 666 stage, to
-   * design 75 §4.2's (225,524), (286.5,574) and (366,633).
+   * 100: each cat's Beat is sized and placed off the cat its sheet draws, which
+   * only the sheet's pixels know, so `scripts/check-entryway-handoffs.test.mjs`
+   * holds S20–S22 at their Actors' heights and hands each cat to her sprite
+   * within 6 units. What the model keeps by itself is the moment: the cat lands
+   * on the tick her Beat ends, so she is never drawn twice or not at all.
    */
   it.each([
-    ['S20', 8.5, { x: 158.325, y: 333.5, width: 133.35, height: 190.5 }],
-    ['S21', 9.8, { x: 213.475, y: 345.4, width: 146.05, height: 228.6 }],
-    ['S22', 11, { x: 221.33, y: 358.756, width: 289.34, height: 274.244 }],
-  ] as const)('draws the cats’ Beat %s at real size, shrunk about its bottom-centre', (id, seconds, expected) => {
-    const beat = arrivalView(arriving(seconds)).beats.find(playing => playing.id === id);
-    expect(beat, `${id} should be playing at ${seconds} s`).toBeDefined();
-    for (const side of ['x', 'y', 'width', 'height'] as const) expect(beat!.box[side]).toBeCloseTo(expected[side], 6);
+    ['S20', 'mica', 8.1, 9.35],
+    ['S21', 'mira', 9.35, 10.35],
+    ['S22', 'luna', 10.35, 11.85],
+  ] as const)('hands %s’s cat to her sprite the moment it ends', (id, cat, starts, ends) => {
+    const playing = (seconds: number) => arrivalView(arriving(seconds)).beats.some(beat => beat.id === id);
+    const landed = (seconds: number) => actorView(arriving(seconds), cat)?.room === 'entryway';
+    expect([playing(starts + 0.05), landed(starts + 0.05)]).toEqual([true, false]);
+    expect([playing(ends - 0.02), landed(ends - 0.02)]).toEqual([true, false]);
+    expect([playing(ends + 0.02), landed(ends + 0.02)]).toEqual([false, true]);
+  });
+
+  /*
+   * 100: they walk in wearing their coats, and he carries the cats. S12 draws
+   * him in the parka with the pet backpack on, so it is his costume only until
+   * S15 takes the backpack off; after that the parka shows through his Beats.
+   */
+  it('walks them in dressed for outside: her coat until 6.15 s, his parka and the backpack until S15', () => {
+    const costumes = (seconds: number) => arrivalView(arriving(seconds)).costumes;
+    expect(costumes(2.5)).toEqual({ girl: 'coat', boy: 'parka-and-backpack' });
+    expect(costumes(3.6)).toEqual({ girl: 'coat', boy: 'parka-and-backpack' });
+    expect(costumes(3.7)).toEqual({ girl: 'coat', boy: 'parka' });
+    expect(costumes(6.2)).toEqual({ boy: 'parka' });
+    expect(costumes(8.1)).toEqual({});
+  });
+
+  /*
+   * 100: S19 is one 8-frame sheet played in two halves. She goes down onto one
+   * knee in frames 1–4 and holds frame 4 while the cats come out; frames 5–8
+   * stand her back up. Declaring only 4 frames drew both rows of the sheet
+   * stacked at half height: two squashed Girls.
+   */
+  it('plays S19 as one 8-frame sheet: frames 1–4 held on 4, then 5–8', () => {
+    const frameAt = (seconds: number) => {
+      const beat = arrivalView(arriving(seconds)).beats.find(playing => playing.id === 'S19');
+      expect(beat, `S19 should be playing at ${seconds} s`).toBeDefined();
+      expect(beat!.frames).toBe(8);
+      expect(beat!.columns).toBe(4);
+      return beat!.frame;
+    };
+    expect([7.15, 7.3, 7.45, 7.6, 8, 10.3].map(frameAt)).toEqual([0, 1, 2, 3, 3, 3]);
+    expect([10.4, 10.5, 10.65, 10.8].map(frameAt)).toEqual([4, 5, 6, 7]);
   });
 
   it('plays each sound once, in the order the script has them', () => {

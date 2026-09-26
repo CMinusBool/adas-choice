@@ -15,8 +15,16 @@
 // A figure's feet are the bottom of its opaque pixels and the middle of their
 // span across the lowest 12 px — the same bottom-centre a Cycle frame is seated
 // by. The sheet's grid is read from `public/assets/entryway/manifest.json`,
-// which is what the sheet really is (S19's declaration in the model is ticket
-// 100's to correct); the sheet file is the one `index.html`'s Beat layer names.
+// which is what the sheet really is; the sheet file is the one `index.html`'s
+// Beat layer names.
+//
+// 100: the three cats too. A cat's Beat (S20–S22) hides nobody, because the cat
+// is not an Actor until it lands: the Beat plays, and the cue that places the
+// cat on its mark fires on the frame the Beat ends. So a cat's hand-off is its
+// Beat's last frame to its sprite, and the same 6 units hold. So does its
+// size: the cat in that last frame stands at the Actor's `data-height`, ± 5 %.
+// And every Beat the model plays declares the grid its sheet really has, which
+// is what S19 at 4 frames of an 8-frame sheet got wrong (two squashed Girls).
 import { before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -44,6 +52,25 @@ const TICK_MS = 16;
  */
 const DUET_COLUMNS = { S16: { boy: [0, 215], girl: [215, 438] } };
 
+/** Each cat's own Beat, which draws her climbing out of the backpack. */
+const CAT_BEATS = { mica: 'S20', mira: 'S21', luna: 'S22' };
+/** How far a cat's size in her last Beat frame may be from her Actor's. */
+const HEIGHT_TOLERANCE = 0.05;
+const ACTORS = ['boy', 'girl', ...Object.keys(CAT_BEATS)];
+
+/** The Actor's `data-height` on the `#cast` block, in stage units. */
+function dataHeight(actor) {
+  const match = new RegExp(`data-actor="${actor}"[^>]*data-height="([\\d.]+)"`).exec(indexHtml);
+  assert.ok(match, `index.html has no data-height for the ${actor}`);
+  return Number(match[1]);
+}
+
+/** Which Beat is standing in for this Actor right now, if any. */
+function standIn(view, actor) {
+  const cat = CAT_BEATS[actor];
+  return view.beats.find(one => (cat ? one.id === cat : one.hides.includes(actor))) ?? null;
+}
+
 const sheets = new Map();
 
 /** A Beat's sheet: its pixels and its real grid. */
@@ -55,7 +82,7 @@ function sheetOf(beatId) {
   assert.ok(entry, `the Entryway manifest has no entry for ${layer[1]}`);
   const [cellWidth, cellHeight] = entry.frame.split('x').map(Number);
   const image = decodePng(read(`public/assets/entryway/${layer[1]}`));
-  const sheet = { image, columns: entry.columns, cellWidth, cellHeight, file: layer[1] };
+  const sheet = { image, frames: entry.frames, columns: entry.columns, cellWidth, cellHeight, file: layer[1] };
   sheets.set(beatId, sheet);
   return sheet;
 }
@@ -85,34 +112,56 @@ function figureFeet(beat, actor) {
   };
 }
 
+/** How tall the figure in `beat`'s current frame is drawn, in stage units. */
+function figureHeight(beat) {
+  const { image, columns, cellWidth, cellHeight } = sheetOf(beat.id);
+  const left = (beat.frame % columns) * cellWidth;
+  const top = Math.floor(beat.frame / columns) * cellHeight;
+  let first = -1;
+  let last = -1;
+  for (let y = 0; y < cellHeight; y++) {
+    for (let x = 0; x < cellWidth; x++) {
+      if (image.data[((top + y) * image.width + left + x) * 4 + 3] >= 128) {
+        if (first < 0) first = y;
+        last = y;
+        break;
+      }
+    }
+  }
+  return (last + 1 - first) * (beat.box.height / cellHeight);
+}
+
 const gap = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
 const fmt = p => `(${p.x.toFixed(1)}, ${p.y.toFixed(1)})`;
 
 let handOffs;
+/** Every Beat the model played, by id: the grid it declared and its last frame shown. */
+let played;
 
 before(async () => {
   const world = await loadWorldModel();
   const { ARRIVAL_SECONDS, actorView, advance, arrivalView, createWorld } = world;
   let state = advance(createWorld({ hash: '', storedLanguage: null, reducedMotion: false }), { type: 'arrival-started' });
-  const last = { boy: null, girl: null };
+  const last = Object.fromEntries(ACTORS.map(actor => [actor, { at: null, beat: null }]));
   handOffs = [];
+  played = new Map();
   for (let now = TICK_MS; now <= (ARRIVAL_SECONDS + 1) * 1000; now += TICK_MS) {
     state = advance(state, { type: 'actor-tick', now });
     const view = arrivalView(state);
     const seconds = view.seconds;
-    for (const actor of ['boy', 'girl']) {
-      const at = actorView(state, actor);
-      const beat = view.beats.find(one => one.hides.includes(actor)) ?? null;
-      const here = at && at.room === 'entryway' ? { at: at.at, beat } : null;
+    for (const beat of view.beats) played.set(beat.id, beat);
+    for (const actor of ACTORS) {
+      const standing = actorView(state, actor);
+      // A cat is nowhere until she lands; the Boy and the Girl are nowhere until they walk in.
+      const at = standing && standing.room === 'entryway' ? standing.at : null;
+      const here = { at, beat: standIn(view, actor) };
       const before = last[actor];
-      if (before && here) {
-        if (!before.beat && here.beat) {
-          handOffs.push({ actor, seconds, what: `sprite → ${here.beat.id}`, from: before.at, to: figureFeet(here.beat, actor) });
-        } else if (before.beat && !here.beat) {
-          handOffs.push({ actor, seconds, what: `${before.beat.id} → sprite`, from: figureFeet(before.beat, actor), to: here.at });
-        } else if (before.beat && here.beat && before.beat.id !== here.beat.id) {
-          handOffs.push({ actor, seconds, what: `${before.beat.id} → ${here.beat.id}`, from: figureFeet(before.beat, actor), to: figureFeet(here.beat, actor) });
-        }
+      if (!before.beat && here.beat && before.at) {
+        handOffs.push({ actor, seconds, what: `sprite → ${here.beat.id}`, from: before.at, to: figureFeet(here.beat, actor) });
+      } else if (before.beat && !here.beat && here.at) {
+        handOffs.push({ actor, seconds, what: `${before.beat.id} → sprite`, from: figureFeet(before.beat, actor), to: here.at });
+      } else if (before.beat && here.beat && before.beat.id !== here.beat.id) {
+        handOffs.push({ actor, seconds, what: `${before.beat.id} → ${here.beat.id}`, from: figureFeet(before.beat, actor), to: figureFeet(here.beat, actor) });
       }
       last[actor] = here;
     }
@@ -120,15 +169,46 @@ before(async () => {
   }
 });
 
-describe('the Entryway arrival hands the Boy and the Girl to their Beats without a jump', () => {
-  test('every one of S15–S19 is handed to and handed back', () => {
+describe('every Entryway Beat is played at the grid its sheet really has', () => {
+  test('each Beat declares the frames and columns the Entryway manifest gives its sheet', () => {
+    const wrong = [...played.values()]
+      .map(beat => ({ beat, sheet: sheetOf(beat.id) }))
+      .filter(({ beat, sheet }) => beat.frames !== sheet.frames || beat.columns !== sheet.columns)
+      .map(({ beat, sheet }) => `${beat.id} declares ${beat.frames} frames in ${beat.columns} columns; ${sheet.file} is ${sheet.frames} in ${sheet.columns}`);
+    assert.deepEqual(wrong, []);
+    assert.deepEqual([...played.keys()].sort(), ['S15', 'S16', 'S17', 'S18', 'S19', 'S20', 'S21', 'S22']);
+  });
+});
+
+describe('the cats climb out of the backpack at their own size', () => {
+  for (const [actor, id] of Object.entries(CAT_BEATS)) {
+    test(`${id}'s last frame draws the ${actor} at her data-height, ± ${HEIGHT_TOLERANCE * 100} %`, () => {
+      const beat = played.get(id);
+      assert.ok(beat, `${id} never played`);
+      const drawn = figureHeight(beat);
+      const wanted = dataHeight(actor);
+      assert.ok(
+        Math.abs(drawn - wanted) <= wanted * HEIGHT_TOLERANCE,
+        `${id} frame ${beat.frame + 1} draws the ${actor} ${drawn.toFixed(1)} units tall; her Actor is ${wanted}`,
+      );
+    });
+  }
+});
+
+describe('the Entryway arrival hands every Actor to and from its Beats without a jump', () => {
+  test('every one of S15–S19 is handed to and handed back, and each cat is handed on from S20–S22', () => {
     const seen = new Set(handOffs.flatMap(one => one.what.match(/S\d+/g)));
-    assert.deepEqual([...seen].sort(), ['S15', 'S16', 'S17', 'S18', 'S19']);
+    assert.deepEqual([...seen].sort(), ['S15', 'S16', 'S17', 'S18', 'S19', 'S20', 'S21', 'S22']);
+    for (const [actor, id] of Object.entries(CAT_BEATS)) {
+      assert.ok(handOffs.some(one => one.actor === actor && one.what === `${id} → sprite`), `${id} never hands the ${actor} on`);
+    }
   });
 
-  test(`no hand-off moves the feet more than ${MAX_JUMP} units`, () => {
-    const jumps = handOffs
-      .map(one => ({ ...one, distance: gap(one.from, one.to) }))
+  test(`no hand-off moves the feet more than ${MAX_JUMP} units`, t => {
+    const measured = handOffs.map(one => ({ ...one, distance: gap(one.from, one.to) }));
+    // Every distance, on the test's own output, so a report can quote them.
+    for (const one of measured) t.diagnostic(`${one.actor} ${one.what} at ${one.seconds.toFixed(2)} s: ${one.distance.toFixed(1)} units`);
+    const jumps = measured
       .filter(one => one.distance > MAX_JUMP)
       .map(one => `${one.actor} ${one.what} at ${one.seconds.toFixed(2)} s: ${fmt(one.from)} → ${fmt(one.to)}, ${one.distance.toFixed(1)} units`);
     assert.deepEqual(jumps, []);

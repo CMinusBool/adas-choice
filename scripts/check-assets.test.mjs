@@ -239,7 +239,8 @@ test('readDeclarations finds the .cycle layers and not the scene sprites', () =>
   const declarations = readDeclarations(html);
   assert.ok(declarations.length >= 6, `expected the cast's cycle layers, found ${declarations.length}`);
   for (const declaration of declarations) {
-    assert.match(declaration.sheet, /^assets\/actors\/.*\.png$/);
+    // 100: the Entryway's two costume sprites (S12, S13) are `.cycle` layers too.
+    assert.match(declaration.sheet, /^assets\/(actors\/.*|entryway\/[a-z]+-costume-(left|right))\.png$/);
     assert.ok(Number.isInteger(declaration.frames) && declaration.frames >= 1);
     assert.ok(Number.isInteger(declaration.columns) && declaration.columns >= 1);
   }
