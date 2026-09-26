@@ -70,7 +70,9 @@ function shelfBoxes(shelf) {
 }
 
 const overlaps = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
-const onStage = box => box.x >= 0 && box.y >= 0 && box.x + box.w <= 1600 && box.y + box.h <= 900;
+/** Inside the Cinema's own stage, `STAGES.cinema` — read once the model has loaded. */
+const onStage = box =>
+  box.x >= 0 && box.y >= 0 && box.x + box.w <= model.STAGES.cinema.width && box.y + box.h <= model.STAGES.cinema.height;
 const within = (point, box) => point.x >= box.x && point.x <= box.x + box.w;
 
 /** The screen sheet, measured off S01 in ticket 36: where the Bumper and the title card play. */

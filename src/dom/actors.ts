@@ -1,8 +1,7 @@
 import {
   ACTOR_IDS,
   ROOM_IDS,
-  STAGE_HEIGHT,
-  STAGE_WIDTH,
+  STAGES,
   actorView,
   apartmentNeedsClock,
   type ActorId,
@@ -163,15 +162,16 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
    *
    * Everything is a percentage of the stage, so the apartment is the same place
    * at every width and nothing here has to watch for a resize: the stage keeps
-   * its 16:9 shape in CSS and 1600 x 900 units map onto it. `z-index` off the
-   * feet is what sorts the Cast by depth, and it is a reading of the position
-   * rather than a decision about it.
+   * its 16:9 shape in CSS and the Room's own `STAGES` entry maps onto it.
+   * `z-index` off the feet is what sorts the Cast by depth, and it is a reading
+   * of the position rather than a decision about it.
    */
   function place(sprite: Sprite, view: ActorView, mirrored: boolean) {
     const style = sprite.element.style;
-    style.left = `${(view.at.x / STAGE_WIDTH) * 100}%`;
-    style.top = `${(view.at.y / STAGE_HEIGHT) * 100}%`;
-    style.height = `${(sprite.height / STAGE_HEIGHT) * 100}%`;
+    const stage = STAGES[view.room];
+    style.left = `${(view.at.x / stage.width) * 100}%`;
+    style.top = `${(view.at.y / stage.height) * 100}%`;
+    style.height = `${(sprite.height / stage.height) * 100}%`;
     style.setProperty('--flip', mirrored ? '-1' : '1');
     style.zIndex = String(Math.round(view.at.y));
   }

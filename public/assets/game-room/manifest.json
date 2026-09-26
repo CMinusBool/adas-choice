@@ -11,6 +11,7 @@
       "frames": 1,
       "columns": 1,
       "frame": "1600x900",
+      "stage": "1600x900",
       "source": {
         "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s01-room/attempt-1/strip-raw.png",
         "sha256": "64bf82ce1e041841dd83e06b54633a6dab8ad4c9bd840768d9d8530097b5243a"

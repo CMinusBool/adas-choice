@@ -9,6 +9,7 @@
       "frames": 1,
       "columns": 1,
       "frame": "1600x900",
+      "stage": "1600x900",
       "source": {
         "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S01-backdrop/attempt-2/strip-raw.png",
         "sha256": "5c51389919c189699cbb0060c96f826a85e504ef1f3f927c35b3ef164d30eb7e"

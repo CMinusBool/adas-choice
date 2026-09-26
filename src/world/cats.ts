@@ -3,7 +3,7 @@ import type { ActorId } from './actors';
 // 09: the hall table's mark is the Entryway's own, written down once there.
 import { ENTRYWAY_MARKS } from './entryway';
 import type { RoomId } from './rooms';
-import { STAGE_WIDTH, WALK_SPEED, distance, type Point } from './stage';
+import { STAGES, WALK_SPEED, distance, type Point } from './stage';
 
 /**
  * The three cats, as something that decides for itself.
@@ -328,11 +328,13 @@ function walkMs(from: Point, to: Point): number {
 
 /**
  * The longest ordinary wander a cat may still start before a knock: a walk
- * clean across the stage, by the same reckoning. A cat thinking of somewhere to
- * be that close to setting off for her Breakable goes to it instead, and waits
- * there, so no wander ever makes her late.
+ * clean across the widest stage in the apartment, by the same reckoning. A cat
+ * thinking of somewhere to be that close to setting off for her Breakable goes
+ * to it instead, and waits there, so no wander ever makes her late, in whichever
+ * Room she is.
  */
-const WANDER_LEAD_MS = walkMs({ x: 0, y: 0 }, { x: STAGE_WIDTH, y: 0 });
+const WIDEST_STAGE = Math.max(...Object.values(STAGES).map(stage => stage.width));
+const WANDER_LEAD_MS = walkMs({ x: 0, y: 0 }, { x: WIDEST_STAGE, y: 0 });
 
 /**
  * The late-cat allowance: the most a fall can land after the moment rolled for

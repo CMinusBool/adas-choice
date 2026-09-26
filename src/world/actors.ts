@@ -4,7 +4,7 @@ import { CINEMA_MARKS } from './cinema'; // 17: the Cinema Room's marks
 import { ENTRYWAY_MARKS, ENTRYWAY_WALKABLE } from './entryway';
 import type { RoomId } from './rooms';
 import {
-  STAGE_WIDTH,
+  STAGES,
   WALK_SPEED,
   clampInto,
   containsPoint,
@@ -610,7 +610,7 @@ export function gatherCats(slice: ActorsSlice, room: RoomId): ActorsSlice {
     // rather than a missing cat.
     const mark = freeMark(room, id, catPlaces(next, room), new Map(), next.random) ?? CAT_MARKS[room][0];
     // A cat that has just come in looks into the Room rather than at the wall.
-    next = placeActor(next, id, room, mark, mark.x > STAGE_WIDTH / 2 ? 'left' : 'right');
+    next = placeActor(next, id, room, mark, mark.x > STAGES[room].width / 2 ? 'left' : 'right');
   }
   return next;
 }

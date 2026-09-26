@@ -261,9 +261,20 @@ html.dialog-open { overflow: hidden; }
 }
 
 /* 07: actors — the stage each Room lays its Cast out on, and the Cast itself.
-   The stage is deliberately bare: it is a 16:9 canvas of 1600 x 900 units and
-   nothing else until each Room's design pass furnishes it. */
+   The stage is deliberately bare: it is a 16:9 canvas in units and nothing else
+   until each Room's design pass furnishes it. */
 .stage { position: relative; width: 100%; max-width: 64rem; margin: 2.2rem auto 0; aspect-ratio: 16 / 9; pointer-events: none; background: linear-gradient(to bottom, transparent 62%, #f589b40a); }
+/* 81: how many units across and down each Room's stage is — its entry in
+   `STAGES` (`src/world/stage.ts`), which `scripts/check-stages.test.mjs` holds
+   these to. Every box on a stage is a percentage of these two, and `--u`, one
+   stage unit as a length for the type, borders and radii inside a Prop, is the
+   stage's width over its units. The unit is the same in every Room, so a Room
+   with more units across draws everything in it bigger, never its stage. */
+.stage { --u: calc(100cqw / var(--stage-w)); }
+.stage[data-stage="entryway"] { --stage-w: 1600; --stage-h: 900; }
+.stage[data-stage="games"] { --stage-w: 1600; --stage-h: 900; }
+.stage[data-stage="cinema"] { --stage-w: 1600; --stage-h: 900; }
+.stage[data-stage="activities"] { --stage-w: 1600; --stage-h: 900; }
 /* The Cast waits in here until the model puts an Actor in a Room, so a parked
    Actor needs no state of its own: the container is what hides it. */
 .cast { display: none; }
@@ -288,7 +299,7 @@ html.dialog-open { overflow: hidden; }
 
    The Room is furnished in stage units: every Prop carries `--x --y --w --h`
    in `index.html` and the rule below turns them into percentages of the
-   1600 x 900 stage, so one set of numbers serves the markup, the walkable
+   Room's own stage, so one set of numbers serves the markup, the walkable
    polygon in `src/world/actors.ts` and the Cast's marks alike. `--u` is one
    stage unit as a length, for the type, borders and radii inside a Prop.
 
@@ -299,15 +310,16 @@ html.dialog-open { overflow: hidden; }
    because the design note never made them images. */
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .stage-cinema {
-  --u: .0625cqw;
   --cream: #efe6d6;
   container-type: inline-size;
   overflow: hidden;
   border-radius: 14px;
   background: #2f2631;
 }
-/* A Prop is a box in stage units, turned into percentages of the stage - the
-   same arithmetic `src/dom/actors.ts` does for an Actor's feet point. All four
+/* A Prop is a box in stage units, turned into percentages of the Room's own
+   `--stage-w` / `--stage-h` - the same arithmetic `src/dom/actors.ts` does for
+   an Actor's feet point off `STAGES`. Multiplying before dividing keeps each
+   percentage bit for bit what it was before a stage had a size of its own. All four
    Rooms spelled these five declarations out separately until ticket 50; they
    were identical in all four, and a selector list keeps each part its own
    specificity, so nothing about the cascade changed when they were folded
@@ -318,10 +330,10 @@ html.dialog-open { overflow: hidden; }
 .stage-cinema .cinema-prop,
 .stage[data-stage="activities"] .prop {
   position: absolute;
-  left: calc(var(--x) / 16 * 1%);
-  top: calc(var(--y) / 9 * 1%);
-  width: calc(var(--w) / 16 * 1%);
-  height: calc(var(--h) / 9 * 1%);
+  left: calc(var(--x) * 100% / var(--stage-w));
+  top: calc(var(--y) * 100% / var(--stage-h));
+  width: calc(var(--w) * 100% / var(--stage-w));
+  height: calc(var(--h) * 100% / var(--stage-h));
 }
 
 /* 53: ...and a Prop's surface comes from the Prop, the same way its box does.
@@ -801,11 +813,11 @@ html.dialog-open { overflow: hidden; }
 
 /* 16: the Activity Room — `design/12-activity-room.md`.
 
-   Everything below is placed in the Room's 1600 x 900 stage units and turned
-   into percentages of the stage here, so the same numbers mean the same place
-   at every width: `--x / 16 * 1%` is x / 1600 as a percentage, `--y / 9 * 1%`
-   is y / 900. The stage is a container, so `1cqw / 16` is one stage unit of
-   type — which is how a 26-unit chalk hand stays 26 units wide on a phone.
+   Everything below is placed in the Room's own stage units and turned into
+   percentages of the stage, so the same numbers mean the same place at every
+   width: `--x` over `--stage-w`, `--y` over `--stage-h`. The stage is a
+   container, so `--u` is one stage unit of type — which is how a 26-unit chalk
+   hand stays 26 units wide on a phone.
 
    Every surface is a placeholder for the shot §7 names for it. The colours are
    the Room palette in §3 so that the placeholder reads as the Room it will be;
@@ -841,36 +853,36 @@ html.dialog-open { overflow: hidden; }
    the Props that only ever said "this file, filling the box" need no rule at all any more. What
    is left below is what a Prop genuinely differs on. */
 
-.a-door { display: block; border-radius: calc(4cqw / 16) calc(4cqw / 16) 0 0; background: transparent; transition: filter .2s, transform .2s; }
+.a-door { display: block; border-radius: calc(4 * var(--u)) calc(4 * var(--u)) 0 0; background: transparent; transition: filter .2s, transform .2s; }
 /* The delivered leaf is a two-cell sheet, shut then swung ~70° open, so the DOM could show either
    cell outright; the swing itself stays the continuous 3D rotation below, on the shut cell alone —
    `styles.css` said so before the art existed ("these two angles stay") and the art does not
    change that. `background-size: 200% 100%` with a fixed `background-position: 0 0` keeps showing
    cell 1 (shut) through the rotation; cell 2 (open) ships but is not read by this rule. */
 .a-door-leaf { position: absolute; left: 7.8%; top: 3.8%; width: 84.4%; height: 96.2%; background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; }
-.a-door:hover, .a-door:focus-visible { transform: translateY(calc(-3cqw / 16)); filter: brightness(1.1); }
+.a-door:hover, .a-door:focus-visible { transform: translateY(calc(-3 * var(--u))); filter: brightness(1.1); }
 
 
-.a-chalkboard { display: grid; align-items: center; padding-inline: calc(14cqw / 16); border-radius: calc(4cqw / 16); background: linear-gradient(#36443F, #2F3A35); box-shadow: inset 0 0 0 calc(3cqw / 16) #5C3F2C; }
-.a-chalk { font-size: calc(26cqw / 16); line-height: 1.08; text-align: center; color: #EADCC2; opacity: .88; transition: opacity .2s, text-shadow .2s; overflow: hidden; }
+.a-chalkboard { display: grid; align-items: center; padding-inline: calc(14 * var(--u)); border-radius: calc(4 * var(--u)); background: linear-gradient(#36443F, #2F3A35); box-shadow: inset 0 0 0 calc(3 * var(--u)) #5C3F2C; }
+.a-chalk { font-size: calc(26 * var(--u)); line-height: 1.08; text-align: center; color: #EADCC2; opacity: .88; transition: opacity .2s, text-shadow .2s; overflow: hidden; }
 /* The design note sizes the chalk for the Traditional Chinese names, which are
    four to seven characters. The English ones run to thirty-one, so they take a
    smaller hand over two lines rather than being cut off at the slate.s edge. */
-html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
+html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
 .a-chalkboard[data-chosen] .a-chalk { opacity: 1; }
 /* The chalk tick the chosen station's board gains at its right end. */
-.a-chalkboard[data-chosen]::after { content: "✓"; position: absolute; right: calc(12cqw / 16); top: 50%; transform: translateY(-50%); font-size: calc(26cqw / 16); line-height: 1; color: #EADCC2; }
+.a-chalkboard[data-chosen]::after { content: "✓"; position: absolute; right: calc(12 * var(--u)); top: 50%; transform: translateY(-50%); font-size: calc(26 * var(--u)); line-height: 1; color: #EADCC2; }
 .stage[data-stage="activities"]:has(.a-station[data-activity="draw"]:hover) .a-chalkboard[data-chalkboard="draw"] .a-chalk,
 .stage[data-stage="activities"]:has(.a-station[data-activity="draw"]:focus-visible) .a-chalkboard[data-chalkboard="draw"] .a-chalk,
 .stage[data-stage="activities"]:has(.a-station[data-activity="hunt"]:hover) .a-chalkboard[data-chalkboard="hunt"] .a-chalk,
 .stage[data-stage="activities"]:has(.a-station[data-activity="hunt"]:focus-visible) .a-chalkboard[data-chalkboard="hunt"] .a-chalk,
 .stage[data-stage="activities"]:has(.a-station[data-activity="map"]:hover) .a-chalkboard[data-chalkboard="map"] .a-chalk,
-.stage[data-stage="activities"]:has(.a-station[data-activity="map"]:focus-visible) .a-chalkboard[data-chalkboard="map"] .a-chalk { opacity: 1; text-shadow: 0 0 calc(10cqw / 16) #eadcc288; }
+.stage[data-stage="activities"]:has(.a-station[data-activity="map"]:focus-visible) .a-chalkboard[data-chalkboard="map"] .a-chalk { opacity: 1; text-shadow: 0 0 calc(10 * var(--u)) #eadcc288; }
 
 /* A station is a transparent rectangle: what lights up is the furniture under it. */
-.a-station { border-radius: calc(10cqw / 16); background: transparent; transition: background-color .2s, box-shadow .2s; }
-.a-station:hover, .a-station:focus-visible { background: #f2b85a14; box-shadow: inset 0 0 0 calc(2cqw / 16) #F2B85A66, 0 0 calc(34cqw / 16) #f2b85a2e; }
-.a-station[data-chosen] { background: #f2b85a12; box-shadow: inset 0 0 0 calc(2cqw / 16) #F2B85A99, 0 0 calc(26cqw / 16) #f2b85a26; }
+.a-station { border-radius: calc(10 * var(--u)); background: transparent; transition: background-color .2s, box-shadow .2s; }
+.a-station:hover, .a-station:focus-visible { background: #f2b85a14; box-shadow: inset 0 0 0 calc(2 * var(--u)) #F2B85A66, 0 0 calc(34 * var(--u)) #f2b85a2e; }
+.a-station[data-chosen] { background: #f2b85a12; box-shadow: inset 0 0 0 calc(2 * var(--u)) #F2B85A99, 0 0 calc(26 * var(--u)) #f2b85a26; }
 .motion-off .a-station, .motion-off .a-door, .motion-off .a-chalk { transition: none; }
 
 .a-tableau { background-size: 100% 100%; background-repeat: no-repeat; animation: activity-tableau-in .25s ease-out; }
@@ -891,7 +903,7 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 .a-boombox-window { position: absolute; left: 39.2%; top: 33.3%; width: 21.5%; height: 33.3%; display: flex; align-items: center; justify-content: space-around; }
 .a-reel { width: 38%; aspect-ratio: 1; border-radius: 50%; }
 .a-boombox-notes { position: absolute; left: 12%; top: 8%; width: 24%; height: 60%; opacity: 0; }
-.a-boombox-notes span { position: absolute; bottom: 0; font-size: calc(26cqw / 16); line-height: 1; color: var(--pink); }
+.a-boombox-notes span { position: absolute; bottom: 0; font-size: calc(26 * var(--u)); line-height: 1; color: var(--pink); }
 .a-boombox-notes span:nth-child(2) { left: 38%; }
 .a-boombox-notes span:nth-child(3) { left: 72%; }
 /* On: the reels turn and three notes drift up from the left speaker; the lit dial is cell 2 above. */
@@ -902,7 +914,7 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 .a-boombox[aria-pressed="true"] .a-boombox-notes span:nth-child(2) { animation-delay: .8s; }
 .a-boombox[aria-pressed="true"] .a-boombox-notes span:nth-child(3) { animation-delay: 1.6s; }
 @keyframes activity-reel { to { transform: rotate(360deg); } }
-@keyframes activity-note { from { transform: translateY(0); opacity: 0; } 25% { opacity: .9; } to { transform: translateY(calc(-90cqw / 16)); opacity: 0; } }
+@keyframes activity-note { from { transform: translateY(0); opacity: 0; } 25% { opacity: .9; } to { transform: translateY(calc(-90 * var(--u))); opacity: 0; } }
 /* Motion off: the lit dial alone carries the state. */
 .motion-off .a-boombox .a-reel, .motion-off .a-boombox .a-boombox-notes span { animation: none; }
 .motion-off .a-boombox[aria-pressed="true"] .a-boombox-notes { opacity: 0; }
@@ -991,7 +1003,6 @@ html[lang="en"] .a-chalk { font-size: calc(18cqw / 16); }
 #room-games .intro { padding: 1.1rem 0 .9rem; }
 #room-games .room-exit { margin-top: 1rem; }
 #room-games .stage {
-  --u: .0625cqw;
   container-type: inline-size;
   /* Everything above the stage in this Room comes to about 23rem, and the
      Room's own foot to another 1rem, so capping the stage's width by what the

@@ -9,6 +9,7 @@
       "frames": 1,
       "columns": 1,
       "frame": "1600x900",
+      "stage": "1600x900",
       "source": {
         "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S01-backdrop/attempt-1/strip-raw.png",
         "sha256": "38f142af5e290e3136156ade77b6ebccd72d295bffafa8b8c63dac3eb02bf96f"

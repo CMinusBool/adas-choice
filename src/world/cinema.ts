@@ -12,8 +12,8 @@ import type { Point } from './stage';
  * never carries a coordinate of its own, which is what keeps one set of stage
  * units behind the Props, the walkable floor and the Actors alike.
  *
- * Every number is in stage units (1600 x 900, origin top-left), taken from the
- * Room's design note.
+ * Every number is in the Cinema's own stage units (`STAGES.cinema`, origin
+ * top-left), taken from the Room's design note.
  */
 
 /** The three genre bookshelves, in the order Tab visits them. */
