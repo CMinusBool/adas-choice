@@ -95,3 +95,4 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [entryway] S17 hangs the Girl's coat over the Game Room door, about 150 units right of hook 2, and it then appears on hook 2. (105, 2026-09-26)
 - [entryway] S18's last frame draws no parka, so the parka is missing for one frame before its Prop appears at 8.05 s. (105, 2026-09-26)
 - [entryway] The Boy sets the bag down against the Girl's legs, she stands in front of it during the duet, and she walks through its footprint to G2. (105, 2026-09-26)
+- [site] A stale `vite preview` from another checkout listens on port 4391 and serves an old stylesheet, so a verify script pointed there measures an old build. (110, 2026-09-26)
