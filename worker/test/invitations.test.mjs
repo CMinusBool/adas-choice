@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { webcrypto, randomUUID } from 'node:crypto';
-import { handleInvite, DeliveryGate, deviceDetails } from '../src/index.mjs';
+import { handleInvite, DeliveryGate, deviceDetails, FILMS } from '../src/index.mjs';
 
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 const ORIGIN = 'https://cminusbool.github.io';
@@ -208,4 +208,58 @@ test('expired fingerprint records and quota data are removed', async t => {
   f.advance(3 * 86400000);
   await f.gate.alarm();
   assert.equal(f.storage.entries.size, 0);
+});
+
+// 108: "Watch this one tonight" sends the Invitation too. A Film is named by its id, and by
+// the title and year the visitor saw; the Worker takes the title only when it is that Film's
+// own, in one of its two languages, so the email never carries a string the Worker did not hold.
+const film = (overrides = {}) => ({ game: undefined, film: 'knives-out', title: '鋒迴路轉', year: 2019, action: 'watch-together', ...overrides });
+
+test('a Film invitation names the Film in the visitor\'s language, with its year', async t => {
+  const f = fixture(t);
+  assert.equal((await handleInvite(f.request(film()), f.env)).status, 200);
+  f.advance();
+  assert.equal((await handleInvite(f.request(film({ film: 'get-out', title: 'Get Out', year: 2017 })), f.env)).status, 200);
+  assert.equal(f.emails.length, 2);
+  const [zh, en] = f.emails;
+  assert.equal(zh.subject, "Ada's choice: 鋒迴路轉 (2019)");
+  assert.match(zh.text, /^Someone chose: I want to watch this with u~\nFilm: 鋒迴路轉 \(2019\)\n/);
+  assert.equal(en.subject, "Ada's choice: Get Out (2017)");
+  assert.match(en.text, /Film: Get Out \(2017\)/);
+  assert.match(en.text, /IP address: 203\.0\.113\.10/);
+  assert(!en.text.includes('Game:'));
+});
+
+test('a Film invitation carries only a Film the Cinema recommends, under its own title and year', async t => {
+  const f = fixture(t);
+  for (const override of [
+    film({ title: 'Get Out' }), film({ title: 'knives out' }), film({ title: '<b>鋒迴路轉</b>' }), film({ year: 2020 }),
+    film({ year: '2019' }), film({ title: undefined }), film({ year: undefined }), film({ film: 'the-room' }),
+    film({ film: '__proto__' }), film({ film: 'constructor' }), film({ film: ['knives-out'] }), film({ game: 'lovers' }),
+    film({ action: 'play-together' }), { action: 'watch-together' }, { title: 'Operation: Tango' }, { year: 2020 }
+  ]) assert.equal((await handleInvite(f.request(override), f.env)).status, 400, JSON.stringify(override));
+  assert.equal(f.emails.length, 0);
+  assert.equal(f.verificationCalls.length, 0);
+});
+
+test('a request ID sent for a Film cannot be reused for another choice', async t => {
+  const f = fixture(t);
+  const id = randomUUID();
+  assert.equal((await handleInvite(f.request(film({ requestId: id })), f.env)).status, 200);
+  f.advance();
+  assert.equal((await handleInvite(f.request(film({ requestId: id })), f.env)).status, 200);
+  assert.equal((await handleInvite(f.request(film({ requestId: id, film: 'get-out', title: 'Get Out', year: 2017 })), f.env)).status, 409);
+  assert.equal((await handleInvite(f.request({ requestId: id }), f.env)).status, 409);
+  assert.equal(f.emails.length, 1);
+});
+
+test('the Worker names every Film the Cinema recommends, as the page does', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const source = await readFile(new globalThis.URL('../../src/world/films.ts', import.meta.url), 'utf8');
+  const page = {};
+  for (const [, id, zh, en, year] of source.matchAll(/id: '([a-z-]+)',[\s\S]*?title: \{ 'zh-Hant': '([^']+)', en: '([^']+)' \},\s*year: (\d{4}),/g)) {
+    page[id] = { title: { 'zh-Hant': zh, en }, year: Number(year) };
+  }
+  assert.equal(Object.keys(page).length, 9);
+  assert.deepEqual(FILMS, page);
 });
