@@ -40,7 +40,11 @@ Read this in full for any `art` or `asset-code` ticket, and before touching
   in stage units, one set for every Room, because `src/dom/actors.ts` moves one element per Actor
   between stages. Each Actor ships one standing frame per facing, cut from its Character Sheet by
   `scripts/make-actor-placeholders.mjs` and recorded in `public/assets/actors/manifest.json`; the
-  world model does the travelling, and a one-frame sheet passes every rule above. Every rule in
+  world model does the travelling, and a one-frame sheet passes every rule above. Since ticket 107
+  the model also gives each walking Actor a `Gait` (`ActorView.gait`): once a step the figure lifts
+  off its feet and rocks about them, over a route cut into whole steps, and `styles.css` applies it
+  to the `.cycle` layers through `--lift` and `--lean` — the feet point and the box never move for
+  it, so no hand-off changes, and it is flat whenever the Actor stands or motion is off. Every rule in
   this paragraph is checked mechanically by `node scripts/check-assets.mjs` — size, grid, binary
   alpha, feet on the bottom edge, centring, no bleed into a neighbouring frame, no height pop and
   no translation across the Cycle — which `npm run build` runs as a report and which any delivered
