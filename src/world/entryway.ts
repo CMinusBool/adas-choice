@@ -37,21 +37,30 @@ import type { Point, Polygon } from './stage';
  * - `B4`, where S18 (his parka onto hook 1) leaves him, before he walks to `BS`.
  * - `G1`, where she walks to: S16's first frame, a step to his right.
  * - `G1b`, where S16 leaves her, coat off, before she walks to `G2`.
- * - `G2`, where she kneels (S19), with her first and last frames' feet 4.6
- *   units either side of it.
+ * - `G2`, where she kneels (S19): its first frame.
+ * - `G2b`, where S19's last frame stands her back up, before she walks to `GS`.
  * The whole chain is placed from one thing: S18's seventh frame holds the
  * parka's collar on hook 1's tip, lowered 4.8 units so that `B4` stands on the
  * floor.
+ *
+ * 105: every Beat but S18 is drawn at its Actors' own height now, so the marks
+ * it hands over on moved with it: `B1`-`B3` by under 2 units, `G1` and `G1b` by
+ * 8, to the Girl's feet in the smaller duet. `G2` is in front of the backpack,
+ * which S15 sets down on the floor at (353,381)-(429,470), by the Game Room
+ * door, and which stays there: she kneels to it with her fingertips on its top.
+ * `GS` and `BS` stay where 86 put them, so at rest the Boy stands in front of
+ * the bag's right half.
  */
 export const ENTRYWAY_MARKS = {
   T: { x: 117, y: 426 },
-  B1: { x: 350.7, y: 496.2 },
-  B2: { x: 334.4, y: 475.5 },
-  B3: { x: 326.7, y: 462.8 },
+  B1: { x: 351, y: 498 },
+  B2: { x: 333.1, y: 475.4 },
+  B3: { x: 326, y: 463.6 },
   B4: { x: 309.7, y: 449.5 },
-  G1: { x: 432, y: 476.1 },
-  G1b: { x: 429, y: 463.5 },
-  G2: { x: 300, y: 482 },
+  G1: { x: 424.3, y: 476 },
+  G1b: { x: 421.5, y: 464.2 },
+  G2: { x: 302, y: 496 },
+  G2b: { x: 305.5, y: 485.9 },
   EMica: { x: 150, y: 505 },
   EMira: { x: 309, y: 549 },
   ELuna: { x: 466, y: 599 },
@@ -91,7 +100,7 @@ export const ENTRYWAY_WALKABLE: Polygon = [
 export interface EntrywayProps {
   /** The front door's leaf: the Cast comes in through it and it shuts itself. */
   readonly frontDoor: 'closed' | 'opening' | 'open' | 'closing';
-  /** The pet backpack: off-stage on the Boy's back, then on the bench. */
+  /** The pet backpack: on the Boy's back, then on the floor where S15 sets it down (105). */
   readonly backpack: 'carried' | 'closed' | 'open';
   /** The Girl's plum coat: on her, then on hook 2. */
   readonly girlCoat: 'worn' | 'hung';
