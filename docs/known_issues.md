@@ -96,3 +96,6 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [entryway] S18's last frame draws no parka, so the parka is missing for one frame before its Prop appears at 8.05 s. (105, 2026-09-26)
 - [entryway] The Boy sets the bag down against the Girl's legs, she stands in front of it during the duet, and she walks through its footprint to G2. (105, 2026-09-26)
 - [site] A stale `vite preview` from another checkout listens on port 4391 and serves an old stylesheet, so a verify script pointed there measures an old build. (110, 2026-09-26)
+- [site] The Cast has no stepping legs: each Actor's walk is its one standing frame lifting and rocking once a step, because the walk Cycles (23–30) are parked. (107, 2026-09-26)
+- [cinema] The cabinet search and the reel threading are a 0.45 s stand, because S30 and S31 are declared but never played. (107, 2026-09-26)
+- [site] The closing probe (`notes/closing/probe/probe.mjs`) measures boxes only and does not see the Actors' step. (107, 2026-09-26)
