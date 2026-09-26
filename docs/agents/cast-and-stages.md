@@ -93,3 +93,8 @@ coats worn, backpack carried — cleared when the world is created, not when the
   that guard since ticket 45; the Activity Room went without one until ticket 50, where the Boy
   was found intercepting every click on the hunt station he stands over. Cats are never
   `aria-hidden` — a cat is a real button with a name — so the guard never costs a petting.
+  **One floor is shared (ticket 103):** on every stage, an Actor's `.cycle` layer and anything
+  `aria-hidden`, `role="img"` or `aria-disabled="true"` takes no pointer, `!important`, next to
+  `.actor > .cycle` in `styles.css`. So nothing but a control can lie over a cat's pad, whatever
+  a Room turns back on. A new Prop that takes no input needs one of those three attributes, not a
+  rule of its own; `scripts/verify/controls.mjs --only cats,pointers` fails on one that has none.
