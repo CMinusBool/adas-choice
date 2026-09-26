@@ -287,6 +287,19 @@ html.dialog-open { overflow: hidden; }
    no pointer events, so a cat has to ask for them back. */
 .actor.cat { padding: 0; border: 0; background: none; font: inherit; color: inherit; pointer-events: auto; cursor: pointer; border-radius: 8px; transition: transform .18s ease-out; }
 .actor.cat:focus-visible { outline: 3px solid var(--pink); outline-offset: 5px; }
+/* 82: at real size a cat is 61 or 66 units tall, which is under 44 CSS px on every stage at
+   1440 x 900 but the Activity Room's, so each cat carries a transparent pad centred on her feet
+   point, as wide as her sprite and never narrower than the Room's floor. The floor is 44 px in
+   that Room's units at 1440 x 900 (design 75 section 5), measured on ticket 74's stage widths —
+   1060, 880, 1024 and 1173 px across 1600 units — and rounded up one unit so a sub-pixel feet
+   point still keeps the whole 44. It is in units rather than px so that the pad keeps the same
+   share of the Room at every width and never grows over a door or a control on a narrow stage.
+   A Room ticket that makes its stage fewer units across only makes its pad bigger in px. */
+.stage[data-stage="entryway"] { --cat-pad: 68; }
+.stage[data-stage="games"] { --cat-pad: 81; }
+.stage[data-stage="cinema"] { --cat-pad: 70; }
+.stage[data-stage="activities"] { --cat-pad: 61; }
+.actor.cat::before { content: ""; position: absolute; left: 50%; top: 100%; translate: -50% -50%; width: max(100%, calc(var(--u) * var(--cat-pad, 0))); height: calc(var(--u) * var(--cat-pad, 0)); }
 /* Being fussed over, until a petting Beat is drawn for one: she settles on to
    her paws under the hand. A Beat that does exist stands in for the sprite. */
 .actor.cat.is-petted { --fuss: .93; }
