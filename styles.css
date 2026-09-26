@@ -310,6 +310,21 @@ html.dialog-open { overflow: hidden; }
 /* 100: while the Entryway arrival has one of them in a costume it has a sprite for (S12, S13), that layer
    stands in over the same feet and height, and the Cycle under it is hidden. src/dom/entryway.ts decides. */
 .actor.is-dressed > .cycle:not([data-costume]) { visibility: hidden; }
+/* 103: nothing on a stage that is not a control takes a pointer, so nothing but a control
+   can lie over a cat's pad. An Actor's `.cycle` layer is only her picture: on a cat the tap
+   falls through it to the button's own box, and the Boy's and the Girl's never catch one.
+   A Prop that takes no input says so — `aria-hidden`, `role="img"`, or a control that is
+   `aria-disabled` for now, like the Cinema's projector gate before a Film is chosen — and a
+   Room that turns `pointer-events` back on for its whole stage still cannot hand it one.
+   Written once for every stage, and `!important` because it is a floor, not a default:
+   each Room hands its controls their pointer back with a rule of its own, and the Cinema's
+   `button.cinema-prop` one out-ranks this on the very gate it is for. The Game Room's and
+   the Activity Room's own `aria-hidden` guards predate it.
+   `scripts/verify/controls.mjs --only cats,pointers` holds it. */
+.actor > .cycle,
+.stage [aria-hidden="true"],
+.stage [role="img"],
+.stage [aria-disabled="true"] { pointer-events: none !important; }
 
 
 /* 17: the Cinema Room.
