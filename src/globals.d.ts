@@ -21,7 +21,8 @@ interface TurnstileOptions {
   language: string;
   callback: (token: string) => void;
   'expired-callback': () => void;
-  'error-callback': () => void;
+  /** Called with Cloudflare's client-side error code; returning true marks it handled. */
+  'error-callback': (code: string) => boolean | void;
 }
 
 interface Turnstile {
