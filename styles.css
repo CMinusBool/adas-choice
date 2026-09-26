@@ -271,7 +271,7 @@ html.dialog-open { overflow: hidden; }
    stage's width over its units. The unit is the same in every Room, so a Room
    with more units across draws everything in it bigger, never its stage. */
 .stage { --u: calc(100cqw / var(--stage-w)); }
-.stage[data-stage="entryway"] { --stage-w: 1600; --stage-h: 900; }
+.stage[data-stage="entryway"] { --stage-w: 1184; --stage-h: 666; }
 .stage[data-stage="games"] { --stage-w: 1600; --stage-h: 900; }
 .stage[data-stage="cinema"] { --stage-w: 1600; --stage-h: 900; }
 .stage[data-stage="activities"] { --stage-w: 1600; --stage-h: 900; }
@@ -294,8 +294,9 @@ html.dialog-open { overflow: hidden; }
    1060, 880, 1024 and 1173 px across 1600 units — and rounded up one unit so a sub-pixel feet
    point still keeps the whole 44. It is in units rather than px so that the pad keeps the same
    share of the Room at every width and never grows over a door or a control on a narrow stage.
-   A Room ticket that makes its stage fewer units across only makes its pad bigger in px. */
-.stage[data-stage="entryway"] { --cat-pad: 68; }
+   A Room ticket that makes its stage fewer units across only makes its pad bigger in px.
+   86: the Entryway is 1184 units across the same 1060 px, so its floor is 49.2 units: 51. */
+.stage[data-stage="entryway"] { --cat-pad: 51; }
 .stage[data-stage="games"] { --cat-pad: 81; }
 .stage[data-stage="cinema"] { --cat-pad: 70; }
 .stage[data-stage="activities"] { --cat-pad: 61; }
@@ -1455,8 +1456,9 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
    `--x / --y / --w / --h` are the design note's own numbers and the rules below
    are the only place they become percentages. `--z` is a Prop's base line on the
    stage, which is what interleaves it with the Cast, whose `z-index` is
-   `round(y)` off their feet — so the monstera at 880 is in front of everybody
-   and the wall Props at 452-512 are behind them.
+   `round(y)` off their feet — so the wall Props at 288-331 are behind them.
+   86: the stage is 1184 x 666 and the monstera Prop is gone; the backdrop
+   paints the plant.
 
    33: the artwork landed. The backdrop, the front door leaf, both jackets,
    the backpack, the vase, the radio and the monstera are now Props with
@@ -1477,15 +1479,17 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
    then showed through radio.png's transparent corners as a grey rectangle.
    The PNG's alpha was never the problem. */
 .entryway-stage .prop { border: 0; padding: 0; background-color: transparent; }
-/* The leaf sorts at 600 shut and 665 open, so the Cast appears from behind it
+/* The leaf sorts at 416 shut and 470 open (86: design 75 §4.2, the floor line
+   and a step inside the threshold at y 426), so the Cast appears from behind it
    as it swings in — which is why `--z` is set here and not in the markup. */
-.prop-front-door { --z: 600; background-size: 200% 100%; background-position: 0 0; transform-origin: left center; transition: transform .6s ease; }
-.prop-front-door.is-open { --z: 665; transform: perspective(900px) rotateY(-62deg); }
+.prop-front-door { --z: 416; background-size: 200% 100%; background-position: 0 0; transform-origin: left center; transition: transform .6s ease; }
+.prop-front-door.is-open { --z: 470; transform: perspective(900px) rotateY(-62deg); }
 .prop-backpack { background-size: 200% 100%; background-position: 0 0; }
 .prop-backpack.is-open { background-position: 100% 0; }
 
 /* The hall radio, which is the Room's Music Source. Its hit box is the whole
-   Prop — 120 x 87 stage units, which stays above 44 CSS px down to the 880 floor. */
+   Prop — 72 x 52 stage units since ticket 86 (x 0.60 to true size), 64 x 46 CSS px
+   at 1440 x 900; on the 880 px floor a narrow screen pans at, it is 54 x 39. */
 .prop-radio { cursor: pointer; background-size: 200% 100%; background-position: 0 0; }
 .prop-radio[aria-pressed="true"] { background-position: 100% 0; }
 .radio-notes { position: absolute; inset: auto 0 62% 0; display: none; justify-content: space-around; color: var(--pink); font-size: 1rem; line-height: 1; }

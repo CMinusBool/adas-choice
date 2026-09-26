@@ -8,14 +8,16 @@
       "shot": "S01",
       "frames": 1,
       "columns": 1,
-      "frame": "1600x900",
-      "stage": "1600x900",
+      "frame": "1672x941",
+      "stage": "1184x666",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S01-backdrop/attempt-1/strip-raw.png",
-        "sha256": "38f142af5e290e3136156ade77b6ebccd72d295bffafa8b8c63dac3eb02bf96f"
+        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S01-backdrop/attempt-4-edit/strip.png",
+        "sha256": "fec9b14a21485a7ad8edce4e7e0ff71ac1f9d8751dadc875b9450a06e3155af6"
       },
-      "builtBy": "scripts/art/build-prop.mjs@1 --frame 1600x900 --fit contain --seat centre --key alpha",
-      "validatedAt": "2026-09-22",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 1672x941 --fit fill --seat centre --key alpha (pixel-identical to its source)",
+      "scale": 0.7081,
+      "placed": "86: ticket 60's attempt-4 with ticket 84's two edits (front jamb narrowed, hook rail raised), scaled whole onto the 1184 x 666 stage (design 75 §2.1, s = 0.74 against the old 1600-unit stage; 1184/1672 = 0.7081 across, 666/941 = 0.7078 down, stretched by its box). Measured on the file at that scale: front opening (46,72)-(188,416), 142.3 x 343.3 (+0.2 % / -1.9 %); teal (388,67)-(531,415), 143.0 x 347.5 (+0.7 % / -0.7 %); plum (743,67)-(885,415), 141.7 x 348 (-0.2 % / -0.6 %); mustard (1018,67)-(1156,415), 138.3 x 348 (-2.6 % / -0.6 %). Hook tips y 140 at x 256, 289, 322, 355; bench seat top 329-341; floor line 416.",
+      "validatedAt": "2026-09-26",
       "motionPhase": null
     },
     {
@@ -23,8 +25,11 @@
       "shot": "S02",
       "frames": 2,
       "columns": 2,
-      "frame": "344x700",
+      "frame": "299x698",
       "cells": ["closed = S02 frame 1 of 6", "open = S02 frame 6 of 6"],
+      "recut": "86 (design 75 X1): both 344x700 cells cropped byte for byte by scripts/art/crop-cell.mjs to the closed leaf's alpha box, cell x 23-322, y 2-700, and re-stacked by scripts/art/stack-cells.mjs; only transparent margin went. The closed leaf now fills its cell, and the open leaf (cell x 141-204) lies inside the same rectangle.",
+      "scale": "0.95 across x 0.99 down",
+      "placed": "86: box (46,72)-(188,416), 142 x 344 (-1.7 %), the painted front opening; 299x698 px drawn into it is a 3.6 % horizontal squeeze. Sorts at 416 shut and 470 open.",
       "source": {
         "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S02-door/attempt-1/strip-raw.png",
         "sha256": "d3831f0b71894e1704d6633a91d046895aecd1176b5894e5c5aa05ed215b0c19"
@@ -86,6 +91,8 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 200x176 --fit content --seat bottom (S06 with --key '#FF00FF') + scripts/art/stack-cells.mjs",
       "note": "styles.css toggles background-position between the two cells on .prop-backpack.is-open, the class src/dom/entryway.ts already sets; no TypeScript changed.",
+      "scale": 0.69,
+      "placed": "86: shrunk whole about its bottom-centre (design 75 §4.2, the owner's shrink-only rule; nothing regenerated). The 100 x 88 box becomes 69 x 60.7, (300.5,270.3)-(369.5,331), standing on the painted bench seat (top face y 329-341) at the bench's right end. S05 is drawn 67.3 units (40 cm) wide and 60 (36 cm) tall; S06 55.5 x 60.",
       "validatedAt": "2026-09-22",
       "motionPhase": null
     },
@@ -108,6 +115,8 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 180x120 --fit content --seat bottom + scripts/art/stack-cells.mjs",
       "note": "styles.css reads the on cell with a :has() rule off .prop-radio[aria-pressed=\"true\"], the same technique the Activity Room's boombox uses.",
+      "scale": 0.6,
+      "placed": "86: shrunk whole (design 75 §4.2): the 120 x 87 box becomes 72 x 52, (567,238)-(639,290), standing on the hall table. At 1440 x 900 that is 64 x 46 CSS px, past the 44 px hit floor with no pad.",
       "validatedAt": "2026-09-22",
       "motionPhase": null
     },
@@ -136,20 +145,6 @@
         "sha256": "567233a1224cb104f50aa836ac11bf2472218cc0a1d35f2b504eae5f1be64336"
       },
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 300x100 --fit content --seat bottom",
-      "validatedAt": "2026-09-22",
-      "motionPhase": null
-    },
-    {
-      "file": "monstera.png",
-      "shot": "S11",
-      "frames": 1,
-      "columns": 1,
-      "frame": "340x640",
-      "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/31-entryway/S11-monstera/attempt-1/strip-raw.png",
-        "sha256": "aba723ff8691fbb1e8c806508583246bf36ee563ebba39a015884c53286e7227"
-      },
-      "builtBy": "scripts/art/build-prop.mjs@1 --frame 340x640 --fit content --seat bottom",
       "validatedAt": "2026-09-22",
       "motionPhase": null
     },
@@ -205,6 +200,7 @@
       "references": [{ "path": "art/characters/v2/boy-character-sheet-v2.png", "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477" }],
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 8 --columns 4 --frame 336x570 --fit contain --seat bottom",
       "note": "A Beat; checked with check-assets.mjs --beat, not the Cycle contract — the figure moves inside the frame on purpose.",
+      "placed": "86: size kept (1.5 px a unit); box (226.4,119.5)-(450.4,499.5) in src/world/arrival.ts, its first frame's feet on B1 and its last on B2 (the chain hung from S18, see hang-coat-2.png). Its frame 7 sets the backpack on the floor at about (383,469); the Prop stands on the bench seat at (335,331).",
       "validatedAt": "2026-09-22",
       "motionPhase": "not verified"
     },
@@ -224,6 +220,7 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 8 --columns 4 --frame 438x504 --fit contain --seat bottom",
       "note": "A duet Beat: one sheet drawing both the Boy and the Girl (design note §5.3). Checked with check-assets.mjs --beat.",
+      "placed": "86: size kept; box (235.7,140.8)-(527.7,476.8), the Boy's feet from B2 to B3 and the Girl's from G1 to G1b.",
       "validatedAt": "2026-09-22",
       "motionPhase": "not verified"
     },
@@ -240,6 +237,7 @@
       "references": [{ "path": "art/characters/v2/boy-character-sheet-v2.png", "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477" }],
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 6 --columns 4 --frame 315x600 --fit contain --seat bottom --key #00FF00",
       "note": "A Beat; checked with check-assets.mjs --beat. Re-dropped by ticket 57 from ticket 56's restyle (matte, and the coat and hands keep their side through frame 05). Frame 05 carries a 74x67 raw-px piece of the hung coat that the generator clipped square at its cell's top and right edges; it is in the owner-approved strip and ships as drawn.",
+      "placed": "86: size kept; box (236,62.8)-(446,462.8), feet from B3 into S18's first frame. Frame 05's hung-coat piece lands at x 405-445, y 186, against the coat Prop on hook 2 at (240,140)-(340,288).",
       "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
@@ -256,6 +254,7 @@
       "references": [{ "path": "art/characters/v2/boy-character-sheet-v2.png", "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477" }],
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 8 --columns 4 --frame 360x600 --fit contain --seat bottom",
       "note": "A Beat; checked with check-assets.mjs --beat.",
+      "placed": "86: size kept; box (199,60.8)-(439,460.8). Frame 07 holds the parka's collar at (256,144.8), on hook 1 (tip y 140), where the parka Prop (207,140)-(307,298) hangs; lowered 4.8 units so its last frame's feet, B4 (309.7,449.5), stand on the floor.",
       "validatedAt": "2026-09-22",
       "motionPhase": "not verified"
     },
@@ -272,6 +271,7 @@
       "references": [{ "path": "art/characters/v2/girl-character-sheet-v2.png", "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be" }],
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 8 --columns 4 --frame 285x516 --fit contain --seat bottom",
       "note": "A Beat, played in two halves at runtime (frames 1-4, held on 4, then 5-8) off one sheet; see src/world/arrival.ts's S19 BeatCue entries. Checked with check-assets.mjs --beat.",
+      "placed": "86: size kept; box (202.5,147)-(392.5,491), her first and last frames' feet 4.6 units either side of G2 (300,482). Her frame-4 hands, at about (337,399), sit under the backpack on the bench seat rather than at its zip.",
       "validatedAt": "2026-09-22",
       "motionPhase": "not verified"
     },
@@ -289,7 +289,7 @@
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 10 --columns 4 --frame 315x450 --fit contain --seat bottom",
       "note": "A box Beat (design note §5.3): anchored on a fixed stage rectangle, not a feet point. Checked with check-assets.mjs --beat.",
       "scale": 0.635,
-      "placed": "82: the cats at real size (design 75 §0.5, Míca 96 → 61 units). The sheet is unchanged; its box in src/world/arrival.ts is (240,430)-(450,730) × 0.635 about its bottom-centre (345,730), so (278.3,539.5)-(411.7,730).",
+      "placed": "82: the cats at real size (design 75 §0.5, Míca 96 → 61 units). The sheet is unchanged; its box in src/world/arrival.ts is (120,224)-(330,524) × 0.635 about its bottom-centre (225,524), so (158.3,333.5)-(291.7,524): design 75 §4.2's box on the 1184 x 666 stage (86).",
       "validatedAt": "2026-09-22",
       "motionPhase": "not verified"
     },
@@ -307,7 +307,7 @@
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 8 --columns 4 --frame 345x540 --fit contain --seat bottom --key #00FF00",
       "note": "A box Beat. Checked with check-assets.mjs --beat. Re-dropped by ticket 57 from ticket 56's restyle (the owner-granted third attempt, opaque RGB on #00FF00).",
       "scale": 0.635,
-      "placed": "82: the cats at real size (design 75 §0.5, Mira 96 → 61 units). The sheet is unchanged; its box in src/world/arrival.ts is (330,430)-(560,790) × 0.635 about its bottom-centre (445,790), so (372.0,561.4)-(518.0,790).",
+      "placed": "82: the cats at real size (design 75 §0.5, Mira 96 → 61 units). The sheet is unchanged; its box in src/world/arrival.ts is (171.5,214)-(401.5,574) × 0.635 about its bottom-centre (286.5,574), so (213.5,345.4)-(359.5,574): design 75 §4.2's box on the 1184 x 666 stage (86).",
       "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
@@ -325,7 +325,7 @@
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 12 --columns 4 --frame 690x654 --fit contain --pack shapes --airborne 10 --seat bottom --key #00FF00",
       "note": "A box Beat, delivered at the design note's 1.5 px/unit (2.9 MB, under its 3 MB ceiling). Re-dropped by ticket 57 from ticket 56's v3 Luna, re-packed by position (--pack shapes): the generator drew 12 separate cats but not on an even grid (frames 03, 09 and 10 reach 3-5 px over a cell line), so each cat is cut out as its own connected shape in reading order, scaled by the raw cell's own contain scale (1.7865, the grid cut's) and seated bottom-centre in its frame. Frame 10 is the hop and is named --airborne (the orchestrator's art call, 2026-09-26): it keeps its feet 77 raw px (138 px built) above row 3's grounded feet, taken from the landing frames 11 and 12, and every grounded frame stays on its bottom edge. The coat is keyed out as drawn (about #2E2520), not recoloured. Checked with check-assets.mjs --beat.",
       "scale": 0.629,
-      "placed": "82: the cats at real size (design 75 §0.5, Luna 105 → 66 units). The sheet is unchanged; its box in src/world/arrival.ts is (330,424)-(790,860) × 0.629 about its bottom-centre (560,860), so (415.3,585.8)-(704.7,860).",
+      "placed": "82: the cats at real size (design 75 §0.5, Luna 105 → 66 units). The sheet is unchanged; its box in src/world/arrival.ts is (136,197)-(596,633) × 0.629 about its bottom-centre (366,633), so (221.3,358.8)-(510.7,633): design 75 §4.2's box on the 1184 x 666 stage (86).",
       "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
@@ -367,6 +367,10 @@
     {
       "shot": "S14",
       "reason": "Optional shot, never staged by the illustrator (ticket 31's manifest.json and shot-list.md). Not delivered here; the Boy's left-facing walk stays the mirrored placeholder."
+    },
+    {
+      "shot": "S11",
+      "reason": "86: the monstera Prop (monstera.png, attempt-1 sha256 aba723ff8691fbb1e8c806508583246bf36ee563ebba39a015884c53286e7227) is taken off the stage and its file deleted (design 75 §4.2, decision 6). The backdrop paints its own monstera at (1068,227)-(1184,616), and the floor stops at x 1060 so no Actor stands over it."
     }
   ]
 }

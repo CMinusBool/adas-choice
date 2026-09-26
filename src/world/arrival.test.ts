@@ -2,13 +2,16 @@ import { describe, expect, it } from 'vitest';
 
 import {
   ARRIVAL_SECONDS,
+  CAT_MARKS,
   ENTRYWAY_MARKS,
+  STAGES,
   actorView,
   actorsIn,
   advance,
   arrivalView,
   createWorld,
   entrywayProps,
+  isWalkable,
   vaseState,
   type ActorId,
   type World,
@@ -302,14 +305,15 @@ describe('the arrival and the rest of the apartment', () => {
 
   /*
    * 82: the cats at real size against the Boy (design 75 §0.5). Each cat-only
-   * Beat is its old box shrunk about its bottom-centre — S20 (240,430)-(450,730),
-   * S21 (330,430)-(560,790), S22 (330,424)-(790,860) — so its feet line and its
-   * middle stay where they were and only the figure gets smaller.
+   * Beat is the box its sheet was cut for shrunk about its bottom-centre, so its
+   * feet line and its middle stay where they were and only the figure gets
+   * smaller. 86 moved those bottom-centres onto the 1184 x 666 stage, to
+   * design 75 §4.2's (225,524), (286.5,574) and (366,633).
    */
   it.each([
-    ['S20', 8.5, { x: 278.325, y: 539.5, width: 133.35, height: 190.5 }],
-    ['S21', 9.8, { x: 371.975, y: 561.4, width: 146.05, height: 228.6 }],
-    ['S22', 11, { x: 415.33, y: 585.756, width: 289.34, height: 274.244 }],
+    ['S20', 8.5, { x: 158.325, y: 333.5, width: 133.35, height: 190.5 }],
+    ['S21', 9.8, { x: 213.475, y: 345.4, width: 146.05, height: 228.6 }],
+    ['S22', 11, { x: 221.33, y: 358.756, width: 289.34, height: 274.244 }],
   ] as const)('draws the cats’ Beat %s at real size, shrunk about its bottom-centre', (id, seconds, expected) => {
     const beat = arrivalView(arriving(seconds)).beats.find(playing => playing.id === id);
     expect(beat, `${id} should be playing at ${seconds} s`).toBeDefined();
@@ -337,6 +341,53 @@ describe('the arrival and the rest of the apartment', () => {
       'mira-meow',
       'luna-meow',
     ]);
+  });
+});
+
+/*
+ * 86: the Entryway on the 1184 x 666 stage its edited backdrop is scaled whole
+ * to (design 75 §2.1, §4.2). Where each Beat leaves its figure's feet is
+ * measured off the sheets by `scripts/check-entryway-handoffs.test.mjs`; these
+ * are the rules the model keeps by itself.
+ */
+describe('the Entryway on its stage', () => {
+  it('is 1184 x 666 units, the size the backdrop takes when its doors come to the one door', () => {
+    expect(STAGES.entryway).toEqual({ width: 1184, height: 666 });
+  });
+
+  it('stands every mark the script and the cats use on the hall’s floor', () => {
+    for (const [name, mark] of Object.entries(ENTRYWAY_MARKS)) {
+      expect(isWalkable('entryway', mark), `${name} (${mark.x}, ${mark.y})`).toBe(true);
+    }
+    for (const mark of CAT_MARKS.entryway) expect(isWalkable('entryway', mark), `cat mark (${mark.x}, ${mark.y})`).toBe(true);
+  });
+
+  it('keeps everybody off the painted monstera: the floor stops at x 1060', () => {
+    expect(isWalkable('entryway', { x: 1059, y: 540 })).toBe(true);
+    expect(isWalkable('entryway', { x: 1062, y: 540 })).toBe(false);
+    expect(isWalkable('entryway', { x: 1120, y: 620 })).toBe(false);
+  });
+
+  it('keeps feet off the wall: nobody stands above the floor line but in the front doorway', () => {
+    expect(isWalkable('entryway', { x: 117, y: 426 })).toBe(true);
+    expect(isWalkable('entryway', { x: 400, y: 440 })).toBe(false);
+  });
+
+  it('has each of them standing still, their walk over, the moment a Beat takes them', () => {
+    let world = advance(createWorld(plainArrival), { type: 'arrival-started' });
+    const started = new Set<string>();
+    for (let seconds = 0; seconds < ARRIVAL_SECONDS; seconds += 0.016) {
+      world = run(world, 0.016);
+      for (const beat of arrivalView(world).beats) {
+        const key = `${beat.id}@${beat.frame}`;
+        if (started.has(beat.id)) continue;
+        started.add(beat.id);
+        for (const actor of beat.hides) {
+          expect(actorView(world, actor)!.moving, `${actor} as ${key} starts`).toBe(false);
+        }
+      }
+    }
+    expect([...started].sort()).toEqual(['S15', 'S16', 'S17', 'S18', 'S19', 'S20', 'S21', 'S22']);
   });
 });
 

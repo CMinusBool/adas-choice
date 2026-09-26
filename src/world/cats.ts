@@ -57,13 +57,14 @@ export const CAT_CLEARANCE = 170;
  */
 export const CAT_MARKS: Record<RoomId, readonly Point[]> = {
   // The hallway: the coat corner, the runner in front of the Game Room door,
-  // the hall table where the vase stands, and the monstera's end.
+  // the hall table where the vase stands, and the floor's far end short of the
+  // painted monstera. 86: design 75 §4.2's, on the 1184 x 666 stage.
   entryway: [
-    { x: 200, y: 690 },
-    { x: 560, y: 840 },
-    { x: 940, y: 680 },
-    { x: 1160, y: 830 },
-    { x: 1420, y: 690 },
+    { x: 136, y: 491 },
+    { x: 366, y: 616 },
+    { x: 630, y: 483 },
+    { x: 780, y: 608 },
+    { x: 1018, y: 491 },
   ],
   // The Game Room: the sideboard's cat bed is Luna's mark in the design note,
   // and the other four keep out of the low table's notch.

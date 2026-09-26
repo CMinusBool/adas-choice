@@ -71,42 +71,43 @@ describe('an Actor crossing a Room', () => {
     const sent = advance(createWorld(plainArrival), {
       type: 'actor-sent',
       actor: 'boy',
-      goal: { x: 1380, y: 680 },
+      goal: { x: 1000, y: 560 },
     });
     expect(boy(sent).moving).toBe(true);
 
     const arrived = runUntil(sent, world => !boy(world).moving);
-    expect(boy(arrived).at).toEqual({ x: 1380, y: 680 });
+    expect(boy(arrived).at).toEqual({ x: 1000, y: 560 });
     expect(boy(arrived).progress).toBe(1);
   });
 
   it('walks around what stands between it and the goal instead of through it', () => {
-    // The doorway is a tongue of floor 36 units deep reaching back to the mat,
-    // with the wall and the bench beside it (ticket 14's §3.2). A straight line
-    // from the mat to the far end of the hall would cross that wall, so the
-    // walk has to come down out of the doorway first and turn there.
+    // The doorway is a tongue of floor 30 units deep reaching back to the mat,
+    // with the wall and the bench beside it (ticket 14's §3.2, on 86's 1184 x
+    // 666 stage). A straight line from the mat to the far end of the hall would
+    // cross that wall, so the walk has to come down out of the doorway first
+    // and turn there.
     const inTheDoorway = advance(createWorld(plainArrival), { type: 'motion-toggled' });
-    const onTheMat = advance(inTheDoorway, { type: 'actor-sent', actor: 'boy', goal: { x: 170, y: 612 } });
+    const onTheMat = advance(inTheDoorway, { type: 'actor-sent', actor: 'boy', goal: { x: 117, y: 426 } });
     const moving = advance(onTheMat, { type: 'motion-toggled' });
-    expect(boy(moving).at).toEqual({ x: 170, y: 612 });
+    expect(boy(moving).at).toEqual({ x: 117, y: 426 });
 
-    const sent = advance(moving, { type: 'actor-sent', actor: 'boy', goal: { x: 1380, y: 660 } });
+    const sent = advance(moving, { type: 'actor-sent', actor: 'boy', goal: { x: 1000, y: 540 } });
     let furthestInTheDoorway = 0;
     const arrived = runUntil(sent, world => {
       const at = boy(world).at;
-      if (at.y < 640) furthestInTheDoorway = Math.max(furthestInTheDoorway, at.x);
+      if (at.y < 449) furthestInTheDoorway = Math.max(furthestInTheDoorway, at.x);
       return !boy(world).moving;
     });
-    expect(boy(arrived).at).toEqual({ x: 1380, y: 660 });
-    // He is out of the doorway before its jamb at x 300, not through the wall.
-    expect(furthestInTheDoorway).toBeLessThan(310);
+    expect(boy(arrived).at).toEqual({ x: 1000, y: 540 });
+    // He is out of the doorway before its edge at x 197, not through the wall.
+    expect(furthestInTheDoorway).toBeLessThan(207);
   });
 
   it('reports progress climbing from nothing to the whole route', () => {
     const sent = advance(createWorld(plainArrival), {
       type: 'actor-sent',
       actor: 'boy',
-      goal: { x: 1380, y: 690 },
+      goal: { x: 1000, y: 570 },
     });
     expect(boy(sent).progress).toBe(0);
     const halfway = runUntil(sent, world => boy(world).progress > 0.5);
@@ -116,9 +117,9 @@ describe('an Actor crossing a Room', () => {
 
   it('turns to face the way it is walking', () => {
     const world = createWorld(plainArrival);
-    const rightwards = advance(world, { type: 'actor-sent', actor: 'boy', goal: { x: 1380, y: 690 } });
+    const rightwards = advance(world, { type: 'actor-sent', actor: 'boy', goal: { x: 1000, y: 570 } });
     expect(boy(run(rightwards, 200)).facing).toBe('right');
-    const leftwards = advance(rightwards, { type: 'actor-sent', actor: 'boy', goal: { x: 160, y: 840 } });
+    const leftwards = advance(rightwards, { type: 'actor-sent', actor: 'boy', goal: { x: 120, y: 600 } });
     expect(boy(run(leftwards, 200)).facing).toBe('left');
   });
 
@@ -126,7 +127,7 @@ describe('an Actor crossing a Room', () => {
     const sent = advance(createWorld(plainArrival), {
       type: 'actor-sent',
       actor: 'boy',
-      goal: { x: 1380, y: 690 },
+      goal: { x: 1000, y: 570 },
       cycle: 'run',
     });
     expect(boy(sent).cycle).toBe('run');
@@ -281,9 +282,9 @@ describe('an Actor when the apartment is not allowed to move', () => {
 
   it('takes its destination at once rather than walking to it', () => {
     const world = createWorld(askedForStillness);
-    const sent = advance(world, { type: 'actor-sent', actor: 'boy', goal: { x: 1380, y: 690 } });
+    const sent = advance(world, { type: 'actor-sent', actor: 'boy', goal: { x: 1000, y: 570 } });
     expect(sent).not.toBe(world);
-    expect(boy(sent).at).toEqual({ x: 1380, y: 690 });
+    expect(boy(sent).at).toEqual({ x: 1000, y: 570 });
     expect(boy(sent).moving).toBe(false);
     expect(boy(sent).cycle).toBe('idle');
   });
@@ -297,12 +298,12 @@ describe('an Actor when the apartment is not allowed to move', () => {
     const sent = advance(createWorld(plainArrival), {
       type: 'actor-sent',
       actor: 'boy',
-      goal: { x: 1380, y: 690 },
+      goal: { x: 1000, y: 570 },
     });
     const walking = run(sent, 500);
     expect(boy(walking).moving).toBe(true);
     const stopped = advance(walking, { type: 'motion-toggled' });
-    expect(boy(stopped).at).toEqual({ x: 1380, y: 690 });
+    expect(boy(stopped).at).toEqual({ x: 1000, y: 570 });
     expect(boy(stopped).moving).toBe(false);
   });
 
@@ -310,16 +311,16 @@ describe('an Actor when the apartment is not allowed to move', () => {
     const sent = advance(createWorld(plainArrival), {
       type: 'actor-sent',
       actor: 'boy',
-      goal: { x: 1380, y: 690 },
+      goal: { x: 1000, y: 570 },
     });
     const stopped = advance(run(sent, 500), { type: 'reduced-motion-changed', reducedMotion: true });
-    expect(boy(stopped).at).toEqual({ x: 1380, y: 690 });
+    expect(boy(stopped).at).toEqual({ x: 1000, y: 570 });
     expect(boy(stopped).moving).toBe(false);
   });
 
   it('walks again once a reduced-motion visitor turns motion on deliberately', () => {
     const playing = advance(createWorld(askedForStillness), { type: 'motion-toggled' });
-    const sent = advance(playing, { type: 'actor-sent', actor: 'boy', goal: { x: 1380, y: 690 } });
+    const sent = advance(playing, { type: 'actor-sent', actor: 'boy', goal: { x: 1000, y: 570 } });
     expect(boy(sent).moving).toBe(true);
     expect(boy(run(sent, 200)).cycle).toBe('walk');
   });
@@ -335,7 +336,7 @@ describe('the world the DOM layer is handed back', () => {
     const sent = advance(createWorld(plainArrival), {
       type: 'actor-sent',
       actor: 'boy',
-      goal: { x: 1380, y: 690 },
+      goal: { x: 1000, y: 570 },
     });
     const walking = run(sent, 500);
     expect(advance(walking, { type: 'actor-tick', now: clock })).toBe(walking);
