@@ -78,13 +78,15 @@ export const CAT_MARKS: Record<RoomId, readonly Point[]> = {
   // two Breakable marks, so a cat is already where ticket 09 wants one. 63: the
   // comedy bay went to the corner right of the screen, so its mark went with
   // it, and the right-hand mark it would have crowded came to the middle of the
-  // floor, under the screen.
+  // floor, under the screen. 92: on the 1360 x 765 stage, design 75 §4.4 —
+  // the free marks by R1, the cabinet-left mark off the re-spaced cabinet —
+  // and the comedy-bay mark design 80 §3.3's (1155, 551).
   cinema: [
-    { x: 200, y: 700 },
-    { x: 392, y: 850 },
-    { x: 1380, y: 675 },
-    { x: 1180, y: 840 },
-    { x: 960, y: 700 },
+    { x: 196, y: 546 },
+    { x: 322, y: 667 },
+    { x: 1155, y: 551 },
+    { x: 960, y: 655 },
+    { x: 789, y: 546 },
   ],
   // The Activity Room: the note's own three rest marks, the door a cat comes
   // in through, and the floor between the stations.

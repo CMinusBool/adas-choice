@@ -94,15 +94,19 @@ const WALKABLE: Record<RoomId, Polygon> = {
   // the Boy walks round the furniture the Room actually has rather than
   // through it. The beanbags are not cut out on purpose: an Actor above them
   // draws behind and one below draws in front, which is the depth cue.
+  // 92: on the 1360 x 765 stage, design 75 §4.4 as design 80 §3.3 re-lays it:
+  // the right edge at 1257, so a Boy standing on it stays on the stage, and the
+  // notch's top at 580, so the Poster board's middle mark is walkable behind
+  // the cabinet.
   cinema: [
-    { x: 100, y: 660 },
-    { x: 1560, y: 660 },
-    { x: 1560, y: 860 },
-    { x: 575, y: 860 },
-    { x: 575, y: 742 },
-    { x: 425, y: 742 },
-    { x: 425, y: 860 },
-    { x: 100, y: 860 },
+    { x: 118, y: 515 },
+    { x: 1257, y: 515 },
+    { x: 1257, y: 730 },
+    { x: 500, y: 730 },
+    { x: 500, y: 580 },
+    { x: 360, y: 580 },
+    { x: 360, y: 730 },
+    { x: 118, y: 730 },
   ],
   // 16: the Activity Room, from `design/12-activity-room.md` §4.2 — a band
   // below the floor line at y 620, with a bite out of its front edge for each
@@ -488,9 +492,11 @@ const HOMES: Partial<Record<RoomId, Partial<Record<ActorId, Home>>>> = {
   },
   // 17: the Cinema Room — the visitor walks in on the two of them already sat
   // down in front of the screen, each turned a little towards the other.
+  // 92: seated marks, since S26 and S27's last frames stand in for the sprites
+  // there (design 13: "already seated").
   cinema: {
-    boy: { at: CINEMA_MARKS.boySeat, facing: 'left' },
-    girl: { at: CINEMA_MARKS.girlSeat, facing: 'right' },
+    boy: { at: CINEMA_MARKS.boySeat, facing: 'left', seated: true },
+    girl: { at: CINEMA_MARKS.girlSeat, facing: 'right', seated: true },
   },
   // 34: the Game Room, `design/11-game-room.md` §4.3 — the two of them sat on
   // their poufs, which is what the seated stills S09 and S10 draw. Ticket 43's

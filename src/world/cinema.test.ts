@@ -142,18 +142,58 @@ describe('the Films each bookshelf holds', () => {
 });
 
 describe('the Cinema Room floor', () => {
-  it('opens the whole band between the screen and the board', () => {
+  // 92: the 1360 x 765 stage, design 75 §4.4 with design 80 §3.3's re-lay.
+  it('opens the whole band from the doorway to the shelves', () => {
+    expect(isWalkable('cinema', { x: 118, y: 515 })).toBe(true);
     expect(isWalkable('cinema', { x: 120, y: 700 })).toBe(true);
-    expect(isWalkable('cinema', { x: 1540, y: 850 })).toBe(true);
-    expect(isWalkable('cinema', { x: 800, y: 660 })).toBe(true);
+    expect(isWalkable('cinema', { x: 1257, y: 730 })).toBe(true);
+    expect(isWalkable('cinema', { x: 800, y: 520 })).toBe(true);
   });
 
-  it('keeps the Cast out of the reel cabinet', () => {
+  it('stops at x 1257, so a Boy on the right edge stays inside the stage', () => {
+    expect(isWalkable('cinema', { x: 1257, y: 600 })).toBe(true);
+    expect(isWalkable('cinema', { x: 1258, y: 600 })).toBe(false);
+    expect(isWalkable('cinema', { x: 1300, y: 600 })).toBe(false);
+  });
+
+  it('keeps the Cast out of the reel cabinet, whose notch starts at y 580', () => {
     // The notch the cabinet stands in: an Actor may pass behind it but never
     // through it, so the Prop and the floor agree about where the furniture is.
-    expect(isWalkable('cinema', { x: 500, y: 800 })).toBe(false);
-    expect(isWalkable('cinema', { x: 500, y: 700 })).toBe(true);
-    expect(isWalkable('cinema', { x: 612, y: 850 })).toBe(true);
+    expect(isWalkable('cinema', { x: 430, y: 600 })).toBe(false);
+    expect(isWalkable('cinema', { x: 430, y: 700 })).toBe(false);
+    expect(isWalkable('cinema', { x: 430, y: 572 })).toBe(true);
+    expect(isWalkable('cinema', { x: 542, y: 667 })).toBe(true);
+  });
+
+  it('puts the seats at the beanbags’ bottom-centres and the cabinet mark off its right edge', () => {
+    expect(CINEMA_MARKS.girlSeat).toEqual({ x: 250, y: 624 });
+    expect(CINEMA_MARKS.boySeat).toEqual({ x: 590, y: 624 });
+    expect(CINEMA_MARKS.cabinet).toEqual({ x: 542, y: 667 });
+  });
+});
+
+describe('the Boy’s errands and the projector', () => {
+  /** Design 75 §4.4: the projector drawn at × 0.78 on the cabinet top. */
+  const PROJECTOR = { x0: 383.2, y0: 446, x1: 476.8, y1: 547.4 };
+  const inside = ({ x, y }: { x: number; y: number }) =>
+    x > PROJECTOR.x0 && x < PROJECTOR.x1 && y > PROJECTOR.y0 && y < PROJECTOR.y1;
+
+  it('never puts his feet inside the projector’s drawn box, pinning a wall or fetching a reel', () => {
+    for (const shelf of CINEMA_SHELVES) {
+      let world = advance(inTheCinema(), { type: 'cinema-shelf-chosen', shelf, now: clock });
+      const feet: { x: number; y: number }[] = [];
+      world = runUntil(world, next => {
+        feet.push(who(next, 'boy').at);
+        return cinemaStep(next) === 'seated' && !who(next, 'boy').moving;
+      }, 40000);
+      world = advance(world, { type: 'cinema-film-chosen', film: filmsOn(shelf)[0], now: clock });
+      runUntil(world, next => {
+        feet.push(who(next, 'boy').at);
+        return cinemaStep(next) === 'slate';
+      }, 40000);
+      expect(feet.length).toBeGreaterThan(100);
+      expect(feet.filter(inside), shelf).toEqual([]);
+    }
   });
 });
 
@@ -164,6 +204,17 @@ describe('walking into the Cinema Room', () => {
     expect(who(world, 'girl').at).toEqual(CINEMA_MARKS.girlSeat);
     expect(isSeated(world, 'boy')).toBe(true);
     expect(isSeated(world, 'girl')).toBe(true);
+  });
+
+  it('hands both of them to their seated stills, and gets him up for a shelf', () => {
+    // 92: the Cinema's HOMES are seated marks, so `src/dom/seats.ts` shows S26
+    // and S27's last frames in place of the standing sprites while they sit.
+    const world = inTheCinema();
+    expect(who(world, 'boy').seated).toBe(true);
+    expect(who(world, 'girl').seated).toBe(true);
+    const up = advance(world, { type: 'cinema-shelf-attended', shelf: 'comedy' });
+    expect(who(up, 'boy').seated).toBe(false);
+    expect(who(up, 'girl').seated).toBe(true);
   });
 
   it('turns the two of them a little towards each other', () => {

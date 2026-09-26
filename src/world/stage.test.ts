@@ -7,6 +7,10 @@ describe('every Room has a stage of its own', () => {
     expect(Object.keys(STAGES).sort()).toEqual([...ROOM_IDS].sort());
   });
 
+  it('stands the Cinema on the 1360 x 765 stage its outpainted backdrop gives it (92)', () => {
+    expect(STAGES.cinema).toEqual({ width: 1360, height: 765 });
+  });
+
   it('keeps every stage exactly 16:9 in whole units', () => {
     for (const room of ROOM_IDS) {
       const { width, height } = STAGES[room];

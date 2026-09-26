@@ -34,6 +34,7 @@ const stage = (() => {
 const tags = [...stage.matchAll(/<[a-z]+\b[^>]*>/g)].map(([tag]) => ({
   classes: (/\bclass="([^"]*)"/.exec(tag)?.[1] ?? '').split(/\s+/),
   shelf: /\bdata-shelf="([^"]*)"/.exec(tag)?.[1],
+  seat: /\bdata-seat="([^"]*)"/.exec(tag)?.[1],
   vars: Object.fromEntries(
     [...(/\bstyle="([^"]*)"/.exec(tag)?.[1] ?? '').matchAll(/--([\w-]+):\s*([-\d.]+)/g)].map(([, name, value]) => [name, Number(value)]),
   ),
@@ -82,8 +83,16 @@ const board = propBox('cinema-board');
 /**
  * S01's floor line: the foot of its skirting board. A Prop that stands above it
  * is standing in mid-air; a Prop that hangs below it is hanging off the floor.
+ * 92: y 469 on the 1360 x 765 stage (design 80 section 2.2).
  */
-const FLOOR_LINE = 600;
+const FLOOR_LINE = 469;
+
+/** Design 75's R1, the map from the 1600 x 900 stage to the 1360 x 765 one. */
+const R1 = 0.78;
+
+const near = (actual, expected, slack, label) =>
+  assert.ok(Math.abs(actual - expected) <= slack, `${label}: ${actual} is not within ${slack} of ${expected}`);
+const bottomCentre = box => ({ x: box.x + box.w / 2, y: box.y + box.h });
 
 let model;
 let shelves;
@@ -94,7 +103,11 @@ before(async () => {
 
 describe('the Cinema Room’s screen', () => {
   test('is the sheet measured off the delivered backdrop', () => {
-    assert.deepEqual(screen, { x: 727, y: 148, w: 566, h: 316 });
+    // 36's (727, 148, 566 x 316) by R1, which ticket 91's sheet measures
+    // (606.7, 115.4, 441.4 x 246.4) on the 1360 x 765 stage.
+    assert.deepEqual(screen, { x: 607.06, y: 115.44, w: 441.48, h: 246.48 });
+    const sheet = { x: 606.7, y: 115.4, w: 441.4, h: 246.4 };
+    for (const side of ['x', 'y', 'w', 'h']) near(screen[side], sheet[side], 0.5, `the screen's ${side}`);
   });
 
   test('is in full view: no shelf and no part of the Poster board stands in front of it', () => {
@@ -137,7 +150,8 @@ describe('the marks that follow the shelves and the board', () => {
   test('stands the Boy just left of each shelf’s bay, on the floor in front of it', () => {
     for (const { shelf, button } of shelves) {
       const mark = model.CINEMA_MARKS.shelves[shelf];
-      assert.equal(mark.x, button.x - 18, shelf);
+      // 63's 18 units left of the bay, by R1 until ticket 73 re-lays the wall.
+      near(mark.x, button.x - 18 * R1, 0.01, shelf);
       assert.ok(mark.y > button.y + button.h, shelf);
       assert.equal(model.isWalkable('cinema', mark), true, shelf);
     }
@@ -164,5 +178,56 @@ describe('the marks that follow the shelves and the board', () => {
     // Where it lands when she knocks it: on the floor at the shelf's foot.
     const broken = propBox('cinema-lucky-cat-broken');
     assert.equal(overlaps(broken, { ...comedy, x: comedy.x - 40, w: comedy.w + 80, h: comedy.h + 60 }), true);
+  });
+});
+
+// 92: the Cinema on its 1360 x 765 stage, design 75 sections 4.1 (D6) and 4.4.
+describe('the Cinema Room at true size', () => {
+  test('keeps the one door: the doorway link is 142 x 350 units within 3 per cent', () => {
+    const door = propBox('cinema-door');
+    near(door.w, 142, 142 * 0.03, 'the door’s width');
+    near(door.h, 350, 350 * 0.03, 'the door’s height');
+    // Its foot is the painted floor line's doorway, left of everything on the wall.
+    assert.ok(door.x + door.w <= board.x, 'the door stands clear of the board');
+  });
+
+  test('stands the beanbags, the cabinet and the film can apart, at their true sizes', () => {
+    const girl = propBox('beanbag-girl');
+    const boy = propBox('beanbag-boy');
+    const cabinet = propBox('cinema-cabinet');
+    const can = propBox('cinema-film-can');
+    assert.deepEqual([girl, cabinet, boy].map(({ w, h }) => [w, h]), [[180, 110], [140, 100], [180, 110]]);
+    assert.deepEqual([can.w, can.h], [60, 38]);
+    for (const [a, b, label] of [[girl, cabinet, 'her beanbag and the cabinet'], [cabinet, boy, 'the cabinet and his beanbag'], [girl, boy, 'the two beanbags'], [girl, can, 'her beanbag and the can'], [boy, can, 'his beanbag and the can']]) {
+      assert.equal(overlaps(a, b), false, label);
+    }
+    // The can lies on the cabinet's top.
+    assert.equal(can.y + can.h, cabinet.y);
+    assert.ok(can.x >= cabinet.x && can.x + can.w <= cabinet.x + cabinet.w);
+  });
+
+  test('stands the projector on the cabinet top, and the reel on its front hub', () => {
+    const cabinet = propBox('cinema-cabinet');
+    const projector = propBox('cinema-projector');
+    near(projector.y + projector.h, cabinet.y, 0.5, 'the projector’s foot on the cabinet top');
+    assert.ok(projector.x >= cabinet.x && projector.x + projector.w <= cabinet.x + cabinet.w, 'the projector is on the cabinet');
+    // Design 75 section 4.4: the front hub at (440.1, 455.3), the reel 60 x 0.78 across.
+    const reel = propBox('cinema-reel');
+    near(reel.x + reel.w / 2, 440.1, 0.05, 'the reel’s centre x');
+    near(reel.y + reel.h / 2, 455.3, 0.05, 'the reel’s centre y');
+    near(reel.w, 60 * R1, 0.05, 'the reel’s size');
+    // Ticket 71, folded in: no spindles overlay any more.
+    assert.equal(tags.some(tag => tag.classes.includes('cinema-spindles')), false);
+    assert.equal(stage.includes('spindles.png'), false);
+  });
+
+  test('seats each of the two on a still whose bottom-centre is the seat mark, within 6 units', () => {
+    const seats = tags.filter(tag => tag.seat);
+    assert.deepEqual(seats.map(tag => tag.seat).sort(), ['boy', 'girl']);
+    for (const tag of seats) {
+      const at = bottomCentre(boxOf(tag.vars));
+      const mark = model.CINEMA_MARKS[`${tag.seat}Seat`];
+      assert.ok(Math.hypot(at.x - mark.x, at.y - mark.y) <= 6, `${tag.seat}'s still stands ${at.x}, ${at.y} against ${mark.x}, ${mark.y}`);
+    }
   });
 });

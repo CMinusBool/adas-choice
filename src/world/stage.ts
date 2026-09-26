@@ -37,7 +37,7 @@ export interface StageSize {
 export const STAGES: Readonly<Record<RoomId, StageSize>> = {
   entryway: { width: 1600, height: 900 },
   games: { width: 1600, height: 900 },
-  cinema: { width: 1600, height: 900 },
+  cinema: { width: 1360, height: 765 },
   activities: { width: 1600, height: 900 },
 };
 

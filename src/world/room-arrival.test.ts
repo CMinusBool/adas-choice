@@ -106,7 +106,7 @@ describe('a Room arrival', () => {
  */
 const MARKS: Readonly<Record<'games' | 'cinema' | 'activities', Readonly<Record<'boy' | 'girl', readonly [number, number, 'left' | 'right']>>>> = {
   games: { boy: [880, 775, 'left'], girl: [620, 780, 'right'] },
-  cinema: { boy: [660, 800, 'left'], girl: [320, 800, 'right'] },
+  cinema: { boy: [590, 624, 'left'], girl: [250, 624, 'right'] },
   activities: { boy: [868, 744, 'left'], girl: [762, 742, 'right'] },
 };
 
