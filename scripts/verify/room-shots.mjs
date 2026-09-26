@@ -75,14 +75,18 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import net from 'node:net';
+import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-/** Where the npx cache put Playwright on this machine. */
+/** Where the npx cache put Playwright on this machine, under `%LOCALAPPDATA%`. */
 const PLAYWRIGHT_PACKAGE =
   process.env.PLAYWRIGHT_PACKAGE ??
-  '%LOCALAPPDATA%/npm-cache/_npx/81bbc6515d992ace/node_modules/playwright/index.mjs';
+  path.join(
+    process.env.LOCALAPPDATA ?? path.join(os.homedir(), 'AppData', 'Local'),
+    'npm-cache/_npx/81bbc6515d992ace/node_modules/playwright/index.mjs',
+  );
 
 /** The two widths every Room is looked at in. */
 const WIDTHS = {
