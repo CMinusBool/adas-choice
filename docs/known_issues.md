@@ -51,3 +51,5 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [cinema] With the Boy pinning at slot 1, the seated Girl hides him from about y 379 down. (80, 2026-09-26)
 - [cinema] The Boy standing at the comedy shelf mark covers a 93 × 113-unit corner of the screen sheet. (80, 2026-09-26)
 - [cinema] The film reel crosses the poster board's bottom rail by 8.9 units, and the projector beam crosses it by a sliver. (80, 2026-09-26)
+- [cinema] The outpainted Cinema backdrop has faint 1-px dark stubs on its y=900 seam near both lower corners, and a slight plank kink under the rug at x≈360 and x≈1060 (1744-px canvas). (91, 2026-09-26)
+- [cinema] The repainted sconce is about 12 × 25 cm, the bottom edge of the true-size range. (91, 2026-09-26)
