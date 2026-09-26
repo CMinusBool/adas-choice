@@ -13,7 +13,8 @@
  * - **invitation** — the Worker mocked to answer 429, 503, 403 and a network error, and a
  *   Turnstile stub that hands over a fresh token 1.5 s after `reset()`. At 5 s after the
  *   failure, the failure message and `data-state="error"` are still on screen, in both
- *   languages, and the send button is back. A 200 still says "sent".
+ *   languages, and the send button is back; withdrawing consent then clears it. A 200
+ *   still says "sent".
  * - **hash** — `location.hash = '#/not-a-room'` from every Room ends at `#/entryway`
  *   with the Entryway's title focused, the rewrite adding no history entry, and Back
  *   returning to the Room left rather than to the junk.
@@ -291,7 +292,10 @@ async function sendOnce(browser, baseUrl, network, { language, answer }) {
       tokens: window.__turnstile.tokens,
       resets: window.__turnstile.resets,
     }));
-    return { consoleErrors, ...shown };
+    // A withdrawn consent is one of the three things that take a failure down.
+    await page.uncheck('#invite-consent');
+    const afterWithdrawn = await page.evaluate(() => document.getElementById('invite-status').textContent);
+    return { consoleErrors, ...shown, afterWithdrawn };
   } finally {
     await context.close();
   }
@@ -305,7 +309,7 @@ async function checkInvitation(browser, baseUrl, network) {
       try {
         const shown = await sendOnce(browser, baseUrl, network, { language, answer: failure.answer });
         // The fresh token must really have arrived, or the check proves nothing.
-        const ok = shown.text === wanted && shown.state === 'error' && shown.resets === 1 && shown.tokens >= 2 && shown.sendEnabled;
+        const ok = shown.text === wanted && shown.state === 'error' && shown.resets === 1 && shown.tokens >= 2 && shown.sendEnabled && shown.afterWithdrawn === '';
         readings.push({ language, answer: failure.answer, atMs: READ_AT_MS, wanted, ...shown, ok });
       } catch (error) {
         readings.push({ language, answer: failure.answer, error: error.message, ok: false });

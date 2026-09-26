@@ -176,6 +176,10 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   let turnstileWidget: string | null = null;
   let turnstileLoad: Promise<Turnstile> | null = null;
   let statusKey: CopyKey | '' = '';
+  // 101: the status line is saying why the last send failed. The fresh token
+  // `reset()` brings back leaves it standing; only the next send, a withdrawn
+  // consent or a closed dialog takes it down.
+  let sendFailed = false;
   const players: ScenePlayer[] = portals.map(portal => ({
     game: portal.dataset.game as PortalId,
     portal,
@@ -548,7 +552,12 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   async function prepareChallenge() {
     removeChallenge();
     updateSendButton();
-    if (!consent.checked || !notificationsReady || !dialog.open) return;
+    sendFailed = false;
+    if (!consent.checked || !notificationsReady || !dialog.open) {
+      // 101: withdrawing consent takes a failure message down with it.
+      if (!consent.checked && status.dataset.state === 'error') setStatus('');
+      return;
+    }
     const run = dialogRun;
     setStatus('checking');
     try {
@@ -556,7 +565,10 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
       if (run !== dialogRun || !consent.checked || !dialog.open) return;
       turnstileWidget = api.render('#turnstile-widget', {
         sitekey: config.turnstileSiteKey, action: 'play-invite', theme: 'dark', size: 'flexible', language: world.language === 'en' ? 'en' : 'zh-tw',
-        callback: token => { if (run === dialogRun && consent.checked) { turnstileToken = token; setStatus(''); updateSendButton(); } },
+        // 101: a managed widget re-solves by itself a second or two after a
+        // failed send's `reset()`; that token re-enables send and leaves the
+        // failure message alone.
+        callback: token => { if (run === dialogRun && consent.checked) { turnstileToken = token; if (!sendFailed) setStatus(''); updateSendButton(); } },
         'expired-callback': () => { turnstileToken = ''; updateSendButton(); setStatus('verifyError', true); },
         'error-callback': () => { turnstileToken = ''; updateSendButton(); setStatus('verifyError', true); }
       });
@@ -612,6 +624,9 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   dialog.addEventListener('close', () => {
     dialogRun++;
     removeChallenge();
+    // 101: a closed dialog takes its failure message with it.
+    sendFailed = false;
+    if (status.dataset.state === 'error') setStatus('');
     root.classList.remove('dialog-open');
     syncPlayers();
   });
@@ -624,6 +639,7 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     const timeout = setTimeout(() => controller.abort(), 20000);
     sending = true;
     updateSendButton();
+    sendFailed = false;
     setStatus('sending');
     try {
       const response = await fetch(config.inviteEndpoint, {
@@ -635,12 +651,14 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
       if (run !== dialogRun) return;
       if (!response.ok || result.ok !== true) {
         setStatus(response.status === 429 ? 'rateLimited' : response.status === 403 ? 'verifyError' : 'sendError', true);
+        sendFailed = true;
         turnstileToken = '';
         if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
       } else { sent = true; setStatus('sent'); removeChallenge(); }
     } catch {
       if (run === dialogRun) {
         setStatus('sendError', true);
+        sendFailed = true;
         turnstileToken = '';
         if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
       }
