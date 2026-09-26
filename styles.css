@@ -421,6 +421,16 @@ html.dialog-open { overflow: hidden; }
 .cinema-door .door-leaf { position: absolute; inset: 0; background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; }
 .cinema-door:hover, .cinema-door:focus-visible { box-shadow: 0 0 calc(var(--u) * 90) #ffca8066; outline: none; }
 .cinema-door:focus-visible .door-leaf { outline: 3px solid var(--pink); outline-offset: 2px; }
+/* 106: the Cinema's leaf swings on its hinge edge with no perspective. The shared
+   `perspective(600px)` at the foot of the file is in page pixels, so on this 142-unit
+   leaf the swinging edge stood 19% taller than the doorway at 1440 x 900 and 6% at
+   390, over the lintel and into the floor. Swung flat, the open leaf keeps the
+   doorway's height and its hinge on the opening's left edge at every width. */
+.stage-cinema[data-door] .cinema-door .door-leaf { transform-origin: left center; }
+.stage-cinema[data-door="closing"] .cinema-door .door-leaf,
+.stage-cinema[data-door="closed"] .cinema-door .door-leaf { transform: rotateY(0deg); }
+.stage-cinema[data-door="opening"] .cinema-door .door-leaf,
+.stage-cinema[data-door="open"] .cinema-door .door-leaf { transform: rotateY(-68deg); }
 
 /* P7-P9: the three shelves. Colour, crown silhouette and ornament each say the
    genre on their own, so any one of them surviving a small screen is enough —
