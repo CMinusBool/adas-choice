@@ -60,3 +60,5 @@ to exactly 1600 x 900 units at every width.
 - **The Game Room's design note is the record** (`.scratch/COOP-001-apartment/design/11-game-room.md`,
   sections 1, 3.4, 3.5, 4.1, 5.4 and 6). Being under `.scratch/`, it is not committed; this ADR is
   the part that survives the effort directory.
+
+Amended by ticket 81: each Room's stage has its own size in `STAGES`, still 16:9.
