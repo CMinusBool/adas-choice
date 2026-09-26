@@ -21,9 +21,25 @@ export const mountRooms = (dispatch: Dispatch): Painter => {
   // A hash we cannot read is rewritten rather than pushed, so a mistyped route
   // does not sit in history waiting for the back button to find it again.
   if (!isCanonicalHash(location.hash)) location.replace(roomHash(parseRoute(location.hash)));
-  addEventListener('hashchange', () => dispatch({ type: 'hash-changed', hash: location.hash }));
 
   const titleOf = (room: RoomId) => elements.get(room)!.querySelector<HTMLElement>('[data-room-title]')!;
+
+  // 101: and so is one typed while the visitor is already here — in the bar or
+  // by the page itself. `location.replace` swaps the junk entry for the Room it
+  // reads as, so history keeps only the Rooms actually walked through. Never
+  // `pushState` (ADR 0001).
+  addEventListener('hashchange', () => {
+    if (isCanonicalHash(location.hash)) {
+      dispatch({ type: 'hash-changed', hash: location.hash });
+      return;
+    }
+    const room = parseRoute(location.hash);
+    location.replace(roomHash(room));
+    dispatch({ type: 'hash-changed', hash: roomHash(room) });
+    // Junk read as the Room the visitor is already in moves nobody, so nothing
+    // else will hand the Room its focus back: the arrival rule applies anyway.
+    if (room === current) titleOf(room).focus({ preventScroll: true });
+  });
 
   // The skip link jumps within the Room the visitor is in; letting it write a
   // hash would read as an unknown route and move them somewhere else entirely.
