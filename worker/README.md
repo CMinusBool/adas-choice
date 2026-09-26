@@ -19,6 +19,8 @@ GitHub Pages hosts the page. A separate Cloudflare Worker sends the invitation e
 
 `wrangler.jsonc` accepts only `https://cminusbool.github.io` as the web origin. If the page later uses a custom hostname, update the origin allowlist, Turnstile hostname restrictions, and the page Content Security Policy accordingly. Do not add wildcard or `null` origins.
 
+The widget refuses every hostname it does not list — on `localhost` Turnstile answers error 110200, which it paints as "Unable to connect to website" — and the Worker accepts only the HTTPS origin above, so a real Invitation can be sent only from the published page. On `vite preview` the dialog takes the widget down and says, in both languages, that the security check can't load at this address.
+
 ## Local checks
 
 `npm test` uses fake provider responses and never sends email. `npm run check` packages the Worker without deploying. `.dev.vars.example` contains only names and empty values; any actual local `.dev.vars` stays ignored.
