@@ -25,6 +25,13 @@
 // size: the cat in that last frame stands at the Actor's `data-height`, ± 5 %.
 // And every Beat the model plays declares the grid its sheet really has, which
 // is what S19 at 4 frames of an 8-frame sheet got wrong (two squashed Girls).
+//
+// 105: the Boy and the Girl too. In every frame that hands one of them to or
+// from a Beat, the figure the sheet draws stands at the Actor's `data-height`,
+// ± 5 %, so nobody grows or shrinks as a sprite gives way to a Beat. And the
+// backpack S15 sets down is drawn exactly once from the moment it leaves his
+// back: by S15 while it draws the bag, then by the Prop, which stands where
+// S15's last bag frame leaves it and at the size that frame draws it.
 import { before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -51,6 +58,21 @@ const TICK_MS = 16;
  * their shoes never cross x 215 of the 438-px cell.
  */
 const DUET_COLUMNS = { S16: { boy: [0, 215], girl: [215, 438] } };
+/**
+ * Which columns a duet figure's height is read across: the Boy's hair crosses
+ * x 215 in the first frames, so the Girl's head is read right of x 225.
+ */
+const DUET_HEADS = { S16: { boy: [0, 215], girl: [225, 438] } };
+
+/**
+ * Where S15 draws the backpack once it is off his back, in its 336 × 570 cell.
+ *
+ * From frame 5 he holds it by the handle, down at his right, and from frame 8
+ * he has let go and stood up. In frames 5–7 everything right of x 189 (the
+ * bag's own left edge, which the toe of his shoe touches) and below y 403
+ * (under his fingertips) is the bag.
+ */
+const BAG = { beat: 'S15', frames: [4, 5, 6], window: { x: 189, y: 403 } };
 
 /** Each cat's own Beat, which draws her climbing out of the backpack. */
 const CAT_BEATS = { mica: 'S20', mira: 'S21', luna: 'S22' };
@@ -112,15 +134,16 @@ function figureFeet(beat, actor) {
   };
 }
 
-/** How tall the figure in `beat`'s current frame is drawn, in stage units. */
-function figureHeight(beat) {
+/** How tall the actor's figure in `beat`'s current frame is drawn, in stage units. */
+function figureHeight(beat, actor) {
   const { image, columns, cellWidth, cellHeight } = sheetOf(beat.id);
   const left = (beat.frame % columns) * cellWidth;
   const top = Math.floor(beat.frame / columns) * cellHeight;
+  const [from, to] = DUET_HEADS[beat.id]?.[actor] ?? [0, cellWidth];
   let first = -1;
   let last = -1;
   for (let y = 0; y < cellHeight; y++) {
-    for (let x = 0; x < cellWidth; x++) {
+    for (let x = from; x < to; x++) {
       if (image.data[((top + y) * image.width + left + x) * 4 + 3] >= 128) {
         if (first < 0) first = y;
         last = y;
@@ -131,31 +154,100 @@ function figureHeight(beat) {
   return (last + 1 - first) * (beat.box.height / cellHeight);
 }
 
+/** The opaque box of `image`'s pixels inside a rectangle, in its px. */
+function opaqueBox(image, left, top, right, bottom) {
+  let x0 = Infinity;
+  let y0 = Infinity;
+  let x1 = -Infinity;
+  let y1 = -Infinity;
+  for (let y = top; y < bottom; y++) {
+    for (let x = left; x < right; x++) {
+      if (image.data[(y * image.width + x) * 4 + 3] >= 128) {
+        x0 = Math.min(x0, x);
+        y0 = Math.min(y0, y);
+        x1 = Math.max(x1, x + 1);
+        y1 = Math.max(y1, y + 1);
+      }
+    }
+  }
+  return { x0, y0, x1, y1 };
+}
+
+/** Where S15's current frame draws the backpack on the stage. */
+function bagInBeat(beat) {
+  const { image, columns, cellWidth, cellHeight } = sheetOf(beat.id);
+  const left = (beat.frame % columns) * cellWidth;
+  const top = Math.floor(beat.frame / columns) * cellHeight;
+  const px = opaqueBox(image, left + BAG.window.x, top + BAG.window.y, left + cellWidth, top + cellHeight);
+  const perX = beat.box.width / cellWidth;
+  const perY = beat.box.height / cellHeight;
+  return {
+    x0: beat.box.x + (px.x0 - left) * perX,
+    x1: beat.box.x + (px.x1 - left) * perX,
+    y0: beat.box.y + (px.y0 - top) * perY,
+    y1: beat.box.y + (px.y1 - top) * perY,
+  };
+}
+
+/** Where the backpack Prop draws the bag, shut, on the stage: its box in `index.html` over its sheet's first cell. */
+function bagOfProp() {
+  const tag = /<[^>]*data-prop="backpack"[^>]*>/.exec(indexHtml);
+  assert.ok(tag, 'index.html has no backpack Prop');
+  const vars = Object.fromEntries([...tag[0].matchAll(/--([xywh]):([-\d.]+)/g)].map(([, side, value]) => [side, Number(value)]));
+  const file = /data-still="assets\/entryway\/([\w-]+\.png)"/.exec(tag[0])[1];
+  const entry = manifest.assets.find(asset => asset.file === file);
+  const [cellWidth, cellHeight] = entry.frame.split('x').map(Number);
+  const px = opaqueBox(decodePng(read(`public/assets/entryway/${file}`)), 0, 0, cellWidth, cellHeight);
+  return {
+    x0: vars.x + px.x0 * (vars.w / cellWidth),
+    x1: vars.x + px.x1 * (vars.w / cellWidth),
+    y0: vars.y + px.y0 * (vars.h / cellHeight),
+    y1: vars.y + px.y1 * (vars.h / cellHeight),
+  };
+}
+
 const gap = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
 const fmt = p => `(${p.x.toFixed(1)}, ${p.y.toFixed(1)})`;
 
 let handOffs;
 /** Every Beat the model played, by id: the grid it declared and its last frame shown. */
 let played;
+/** The Boy's and the Girl's Beat frames at each of their hand-offs, and how tall each draws them. */
+let handedFrames;
+/** At every tick from S15's first bag frame on: who draws the backpack, and the last S15 frame that did. */
+let bagTicks;
+let lastBagFrame;
 
 before(async () => {
   const world = await loadWorldModel();
-  const { ARRIVAL_SECONDS, actorView, advance, arrivalView, createWorld } = world;
+  const { ARRIVAL_SECONDS, actorView, advance, arrivalView, createWorld, entrywayProps } = world;
   let state = advance(createWorld({ hash: '', storedLanguage: null, reducedMotion: false }), { type: 'arrival-started' });
   const last = Object.fromEntries(ACTORS.map(actor => [actor, { at: null, beat: null }]));
   handOffs = [];
+  handedFrames = [];
+  bagTicks = [];
+  lastBagFrame = null;
   played = new Map();
   for (let now = TICK_MS; now <= (ARRIVAL_SECONDS + 1) * 1000; now += TICK_MS) {
     state = advance(state, { type: 'actor-tick', now });
     const view = arrivalView(state);
     const seconds = view.seconds;
     for (const beat of view.beats) played.set(beat.id, beat);
+    const setting = view.beats.find(beat => beat.id === BAG.beat && BAG.frames.includes(beat.frame));
+    if (setting) lastBagFrame = setting;
+    if (setting || bagTicks.length) bagTicks.push({ seconds, beat: Boolean(setting), prop: entrywayProps(state).backpack !== 'carried' });
     for (const actor of ACTORS) {
       const standing = actorView(state, actor);
       // A cat is nowhere until she lands; the Boy and the Girl are nowhere until they walk in.
       const at = standing && standing.room === 'entryway' ? standing.at : null;
       const here = { at, beat: standIn(view, actor) };
       const before = last[actor];
+      if (!CAT_BEATS[actor]) {
+        const frames = [];
+        if (here.beat && here.beat.id !== before.beat?.id) frames.push(here.beat);
+        if (before.beat && before.beat.id !== here.beat?.id) frames.push(before.beat);
+        for (const beat of frames) handedFrames.push({ actor, seconds, id: beat.id, frame: beat.frame, drawn: figureHeight(beat, actor) });
+      }
       if (!before.beat && here.beat && before.at) {
         handOffs.push({ actor, seconds, what: `sprite → ${here.beat.id}`, from: before.at, to: figureFeet(here.beat, actor) });
       } else if (before.beat && !here.beat && here.at) {
@@ -185,7 +277,7 @@ describe('the cats climb out of the backpack at their own size', () => {
     test(`${id}'s last frame draws the ${actor} at her data-height, ± ${HEIGHT_TOLERANCE * 100} %`, () => {
       const beat = played.get(id);
       assert.ok(beat, `${id} never played`);
-      const drawn = figureHeight(beat);
+      const drawn = figureHeight(beat, actor);
       const wanted = dataHeight(actor);
       assert.ok(
         Math.abs(drawn - wanted) <= wanted * HEIGHT_TOLERANCE,
@@ -212,5 +304,43 @@ describe('the Entryway arrival hands every Actor to and from its Beats without a
       .filter(one => one.distance > MAX_JUMP)
       .map(one => `${one.actor} ${one.what} at ${one.seconds.toFixed(2)} s: ${fmt(one.from)} → ${fmt(one.to)}, ${one.distance.toFixed(1)} units`);
     assert.deepEqual(jumps, []);
+  });
+});
+
+describe('the Boy and the Girl keep their own height through every Beat they are handed to', () => {
+  test(`every frame that hands either of them over draws them at their data-height, ± ${HEIGHT_TOLERANCE * 100} %`, t => {
+    const seen = new Set(handedFrames.map(one => one.id));
+    assert.deepEqual([...seen].sort(), ['S15', 'S16', 'S17', 'S18', 'S19']);
+    for (const one of handedFrames) {
+      t.diagnostic(`${one.actor} ${one.id} frame ${one.frame + 1} at ${one.seconds.toFixed(2)} s: ${one.drawn.toFixed(1)} units`);
+    }
+    const wrong = handedFrames
+      .filter(one => Math.abs(one.drawn - dataHeight(one.actor)) > dataHeight(one.actor) * HEIGHT_TOLERANCE)
+      .map(one => `${one.id} frame ${one.frame + 1} draws the ${one.actor} ${one.drawn.toFixed(1)} units tall; the Actor is ${dataHeight(one.actor)}`);
+    assert.deepEqual(wrong, []);
+  });
+});
+
+describe('the backpack S15 sets down stays where it was set down', () => {
+  test('from S15’s first bag frame on, the bag is drawn exactly once at every tick: by S15, then by the Prop', () => {
+    assert.ok(lastBagFrame, `${BAG.beat} never drew the bag`);
+    const twice = bagTicks.filter(one => one.beat && one.prop).map(one => `both at ${one.seconds.toFixed(3)} s`);
+    const never = bagTicks.filter(one => !one.beat && !one.prop).map(one => `neither at ${one.seconds.toFixed(3)} s`);
+    assert.deepEqual([...twice, ...never], []);
+  });
+
+  test(`the Prop stands where S15’s last bag frame leaves the bag, within ${MAX_JUMP} units, at its drawn height ± ${HEIGHT_TOLERANCE * 100} %`, t => {
+    const beat = bagInBeat(lastBagFrame);
+    const prop = bagOfProp();
+    const base = box => ({ x: (box.x0 + box.x1) / 2, y: box.y1 });
+    const tall = box => box.y1 - box.y0;
+    t.diagnostic(`S15 frame ${lastBagFrame.frame + 1} leaves the bag at (${beat.x0.toFixed(1)}, ${beat.y0.toFixed(1)})–(${beat.x1.toFixed(1)}, ${beat.y1.toFixed(1)})`);
+    t.diagnostic(`the Prop draws it at (${prop.x0.toFixed(1)}, ${prop.y0.toFixed(1)})–(${prop.x1.toFixed(1)}, ${prop.y1.toFixed(1)})`);
+    const moved = gap(base(beat), base(prop));
+    assert.ok(moved <= MAX_JUMP, `the bag's base moves ${moved.toFixed(1)} units, ${fmt(base(beat))} → ${fmt(base(prop))}`);
+    assert.ok(
+      Math.abs(tall(prop) - tall(beat)) <= tall(beat) * HEIGHT_TOLERANCE,
+      `the bag is ${tall(beat).toFixed(1)} units tall in S15 and ${tall(prop).toFixed(1)} as the Prop`,
+    );
   });
 });
