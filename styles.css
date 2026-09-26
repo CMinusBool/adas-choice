@@ -1561,3 +1561,22 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
    travelling. The reduced-motion block at the top of the file covers the
    system's own request, scoped to a visitor who has not overruled it. */
 .motion-off .stage .door-leaf, .motion-off .stage .a-door-leaf { transition: none; }
+/* 74: no Room scrolls at 1440 x 900, in either language. From 1080 px up the
+   footer already rides in the header band (67), so what is left under the
+   header is the Room: its chrome and its stage. The stages keep the size they
+   had at 1440 x 900 (Entryway 1060 x 596, Game Room 880 x 495, Cinema
+   1024 x 576, Activity Room 1173 x 660) - design 75's px-per-unit table and
+   the 44 px hit floors it derives stand on those - and the chrome moves
+   instead, the way the Game Room already fits. Below 1080 px nothing here
+   applies, and the narrow Rooms scroll as they always have.
+   Measured with room-shots' fit check and in English with Playwright; the
+   numbers are in ticket 74. */
+@media (min-width: 1080px) {
+  /* The Entryway: the caption stays under the stage, where design 10 put it.
+     The padding and the gap above the stage give back what the caption
+     costs, and its measure opens to one line in both languages, so the
+     Room is the same height in each: title, stage, caption. */
+  #room-entryway { padding: 1.1rem 0 1rem; }
+  #room-entryway .entryway-stage { margin-top: 1rem; }
+  #room-entryway .stage-caption { max-width: 72ch; margin-top: .8rem; }
+}
