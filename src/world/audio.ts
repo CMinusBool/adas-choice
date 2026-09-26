@@ -46,6 +46,17 @@ export interface AudioSlice {
   readonly filmPlaying: boolean;
 }
 
+/**
+ * 101: Does the apartment ship anything to hear?
+ *
+ * The header's sound control is offered only when it does. With every tier
+ * empty it would change nothing anyone can hear, so it stays hidden — and so
+ * out of the Tab order — until a ticket adds the first sound to any tier.
+ */
+export function anySoundShips(sounds: { readonly [tier in AudioTier]: Readonly<Record<string, string | undefined>> }): boolean {
+  return Object.values(sounds).some(tier => Object.values(tier).some(Boolean));
+}
+
 /** The apartment as the visitor finds it: silent, and waiting to be touched. */
 export function createAudio(): AudioSlice {
   return { interacted: false, muted: false, musicSourcesOn: [], filmPlaying: false };

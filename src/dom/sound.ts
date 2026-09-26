@@ -1,5 +1,5 @@
 import { copy, type CopyKey } from '../copy';
-import { ROOM_IDS, isAudible, isMusicSourceOn, isRoomMusicAudible, soundIsOn, type AudioSlice, type Language, type RoomId, type World } from '../world';
+import { ROOM_IDS, anySoundShips, isAudible, isMusicSourceOn, isRoomMusicAudible, soundIsOn, type AudioSlice, type Language, type RoomId, type World } from '../world';
 import { byId, type Dispatch, type Painter } from './painter';
 
 /**
@@ -117,7 +117,9 @@ export function setFilmAudio(name: string | null): void {
 export const mountSound = (dispatch: Dispatch): Painter => {
   const toggle = byId<HTMLButtonElement>('sound-toggle');
   toggle.addEventListener('click', () => dispatch({ type: 'sound-toggled' }));
-  toggle.hidden = false;
+  // 101: offered only once there is something to hear. `hidden` also takes it
+  // out of the Tab order, in either language.
+  toggle.hidden = !anySoundShips(SOUNDS);
 
   // Browsers refuse playback until the visitor has acted, and so does the
   // model. One listener, the first of either kind, and then never again.
