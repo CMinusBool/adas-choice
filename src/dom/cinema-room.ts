@@ -2,12 +2,14 @@ import { copy } from '../copy';
 import {
   CINEMA_SHELVES,
   attendedShelf,
+  capsGoneShelf,
   cinemaStep,
   expandedPoster,
   filmById,
   loadedReel,
   pinnedPosters,
   posterDetails,
+  posterSlot,
   rollingFilm,
   rummagingShelf,
   type CinemaShelf,
@@ -284,11 +286,11 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
    * see it; this copies that declaration's surface and measured frame onto the
    * Poster, and `styles.css` clips the image to the frame until it expands.
    */
-  function buildPoster(film: FilmId, slot: number, language: Language): HTMLElement {
+  function buildPoster(film: FilmId, language: Language): HTMLElement {
     const element = document.createElement('button');
     element.type = 'button';
     element.className = 'cinema-poster';
-    element.dataset.posterSlot = String(slot + 1);
+    element.dataset.posterSlot = String(posterSlot(film));
     element.dataset.film = film;
     element.dataset.shelf = filmById(film).shelf;
     element.innerHTML =
@@ -309,16 +311,23 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
    *
    * Slots already holding the right Film are left alone, so a Poster unrolls
    * once — when its pin Beat finishes — and a language change rewrites captions
-   * rather than tearing the wall down and hanging it again.
+   * rather than tearing the wall down and hanging it again. 73: he pins right to
+   * left, so a new Poster goes in ahead of the ones already up, keeping the
+   * markup — and so the Tab order — in slot order, left to right.
    */
   function paintPosters(pinned: readonly FilmId[], language: Language, pinning: boolean) {
-    let kept = 0;
-    while (kept < posters.length && kept < pinned.length && posters[kept].dataset.film === pinned[kept]) kept += 1;
-    for (const gone of posters.splice(kept)) gone.remove();
-    for (let slot = kept; slot < pinned.length; slot += 1) {
-      const element = buildPoster(pinned[slot], slot, language);
+    const kept = posters.filter(poster => pinned.includes(poster.dataset.film as FilmId));
+    for (const gone of posters.filter(poster => !kept.includes(poster))) gone.remove();
+    posters.splice(0, posters.length);
+    for (const film of pinned) {
+      const up = kept.find(poster => poster.dataset.film === film);
+      if (up) {
+        posters.push(up);
+        continue;
+      }
+      const element = buildPoster(film, language);
+      slots?.insertBefore(element, kept.find(poster => Number(poster.dataset.posterSlot) > posterSlot(film)) ?? null);
       posters.push(element);
-      slots?.append(element);
       // Silent when the wall is simply found this way — walking back into the
       // Room is not a Poster being pinned.
       if (pinning) {
@@ -408,6 +417,7 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
 
   let paintedAttention: CinemaShelf | null | undefined;
   let paintedRummage: CinemaShelf | null | undefined;
+  let paintedCapsGone: CinemaShelf | null | undefined;
   let paintedStep: CinemaStep | undefined;
   let paintedPinned: readonly FilmId[] | undefined;
   let paintedLanguage: Language | undefined;
@@ -428,6 +438,17 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
     if (paintedRummage !== rummaging) {
       paintedRummage = rummaging;
       for (const [shelf, element] of shelves) element.classList.toggle('is-rummaging', shelf === rummaging);
+    }
+
+    // 73: the shelf he took three tubes from shows its caps-gone still over
+    // the full one; every other shelf is full (design 80 section 4).
+    const capsGone = capsGoneShelf(world);
+    if (paintedCapsGone !== capsGone) {
+      paintedCapsGone = capsGone;
+      for (const [shelf, element] of shelves) {
+        const still = element.querySelector<HTMLElement>('.shelf-art-caps-gone');
+        if (still) still.hidden = shelf !== capsGone;
+      }
     }
 
     const step = cinemaStep(world);

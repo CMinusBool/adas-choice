@@ -373,8 +373,9 @@ html.dialog-open { overflow: hidden; }
    its own `--scale`, and inside it `--note-u` is the note's unit at that scale —
    so every number written inside a shelf or the board below stays the note's,
    and only the box in `index.html` is the scaled one. `--u` is still the stage
-   unit in there, as it is everywhere on the stage. S01's walls either side of
-   the screen are narrower than the note's shelves and board. */
+   unit in there, as it is everywhere on the stage. 73: the shelves are at true
+   size and carry no `--scale`, so their `--note-u` is the stage unit; the board
+   keeps `--scale: .871`, design 13's board at exactly true size (design 72). */
 .stage-cinema .cinema-shelf, .stage-cinema .cinema-board { --note-u: calc(var(--u) * var(--scale, 1)); }
 /* The stage swallows pointer events so the Cast never blocks a click; the
    Props the visitor can actually use take theirs back. */
@@ -414,11 +415,16 @@ html.dialog-open { overflow: hidden; }
 .cinema-shelf[data-shelf="romance"] { --glow: #f5a3c5; }
 .cinema-shelf[data-shelf="horror"] { --glow: #8fd14f; }
 /* Each image is its shelf plus the ornament on its crown, so it is taller and
-   wider than the 120 x 380 button: it stands on the button's base, centred,
-   at the `--art-w` x `--art-h` stage units its own element declares. */
-.cinema-shelf .shelf-art { position: absolute; bottom: 0; left: calc(var(--note-u) * (120 - var(--art-w)) / 2); width: calc(var(--note-u) * var(--art-w)); height: calc(var(--note-u) * var(--art-h)); }
+   wider than the 80-wide button: it stands on the button's base, centred,
+   at the `--art-w` x `--art-h` stage units its own element declares. 73: the
+   caps-gone still is a second `.shelf-art` in the same box, over the full one,
+   shown by `src/dom/cinema-room.ts` taking its `hidden` away (design 80 §4).
+   The swap is instant, so it needs no motion opt-out. */
+.cinema-shelf .shelf-art { position: absolute; bottom: 0; left: calc(var(--note-u) * (80 - var(--art-w)) / 2); width: calc(var(--note-u) * var(--art-w)); height: calc(var(--note-u) * var(--art-h)); }
 /* P21: the brass plaque on each plinth, muted until the shelf is attended. */
-.cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--note-u) * 12); width: calc(var(--note-u) * 100); padding: calc(var(--note-u) * 2) 0; border-radius: calc(var(--note-u) * 4); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--note-u) * 20); line-height: 1.2; text-align: center; opacity: .78; transition: opacity .2s; }
+/* 73: design 72's P21 on the plinth, 64 x 20 units, 16 above the base, one
+   line of 14-unit type. */
+.cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--note-u) * 16); width: calc(var(--note-u) * 64); height: calc(var(--note-u) * 20); padding: 0; border-radius: calc(var(--note-u) * 3); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--note-u) * 14); line-height: calc(var(--note-u) * 20); white-space: nowrap; text-align: center; opacity: .78; transition: opacity .2s; }
 .cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--note-u) * 30) var(--glow)) brightness(1.08); outline: none; }
 .cinema-shelf:hover .shelf-plaque, .cinema-shelf:focus-visible .shelf-plaque, .cinema-shelf.is-attended .shelf-plaque { opacity: 1; }
 .cinema-shelf:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
@@ -438,7 +444,7 @@ html.dialog-open { overflow: hidden; }
    169 and 323. `--note-u` is the board's unit (the note's, at its `--scale`), so
    the three land on the same spot at every shell width, like every other Prop
    here. */
-.cinema-board .board-slots { position: absolute; left: calc(var(--note-u) * 3); top: calc(var(--note-u) * 38); display: flex; gap: calc(var(--note-u) * 22); }
+.cinema-board .board-slots { position: absolute; left: calc(var(--note-u) * 3); top: calc(var(--note-u) * 38); }
 /* 36: every Poster is its Film's own image (S17-S25): the framed Poster
    painted in the middle of a 600 x 800 canvas — cream stock, genre stripe and
    all — with its characters spilling out over the frame onto a transparent
@@ -459,8 +465,11 @@ html.dialog-open { overflow: hidden; }
   --art-w: calc(var(--art-h) * .75);
   --frame-width: calc(var(--art-w) * var(--frame-w));
   --frame-left: calc((var(--note-u) * var(--slot-w) - var(--frame-width)) / 2);
-  position: relative; flex: 0 0 auto; width: calc(var(--note-u) * var(--slot-w)); height: calc(var(--note-u) * var(--slot-h)); padding: 0; border: 0; background: none; overflow: visible; filter: drop-shadow(0 calc(var(--note-u) * 6) calc(var(--note-u) * 8) #00000066); cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1);
+  position: absolute; top: 0; left: calc(var(--note-u) * (var(--slot-x) - 81)); width: calc(var(--note-u) * var(--slot-w)); height: calc(var(--note-u) * var(--slot-h)); padding: 0; border: 0; background: none; overflow: visible; filter: drop-shadow(0 calc(var(--note-u) * 6) calc(var(--note-u) * 8) #00000066); cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1);
 }
+/* 73: he pins right to left, slot 3 first (design 72 section 3.4), so a wall
+   part-way up has its left slots bare: each Poster stands at its own slot, 154
+   note units apart (132 wide, 22 between), rather than flowing into the first. */
 /* Clipped to the frame at rest, and unclipped as the Poster grows (below), so
    what spills out emerges from behind the frame's edges rather than fading in. */
 .cinema-poster .poster-art { position: absolute; top: calc(var(--art-h) * var(--frame-y) * -1); left: calc(var(--frame-left) - var(--art-w) * var(--frame-x)); width: var(--art-w); height: var(--art-h); background: var(--still) 0 0 / 100% 100% no-repeat; clip-path: inset(calc(var(--frame-y) * 100%) calc((1 - var(--frame-x) - var(--frame-w)) * 100%) calc((1 - var(--frame-y) - var(--frame-h)) * 100%) calc(var(--frame-x) * 100%)); pointer-events: none; }
@@ -507,22 +516,24 @@ html.dialog-open { overflow: hidden; }
    across for the first slot, 154 more for each after it, and 148 down for all
    three. */
 .cinema-poster {
-  --grow: 1.248;
+  --grow: 1.394;
   --slot-y: 148;
   --at-x: calc(var(--x) + var(--scale) * var(--slot-x));
   --at-y: calc(var(--y) + var(--scale) * var(--slot-y));
-  --to-x: 438.97;
+  --to-x: 389;
   --to-y: var(--at-y);
   transition: scale .45s cubic-bezier(.22, .75, .2, 1), translate .45s cubic-bezier(.22, .75, .2, 1), filter .2s;
 }
 .cinema-poster[data-poster-slot="1"] { --slot-x: 81; }
 .cinema-poster[data-poster-slot="2"] { --slot-x: 235; }
 .cinema-poster[data-poster-slot="3"] { --slot-x: 389; }
-/* 92: `--grow` and the two targets are 63's by design 75's R1 (x 0.78; x' = 0.78x + 40,
-   y' = 0.78y), so an open Poster keeps its size against the board R1 moved; ticket 73
-   sets design 80's own. */
-@container (max-width: 900px) { .cinema-poster { --grow: 1.716; --to-x: 323.53; --to-y: 351; } }
-@container (max-width: 620px) { .cinema-poster { --grow: 2.067; } }
+/* 73: design 80 section 3.1's two points on the re-laid wall: the middle between
+   the doorway (171) and the sheet (607), and at the narrow widths the middle of
+   the stage left of the sheet. `--grow` is 63's 1.6 / 2.2 / 2.65 of the slot at
+   the board's true-size x 0.871, so an open Poster spans x 297-481, y 154-427
+   wide and x 177-430, y 195-570 at 900 px: clear of the sheet and the doorway. */
+@container (max-width: 900px) { .cinema-poster { --grow: 1.916; --to-x: 303.5; --to-y: 382.5; } }
+@container (max-width: 620px) { .cinema-poster { --grow: 2.308; } }
 /* `--expanded-scale` is how many times its slot an open Poster is drawn:
    `--grow` of the note's size, on a board drawn at `--scale` of it. It travels
    in stage units, so its translate is in `--u`. */
@@ -546,7 +557,7 @@ html.dialog-open { overflow: hidden; }
   height: calc(var(--note-u) * var(--slot-h) / var(--expanded-scale));
 }
 /* The expanded Poster comes off the wall over the furniture and the Cast, which
-   all sort above the board's 640; the details card still sorts above it. */
+   all sort above the board's 499; the details card still sorts above it. */
 .stage-cinema .cinema-board:has(.cinema-poster.is-expanded) { z-index: 905; }
 .cinema-poster .poster-art { transition: clip-path .45s cubic-bezier(.22, .75, .2, 1); }
 .cinema-poster.is-expanded .poster-art { clip-path: inset(0); }
@@ -578,7 +589,8 @@ html.dialog-open { overflow: hidden; }
 .cinema-film-can { z-index: 648; }
 .cinema-film-can-broken { z-index: 697; }
 .cinema-lucky-cat { z-index: 499; }
-.cinema-lucky-cat-broken { z-index: 530; }
+/* 73: design 80 section 2.2, 2 below its box's bottom (537). */
+.cinema-lucky-cat-broken { z-index: 539; }
 
 /* P15-P17: the projector, and its two affordances. S09 is the machine at rest;
    S10, the reel, sits on the front hub once one is loaded — which is when the

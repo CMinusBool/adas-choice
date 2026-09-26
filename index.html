@@ -386,37 +386,37 @@
           <a class="cinema-prop cinema-door" href="#/entryway" style="--x:29.6;--y:116.2;--w:140.4;--h:347.8" aria-label="回到玄關" data-i18n-aria="backToEntryway"><span class="door-leaf" aria-hidden="true" data-still="assets/cinema/door-leaf.png"></span></a>
           <!-- P7-P9 and P21: three shelves you can tell apart from across the
                Room — colour, crown silhouette and ornament, then the plaque. -->
-          <!-- 36: each shelf's image (S02-S04) is wider and taller than its
-               120 x 380 button, because its crown ornament rises above it; it
-               stands on the button's base, centred, at its own --art-w/--art-h. -->
-          <!-- 92: until ticket 73 re-lays the wall by design 80, the shelves,
-               the lucky cat and the board stand where they stood on screen,
-               moved by design 75's R1 (x' = 0.78x + 40, y' = 0.78y, sizes and
-               --scale x 0.78): the numbers below are 63's, mapped.
-               63: S01 hangs its screen at (727, 148, 566 x 316), right of
-               centre, and the note's shelves stood in front of it. They stand
-               in the corner right of the screen now, on the note's 640 base,
-               and that wall is 307 units wide where three shelves at the note's
-               size need 428: so each is drawn at --scale .7 of it. Every
-               number inside a shelf stays the note's (the 120 x 380 button,
-               --art-w/--art-h, the plaque) and `styles.css` scales them; the
-               box here is the scaled one, 84 x 266, still 10 apart. -->
-          <button class="cinema-prop cinema-shelf" type="button" data-shelf="comedy" style="--x:1061.8;--y:291.72;--w:65.52;--h:207.48;--scale:.546" aria-label="喜劇書架：點一下，讓他挑三部片" data-i18n-aria="shelfComedyAria">
-            <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-comedy.png" style="--art-w:160;--art-h:470"></span>
+          <!-- 73: the wall at true size on the 1360 x 765 stage, at design 80
+               section 3.1's boxes (72's, moved by (-246, -141)), right of the
+               screen and 8 inside the stage's edge. Each button is its shelf's
+               80-wide body, on the one base at y 499. Its image (S02'-S04',
+               2 px a unit) is wider and taller, because the crown ornament
+               rises above it: it stands on the button's base, centred, at its
+               own --art-w/--art-h. The span after it is the same image with
+               three caps gone, in the same box: `src/dom/cinema-room.ts`
+               un-hides it on the shelf the model names (design 80 section 4),
+               and its `data-still` is what preloads it. -->
+          <button class="cinema-prop cinema-shelf" type="button" data-shelf="comedy" style="--x:1085;--y:199;--w:80;--h:300" aria-label="喜劇書架：點一下，讓他挑三部片" data-i18n-aria="shelfComedyAria">
+            <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-comedy.png" style="--art-w:90;--art-h:380"></span>
+            <span class="shelf-art shelf-art-caps-gone" aria-hidden="true" data-still="assets/cinema/shelf-comedy-caps-gone.png" style="--art-w:90;--art-h:380" hidden></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfComedy">喜劇</span>
           </button>
           <!-- P19: the lucky cat 招財貓, Mira's Breakable, on the comedy
                shelf's bottom cubby floor (design 13 §7). Ticket 09 owns the
                knock and the state; the visitor cannot break it by clicking.
-               63: both moved and scaled with the shelf, off its base. -->
-          <div class="cinema-prop cinema-lucky-cat" data-breakable="cinema-lucky-cat" data-breakable-state="intact" role="img" aria-label="一隻招財貓" data-i18n-aria="luckyCatIntact" data-still="assets/cinema/lucky-cat.png" style="--x:1081.3;--y:446.94;--w:24.18;--h:24.18"></div>
-          <div class="cinema-prop cinema-lucky-cat-broken" data-breakable="cinema-lucky-cat" data-breakable-state="broken" role="img" aria-label="摔成三塊的招財貓，手還在招" data-i18n-aria="luckyCatBroken" data-still="assets/cinema/lucky-cat-broken.png" style="--x:1067.26;--y:504.66;--w:49.14;--h:16.38" hidden></div>
-          <button class="cinema-prop cinema-shelf" type="button" data-shelf="romance" style="--x:1135.12;--y:291.72;--w:65.52;--h:207.48;--scale:.546" aria-label="愛情書架：點一下，讓他挑三部片" data-i18n-aria="shelfRomanceAria">
-            <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-romance.png" style="--art-w:140;--art-h:450"></span>
+               73: at its true 44 x 44 on that floor (y 449), at its left side,
+               and in pieces on the floor in front of the plinth (design 80
+               section 3.1). -->
+          <div class="cinema-prop cinema-lucky-cat" data-breakable="cinema-lucky-cat" data-breakable-state="intact" role="img" aria-label="一隻招財貓" data-i18n-aria="luckyCatIntact" data-still="assets/cinema/lucky-cat.png" style="--x:1091;--y:405;--w:44;--h:44"></div>
+          <div class="cinema-prop cinema-lucky-cat-broken" data-breakable="cinema-lucky-cat" data-breakable-state="broken" role="img" aria-label="摔成三塊的招財貓，手還在招" data-i18n-aria="luckyCatBroken" data-still="assets/cinema/lucky-cat-broken.png" style="--x:1080;--y:507;--w:90;--h:30" hidden></div>
+          <button class="cinema-prop cinema-shelf" type="button" data-shelf="romance" style="--x:1175;--y:182;--w:80;--h:317" aria-label="愛情書架：點一下，讓他挑三部片" data-i18n-aria="shelfRomanceAria">
+            <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-romance.png" style="--art-w:80;--art-h:397"></span>
+            <span class="shelf-art shelf-art-caps-gone" aria-hidden="true" data-still="assets/cinema/shelf-romance-caps-gone.png" style="--art-w:80;--art-h:397" hidden></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfRomance">愛情</span>
           </button>
-          <button class="cinema-prop cinema-shelf" type="button" data-shelf="horror" style="--x:1208.44;--y:291.72;--w:65.52;--h:207.48;--scale:.546" aria-label="恐怖書架：點一下，讓他挑三部片" data-i18n-aria="shelfHorrorAria">
-            <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-horror.png" style="--art-w:160;--art-h:460"></span>
+          <button class="cinema-prop cinema-shelf" type="button" data-shelf="horror" style="--x:1265;--y:166;--w:80;--h:333" aria-label="恐怖書架：點一下，讓他挑三部片" data-i18n-aria="shelfHorrorAria">
+            <span class="shelf-art" aria-hidden="true" data-still="assets/cinema/shelf-horror.png" style="--art-w:94;--art-h:413"></span>
+            <span class="shelf-art shelf-art-caps-gone" aria-hidden="true" data-still="assets/cinema/shelf-horror-caps-gone.png" style="--art-w:94;--art-h:413" hidden></span>
             <span class="shelf-plaque" aria-hidden="true" data-i18n="shelfHorror">恐怖</span>
           </button>
           <!-- P10-P11: the Poster board. The three slots are filled by
@@ -427,12 +427,13 @@
                its three 132 x 196 slots land 15 / 169 / 323 units in from the
                board's left edge, 50 down, in the board's own units.
 
-               63: the board hangs on the wall between the door and the screen,
-               under the sconce and clear of the furniture below it. That wall is
-               424 units wide where the note's board is 470, so it is drawn at
-               --scale .85: 399.5 x 272, its slots' centres at stage x 379 / 510
-               / 641, y 381. -->
-          <section class="cinema-prop cinema-board" data-still="assets/cinema/board.png" style="--x:281.8;--y:198.9;--w:311.61;--h:212.16;--scale:.663" aria-label="釘在牆上的海報" data-i18n-aria="boardLabel">
+               73: the board hangs between the doorway and the screen, 16 under
+               the sconce, at design 80 section 3.1's box: design 13's 470 x 320
+               board at exactly x 0.871, which is true size, so --scale .871 is
+               the conversion from the note's units and not a shrink. Its slots'
+               centres are at stage x 245.68 / 379.81 / 513.95, y 290.91, and he
+               pins them right to left, slot 3 first. -->
+          <section class="cinema-prop cinema-board" data-still="assets/cinema/board.png" style="--x:175.13;--y:162;--w:409.37;--h:278.72;--scale:.871" aria-label="釘在牆上的海報" data-i18n-aria="boardLabel">
             <p class="board-empty" data-i18n="boardEmpty">牆上還空著。先選一排書架。</p>
             <div class="board-slots" data-poster-slots></div>
           </section>

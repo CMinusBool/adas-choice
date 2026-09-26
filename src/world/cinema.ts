@@ -34,10 +34,12 @@ export const CINEMA_SHELVES: readonly CinemaShelf[] = ['comedy', 'romance', 'hor
  *
  * 92: the 1360 x 765 stage (design 75 §4.4). The seats are the re-spaced
  * beanbags' bottom-centres and the cabinet mark keeps its old offset from the
- * cabinet's right edge. The shelf marks and the board marks' x follow the wall,
- * which stands where it stood on screen (design 75's R1, x' = 0.78x + 40,
- * y' = 0.78y) until ticket 73 re-lays it by design 80; the board marks stand at
- * design 80's y 572, in front of the projector's drawn box (bottom 547.4) and
+ * cabinet's right edge.
+ *
+ * 73: the wall re-laid at true size (design 80 section 3.3). A shelf mark is
+ * the shelf's middle cubby centre at hand height less 119, 50 in front of the
+ * shelves' base (499); a board mark is under its slot's centre, 364.7 below
+ * its pins, at y 572: in front of the projector's drawn box (bottom 547.4) and
  * inside the walkable, whose cabinet notch starts at 580 for them.
  */
 export const CINEMA_MARKS = {
@@ -46,17 +48,17 @@ export const CINEMA_MARKS = {
   /** Her teal beanbag. */
   girlSeat: { x: 250, y: 624 },
   shelves: {
-    comedy: { x: 1047.76, y: 546 },
-    romance: { x: 1121.08, y: 546 },
-    horror: { x: 1194.4, y: 546 },
+    comedy: { x: 1006, y: 549 },
+    romance: { x: 1096, y: 549 },
+    horror: { x: 1179, y: 549 },
   },
   /** Right of the reel cabinet, clear of anything the cats spill. */
   cabinet: { x: 542, y: 667 },
-  /** In front of each Poster slot, for the pinning this Room grows later. */
+  /** In front of each Poster slot, 1 to 3 left to right; he pins 3 first. */
   boardSlots: [
-    { x: 335.62, y: 572 },
-    { x: 437.8, y: 572 },
-    { x: 539.98, y: 572 },
+    { x: 246, y: 572 },
+    { x: 380, y: 572 },
+    { x: 514, y: 572 },
   ],
 } as const satisfies Record<string, Point | Readonly<Record<string, Point>> | readonly Point[]>;
 
