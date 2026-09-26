@@ -69,3 +69,8 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [entryway] The Entryway Beats draw their figures more than 10% off the Actors' heights: the Girl 232 in S19 and 313 in S16 against 273, the Boy 256 in S17 against 300. (86, 2026-09-26)
 - [entryway] The pet backpack comes out 40 × 36 cm, 28% short of a real one's 50 cm. (86, 2026-09-26)
 - [entryway] At 390 px wide the Entryway's radio is 54 × 39 px and the cat pads 38 px, under the 44-px target. (86, 2026-09-26)
+- [entryway] The cats climb out of the floor 238–345 units from the pet backpack, and Mira's first frame is a head in mid-air. (100, 2026-09-26)
+- [entryway] The cat sprites' paws are not centred in their frames, so a paw steps up to 6.7 units (Luna) when her sprite takes over from her Beat. (100, 2026-09-26)
+- [entryway] At 390 px the Entryway frame cuts the Game Room plaque at its edge, and the other two doors are out of view. (100, 2026-09-26)
+- [entryway] The Boy wears his hoodie between Beats after S15, because no sprite exists for the parka without the backpack. (100, 2026-09-26)
+- [site] `scripts/probe` `analyze.mjs` still uses the 1600 × 900 stage and the old walkable floor, and it measures Beat box bottom-centres rather than feet. (100, 2026-09-26)
