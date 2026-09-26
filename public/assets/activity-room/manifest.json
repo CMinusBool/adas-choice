@@ -200,7 +200,9 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 0.635,
+      "placed": "82: the cats at real size (design 75 §0.5, §8.1 T2). The file is unchanged; its box in index.html is (630,400)-(680,472) × 0.635 about its bottom-centre (655,472), so (639.13,426.28)-(670.88,472), the factor Mira's mug Beat takes so the two still meet. Ticket 96 places it on the table."
     },
     {
       "file": "mug-broken.png",
@@ -233,7 +235,9 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 0.635,
+      "placed": "82: the file is unchanged; its box in index.html is (560,786)-(720,832) × 0.635 about its bottom-centre (640,832), so (589.2,802.79)-(690.8,832). Ticket 96 places it."
     },
     {
       "file": "call-corner.png",
@@ -497,7 +501,9 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1 (--fit contain)",
       "validatedAt": "2026-09-20",
-      "motionPhase": "not verified"
+      "motionPhase": "not verified",
+      "scale": 0.635,
+      "placed": "82: the sheet is unchanged and not wired yet (no cue in the model, no layer in index.html). At Mira's real size (96 → 61 units) its 280-unit frame is drawn 177.8 units square. Placed by design 75 R4, so that the touching frame meets the thing: frame 5's own mug (body x 404-463 px, foot on row 367 of 560) sits on the intact Prop's mug (body x 14-77 of 100 px, foot on its box's bottom edge), which puts the box at (515.9,355.5)-(693.7,533.3) against today's Prop. Her feet in frame 1 then land at about (607,499), not on her mug mark (620,690): the sheet's crouch-to-table-top leap is 86 px (27 units at this scale) against a table top 218 units above the floor, so frames 1-4 need either the mark or the art to move when ticket 96 wires it."
     }
   ]
 }
