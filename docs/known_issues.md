@@ -80,3 +80,5 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [cinema] At 390 px the motor switch and, once a Film is chosen, the projector gate each keep a 44-px pad over about 200 units of floor, so a cat walking there cannot be petted until she moves on. (103, 2026-09-26)
 - [cinema] The disabled projector gate no longer shows the `not-allowed` cursor on hover. (103, 2026-09-26)
 - [site] Where two cats stand within a pad of each other, a tap at the rear cat's feet pets the front one. (103, 2026-09-26)
+- [activities] The English hunt label "The Thirty-Second Treasure Hunt" fits its board only at 15.9 px, which is small. (96, 2026-09-26)
+- [site] At 390 × 844 the Entryway and the Game Room scroll vertically (pages 946 and 990 px tall); they never scroll sideways. (96, 2026-09-26)
