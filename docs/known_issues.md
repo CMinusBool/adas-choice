@@ -58,3 +58,8 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [cinema] The three Cinema shelves stand about a third shorter than design 80 draws them (comedy 249.5 of 380 units, romance 267.5 of 397, horror 273 of 413), and their caps are 17–24% under 15 units across, because the generations are squatter than the design. (79, 2026-09-26)
 - [cinema] Each shelf's top row of caps sits about 70 units lower than design 80 §5.1 places it, and the horror shelf's base is 4.25 units right of its canvas centre. (79, 2026-09-26)
 - [cinema] The Cinema door leaf's open cell has a smeared red, olive and grey blotch in the middle of its amber light band, which shows while the door stands open. (90, 2026-09-26)
+- [games] The painted rug is 787 cm long in an 845-cm Room, nearly twice a real rug's length. (89, 2026-09-26)
+- [games] Where the Boy sits down on his pouf, his feet travel 6.65 units across the swap frame, 0.65 over the 6-unit hand-off line. The gap on that frame is 0.00 and the travel is no more than a running stride. (89, 2026-09-26)
+- [activities] Mira's mug Beat is not played: its 27-unit leap cannot reach the 245-unit table top without an Actor jump, so she knocks the mug standing on the floor and her paw never meets it. (96, 2026-09-26)
+- [activities] At 390 px the Activity Room shrinks to 350 px wide, so its chalk labels are about 7 px and cannot be read. (96, 2026-09-26)
+- [activities] The map tableau is shown at × 0.753, not design 75's × 0.838, because its figures are drawn 11% larger than the hunt tableau's. (96, 2026-09-26)
