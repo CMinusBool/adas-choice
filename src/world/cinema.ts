@@ -178,8 +178,23 @@ export interface CinemaSlice {
   readonly step: CinemaStep;
   /** The shelf being fetched from, for as long as the errand runs. */
   readonly errand: CinemaShelf | null;
-  /** The Posters on the wall, in the order he pinned them: slot 1, 2, 3. */
+  /**
+   * The Posters on the wall, in slot order, left to right.
+   *
+   * 73: he pins them right to left, slot 3 first (design 72 section 3.4), and
+   * the Poster on slot k is always the shelf's k-th Film, so a wall part-way up
+   * is the shelf's last one or two Films: `posterSlot` says which slot each is.
+   */
   readonly pinned: readonly FilmId[];
+  /**
+   * 73: the shelf showing three caps gone, or `null` while every shelf is full.
+   *
+   * Design 80 section 4: a shelf loses its three caps as his rummage in it
+   * ends, and in that same tick the shelf that had lost them, if another, is
+   * full again. Nothing else changes it: not the pinning, a Film, a Poster
+   * opening, nor walking out and back. It is not persisted, as the wall is not.
+   */
+  readonly capsGone: CinemaShelf | null;
   /**
    * When the Beat in progress is over, on the same clock the ticks carry.
    *
@@ -230,6 +245,7 @@ export function createCinema(): CinemaSlice {
     step: 'seated',
     errand: null,
     pinned: [],
+    capsGone: null,
     until: null,
     expanded: null,
     expandedUntil: null,
@@ -248,6 +264,23 @@ export function openShelfOf(slice: CinemaSlice): CinemaShelf | null {
 function shelfOf(film: FilmId): CinemaShelf {
   for (const shelf of CINEMA_SHELVES) if (filmsOn(shelf).includes(film)) return shelf;
   return 'comedy';
+}
+
+/** 73: the board slot a Film's Poster hangs on, 1 to 3: its place on its shelf. */
+export type PosterSlot = 1 | 2 | 3;
+
+export function posterSlot(film: FilmId): PosterSlot {
+  return (filmsOn(shelfOf(film)).indexOf(film) + 1) as PosterSlot;
+}
+
+/**
+ * The next Poster he pins off a shelf, with the wall holding `pinned`: the
+ * slot to the left of the ones already up, starting at slot 3.
+ */
+function nextPin(shelf: CinemaShelf, pinned: readonly FilmId[]): { film: FilmId; slot: number } | null {
+  const slot = filmsOn(shelf).length - pinned.length - 1;
+  const film = filmsOn(shelf)[slot];
+  return film ? { film, slot } : null;
 }
 
 /** The Room with a shelf chosen: whatever he was doing, he is off to this one. */
@@ -274,8 +307,15 @@ export function settleCinema(slice: CinemaSlice): CinemaSlice {
   // the projector they come back to is loaded and its gate lever works. A Film
   // that was rolling stops: the Bumper is a Cinema Room moment (§8.3).
   const reel = slice.fetching ?? slice.reel;
+  // 73: and the shelf he was fetching from has its three caps gone, as it
+  // would have once his rummage there ended.
+  const capsGone = slice.errand ?? slice.capsGone;
   const settled =
-    slice.attended === null && slice.step === 'seated' && pinned === slice.pinned && reel === slice.reel;
+    slice.attended === null &&
+    slice.step === 'seated' &&
+    pinned === slice.pinned &&
+    reel === slice.reel &&
+    capsGone === slice.capsGone;
   // 19: nobody is looking at a Poster in a Room they have walked out of, so the
   // wall they come back to is the wall, flat, however they left it.
   if (settled && slice.expanded === null) return slice;
@@ -284,6 +324,7 @@ export function settleCinema(slice: CinemaSlice): CinemaSlice {
     step: 'seated',
     errand: null,
     pinned,
+    capsGone,
     until: null,
     expanded: null,
     expandedUntil: null,
@@ -446,23 +487,29 @@ export function stepCinema(
     }
     case 'rummaging': {
       if (!beatOver(slice, now, motionOn)) return WAITING(slice);
-      // Three tubes under his arm; the first slot is where he takes them.
-      return SENDING({ ...slice, step: 'carrying', until: null }, CINEMA_MARKS.boardSlots[0]);
+      // Three tubes under his arm, and three caps gone from the shelf: 73, the
+      // one moment a shelf's state changes (design 80 section 4), and the
+      // shelf that had lost its caps before is full again in the same tick.
+      // Slot 3 is where he takes them first (design 72 section 3.4).
+      const first = slice.errand ? nextPin(slice.errand, slice.pinned) : null;
+      const carrying: CinemaSlice = { ...slice, step: 'carrying', capsGone: slice.errand, until: null };
+      return SENDING(carrying, CINEMA_MARKS.boardSlots[first?.slot ?? 0]);
     }
     case 'carrying': {
-      const slot = CINEMA_MARKS.boardSlots[slice.pinned.length];
+      const next = slice.errand ? nextPin(slice.errand, slice.pinned) : null;
+      const slot = next ? CINEMA_MARKS.boardSlots[next.slot] : undefined;
       if (!slot || !arrivedAt(boy, slot)) return WAITING(slice);
       return WAITING({ ...slice, step: 'pinning', until: beatUntil(now, motionOn, PIN_MS) });
     }
     case 'pinning': {
       if (!beatOver(slice, now, motionOn)) return WAITING(slice);
-      const shelf = slice.errand;
-      const next = shelf ? filmsOn(shelf)[slice.pinned.length] : undefined;
+      const next = slice.errand ? nextPin(slice.errand, slice.pinned) : null;
       // A Poster only exists on the wall once its pin Beat has finished, which
       // is what makes them arrive one at a time rather than as a set of three.
-      const pinned = next ? [...slice.pinned, next] : slice.pinned;
-      const slot = CINEMA_MARKS.boardSlots[pinned.length];
-      if (slot) return SENDING({ ...slice, step: 'carrying', pinned, until: null }, slot);
+      // Each goes up left of the last, so the wall stays in slot order.
+      const pinned = next ? [next.film, ...slice.pinned] : slice.pinned;
+      const after = slice.errand ? nextPin(slice.errand, pinned) : null;
+      if (after) return SENDING({ ...slice, step: 'carrying', pinned, until: null }, CINEMA_MARKS.boardSlots[after.slot]);
       return SENDING({ ...slice, step: 'returning', pinned, until: null }, CINEMA_MARKS.boySeat);
     }
     case 'returning': {
