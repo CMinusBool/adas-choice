@@ -46,3 +46,8 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [site] Breakable persistence (kept across a reload, not into a new tab) lives in `src/dom/breakables.ts` and is checked by hand only; `world.test.ts` proves just the echo. (40, 2026-09-26)
 - [site] `room-shots` does not fail a Room that moves under reduced motion, its exit code has no unit test, and its "at rest" pictures of the Game Room, the Cinema and the Activity Room are taken 0.5 s into their Arrivals. (70, 2026-09-26)
 - [site] CONTEXT.md's Beat entry does not name the box Beat, the duet Beat or the costume sprite; they are defined only in a comment in `src/world/arrival.ts`. (10, 2026-09-26)
+- [cinema] At 390 px wide the Cinema stage is 350 px across, so a cat there is about 13 px tall and her hit area about 15 px; at 1440 × 900 every cat keeps a full 44 × 44 px. (82, 2026-09-26)
+- [activities] Mira's mug Beat leaps 27 units while the table top is 218 units above the floor, so her jump onto the table reads short. (82, 2026-09-26)
+- [cinema] With the Boy pinning at slot 1, the seated Girl hides him from about y 379 down. (80, 2026-09-26)
+- [cinema] The Boy standing at the comedy shelf mark covers a 93 × 113-unit corner of the screen sheet. (80, 2026-09-26)
+- [cinema] The film reel crosses the poster board's bottom rail by 8.9 units, and the projector beam crosses it by a sliver. (80, 2026-09-26)
