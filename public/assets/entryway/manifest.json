@@ -288,6 +288,8 @@
       "references": [{ "path": "art/characters/v2/mica-character-sheet-v2.png", "sha256": "6ef1ec9e83846fb62fb7cd5e5129e65b8f595f2f58bb604afa7570b222bf82b4" }],
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 10 --columns 4 --frame 315x450 --fit contain --seat bottom",
       "note": "A box Beat (design note §5.3): anchored on a fixed stage rectangle, not a feet point. Checked with check-assets.mjs --beat.",
+      "scale": 0.635,
+      "placed": "82: the cats at real size (design 75 §0.5, Míca 96 → 61 units). The sheet is unchanged; its box in src/world/arrival.ts is (240,430)-(450,730) × 0.635 about its bottom-centre (345,730), so (278.3,539.5)-(411.7,730).",
       "validatedAt": "2026-09-22",
       "motionPhase": "not verified"
     },
@@ -304,6 +306,8 @@
       "references": [{ "path": "art/characters/v2/mira-character-sheet-v2.png", "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443" }],
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 8 --columns 4 --frame 345x540 --fit contain --seat bottom --key #00FF00",
       "note": "A box Beat. Checked with check-assets.mjs --beat. Re-dropped by ticket 57 from ticket 56's restyle (the owner-granted third attempt, opaque RGB on #00FF00).",
+      "scale": 0.635,
+      "placed": "82: the cats at real size (design 75 §0.5, Mira 96 → 61 units). The sheet is unchanged; its box in src/world/arrival.ts is (330,430)-(560,790) × 0.635 about its bottom-centre (445,790), so (372.0,561.4)-(518.0,790).",
       "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
@@ -320,6 +324,8 @@
       "references": [{ "path": "art/characters/v3/luna-character-sheet-v3.png", "sha256": "efb442307e6aec93e478f7a4a801cd393b1807723ebc4181ed5b19a2442d1239" }],
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 12 --columns 4 --frame 690x654 --fit contain --pack shapes --airborne 10 --seat bottom --key #00FF00",
       "note": "A box Beat, delivered at the design note's 1.5 px/unit (2.9 MB, under its 3 MB ceiling). Re-dropped by ticket 57 from ticket 56's v3 Luna, re-packed by position (--pack shapes): the generator drew 12 separate cats but not on an even grid (frames 03, 09 and 10 reach 3-5 px over a cell line), so each cat is cut out as its own connected shape in reading order, scaled by the raw cell's own contain scale (1.7865, the grid cut's) and seated bottom-centre in its frame. Frame 10 is the hop and is named --airborne (the orchestrator's art call, 2026-09-26): it keeps its feet 77 raw px (138 px built) above row 3's grounded feet, taken from the landing frames 11 and 12, and every grounded frame stays on its bottom edge. The coat is keyed out as drawn (about #2E2520), not recoloured. Checked with check-assets.mjs --beat.",
+      "scale": 0.629,
+      "placed": "82: the cats at real size (design 75 §0.5, Luna 105 → 66 units). The sheet is unchanged; its box in src/world/arrival.ts is (330,424)-(790,860) × 0.629 about its bottom-centre (560,860), so (415.3,585.8)-(704.7,860).",
       "validatedAt": "2026-09-26",
       "motionPhase": "not verified"
     },
@@ -336,6 +342,8 @@
       "references": [{ "path": "art/characters/v2/mica-character-sheet-v2.png", "sha256": "6ef1ec9e83846fb62fb7cd5e5129e65b8f595f2f58bb604afa7570b222bf82b4" }],
       "builtBy": "scripts/art/build-prop.mjs@1 --frames 16 --columns 4 --frame 450x579 --fit contain --seat bottom",
       "note": "Kept attempt-3 per the illustrator's manifest (attempt-1/attempt-2 were translucent RGBA and are not shipped). A box Beat. Checked with check-assets.mjs --beat.",
+      "scale": 0.635,
+      "placed": "82: not wired yet (no cue in src/world/arrival.ts, no layer in index.html). When it is, its box is the one it was drawn for × 0.635 about its bottom-centre, Míca's factor (design 75 §0.5).",
       "validatedAt": "2026-09-22",
       "motionPhase": "not verified"
     },

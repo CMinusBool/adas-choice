@@ -224,6 +224,20 @@ const box = (x0: number, y0: number, x1: number, y1: number): Box => ({
   height: y1 - y0,
 });
 
+/**
+ * How much smaller each cat's Beats are drawn than their sheets were made for
+ * (82, design 75 §0.5): the sheets were cut at the old cat heights, 96 / 96 /
+ * 105 units, and the cats now stand 61 / 61 / 66 against the Boy's 300.
+ */
+const CAT_BEAT_SCALE = { mica: 0.635, mira: 0.635, luna: 0.629 } as const;
+
+/** A box scaled about its bottom-centre, so whatever stands on its floor stays put. */
+const shrunk = (from: Box, factor: number): Box => {
+  const width = from.width * factor;
+  const height = from.height * factor;
+  return { x: from.x + (from.width - width) / 2, y: from.y + from.height - height, width, height };
+};
+
 const BEATS: readonly BeatCue[] = [
   { id: 'S15', at: 3.65, seconds: 1, box: box(296, 320, 520, 700), frames: 8, columns: 4, fps: 8, hides: ['boy'] },
   { id: 'S16', at: 4.8, seconds: 1.35, box: box(320, 364, 612, 700), frames: 8, columns: 4, fps: 6, hides: ['boy', 'girl'] },
@@ -234,9 +248,13 @@ const BEATS: readonly BeatCue[] = [
   { id: 'S19', at: 7.1, seconds: 3.25, box: box(280, 400, 470, 744), frames: 4, columns: 4, fps: 8, hides: ['girl'] },
   { id: 'S19', at: 10.35, seconds: 0.5, box: box(280, 400, 470, 744), frames: 4, columns: 4, fps: 8, hides: ['girl'], from: 4 },
   // The cats are not Actors while their Beat is playing, so a Beat hides nobody.
-  { id: 'S20', at: 8.1, seconds: 1.25, box: box(240, 430, 450, 730), frames: 10, columns: 4, fps: 8, hides: [] },
-  { id: 'S21', at: 9.35, seconds: 1, box: box(330, 430, 560, 790), frames: 8, columns: 4, fps: 8, hides: [] },
-  { id: 'S22', at: 10.35, seconds: 1.5, box: box(330, 424, 790, 860), frames: 12, columns: 4, fps: 8, hides: [] },
+  // 82: the cats at real size (design 75 §0.5) — each sheet is drawn at the old
+  // cat height, so its box shrinks by the cat's own factor about its
+  // bottom-centre: Míca and Mira × 0.635 (96 → 61), Luna × 0.629 (105 → 66).
+  // S23, Míca at the vase, has no cue yet; when it is wired it shrinks × 0.635.
+  { id: 'S20', at: 8.1, seconds: 1.25, box: shrunk(box(240, 430, 450, 730), CAT_BEAT_SCALE.mica), frames: 10, columns: 4, fps: 8, hides: [] },
+  { id: 'S21', at: 9.35, seconds: 1, box: shrunk(box(330, 430, 560, 790), CAT_BEAT_SCALE.mira), frames: 8, columns: 4, fps: 8, hides: [] },
+  { id: 'S22', at: 10.35, seconds: 1.5, box: shrunk(box(330, 424, 790, 860), CAT_BEAT_SCALE.luna), frames: 12, columns: 4, fps: 8, hides: [] },
 ];
 
 /** Until when each of the two of them is still in their coat (§5.2). */

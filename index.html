@@ -122,7 +122,10 @@
                  and hides the rest; a Beat with no layer here is skipped.
                  S23/S24 (the vase knock) have no layer: no in-between
                  frames are drawn for that Breakable yet (ticket 09), same
-                 as the Activity Room's own unconsumed Beat. -->
+                 as the Activity Room's own unconsumed Beat. 82: the three
+                 cat Beats S20-S22 draw x 0.635 / 0.635 / 0.629 of the size
+                 their sheets were cut at, about their bottom-centres, and
+                 S23 takes x 0.635 when it is wired (design 75 section 0.5). -->
             <div class="beats" data-beats="entryway" aria-hidden="true">
               <div class="at" data-beat="S15" data-still="assets/entryway/backpack-down.png" hidden></div>
               <div class="at" data-beat="S16" data-still="assets/entryway/coat-off.png" hidden></div>
@@ -605,7 +608,8 @@
           station's furniture into one group image (A-S02 table, A-S03 shelf, A-S04 desk, A-S08
           call corner, A-S09 boombox+crate), so the box is that group's full extent, not any one
           piece of it, and the sub-Props those groups used to draw separately are gone. The pencil
-          mug, the wall map and the door leaf keep their own boxes and their own images, unchanged.
+          mug, the wall map and the door leaf keep their own boxes and their own images; the mug's
+          two boxes are x 0.635 since ticket 82.
         -->
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
         <h1 class="room-title" id="activities-title" data-room-title tabindex="-1" data-i18n="activitiesTitle">活動室</h1>
@@ -629,9 +633,12 @@
                 <!-- 35: A-S02, one group image - table, leaning sketchpad, loose paper, clamp lamp. -->
                 <div class="prop a-table" aria-hidden="true" data-still="assets/activity-room/table.png" style="--x:320;--y:320;--w:380;--h:300;--z:620"></div>
                 <!-- L13, A-S06 / A-S07: Mira's Breakable. Ticket 09 owns the knock and the state;
-                     both Props stand here so that ticket only has to flip which one is hidden. -->
-                <div class="prop a-mug" data-still="assets/activity-room/mug-intact.png" data-breakable="activity-pencil-mug" data-breakable-state="intact" role="img" aria-label="一只裝滿鉛筆的馬克杯" data-i18n-aria="pencilMugIntact" style="--x:630;--y:400;--w:50;--h:72;--z:621"></div>
-                <div class="prop a-mug-broken" data-still="assets/activity-room/mug-broken.png" data-breakable="activity-pencil-mug" data-breakable-state="broken" role="img" aria-label="摔成兩半的馬克杯，鉛筆滾了一地" data-i18n-aria="pencilMugBroken" style="--x:560;--y:786;--w:160;--h:46;--z:832" hidden></div>
+                     both Props stand here so that ticket only has to flip which one is hidden.
+                     82: both are x 0.635 of their old boxes, (630,400)-(680,472) and
+                     (560,786)-(720,832), about their bottom-centres, the factor Mira's mug Beat
+                     shrinks by (design 75 section 0.5); the factor is in the Room's manifest. -->
+                <div class="prop a-mug" data-still="assets/activity-room/mug-intact.png" data-breakable="activity-pencil-mug" data-breakable-state="intact" role="img" aria-label="一只裝滿鉛筆的馬克杯" data-i18n-aria="pencilMugIntact" style="--x:639.13;--y:426.28;--w:31.75;--h:45.72;--z:621"></div>
+                <div class="prop a-mug-broken" data-still="assets/activity-room/mug-broken.png" data-breakable="activity-pencil-mug" data-breakable-state="broken" role="img" aria-label="摔成兩半的馬克杯，鉛筆滾了一地" data-i18n-aria="pencilMugBroken" style="--x:589.2;--y:802.79;--w:101.6;--h:29.21;--z:832" hidden></div>
                 <!-- The Treasure Hunt's station: L14-L19, A-S03. -->
                 <!-- 35: A-S03, one group image - shelf, timer, basket of finds, boxes, album, stopwatch. -->
                 <div class="prop a-shelf" aria-hidden="true" data-still="assets/activity-room/shelf.png" style="--x:752;--y:296;--w:356;--h:324;--z:620"></div>
@@ -716,15 +723,15 @@
         <div class="actor" data-actor="girl" data-height="273" aria-hidden="true">
           <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/girl-walk-right.png"></div>
         </div>
-        <button class="actor cat" type="button" data-actor="mica" data-height="96" data-i18n-aria="catMica" aria-label="三花貓 Míca：摸摸她">
+        <button class="actor cat" type="button" data-actor="mica" data-height="61" data-i18n-aria="catMica" aria-label="三花貓 Míca：摸摸她">
           <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mica-walk-left.png"></div>
           <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mica-walk-right.png"></div>
         </button>
-        <button class="actor cat" type="button" data-actor="mira" data-height="96" data-i18n-aria="catMira" aria-label="虎斑貓 Mira：摸摸她">
+        <button class="actor cat" type="button" data-actor="mira" data-height="61" data-i18n-aria="catMira" aria-label="虎斑貓 Mira：摸摸她">
           <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mira-walk-left.png"></div>
           <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/mira-walk-right.png"></div>
         </button>
-        <button class="actor cat" type="button" data-actor="luna" data-height="105" data-i18n-aria="catLuna" aria-label="黑貓 Luna：摸摸她">
+        <button class="actor cat" type="button" data-actor="luna" data-height="66" data-i18n-aria="catLuna" aria-label="黑貓 Luna：摸摸她">
           <div class="cycle" data-cycle="walk" data-facing="left" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/luna-walk-left.png"></div>
           <div class="cycle" data-cycle="walk" data-facing="right" data-frames="1" data-columns="1" data-fps="10" data-sheet="assets/actors/luna-walk-right.png"></div>
         </button>
