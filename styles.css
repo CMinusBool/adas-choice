@@ -1033,9 +1033,11 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
      as tall as its copy, centred, up to the stage's height less 1.5rem and 80% of its
      width, and its copy stands in two columns under a full-width head: how it
      goes on the left, why this one on the right. The DOM order, and so the
-     reading order, is §5.2's. Body type follows the screen's height, 20 px at
-     900 and never under 16. At 1440 x 900 every card reads without scrolling,
-     in both languages; on a shorter screen a card may still scroll. */
+     reading order, is §5.2's. Body type follows the screen's height or its
+     width, whichever is tighter: 20 px at 1440 x 900, 18 at 1280 x 800, 16 at
+     1100 and never under. Measured from 1080 x 800 to 1600 x 900, every card
+     reads without scrolling in both languages; the card still scrolls if a
+     screen is shorter than that. */
   .activity-scrim { display: block; position: absolute; inset: 0; z-index: 900; border-radius: 14px; background: rgba(24, 32, 30, .55); animation: activity-fade-in .15s ease-out; }
   .activity-card {
     position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: min(80%, 64rem); max-height: calc(100% - 1.5rem); z-index: 910;
@@ -1043,16 +1045,16 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
     display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); column-gap: 2.5rem; align-content: start;
     grid-template-areas: "title title" "line line" "meta meta" "how-label why-label" "steps why" "extra why" "actions actions";
   }
-  .activity-card-title { grid-area: title; min-height: 0; font-size: clamp(1.75rem, 4.45dvh, 2.5rem); }
+  .activity-card-title { grid-area: title; min-height: 0; font-size: clamp(1.75rem, min(4.45dvh, 2.8vw), 2.5rem); }
   .activity-card-line { grid-area: line; }
   .activity-card-meta { grid-area: meta; }
   .activity-card-label:first-of-type { grid-area: how-label; }
   .activity-card-steps { grid-area: steps; }
-  .activity-card-extra { grid-area: extra; font-size: clamp(1rem, 2.1dvh, 1.1875rem); }
+  .activity-card-extra { grid-area: extra; font-size: clamp(1rem, min(2.1dvh, 1.32vw), 1.1875rem); }
   .activity-card-label:last-of-type { grid-area: why-label; }
   .activity-card-why { grid-area: why; }
   .activity-card-actions { grid-area: actions; }
-  .activity-card-line, .activity-card-meta, .activity-card-steps, .activity-card-why { font-size: clamp(1rem, 2.25dvh, 1.25rem); }
+  .activity-card-line, .activity-card-meta, .activity-card-steps, .activity-card-why { font-size: clamp(1rem, min(2.25dvh, 1.4vw), 1.25rem); }
   .motion-off .activity-scrim, .motion-off .activity-card { animation: none; }
 }
 @keyframes activity-fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -1729,5 +1731,18 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
      and 4 px of spare - 12.25rem in all. At 1440 x 900 the stage goes from
      1173 x 660 to 1252 x 704. */
   #room-activities { padding: .5rem 0; }
-  #room-activities .activity-room { margin-top: .5rem; max-width: min(100%, calc((100dvh - 12.25rem) * 16 / 9)); }
+
+  /* 109: with an Activity chosen, the note and the way to take it back stood
+     in a row under the stage and the Room scrolled to 970-987 px. From here up
+     they join the title row instead, in the lede's place - the lede asks for a
+     pick, the note says one is made - so the chosen Room is as tall as the
+     Room at rest. The Activity Room's own wrapper steps out of the layout so
+     that its three children are the grid's items; the stage area takes the
+     full-width row it stood in, and the wrapper's size with it. */
+  #room-activities { grid-template-columns: auto auto minmax(0, 1fr) auto; }
+  #room-activities .activity-room { display: contents; }
+  #room-activities .activity-stage-area { grid-column: 1 / -1; justify-self: center; width: 100%; max-width: min(100%, calc((100dvh - 12.25rem) * 16 / 9)); margin-top: .5rem; }
+  #room-activities:has(#activity-chosen-note:not([hidden])) > .room-lede { display: none; }
+  #room-activities .activity-chosen-note { grid-row: 1; grid-column: 3; margin: 0; font-size: 1.0625rem; }
+  #room-activities .activity-unpick { grid-row: 1; grid-column: 4; margin: 0; }
 }
