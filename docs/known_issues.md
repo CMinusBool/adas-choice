@@ -99,3 +99,4 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [site] The Cast has no stepping legs: each Actor's walk is its one standing frame lifting and rocking once a step, because the walk Cycles (23–30) are parked. (107, 2026-09-26)
 - [cinema] The cabinet search and the reel threading are a 0.45 s stand, because S30 and S31 are declared but never played. (107, 2026-09-26)
 - [site] The closing probe (`notes/closing/probe/probe.mjs`) measures boxes only and does not see the Actors' step. (107, 2026-09-26)
+- [cinema] At rest a cat can stand half hidden behind the projector and the reel cabinet. (107, 2026-09-26)
