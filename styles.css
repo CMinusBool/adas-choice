@@ -274,7 +274,7 @@ html.dialog-open { overflow: hidden; }
 .stage[data-stage="entryway"] { --stage-w: 1600; --stage-h: 900; }
 .stage[data-stage="games"] { --stage-w: 1408; --stage-h: 792; }
 .stage[data-stage="cinema"] { --stage-w: 1600; --stage-h: 900; }
-.stage[data-stage="activities"] { --stage-w: 1600; --stage-h: 900; }
+.stage[data-stage="activities"] { --stage-w: 1328; --stage-h: 747; }
 /* The Cast waits in here until the model puts an Actor in a Room, so a parked
    Actor needs no state of its own: the container is what hides it. */
 .cast { display: none; }
@@ -298,7 +298,7 @@ html.dialog-open { overflow: hidden; }
 .stage[data-stage="entryway"] { --cat-pad: 68; }
 .stage[data-stage="games"] { --cat-pad: 81; }
 .stage[data-stage="cinema"] { --cat-pad: 70; }
-.stage[data-stage="activities"] { --cat-pad: 61; }
+.stage[data-stage="activities"] { --cat-pad: 50; } /* 96: 1173 px across 1328 units */
 .actor.cat::before { content: ""; position: absolute; left: 50%; top: 100%; translate: -50% -50%; width: max(100%, calc(var(--u) * var(--cat-pad, 0))); height: calc(var(--u) * var(--cat-pad, 0)); }
 /* Being fussed over, until a petting Beat is drawn for one: she settles on to
    her paws under the hand. A Beat that does exist stands in for the sprite. */
@@ -841,9 +841,13 @@ html.dialog-open { overflow: hidden; }
 .activity-room { position: relative; width: 100%; max-width: min(100%, calc((100dvh - 15rem) * 16 / 9)); margin: 2.2rem auto 0; }
 .activity-stage-area { position: relative; }
 .stage-pan { width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border-radius: 14px; }
-/* Below 880 px the stage keeps its width and the Room pans, starting at the
-   door back to the Entryway — nothing shrinks below the legibility floor. */
-.stage[data-stage="activities"] { container-type: inline-size; min-width: 880px; max-width: none; margin: 0; overflow: hidden; border-radius: 14px; background: #4E6560; pointer-events: auto; }
+/* 96: below 880 px the stage used to keep its width and pan, starting at the door
+   back to the Entryway, which left the desk and any cat resting right of the hunt
+   station off the screen at 390 px. A cat is a control the visitor has to be able
+   to reach, and cats rest anywhere on the floor, so the whole Room now shrinks to
+   the screen like the Cinema Room's does; the chalk is small there. The pan
+   wrapper stays, with nothing left to pan. */
+.stage[data-stage="activities"] { container-type: inline-size; max-width: none; margin: 0; overflow: hidden; border-radius: 14px; background: #4E6560; pointer-events: auto; }
 
 .stage[data-stage="activities"] .prop { z-index: var(--z, 0); padding: 0; border: 0; pointer-events: none; }
 /* Four controls, and only four: the door, the three stations, the boombox. */
@@ -875,7 +879,9 @@ html.dialog-open { overflow: hidden; }
    `styles.css` said so before the art existed ("these two angles stay") and the art does not
    change that. `background-size: 200% 100%` with a fixed `background-position: 0 0` keeps showing
    cell 1 (shut) through the rotation; cell 2 (open) ships but is not read by this rule. */
-.a-door-leaf { position: absolute; left: 7.8%; top: 3.8%; width: 84.4%; height: 96.2%; background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; }
+/* 96: the leaf is the painted opening, 142 x 351 units, inside the casing box the link
+   takes (design 75 §4.1 D7): (95,162)-(237,513) in (73,139)-(257,514). */
+.a-door-leaf { position: absolute; left: 11.96%; top: 6.13%; width: 77.17%; height: 93.6%; background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; }
 .a-door:hover, .a-door:focus-visible { transform: translateY(calc(-3 * var(--u))); filter: brightness(1.1); }
 
 
