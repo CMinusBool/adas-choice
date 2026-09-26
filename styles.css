@@ -1027,9 +1027,32 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
 .activity-scrim { display: none; }
 
 @media (min-width: 1080px) {
-  /* (400,160)-(1200,620) in stage units, over a scrim across the whole stage. */
+  /* Over a scrim across the whole stage. 109: the card was design 12's
+     (400,160)-(1200,620), half the stage each way - 587 x 337 px at 1440 x 900,
+     against 630-790 px of copy, so every Activity scrolled inside it. It is now
+     as tall as its copy, centred, up to the stage's height less 1.5rem and 80% of its
+     width, and its copy stands in two columns under a full-width head: how it
+     goes on the left, why this one on the right. The DOM order, and so the
+     reading order, is §5.2's. Body type follows the screen's height, 20 px at
+     900 and never under 16. At 1440 x 900 every card reads without scrolling,
+     in both languages; on a shorter screen a card may still scroll. */
   .activity-scrim { display: block; position: absolute; inset: 0; z-index: 900; border-radius: 14px; background: rgba(24, 32, 30, .55); animation: activity-fade-in .15s ease-out; }
-  .activity-card { position: absolute; left: 25%; top: 17.8%; width: 50%; bottom: 31.1%; z-index: 910; margin: 0; overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 24px 80px #000a; animation: activity-fade-in .15s ease-out; }
+  .activity-card {
+    position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: min(80%, 64rem); max-height: calc(100% - 1.5rem); z-index: 910;
+    margin: 0; padding: 1.5rem 2rem; overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 24px 80px #000a; animation: activity-fade-in .15s ease-out;
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); column-gap: 2.5rem; align-content: start;
+    grid-template-areas: "title title" "line line" "meta meta" "how-label why-label" "steps why" "extra why" "actions actions";
+  }
+  .activity-card-title { grid-area: title; min-height: 0; font-size: clamp(1.75rem, 4.45dvh, 2.5rem); }
+  .activity-card-line { grid-area: line; }
+  .activity-card-meta { grid-area: meta; }
+  .activity-card-label:first-of-type { grid-area: how-label; }
+  .activity-card-steps { grid-area: steps; }
+  .activity-card-extra { grid-area: extra; font-size: clamp(1rem, 2.1dvh, 1.1875rem); }
+  .activity-card-label:last-of-type { grid-area: why-label; }
+  .activity-card-why { grid-area: why; }
+  .activity-card-actions { grid-area: actions; }
+  .activity-card-line, .activity-card-meta, .activity-card-steps, .activity-card-why { font-size: clamp(1rem, 2.25dvh, 1.25rem); }
   .motion-off .activity-scrim, .motion-off .activity-card { animation: none; }
 }
 @keyframes activity-fade-in { from { opacity: 0; } to { opacity: 1; } }
