@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   advance,
+  anySoundShips,
   createWorld,
   isAudible,
   isMusicSourceOn,
@@ -166,5 +167,24 @@ describe('what a new visit inherits', () => {
   it('takes no notice of any interaction after the first', () => {
     const world = afterInteraction();
     expect(advance(world, { type: 'visitor-interacted' })).toBe(world);
+  });
+});
+
+describe('the sound control', () => {
+  // 101: a control that changes nothing anyone can hear is not offered.
+  it('is not offered while no tier has a sound', () => {
+    expect(anySoundShips({ sfx: {}, music: {}, film: {} })).toBe(false);
+  });
+
+  it('is offered once one SFX ships', () => {
+    expect(anySoundShips({ sfx: { meow: 'assets/meow.mp3' }, music: {}, film: {} })).toBe(true);
+  });
+
+  it('is offered once one Room has its Room Music', () => {
+    expect(anySoundShips({ sfx: {}, music: { cinema: 'assets/cinema.mp3' }, film: {} })).toBe(true);
+  });
+
+  it('is offered once the Bumper has its audio', () => {
+    expect(anySoundShips({ sfx: {}, music: {}, film: { bumper: 'assets/bumper.mp3' } })).toBe(true);
   });
 });
