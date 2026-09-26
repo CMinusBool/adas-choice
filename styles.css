@@ -308,6 +308,10 @@ html.dialog-open { overflow: hidden; }
 .actor.cat.is-fussed { display: none; }
 .motion-off .actor.cat { transition: none; }
 .actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
+/* 107: the gait (`Gait` in src/world/actors.ts). Every sheet is one standing frame, so the step is
+   the figure rising off its feet and rocking about them; the feet point, the Actor's box and its
+   hand-offs do not move for it. Both are 0 whenever the Actor is not walking, motion off included. */
+.actor > .cycle { transform-origin: 50% 100%; translate: 0 calc(var(--lift, 0) * -100%); rotate: calc(var(--lean, 0) * 1deg); }
 /* 100: while the Entryway arrival has one of them in a costume it has a sprite for (S12, S13), that layer
    stands in over the same feet and height, and the Cycle under it is hidden. src/dom/entryway.ts decides. */
 .actor.is-dressed > .cycle:not([data-costume]) { visibility: hidden; }

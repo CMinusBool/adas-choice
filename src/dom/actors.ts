@@ -175,6 +175,10 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
     style.height = `${(sprite.height / stage.height) * 100}%`;
     style.setProperty('--flip', mirrored ? '-1' : '1');
     style.zIndex = String(Math.round(view.at.y));
+    // 107: the step the one-frame sheet cannot draw. `styles.css` lifts and
+    // rocks the Cycle layers over the feet by these; the box itself stays put.
+    style.setProperty('--lift', view.gait.lift.toFixed(4));
+    style.setProperty('--lean', view.gait.lean.toFixed(3));
   }
 
   function park(sprite: Sprite) {
