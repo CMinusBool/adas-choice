@@ -7,7 +7,7 @@
     "dev": "vite",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.world.json",
-    "test": "npm run typecheck && vitest run && node --test scripts/check-assets.test.mjs scripts/check-styles.test.mjs scripts/check-cinema-stage.test.mjs scripts/check-stages.test.mjs scripts/art/codex-imagegen.test.mjs scripts/art/build-cycle.test.mjs scripts/art/build-prop.test.mjs scripts/art/make-preview.test.mjs scripts/art/measure-rect.test.mjs scripts/art/edit-entryway-backdrop.test.mjs scripts/art/edit-game-room-backdrop.test.mjs scripts/art/edit-activity-room-backdrop.test.mjs",
+    "test": "npm run typecheck && vitest run && node --test scripts/check-assets.test.mjs scripts/check-styles.test.mjs scripts/check-cinema-stage.test.mjs scripts/check-game-room-stage.test.mjs scripts/check-stages.test.mjs scripts/art/codex-imagegen.test.mjs scripts/art/build-cycle.test.mjs scripts/art/build-prop.test.mjs scripts/art/make-preview.test.mjs scripts/art/measure-rect.test.mjs scripts/art/edit-entryway-backdrop.test.mjs scripts/art/edit-game-room-backdrop.test.mjs scripts/art/edit-activity-room-backdrop.test.mjs",
     "build": "npm run typecheck && vite build && node scripts/assert-built-page.mjs && node scripts/check-assets.mjs --non-fatal"
   },
   "devDependencies": {

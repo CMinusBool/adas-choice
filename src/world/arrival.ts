@@ -500,11 +500,12 @@ export interface RoomArrivalSlice {
  * is the same place. Every Door is in a left-hand wall, so everyone turns right
  * as they come through it. The Entryway's entry is its own threshold and is
  * never used: that Room's arrival is the long script above, and it comes in
- * from outside rather than from another Room.
+ * from outside rather than from another Room. 89: the Game Room's is design 75
+ * §4.1's (130, 583), in front of its narrowed doorway on the 1408 x 792 stage.
  */
 const DOOR_MARKS: Record<RoomId, ArrivalMark> = {
   entryway: { at: ENTRYWAY_MARKS.T, facing: 'right' },
-  games: { at: { x: 150, y: 662 }, facing: 'right' },
+  games: { at: { x: 130, y: 583 }, facing: 'right' },
   cinema: { at: { x: 150, y: 662 }, facing: 'right' },
   activities: { at: { x: 150, y: 662 }, facing: 'right' },
 };

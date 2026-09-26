@@ -292,6 +292,14 @@ describe('a cat and her own Breakable', () => {
     expect(new Set(BREAKABLE_IDS.map(id => breakableById(id).owner))).toEqual(new Set(CAT_IDS));
   });
 
+  it('has Luna knock the snow globe from the shrunk cat bed, one of her roam marks', () => {
+    // 89, design 75 §4.3: the bed ticket 87 shrank × 0.75 is painted at
+    // (959,465)-(1078,516) on the 1408 x 792 stage, and her mark stands on it.
+    const mark = breakableById('snow-globe').mark;
+    expect(mark).toEqual({ x: 1018, y: 505 });
+    expect(CAT_MARKS.games).toContainEqual(mark);
+  });
+
   /**
    * The knock mark is the one place a cat stands that the visitor can check
    * against the Room she is standing in, so it has to be on that Room's floor

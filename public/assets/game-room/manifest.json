@@ -1,27 +1,34 @@
 {
   "schema": "game-room-manifest/1",
-  "note": "Provenance for the Game Room's delivered art (COOP-001 ticket 34). The raw generations live in the main checkout's .scratch/COOP-001-apartment/art/generated/41-game-room/ (gitignored) and travel here only as sha256s; each source is the attempt ticket 41's manifest marks kept and its 2026-09-25 approvals confirm (S02 attempt-5, S09 and S10 attempt-4, the S15 sheet attempt-3). Files are relative to public/assets/: the Props under game-room/, the three Scene sets at their existing names. Every Prop keeps the box it had before the drop (design 75's true-size boxes are not applied); `painted` is where the painting actually sits inside that box, so a later rescale can shrink the box to it without regenerating.",
+  "note": "Provenance for the Game Room's delivered art (COOP-001 ticket 34). The raw generations live in the main checkout's .scratch/COOP-001-apartment/art/generated/41-game-room/ (gitignored) and travel here only as sha256s; each source is the attempt ticket 41's manifest marks kept and its 2026-09-25 approvals confirm (S02 attempt-5, S09 and S10 attempt-4, the S15 sheet attempt-3). Files are relative to public/assets/: the Props under game-room/, the three Scene sets at their existing names. Every Prop keeps the box it had before the drop (design 75's true-size boxes are not applied); `painted` is where the painting actually sits inside that box, so a later rescale can shrink the box to it without regenerating. Ticket 89 (design 75 §4.3) put the Room on its 1408 x 792 stage: the backdrop is ticket 87's edit of S01 (doorway narrowed, cat bed × 0.75) stretched whole to the stage, the Portals, dots and cornice moved × 0.88 (R1), and every Prop scaled about its bottom-centre to the factor in its `scale`; its `placed` is the box it now takes in stage units, and `trueSize` what that comes to at 1 cm = 1.667 units. Nothing was regenerated. Every `painted` but the sideboard's is still ticket 34's, measured in the 1600 x 900 stage's old boxes.",
   "identitySource": "art/characters/v2 for S14, S15-still, S16 and S17-era shots; art/characters/v3 for the 2026-09-25 revisions (S02, S09, S10, S15 sheet) — as ticket 41 records",
   "assets": [
     {
       "file": "game-room/backdrop.png",
       "shot": "S01",
       "name": "Empty Room backdrop",
-      "kept": "attempt-1",
+      "kept": "attempt-1, as edited by ticket 87 (attempt-1-edit)",
       "frames": 1,
       "columns": 1,
       "frame": "1600x900",
-      "stage": "1600x900",
+      "stage": "1408x792",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s01-room/attempt-1/strip-raw.png",
-        "sha256": "64bf82ce1e041841dd83e06b54633a6dab8ad4c9bd840768d9d8530097b5243a"
+        "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s01-room/attempt-1-edit/strip-raw.png",
+        "sha256": "d08b5caacfd5f9b79d9c24ba59841bc5534683eb9aa301ef8c21e20e61cfa765",
+        "editedBy": "scripts/art/edit-game-room-backdrop.mjs (ticket 87)",
+        "editedFrom": {
+          "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s01-room/attempt-1/strip-raw.png",
+          "sha256": "64bf82ce1e041841dd83e06b54633a6dab8ad4c9bd840768d9d8530097b5243a"
+        }
       },
-      "sha256": "5c52715ad9d54f73b88cbe35a12a8d5cb40cad5d27b771e9f7e326ce2e5fe0f8",
+      "sha256": "650ac9eef6bb29bd12965d3c805a94b87e1a841041edf118a6d3a99ae862a6d8",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 1600x900 --fit fill --seat centre --key alpha",
       "sharedScale": null,
-      "placed": "0, 0, 1600 x 900 (today's box, kept: ticket 34 swaps the surface only)",
+      "placed": "0, 0, 1408 x 792 (ticket 89: the whole painting × 0.88 against the 1600 x 900 stage)",
       "painted": null,
-      "motionPhase": null
+      "motionPhase": null,
+      "door": "casing (39,100)-(222,473), 183 x 373; opening (59,121)-(200,473), 141 x 352 (85 x 211 cm), the one door within 1 %",
+      "catBed": "(959,465)-(1078,516), 71 cm across, as ticket 87 measured it"
     },
     {
       "file": "game-room/sideboard.png",
@@ -30,24 +37,24 @@
       "kept": "attempt-5",
       "frames": 1,
       "columns": 1,
-      "frame": "2160x344",
+      "frame": "1047x342",
       "source": {
         "path": ".scratch/COOP-001-apartment/art/generated/41-game-room/s02-sideboard/attempt-5/strip-raw.png",
         "sha256": "8d960c26b1f491bcf06ca8ed73ac089edd6d298347d281bd86b78de8784d676a"
       },
-      "sha256": "e2b80a457f0648b7dbefaabd825e7139ee001d49f8c9ee64763f620376c1a3b4",
-      "builtBy": "scripts/art/build-prop.mjs@1 --frame 2160x344 --fit content --seat bottom --key '#00FF00'",
+      "sha256": "009f656874994e6d89e1e509c0fc204124c06dd290319f341d5898e7ebf62bde",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 2160x344 --fit content --seat bottom --key '#00FF00' + scripts/art/crop-cell.mjs --region 557,2,1604,344 (ticket 89: re-cut byte for byte to its alpha box)",
       "sharedScale": 0.5369,
-      "placed": "300, 468, 1080 x 172 (today's box, kept: ticket 34 swaps the surface only)",
+      "placed": "(526,432)-(926,563), 400 x 131, free-standing and centred under the middle Portal (x 726); its top surface runs from y 467 to 481",
       "painted": {
-        "units": "523.5 x 171.0",
-        "box": "(578,469)-(1102,640)",
-        "paintedAspect": 3.063,
-        "boxAspect": 6.279,
-        "fillsWidth": 0.485,
-        "fillsHeight": 0.994
+        "units": "400 x 131",
+        "box": "(526,432)-(926,563)",
+        "fillsWidth": 1,
+        "fillsHeight": 1
       },
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 0.763,
+      "trueSize": "240 x 79 cm, the free-standing length (answer 5); the console on it about 40 cm, 1.5 x life"
     },
     {
       "file": "game-room/boombox.png",
@@ -64,7 +71,7 @@
       "sha256": "b8caf2a0a4ad6ce2a82808fe90a7d4cfc42e802aa38402c6bbf98d008984dd62",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 320x180 --frames 2 --columns 2 --fit content --seat bottom --key '#00FF00'",
       "sharedScale": 0.3271,
-      "placed": "340, 450, 160 x 90 (today's box, kept: ticket 34 swaps the surface only)",
+      "placed": "the cell box (329.8,496.4)-(448.2,563), 118.4 x 66.6, on the floor under the left Portal; its ::after pads the hit area to 44 px",
       "painted": {
         "units": "158.0 x 81.0",
         "box": "(341,459)-(499,540)",
@@ -73,7 +80,9 @@
         "fillsWidth": 0.988,
         "fillsHeight": 0.9
       },
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 0.74,
+      "trueSize": "70 x 36 cm painted (116.9 x 59.9 units)"
     },
     {
       "file": "game-room/snow-globe.png",
@@ -90,7 +99,7 @@
       "sha256": "b0787f1c4a35afebac45218214c50fcfff96aeb7da6ebf5889f0ff47d4bb62e2",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 120x128 --fit content --seat bottom --key '#00FF00'",
       "sharedScale": 0.109,
-      "placed": "1240, 476, 60 x 64 (today's box, kept: ticket 34 swaps the surface only)",
+      "placed": "(874.1,441.1)-(905.9,475), 31.8 x 33.9, on the sideboard's right end, standing at the depth the game cases stand at; its ::after pads the hit area to 44 px",
       "painted": {
         "units": "51.5 x 63.0",
         "box": "(1244,477)-(1296,540)",
@@ -99,7 +108,9 @@
         "fillsWidth": 0.858,
         "fillsHeight": 0.984
       },
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 0.53,
+      "trueSize": "16 x 20 cm painted (27.3 x 33.4 units)"
     },
     {
       "file": "game-room/snow-globe-broken.png",
@@ -116,7 +127,7 @@
       "sha256": "3391ae473b51c0f575a1e691a52faac5bcc3b6922e3f93bb1d8d25d338c12c2a",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 240x92 --fit content --seat bottom --key '#00FF00'",
       "sharedScale": 0.1227,
-      "placed": "1210, 646, 120 x 46 (today's box, kept: ticket 34 swaps the surface only)",
+      "placed": "(858.2,563.6)-(921.8,588), 63.6 x 24.4, on the floor in front of the sideboard",
       "painted": {
         "units": "118.0 x 42.5",
         "box": "(1211,650)-(1329,692)",
@@ -125,7 +136,9 @@
         "fillsWidth": 0.983,
         "fillsHeight": 0.924
       },
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 0.53,
+      "trueSize": "38 x 14 cm painted"
     },
     {
       "file": "game-room/floor-lamp.png",
@@ -142,7 +155,7 @@
       "sha256": "52d982caea0accc0ab2e781c3b51f2430597c59a94429d5cbfcf557822295be0",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 220x788 --fit content --seat bottom --key '#00FF00'",
       "sharedScale": 0.3564,
-      "placed": "1390, 246, 110 x 394 (today's box, kept: ticket 34 swaps the surface only)",
+      "placed": "(1230,169)-(1340,563), 110 x 394, moved right of the right Portal, size kept",
       "painted": {
         "units": "108.0 x 293.0",
         "box": "(1391,347)-(1499,640)",
@@ -151,7 +164,9 @@
         "fillsWidth": 0.982,
         "fillsHeight": 0.744
       },
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 1,
+      "trueSize": "65 x 176 cm painted"
     },
     {
       "file": "game-room/low-table.png",
@@ -168,7 +183,7 @@
       "sha256": "34bf61385360f198392c8c3dbc32ec4ea5c84d93c427efc7aa9053a180c3c83b",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 880x200 --fit content --seat bottom --key '#00FF00'",
       "sharedScale": 0.3736,
-      "placed": "560, 790, 440 x 100 (today's box, kept: ticket 34 swaps the surface only)",
+      "placed": "(549,720.5)-(824,783), 275 x 62.5, painted (578,721)-(795,783), between the two poufs",
       "painted": {
         "units": "347.0 x 99.0",
         "box": "(607,791)-(954,890)",
@@ -177,7 +192,9 @@
         "fillsWidth": 0.789,
         "fillsHeight": 0.99
       },
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 0.625,
+      "trueSize": "130 x 37 cm painted; 7.5 % under a real low table's 40-45 cm"
     },
     {
       "file": "game-room/girl-pouf.png",
@@ -194,7 +211,7 @@
       "sha256": "0ab89c73be84e90a372176c90a309ad5c674a92633a389a343f82ef55a3d2c41",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 480x520 --fit content --seat bottom --key '#00FF00'",
       "sharedScale": 0.4164,
-      "placed": "500, 520, 240 x 260 (today's box, kept: ticket 34 swaps the surface only)",
+      "placed": "(458.4,496.2)-(633.6,686), 175.2 x 189.8, its base centre on the Girl's seated mark (546,686); the CSS pouf G17 is (469,606)-(622,686)",
       "painted": {
         "units": "209.0 x 259.0",
         "box": "(516,521)-(725,780)",
@@ -203,7 +220,9 @@
         "fillsWidth": 0.871,
         "fillsHeight": 0.996
       },
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 0.73,
+      "trueSize": "her head 57 units, as the standing Girl's"
     },
     {
       "file": "game-room/boy-pouf.png",
@@ -220,7 +239,7 @@
       "sha256": "a236c8ada697eeb1b5b6c544e2d3add76acadc783cae073807201d1de12a7068",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 520x560 --fit content --seat bottom --key '#00FF00'",
       "sharedScale": 0.4504,
-      "placed": "750, 495, 260 x 280 (today's box, kept: ticket 34 swaps the surface only)",
+      "placed": "(679.1,477.6)-(868.9,682), 189.8 x 204.4, its base centre on the Boy's seated mark (774,682); the CSS pouf G18 is (694,613)-(855,682)",
       "painted": {
         "units": "224.0 x 279.0",
         "box": "(768,496)-(992,775)",
@@ -229,7 +248,9 @@
         "fillsWidth": 0.862,
         "fillsHeight": 0.996
       },
-      "motionPhase": null
+      "motionPhase": null,
+      "scale": 0.73,
+      "trueSize": "his head 53 units, as the standing Boy's"
     },
     {
       "file": "game-room/door-leaf.png",
@@ -249,8 +270,10 @@
         "shut": 0.7988,
         "open": 0.7074
       },
-      "placed": "fills S01's measured opening (67,136)-(265,535), 198 x 399, inside the link's measured casing (45,114)-(286,539); cell 1 read, stretched 1.22x across (painted 0.403 wide per unit tall against the opening's 0.496)",
-      "motionPhase": null
+      "placed": "fills the painted opening (59,121)-(200,473), 141 x 352, inside the link's casing (39,100)-(222,473); cell 1 read, 0.4 % narrower across than drawn",
+      "motionPhase": null,
+      "scale": 1,
+      "trueSize": "85 x 211 cm"
     },
     {
       "file": "operation-tango.webp",

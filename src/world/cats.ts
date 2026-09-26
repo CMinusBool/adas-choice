@@ -65,14 +65,17 @@ export const CAT_MARKS: Record<RoomId, readonly Point[]> = {
     { x: 1160, y: 830 },
     { x: 1420, y: 690 },
   ],
-  // The Game Room: the sideboard's cat bed is Luna's mark in the design note,
-  // and the other four keep out of the low table's notch.
+  // The Game Room: the cat bed is Luna's mark in the design note, and the other
+  // four keep out of the low table's notch. 89: design 75 §4.3 on the 1408 x 792
+  // stage — the four free marks × 0.88, and the bed's mark on the bed ticket 87
+  // shrank. The second is 18 units right of the note's (352, 739), which at
+  // × 0.88 came 162 units from the first, inside `CAT_CLEARANCE`.
   games: [
-    { x: 280, y: 700 },
-    { x: 400, y: 840 },
-    { x: 760, y: 700 },
-    { x: 1180, y: 700 },
-    { x: 1300, y: 840 },
+    { x: 246, y: 616 },
+    { x: 370, y: 739 },
+    { x: 669, y: 616 },
+    { x: 1018, y: 505 },
+    { x: 1144, y: 739 },
   ],
   // The Cinema Room: the reel cabinet's left side and the comedy bay are the
   // two Breakable marks, so a cat is already where ticket 09 wants one. 63: the

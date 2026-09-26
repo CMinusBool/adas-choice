@@ -73,6 +73,8 @@ describe('a Room arrival', () => {
     expect(roomDoorState(held, 'games')).toBe('open');
     expect(whoIsIn(held, 'games')).toEqual(['girl']);
     expect(who(held, 'girl').moving).toBe(false);
+    // The door mark in front of the narrowed doorway (design 75 §4.1, ticket 89).
+    expect(who(held, 'girl').at).toEqual({ x: 130, y: 583 });
   });
 
   it('sends the three cats through the gap ahead of her, at a run', () => {
@@ -102,10 +104,11 @@ describe('a Room arrival', () => {
  *
  * Taken from the notes rather than from `HOMES`, so that these are a check of
  * the table as well as of the arrival that walks the Cast to it. The Game
- * Room's pair are §4.3's seated marks, since S09 and S10 landed (ticket 34).
+ * Room's pair are the seated marks since S09 and S10 landed (ticket 34), and
+ * design 75 §4.3's on the 1408 x 792 stage since ticket 89.
  */
 const MARKS: Readonly<Record<'games' | 'cinema' | 'activities', Readonly<Record<'boy' | 'girl', readonly [number, number, 'left' | 'right']>>>> = {
-  games: { boy: [880, 775, 'left'], girl: [620, 780, 'right'] },
+  games: { boy: [774, 682, 'left'], girl: [546, 686, 'right'] },
   cinema: { boy: [660, 800, 'left'], girl: [320, 800, 'right'] },
   activities: { boy: [868, 744, 'left'], girl: [762, 742, 'right'] },
 };
@@ -129,8 +132,9 @@ describe.each(ROOMS)('the arrival of the %s Room', room => {
     const scripted = play(room, ROOM_ARRIVAL_SECONDS + 0.05);
     expect(roomArrivalState(scripted)).toBe('done');
     expect(roomDoorState(scripted, room)).toBe('closed');
-    // The last stride lands inside another half second in every Room — 3.28 s
-    // in the Game Room, 3.44 in the Activity Room, 3.60 in the Cinema Room,
+    // The last stride lands inside another half second in every Room — 2.99 s
+    // in the Game Room on its 1408 x 792 stage (ticket 89; 3.28 on 1600 x 900),
+    // 3.44 in the Activity Room, 3.60 in the Cinema Room,
     // measured against ticket 07's walk and run speeds. The two of them stay
     // put once they are there; the cats are free to go somewhere else.
     const quiet = run(scripted, 0.55);

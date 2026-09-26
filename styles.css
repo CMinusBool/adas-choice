@@ -272,7 +272,7 @@ html.dialog-open { overflow: hidden; }
    with more units across draws everything in it bigger, never its stage. */
 .stage { --u: calc(100cqw / var(--stage-w)); }
 .stage[data-stage="entryway"] { --stage-w: 1600; --stage-h: 900; }
-.stage[data-stage="games"] { --stage-w: 1600; --stage-h: 900; }
+.stage[data-stage="games"] { --stage-w: 1408; --stage-h: 792; }
 .stage[data-stage="cinema"] { --stage-w: 1600; --stage-h: 900; }
 .stage[data-stage="activities"] { --stage-w: 1600; --stage-h: 900; }
 /* The Cast waits in here until the model puts an Actor in a Room, so a parked
@@ -1057,11 +1057,16 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
    Room, because P2's rim is, but it is the only pink on the floor. */
 .prop-led {
   background: var(--pink);
-  box-shadow: 0 0 calc(26 * var(--u)) calc(5 * var(--u)) #f5a3c555;
+  box-shadow: 0 0 calc(22.9 * var(--u)) calc(4.4 * var(--u)) #f5a3c555;
 }
 
-/* G8, G8a, G8b: the three Portals — apertures into each game's world, 300 x
-   480 units and a 5:8 ellipse, on the wall at every width (ADR 0004).
+/* G8, G8a, G8b: the three Portals — apertures into each game's world, 264 x
+   422.4 units and a 5:8 ellipse, on the wall at every width (ADR 0004).
+
+   89: the wall is painted, so it moved onto the 1408 x 792 stage by design 75's
+   R1 — every box, rim and glow on it × 0.88 in units, which keeps each one the
+   size on screen it was on the 1600 x 900 stage. The numbers below are the old
+   ones × 0.88.
 
    The rim is the button's own border, because a border follows an ellipse at
    a constant width and no radial mask can: a percentage ring on a 300 x 480
@@ -1076,14 +1081,14 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
   --rim: var(--pink);
   /* 46: the thickness is a variable because the expanded Portal wears the same
      rim at a different size, and `--u` does not reach outside the stage. */
-  --rim-width: calc(16 * var(--u));
+  --rim-width: calc(14.08 * var(--u));
   border: var(--rim-width) solid var(--rim);
   border-radius: 50%;
   background: #0A0810;
   cursor: pointer;
   box-shadow:
-    0 0 calc(30 * var(--u)) calc(4 * var(--u)) color-mix(in srgb, var(--rim) 45%, transparent),
-    inset 0 0 calc(24 * var(--u)) calc(2 * var(--u)) color-mix(in srgb, var(--rim) 30%, transparent);
+    0 0 calc(26.4 * var(--u)) calc(3.52 * var(--u)) color-mix(in srgb, var(--rim) 45%, transparent),
+    inset 0 0 calc(21.12 * var(--u)) calc(1.76 * var(--u)) color-mix(in srgb, var(--rim) 30%, transparent);
   transition: box-shadow .45s;
 }
 #room-games .stage .portal[data-game="tango"] { --rim: #4DA3D9; }
@@ -1094,8 +1099,8 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
    enough, and there is no muted state for a Portal to be in (§5.4). */
 #room-games .stage .portal.is-awake {
   box-shadow:
-    0 0 calc(44 * var(--u)) calc(7 * var(--u)) color-mix(in srgb, var(--rim) 65%, transparent),
-    inset 0 0 calc(30 * var(--u)) calc(3 * var(--u)) color-mix(in srgb, var(--rim) 45%, transparent);
+    0 0 calc(38.72 * var(--u)) calc(6.16 * var(--u)) color-mix(in srgb, var(--rim) 65%, transparent),
+    inset 0 0 calc(26.4 * var(--u)) calc(2.64 * var(--u)) color-mix(in srgb, var(--rim) 45%, transparent);
 }
 .portal-world {
   position: absolute;
@@ -1132,16 +1137,16 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
 /* G8b: the sparks, thrown outward off the rim into the room. */
 #room-games .stage .particle-field { z-index: 383; overflow: visible; }
 
-/* §3.5: the three dots under a narrow wall's one Portal. Painted 40 units
-   across so they are still 22 px at the 880 px floor, with a 44 px hit box
-   around each and 33 px between centres, so the boxes never overlap. */
+/* §3.5: the three dots under a narrow wall's one Portal. Painted 35.2 units
+   across (40 on the 1600 x 900 stage, × 0.88 by R1 since ticket 89) so they
+   are still 22 px at the 880 px floor, with a 44 px hit box around each. */
 .portal-dots { display: flex; align-items: center; justify-content: space-between; }
 .portal-dot {
   position: relative;
-  width: calc(40 * var(--u));
-  height: calc(40 * var(--u));
+  width: calc(35.2 * var(--u));
+  height: calc(35.2 * var(--u));
   padding: 0;
-  border: calc(3 * var(--u)) solid #EAD9C2aa;
+  border: calc(2.64 * var(--u)) solid #EAD9C2aa;
   border-radius: 50%;
   background: #1B1E21;
   cursor: pointer;
@@ -1159,7 +1164,7 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
 .portal-dot[aria-current="true"] {
   border-color: var(--pink);
   background: var(--pink);
-  box-shadow: 0 0 calc(18 * var(--u)) #f5a3c5aa;
+  box-shadow: 0 0 calc(15.84 * var(--u)) #f5a3c5aa;
 }
 @media (min-width: 1080px) { .portal-dots { display: none; } }
 /* 47: and below it, a sideways drag across the chooser — the Portal itself
@@ -1333,12 +1338,16 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
    it: the image is drawn at the painting's own proportions, seated on the box's
    bottom edge and centred across it, so a painting narrower or shorter than its
    box leaves the rest of the box transparent. Nothing here draws a surface.
-   The sideboard's image box still reaches up to y 468 because the console and
-   the game cases stand above its top (G13, G14, baked into S02). */
+   The sideboard's image box still reaches up to y 432 because the console and
+   the game cases stand above its top (G13, G14, baked into S02).
+   89: each is at true size on the 1408 x 792 stage, S02 re-cut to its alpha
+   box and every factor in `public/assets/game-room/manifest.json`. */
 
 /* G17, G18 and S09, S10: a pouf shows while its seated still does not, and the
    still stands in for its Actor's sprite — `src/dom/seats.ts` names who is
-   seated on the stage's `data-seated`, and the model decides when. */
+   seated on the stage's `data-seated`, and the model decides when. Each CSS
+   pouf's box is the pouf painted under its still (ticket 89), which
+   `scripts/check-game-room-stage.test.mjs` holds to 5 units. */
 .prop-pouf {
   border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
   box-shadow: inset 0 calc(-6 * var(--u)) calc(10 * var(--u)) #0000004d;
@@ -1361,9 +1370,10 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
   cursor: pointer;
   background-size: 200% 100%;
   background-position: 0 0;
-  /* The painted box is 68 x 38 px at the narrow shell, so the hit area is grown
-     around it rather than the artwork being made unreadably large. */
-  outline-offset: calc(3 * var(--u));
+  /* At true size (× 0.74, ticket 89) the painted box is 74 x 42 px at the
+     880 px stage, so the hit area is grown around it rather than the artwork
+     being made unreadably large. */
+  outline-offset: calc(2.22 * var(--u));
 }
 .prop-boombox[aria-pressed="true"] { background-position: 100% 0; }
 .prop-boombox::after {
@@ -1377,21 +1387,23 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
 }
 /* The two tape spindles, DOM discs over the painted reels (§5.1: CSS, not
    artwork, so they stay crisp). S03's reels sit at (68.5, 62.5) and
-   (91.5, 62.5) in the 160 x 90 box, as measured off the delivered cells; the
-   discs only come up while the machine is on, and turn only with motion on. */
+   (91.5, 62.5) in the cell's 160 x 90, as measured off the delivered cells, so
+   at the boombox's × 0.74 (ticket 89) at (50.7, 46.3) and (67.7, 46.3) in its
+   118.4 x 66.6 box; the discs only come up while the machine is on, and turn
+   only with motion on. */
 .spindle {
   display: none;
   position: absolute;
-  top: calc(58 * var(--u));
-  width: calc(9 * var(--u));
-  height: calc(9 * var(--u));
+  top: calc(42.92 * var(--u));
+  width: calc(6.66 * var(--u));
+  height: calc(6.66 * var(--u));
   border-radius: 50%;
-  border: calc(1.5 * var(--u)) solid #6B4C1E;
+  border: calc(1.11 * var(--u)) solid #6B4C1E;
   /* The teeth, so a turning spindle reads as turning. */
   background: conic-gradient(#6B4C1E 0 12%, transparent 12% 38%, #6B4C1E 38% 50%, transparent 50% 88%, #6B4C1E 88% 100%);
 }
-.spindle { left: calc(64 * var(--u)); }
-.spindle + .spindle { left: calc(87 * var(--u)); }
+.spindle { left: calc(47.36 * var(--u)); }
+.spindle + .spindle { left: calc(64.38 * var(--u)); }
 .prop-boombox[aria-pressed="true"] .spindle {
   display: block;
   animation: spindle-turn .9s linear infinite;
@@ -1402,16 +1414,30 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
 
 /* G15: Luna's snow globe, the only Breakable in this Room. Ticket 09 swaps the
    two states over; nothing here is clickable, and the visitor cannot break it.
-   S04 intact, 60 x 64 units on the sideboard; S05 broken, 120 x 46 units,
-   anchored bottom-left at (1210, 692). Both paint from their `data-still`. */
+   Both paint from their `data-still`, at true size since ticket 89 (× 0.53):
+   S04 intact, 31.8 x 33.9 units on the sideboard's right end; S05 broken,
+   63.6 x 24.4 units on the floor in front of it. The intact globe is 20 px
+   across at the 880 px stage, so like the boombox it keeps a 44 px hit area
+   grown around it; it sorts under every Actor, so the pad never covers one. */
+.prop-globe::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(44px, 100%);
+  height: max(44px, 100%);
+  transform: translate(-50%, -50%);
+}
 
 /* G6: the door back to the Entryway — the Entryway's own Game door, seen from
    this side. The text `.room-exit` at the top of the Room leads out too; §8.3
    asks the owner whether both should stay. Since ticket 34 the casing and the
-   dark opening are painted into S01, and the link's box is that casing as
-   measured, (45,114)-(286,539); the S17 leaf fills the painted opening,
-   (67,136)-(265,535), and shows its shut cell through the whole swing, which
-   `.stage[data-door]` at the end of the file still drives. */
+   dark opening are painted into S01. Since ticket 89 the opening is ticket 87's
+   narrowed one on the 1408 x 792 stage, and the link's box is its casing as
+   measured, (39,100)-(222,473); the S17 leaf fills the painted opening,
+   (59,121)-(200,473), 141 x 352 — the one door within 1 % — and shows its shut
+   cell through the whole swing, which `.stage[data-door]` at the end of the
+   file still drives. */
 .prop-door {
   border-radius: calc(4 * var(--u)) calc(4 * var(--u)) 0 0;
   overflow: hidden;
@@ -1419,10 +1445,10 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
 }
 .prop-door .door-leaf {
   position: absolute;
-  left: 9.13%;
-  right: 8.71%;
-  top: 5.18%;
-  bottom: 0.94%;
+  left: 10.93%;
+  right: 12.02%;
+  top: 5.63%;
+  bottom: 0%;
   background-size: 200% 100%;
   background-position: 0 0;
   background-repeat: no-repeat;

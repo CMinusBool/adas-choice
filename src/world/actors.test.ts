@@ -223,56 +223,69 @@ describe('the floor every Room stands on', () => {
 });
 
 describe('the Game Room floor', () => {
-  // Design note 11 §4.2: a band from y 660 to y 860 between x 140 and x 1460,
-  // with one notch cut out of its bottom edge for the low table's footprint, so
-  // a cat never walks into the foreground Prop that would hide it.
+  // Design 75 §4.3 (ticket 89): on the 1408 x 792 stage, a band from y 581 to
+  // y 757 between the door's jamb at x 123 and the lamp at x 1285, with a bump
+  // up onto Luna's shrunk cat bed and one notch cut out of its bottom edge for
+  // the true-size low table's footprint, so a cat never walks into the
+  // foreground Prop that would hide it.
   it('is a band across the front of the Room, inside the wall and the lamp', () => {
-    expect(isWalkable('games', { x: 800, y: 700 })).toBe(true);
-    expect(isWalkable('games', { x: 150, y: 700 })).toBe(true);
-    expect(isWalkable('games', { x: 1450, y: 700 })).toBe(true);
-    // The sideboard, the door and the lamp stand against the wall above y 660.
-    expect(isWalkable('games', { x: 800, y: 650 })).toBe(false);
-    expect(isWalkable('games', { x: 130, y: 700 })).toBe(false);
-    expect(isWalkable('games', { x: 1470, y: 700 })).toBe(false);
+    expect(isWalkable('games', { x: 700, y: 620 })).toBe(true);
+    expect(isWalkable('games', { x: 130, y: 620 })).toBe(true);
+    expect(isWalkable('games', { x: 1275, y: 620 })).toBe(true);
+    // The sideboard, the door and the lamp stand against the wall above y 581.
+    expect(isWalkable('games', { x: 700, y: 570 })).toBe(false);
+    expect(isWalkable('games', { x: 115, y: 620 })).toBe(false);
+    expect(isWalkable('games', { x: 1295, y: 620 })).toBe(false);
+  });
+
+  it('reaches up onto the cat bed, and nowhere else along the wall', () => {
+    expect(isWalkable('games', { x: 1018, y: 520 })).toBe(true);
+    expect(isWalkable('games', { x: 940, y: 540 })).toBe(false);
+    expect(isWalkable('games', { x: 1100, y: 540 })).toBe(false);
   });
 
   it('keeps the low table’s footprint out of the floor', () => {
     // Inside the notch: the table stands here and draws in front of everyone.
-    expect(isWalkable('games', { x: 780, y: 830 })).toBe(false);
+    expect(isWalkable('games', { x: 686, y: 745 })).toBe(false);
     // Just above it, and to either side of it, is floor.
-    expect(isWalkable('games', { x: 780, y: 780 })).toBe(true);
-    expect(isWalkable('games', { x: 400, y: 830 })).toBe(true);
-    expect(isWalkable('games', { x: 1200, y: 830 })).toBe(true);
+    expect(isWalkable('games', { x: 686, y: 720 })).toBe(true);
+    expect(isWalkable('games', { x: 400, y: 745 })).toBe(true);
+    expect(isWalkable('games', { x: 1000, y: 745 })).toBe(true);
   });
 
   it('leaves the poufs walkable, so a cat can pass in front of and behind them', () => {
     // The Cinema's rule: depth is the y-sort, not a hole in the floor.
-    expect(isWalkable('games', { x: 620, y: 760 })).toBe(true);
-    expect(isWalkable('games', { x: 880, y: 790 })).toBe(true);
+    expect(isWalkable('games', { x: 546, y: 650 })).toBe(true);
+    expect(isWalkable('games', { x: 774, y: 700 })).toBe(true);
   });
 
   it('holds every mark the design note places in this Room', () => {
-    // Luna at the sideboard (§4.3), and the two seated marks (§4.3).
-    expect(isWalkable('games', { x: 1180, y: 700 })).toBe(true);
-    expect(isWalkable('games', { x: 620, y: 780 })).toBe(true);
-    expect(isWalkable('games', { x: 880, y: 775 })).toBe(true);
+    // Luna on the shrunk bed, the two seated marks, and the door mark (§4.3, §4.1).
+    expect(isWalkable('games', { x: 1018, y: 505 })).toBe(true);
+    expect(isWalkable('games', { x: 546, y: 686 })).toBe(true);
+    expect(isWalkable('games', { x: 774, y: 682 })).toBe(true);
+    expect(isWalkable('games', { x: 130, y: 583 })).toBe(true);
   });
 
   it('bends a walk along the front of the Room around the table', () => {
     const polygon: Point[] = [
-      { x: 140, y: 660 },
-      { x: 1460, y: 660 },
-      { x: 1460, y: 860 },
-      { x: 1000, y: 860 },
-      { x: 1000, y: 800 },
-      { x: 560, y: 800 },
-      { x: 560, y: 860 },
-      { x: 140, y: 860 },
+      { x: 123, y: 581 },
+      { x: 960, y: 581 },
+      { x: 960, y: 500 },
+      { x: 1076, y: 500 },
+      { x: 1076, y: 581 },
+      { x: 1285, y: 581 },
+      { x: 1285, y: 757 },
+      { x: 795, y: 757 },
+      { x: 795, y: 731 },
+      { x: 578, y: 731 },
+      { x: 578, y: 757 },
+      { x: 123, y: 757 },
     ];
     // A concave floor is what makes route bending worth having: the straight
     // line between these two crosses the notch, so the walk has to go round.
     for (const corner of polygon) expect(isWalkable('games', corner)).toBe(true);
-    expect(isWalkable('games', { x: 780, y: 845 })).toBe(false);
+    expect(isWalkable('games', { x: 686, y: 750 })).toBe(false);
   });
 });
 
@@ -395,11 +408,12 @@ describe('the Cast in whichever Room the visitor is in', () => {
 
   it('seats the Boy and the Girl on their poufs in the Game Room', () => {
     // 34: the seated stills S09 and S10 have landed, so the interim standing
-    // marks of §4.3.1 are gone and the homes are the seated marks of §4.3.
+    // marks of §4.3.1 are gone and the homes are the seated marks — design 75
+    // §4.3's since ticket 89, on the 1408 x 792 stage.
     const world = walkInto(createWorld(plainArrival), 'games');
-    expect(who(world, 'girl').at).toEqual({ x: 620, y: 780 });
+    expect(who(world, 'girl').at).toEqual({ x: 546, y: 686 });
     expect(who(world, 'girl').facing).toBe('right');
-    expect(who(world, 'boy').at).toEqual({ x: 880, y: 775 });
+    expect(who(world, 'boy').at).toEqual({ x: 774, y: 682 });
     expect(who(world, 'boy').facing).toBe('left');
     // Nobody is mid-walk, and nobody was pulled onto the floor from off it: a
     // clamped mark would come back as some other point.
@@ -482,8 +496,8 @@ describe('the Cast in whichever Room the visitor is in', () => {
     expect(who(wandered, 'boy').at).toEqual({ x: 300, y: 700 });
 
     const back = walkInto(walkInto(wandered, 'activities'), 'games');
-    expect(who(back, 'boy').at).toEqual({ x: 880, y: 775 });
-    expect(who(back, 'girl').at).toEqual({ x: 620, y: 780 });
+    expect(who(back, 'boy').at).toEqual({ x: 774, y: 682 });
+    expect(who(back, 'girl').at).toEqual({ x: 546, y: 686 });
   });
 
   it('hands the Cast back by identity when the Room being entered moved nobody', () => {

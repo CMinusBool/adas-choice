@@ -14,4 +14,10 @@ describe('every Room has a stage of its own', () => {
       expect(width * 9, `the ${room} stage is ${width} x ${height}`).toBe(height * 16);
     }
   });
+
+  it('puts the Game Room on the stage its backdrop takes at true size', () => {
+    // 89, design 75 §2.1: S01 scaled × 0.88 whole, so its painted doorway is the
+    // one door, 350 units tall.
+    expect(STAGES.games).toEqual({ width: 1408, height: 792 });
+  });
 });
