@@ -82,3 +82,6 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [site] Where two cats stand within a pad of each other, a tap at the rear cat's feet pets the front one. (103, 2026-09-26)
 - [activities] The English hunt label "The Thirty-Second Treasure Hunt" fits its board only at 15.9 px, which is small. (96, 2026-09-26)
 - [site] At 390 × 844 the Entryway and the Game Room scroll vertically (pages 946 and 990 px tall); they never scroll sideways. (96, 2026-09-26)
+- [cinema] The lucky cat sits over the comedy stack's bottom-left caps, because the painted cubbies sit lower than design 80 places them. (73, 2026-09-26)
+- [cinema] The horror shelf's painted base is 4.25 units right of its button's centre. (73, 2026-09-26)
+- [cinema] The shelf crowns above the 80-unit-wide shelf buttons do not take hover. (73, 2026-09-26)
