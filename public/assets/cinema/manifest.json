@@ -1,6 +1,6 @@
 {
   "schema": "cinema-manifest/1",
-  "note": "Provenance for the Cinema Room's delivered art (COOP-001 ticket 36). The raw generations live in the main checkout's .scratch/COOP-001-apartment/art/generated/32-cinema-room/ (gitignored) and travel here only as sha256s; each source.path is the kept attempt ticket 32's manifest names and its 2026-09-25 approval confirms (S02 attempt-v3-nocat, S22 and S24 attempt-v3-painted). Every file rebuilds byte for byte from that source with the builtBy line. Beats keep the design note's frame proportions at the source's own resolution (pxPerUnit), never upscaled past it.",
+  "note": "Provenance for the Cinema Room's delivered art (COOP-001 ticket 36). The raw generations live in the main checkout's .scratch/COOP-001-apartment/art/generated/32-cinema-room/ (gitignored) and travel here only as sha256s; each source.path is the kept attempt ticket 32's manifest names and its 2026-09-25 approval confirms (S02 attempt-v3-nocat, S22 and S24 attempt-v3-painted). Every file rebuilds byte for byte from that source with the builtBy line. Beats keep the design note's frame proportions at the source's own resolution (pxPerUnit), never upscaled past it. Since ticket 79 the three shelves and their three caps-gone stills come from ticket 77's closing run instead (77-cinema-shelf-wall/, each attempt-1, accepted 2026-09-26); each caps-gone entry names the shelf it is a variant of and the measured pixel diff between the two.",
   "identitySource": "art/characters/v2 — the version 2 Character Sheets, referenced by every Cast shot, never a generated asset",
   "assets": [
     {
@@ -44,53 +44,125 @@
     },
     {
       "file": "shelf-comedy.png",
-      "shot": "S02",
-      "name": "Comedy shelf",
-      "kept": "attempt-v3-nocat",
+      "shot": "S02′",
+      "name": "Comedy shelf, tubes end-on (ticket 79)",
+      "kept": "attempt-1",
       "frames": 1,
       "columns": 1,
-      "frame": "320x940",
+      "frame": "180x760",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s02-comedy-shelf/attempt-v3-nocat/strip-raw.png",
-        "sha256": "1729ad602680b36d55aa3c4da5f0522c63f084b1e621d8d3e384533a5d87e13a"
+        "path": ".scratch/COOP-001-apartment/art/generated/77-cinema-shelf-wall/S02pp/attempt-1/strip-raw.png",
+        "sha256": "38509154a5786d706f8b08da811fda9e72d74bf03fe6f622d814eaf6c716ab66"
       },
-      "sha256": "0152082322da365226ae7442ce9fc2980d6f9b2b82756dd86268a2ccc74db1df",
-      "builtBy": "scripts/art/build-prop.mjs@1 --frame 320x940 --fit content --seat bottom --key alpha",
-      "placed": "button 1310, 374, 84 x 266 (the note's 120 x 380 at --scale .7, ticket 63); image 160 x 470 on its base, at the same scale",
+      "sha256": "3895a083a1912b099351603cf84fe876b7a0a549ba0bc772da6b6e4000976bec",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 180x760 --fit content --seat bottom --key alpha",
+      "scale": "one uniform scale 0.3253 canvas px per raw px about the bottom centre, the largest that fits the raw's content box on design 80 section 5.1's 180x760 canvas (width-limited: the raw is squatter than the design's shelf). A cap comes out about 22.9 px (11.4 units, -24%) against the design's 30 px (15 units, 9 cm), and the shelf 499 px tall (249.5 units, -34%) against the design's 760; its width is the design's to within the canvas",
+      "content": "176 x 499 px (88 x 249.5 units), top at canvas y 261; base 5-175 px, centre 90 (canvas centre 90); transparent above",
+      "placed": "unchanged by ticket 79: the button and its --art-w/--art-h box are the old ones, so the canvas is stretched into it until ticket 73 places the wall on the 1360 x 765 stage at design 80 section 3.1's art boxes",
+      "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 180x760: pass (the seven sprite-sheet rules; index.html declares no Cycle here)",
       "motionPhase": null
     },
     {
       "file": "shelf-romance.png",
-      "shot": "S03",
-      "name": "Romance shelf",
+      "shot": "S03′",
+      "name": "Romance shelf, tubes end-on (ticket 79)",
       "kept": "attempt-1",
       "frames": 1,
       "columns": 1,
-      "frame": "280x900",
+      "frame": "160x794",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s03-romance-shelf/attempt-1/strip-raw.png",
-        "sha256": "cff9c5446cfc70699be034790c37162c043f86bfa616b385121a36e92ba27a63"
+        "path": ".scratch/COOP-001-apartment/art/generated/77-cinema-shelf-wall/S03pp/attempt-1/strip-raw.png",
+        "sha256": "55441c2d652ba8f47ada40013dc15d64bd15aa94728137b9fffc91690d75113e"
       },
-      "sha256": "be1330abb8c906c5a7ab9c8a93e8f58c7a52b96352f072325bb4d479e7b2fa26",
-      "builtBy": "scripts/art/build-prop.mjs@1 --frame 280x900 --fit content --seat bottom --key alpha",
-      "placed": "button 1404, 374, 84 x 266 (the note's 120 x 380 at --scale .7, ticket 63); image 140 x 450 on its base, at the same scale",
+      "sha256": "80fa7fa8bf267f6942918f95516ea36535b35fd8bce0d30ca7d0838ecc64ba50",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 160x794 --fit content --seat bottom --key alpha",
+      "scale": "one uniform scale 0.2504 canvas px per raw px about the bottom centre, the largest that fits the raw's content box on design 80 section 5.1's 160x794 canvas (width-limited: the raw is squatter than the design's shelf). A cap comes out about 23.2 px (11.6 units, -23%) against the design's 30 px (15 units, 9 cm), and the shelf 535 px tall (267.5 units, -33%) against the design's 794; its width is the design's to within the canvas",
+      "content": "156 x 535 px (78 x 267.5 units), top at canvas y 259; base 9-150 px, centre 79.5 (canvas centre 80); transparent above",
+      "placed": "unchanged by ticket 79: the button and its --art-w/--art-h box are the old ones, so the canvas is stretched into it until ticket 73 places the wall on the 1360 x 765 stage at design 80 section 3.1's art boxes",
+      "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 160x794: pass (the seven sprite-sheet rules; index.html declares no Cycle here)",
       "motionPhase": null
     },
     {
       "file": "shelf-horror.png",
-      "shot": "S04",
-      "name": "Horror shelf",
+      "shot": "S04′",
+      "name": "Horror shelf, tubes end-on (ticket 79)",
       "kept": "attempt-1",
       "frames": 1,
       "columns": 1,
-      "frame": "320x920",
+      "frame": "188x826",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s04-horror-shelf/attempt-1/strip-raw.png",
-        "sha256": "8963204259c922f801a0290741aad4ebdf5ec7a35fcc065adadfe4996b060e29"
+        "path": ".scratch/COOP-001-apartment/art/generated/77-cinema-shelf-wall/S04pp/attempt-1/strip-raw.png",
+        "sha256": "b5f073b11f51fb89809356aa20154cd20d7240fe3c952c61252ac594f58a4cf8"
       },
-      "sha256": "cfdf2cca3fbff14f82b0cdbb979c9dbe77011d6a072a860266a09f018ab0bb45",
-      "builtBy": "scripts/art/build-prop.mjs@1 --frame 320x920 --fit content --seat bottom --key alpha",
-      "placed": "button 1498, 374, 84 x 266 (the note's 120 x 380 at --scale .7, ticket 63); image 160 x 460 on its base, at the same scale",
+      "sha256": "946037e611f9a1b50540c3f74f85a0efaec3c5a5b4658a816c8aa7c0eaaceb7e",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 188x826 --fit content --seat bottom --key alpha",
+      "scale": "one uniform scale 0.264 canvas px per raw px about the bottom centre, the largest that fits the raw's content box on design 80 section 5.1's 188x826 canvas (width-limited: the raw is squatter than the design's shelf). A cap comes out about 25.0 px (12.5 units, -17%) against the design's 30 px (15 units, 9 cm), and the shelf 546 px tall (273 units, -34%) against the design's 826; its width is the design's to within the canvas",
+      "content": "184 x 546 px (92 x 273 units), top at canvas y 280; base 26-179 px, centre 102.5 (canvas centre 94: 8.5 px right, because the talisman widens the box to the right); transparent above",
+      "placed": "unchanged by ticket 79: the button and its --art-w/--art-h box are the old ones, so the canvas is stretched into it until ticket 73 places the wall on the 1360 x 765 stage at design 80 section 3.1's art boxes",
+      "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 188x826: pass (the seven sprite-sheet rules; index.html declares no Cycle here)",
+      "motionPhase": null
+    },
+    {
+      "file": "shelf-comedy-caps-gone.png",
+      "shot": "S02′g",
+      "name": "Comedy shelf, three caps gone (ticket 79)",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "180x760",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/77-cinema-shelf-wall/S02pg/attempt-1/caps-gone.png",
+        "sha256": "9fed785bfa65634e02fa02c26087d6c862f3140ad459267ff55a7b7d633fdccd"
+      },
+      "sha256": "419326d79d7ebd59c2acce6a310a86a9998651c7107ae2ba83cd4b4fc33a7d90",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 180x760 --fit content --seat bottom --key alpha (the same transform as shelf-comedy.png: the raw's content box is the full shelf's, 541 x 1534 raw px)",
+      "variantOf": "shelf-comedy.png",
+      "holes": "(49.1, 523.9), (76.1, 523.9), (102.8, 523.8) px, each 25 px across with the resample fringe; the fourth top-row cap, right of them, stays; design 80 section 5.1 put them at (45, 385), (75, 385), (105, 385) px on its own mapping",
+      "differsFromVariantOf": "1527 of 136800 px differ, all inside the three holes (farthest 12.9 px from its hole's centre); 0 outside",
+      "placed": "not declared in index.html; ticket 73 adds the shelf state that shows it, in shelf-comedy.png's box",
+      "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 180x760: pass (the seven sprite-sheet rules; index.html declares no Cycle here)",
+      "motionPhase": null
+    },
+    {
+      "file": "shelf-romance-caps-gone.png",
+      "shot": "S03′g",
+      "name": "Romance shelf, three caps gone (ticket 79)",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "160x794",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/77-cinema-shelf-wall/S03pg/attempt-1/caps-gone.png",
+        "sha256": "5d8111fe2a0f8fd42c39938d0b87f4433c77684342b9a75651a676c2d847eb14"
+      },
+      "sha256": "9f2f366670427c027091985c2c2af1ab85c3dabfb33e425adc5578763f2c30b7",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 160x794 --fit content --seat bottom --key alpha (the same transform as shelf-romance.png: the raw's content box is the full shelf's, 623 x 2136 raw px)",
+      "variantOf": "shelf-romance.png",
+      "holes": "(45.1, 502.6), (68.6, 502.6), (92.1, 502.6) px, each 24 x 26 px with the resample fringe; the fourth top-row cap, right of them, stays; design 80 section 5.1 put them at (35, 419), (65, 419), (95, 419) px on its own mapping",
+      "differsFromVariantOf": "1528 of 127040 px differ, all inside the three holes (farthest 13.3 px from its hole's centre); 0 outside",
+      "placed": "not declared in index.html; ticket 73 adds the shelf state that shows it, in shelf-romance.png's box",
+      "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 160x794: pass (the seven sprite-sheet rules; index.html declares no Cycle here)",
+      "motionPhase": null
+    },
+    {
+      "file": "shelf-horror-caps-gone.png",
+      "shot": "S04′g",
+      "name": "Horror shelf, three caps gone (ticket 79)",
+      "kept": "attempt-1",
+      "frames": 1,
+      "columns": 1,
+      "frame": "188x826",
+      "source": {
+        "path": ".scratch/COOP-001-apartment/art/generated/77-cinema-shelf-wall/S04pg/attempt-1/caps-gone.png",
+        "sha256": "4c588b53afa9df136507a50da8188d0671fc936793a0dda9fc96a982edc9f22d"
+      },
+      "sha256": "c7b9b4c7cf9e26a26cdffa04dba8a2eaa8a6fa2b85999013a571baf89322c3ca",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 188x826 --fit content --seat bottom --key alpha (the same transform as shelf-horror.png: the raw's content box is the full shelf's, 697 x 2068 raw px)",
+      "variantOf": "shelf-horror.png",
+      "holes": "(75.1, 515.6), (100.6, 515.6), (126.1, 515.6) px, each 26 x 28 px with the resample fringe; the top row's left cap, under the cobweb, stays; design 80 section 5.1 put them at (66, 452), (96, 450), (126, 449) px on its own mapping",
+      "differsFromVariantOf": "1763 of 155288 px differ, all inside the three holes (farthest 14.2 px from its hole's centre); 0 outside",
+      "placed": "not declared in index.html; ticket 73 adds the shelf state that shows it, in shelf-horror.png's box",
+      "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 188x826: pass (the seven sprite-sheet rules; index.html declares no Cycle here)",
       "motionPhase": null
     },
     {
