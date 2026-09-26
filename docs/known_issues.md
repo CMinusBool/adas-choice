@@ -74,3 +74,6 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [entryway] At 390 px the Entryway frame cuts the Game Room plaque at its edge, and the other two doors are out of view. (100, 2026-09-26)
 - [entryway] The Boy wears his hoodie between Beats after S15, because no sprite exists for the parka without the backpack. (100, 2026-09-26)
 - [site] `scripts/probe` `analyze.mjs` still uses the 1600 × 900 stage and the old walkable floor, and it measures Beat box bottom-centres rather than feet. (100, 2026-09-26)
+- [cinema] The Boy's seated still carries a beanbag about 22% wider than the empty one (the Girl's about 10%), and his runs about 20 units behind the reel cabinet. (92, 2026-09-26)
+- [cinema] The broken film can overlaps the bottom 7 units of the Girl's beanbag. (92, 2026-09-26)
+- [site] `room-shots` takes its desktop picture as soon as the whole Cast is on stage, mid-Arrival, so it shows the door open and the pair standing rather than the Room at rest. (92, 2026-09-26)
