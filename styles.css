@@ -307,6 +307,9 @@ html.dialog-open { overflow: hidden; }
 .actor.cat.is-fussed { display: none; }
 .motion-off .actor.cat { transition: none; }
 .actor > .cycle { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 100% 100%; }
+/* 100: while the Entryway arrival has one of them in a costume it has a sprite for (S12, S13), that layer
+   stands in over the same feet and height, and the Cycle under it is hidden. src/dom/entryway.ts decides. */
+.actor.is-dressed > .cycle:not([data-costume]) { visibility: hidden; }
 
 
 /* 17: the Cinema Room.

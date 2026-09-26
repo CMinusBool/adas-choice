@@ -76,7 +76,8 @@ export const mountActors = (dispatch: Dispatch, initial: World): Painter => {
   const sprites: Sprite[] = [...cast.querySelectorAll<HTMLElement>('.actor')]
     .filter(element => (ACTOR_IDS as readonly string[]).includes(element.dataset.actor ?? ''))
     .map(element => {
-      const layers = [...element.querySelectorAll<HTMLElement>('.cycle')].map(layer => {
+      // 100: a `data-costume` layer is the Entryway's to show, not a Cycle.
+      const layers = [...element.querySelectorAll<HTMLElement>('.cycle:not([data-costume])')].map(layer => {
         const frames = number(layer, 'frames', 1);
         const columns = Math.min(frames, number(layer, 'columns', 1));
         layer.hidden = true;

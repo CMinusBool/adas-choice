@@ -58,8 +58,14 @@ export const DOORSTEP_MS: Readonly<Record<RoomId, number>> = { entryway: 600, ga
 /** A shot in the design note's shot list (§6.4), by its id there. */
 export type BeatId = 'S15' | 'S16' | 'S17' | 'S18' | 'S19' | 'S20' | 'S21' | 'S22';
 
-/** What the two of them wear over the bible wardrobe while the coats are on. */
-export type Costume = 'parka' | 'coat';
+/**
+ * What the two of them wear over the bible wardrobe while the coats are on.
+ *
+ * 100: `parka-and-backpack` is the parka with the pet backpack still on his
+ * back, which is what S12 draws; the painter shows a costume sprite only for a
+ * costume it has one for.
+ */
+export type Costume = 'parka' | 'parka-and-backpack' | 'coat';
 
 /** A rectangle on the stage, in stage units. */
 export interface Box {
@@ -305,10 +311,15 @@ const BEATS: readonly BeatCue[] = [
   { id: 'S22', at: 10.35, seconds: 1.5, box: landing({ cell: { width: 690, height: 654 }, top: 173, bottom: 654, feetX: 346 }, CAT_HEIGHTS.luna, M.ELuna), frames: 12, columns: 4, fps: 8, hides: [] },
 ];
 
-/** Until when each of the two of them is still in their coat (§5.2). */
+/**
+ * Until when each of the two of them is still in their coat (§5.2). Each
+ * Actor's first entry the clock has not passed yet is what they are wearing.
+ */
 const COSTUMES: ReadonlyArray<{ readonly actor: ActorId; readonly costume: Costume; readonly until: number }> = [
   // She is in the teal bomber from the moment the duet Beat hands her coat over.
   { actor: 'girl', costume: 'coat', until: 6.15 },
+  // 100: he carries the cats in until S15 sets the backpack down.
+  { actor: 'boy', costume: 'parka-and-backpack', until: BEATS.find(beat => beat.id === 'S15')!.at },
   // He keeps the parka on until he has hung it, and is in the coral hoodie after.
   { actor: 'boy', costume: 'parka', until: 8.05 },
 ];
@@ -483,7 +494,7 @@ export function viewArrival(arrival: ArrivalSlice): ArrivalView {
         hides: beat.hides,
       }));
   const costumes: Partial<Record<ActorId, Costume>> = {};
-  if (playing) for (const worn of COSTUMES) if (seconds < worn.until) costumes[worn.actor] = worn.costume;
+  if (playing) for (const worn of COSTUMES) if (seconds < worn.until) costumes[worn.actor] ??= worn.costume;
   return { state: arrival.state, seconds, beats, costumes, sfx: arrival.sfx };
 }
 

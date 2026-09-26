@@ -323,6 +323,20 @@ describe('the arrival and the rest of the apartment', () => {
   });
 
   /*
+   * 100: they walk in wearing their coats, and he carries the cats. S12 draws
+   * him in the parka with the pet backpack on, so it is his costume only until
+   * S15 takes the backpack off; after that the parka shows through his Beats.
+   */
+  it('walks them in dressed for outside: her coat until 6.15 s, his parka and the backpack until S15', () => {
+    const costumes = (seconds: number) => arrivalView(arriving(seconds)).costumes;
+    expect(costumes(2.5)).toEqual({ girl: 'coat', boy: 'parka-and-backpack' });
+    expect(costumes(3.6)).toEqual({ girl: 'coat', boy: 'parka-and-backpack' });
+    expect(costumes(3.7)).toEqual({ girl: 'coat', boy: 'parka' });
+    expect(costumes(6.2)).toEqual({ boy: 'parka' });
+    expect(costumes(8.1)).toEqual({});
+  });
+
+  /*
    * 100: S19 is one 8-frame sheet played in two halves. She goes down onto one
    * knee in frames 1–4 and holds frame 4 while the cats come out; frames 5–8
    * stand her back up. Declaring only 4 frames drew both rows of the sheet

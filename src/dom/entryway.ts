@@ -83,6 +83,34 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
     ]),
   );
 
+  /**
+   * 100: the costume sprites, S12 and S13, each declared in `index.html` as a
+   * one-frame `.cycle` layer inside its Actor with the costume it draws on
+   * `data-costume` — which is what preloads it and gets it checked. The Actor
+   * painter leaves those layers alone; while the model has an Actor in a
+   * costume that has a layer, that layer is shown over the same feet and
+   * height and the Actor's Cycle underneath is hidden.
+   */
+  const costumeLayers = new Map<ActorId, readonly HTMLElement[]>(
+    [...cast].map(([id, element]) => [id, [...element.querySelectorAll<HTMLElement>('.cycle[data-costume]')]]),
+  );
+  for (const layers of costumeLayers.values()) {
+    for (const layer of layers) {
+      layer.hidden = true;
+      layer.style.backgroundImage = `url("${layer.dataset.sheet}")`;
+    }
+  }
+
+  function dress(id: ActorId, costume: string | undefined) {
+    let dressed = false;
+    for (const layer of costumeLayers.get(id) ?? []) {
+      const wearing = layer.dataset.costume === costume;
+      layer.hidden = !wearing;
+      dressed ||= wearing;
+    }
+    cast.get(id)!.classList.toggle('is-dressed', dressed);
+  }
+
   let knocked = false;
   let world = initial;
 
@@ -164,6 +192,7 @@ export const mountEntryway = (dispatch: Dispatch, initial: World): Painter => {
       const costume = arrival.costumes[id];
       if (costume) element.dataset.costume = costume;
       else delete element.dataset.costume;
+      dress(id, costume);
     }
   };
 };
