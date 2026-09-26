@@ -776,6 +776,45 @@ describe('choosing a Film, and the reel he fetches for it', () => {
     expect(seen).toEqual([...REEL_STEPS]);
   });
 
+  // 107: "it takes too long to start playing on the projector". The cabinet
+  // search and the threading have no Beat of their own on the page, so both
+  // were the Boy standing at the cabinet for 3.2 s before the studio logo.
+  describe('the wait for the studio logo', () => {
+    /** Frames from the click to the Bumper's first, and when he stopped at the cabinet. */
+    function toTheBumper(world: World) {
+      const clicked = clock;
+      let next = world;
+      let atCabinet: number | null = null;
+      while (cinemaStep(next) !== 'bumper' && clock < clicked + 20000) {
+        clock += 16;
+        next = advance(next, { type: 'actor-tick', now: clock });
+        const boy = who(next, 'boy');
+        if (atCabinet === null && !boy.moving && boy.at.x === CINEMA_MARKS.cabinet.x && boy.at.y === CINEMA_MARKS.cabinet.y) {
+          atCabinet = clock;
+        }
+      }
+      return { wait: clock - clicked, standing: atCabinet === null ? Infinity : clock - atCabinet, world: next };
+    }
+
+    it('keeps him at the cabinet for no more than half a second', () => {
+      const { standing, world } = toTheBumper(choose(wallUp(), 'knives-out'));
+      expect(cinemaStep(world)).toBe('bumper');
+      expect(standing).toBeLessThanOrEqual(500);
+    });
+
+    it('puts the studio logo on the screen within 3 s of the click', () => {
+      expect(toTheBumper(choose(wallUp('horror'), 'get-out')).wait).toBeLessThanOrEqual(3000);
+    });
+
+    it('still sends him to the cabinet and back for the reel', () => {
+      const { world } = toTheBumper(choose(wallUp('romance'), 'about-time'));
+      expect(who(world, 'boy').moving).toBe(true);
+      const home = runUntil(world, next => !who(next, 'boy').moving);
+      expect(who(home, 'boy').at).toEqual(CINEMA_MARKS.boySeat);
+      expect(loadedReel(home)).toBe('about-time');
+    });
+  });
+
   it('never takes a step backwards, however long the visitor watches', () => {
     // Asserted on every tick rather than on the route above, because a step
     // the sequence dipped into and came straight back out of would not show
