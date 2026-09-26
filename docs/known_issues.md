@@ -89,3 +89,5 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [site] Headless Chromium on the Pages hostname gets Turnstile's interactive checkbox, so no automated check receives a real token. (104, 2026-09-26)
 - [cinema] While a Film plays, the beam crosses the right third of the Poster board and the seated Boy's head. (106, 2026-09-26)
 - [cinema] The open Cinema door leaf is the shut cell swung flat, 52 units wide, not ticket 90's drawn open cell. (106, 2026-09-26)
+- [activities] With the treasure hunt chosen, its tableau (the Girl) covers the hunt chalkboard's label. (109, 2026-09-26)
+- [activities] At 390 px the Activity card's labels are 15 px; only its body text is held to 16. (109, 2026-09-26)
