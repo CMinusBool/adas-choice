@@ -732,7 +732,11 @@ html.dialog-open { overflow: hidden; }
    92: on the 1360 x 765 stage the box is that one by R1 (387.1, 115.44,
    661.44 x 403.26), the sheet's corners (607.06, 361.92) and (1048.54, 361.92)
    with it, and the aperture the projector group's, (468.6, 483.4). */
-.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(12.32% 91.25%, 33.25% 61.1%, 100% 61.1%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
+/* 106: lens glass, sheet top-left, bottom-left, bottom-right, lens glass: the cone
+   index.html's comment on `.cinema-beam` spells out in stage units. Its three
+   vertices at the old box ran to the sheet's bottom edge only, a sliver aimed at the
+   right-hand wall. */
+.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(0% 97.55%, 24.43% 0%, 24.43% 65.86%, 100% 65.86%, 0.86% 100%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
 
 /* §10: the screen sheet, once there is something on it. 92: everything drawn
    on it is in `--sheet-u`, the stage unit at R1's 0.78, so the Bumper and the
