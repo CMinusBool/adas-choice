@@ -91,3 +91,7 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [cinema] The open Cinema door leaf is the shut cell swung flat, 52 units wide, not ticket 90's drawn open cell. (106, 2026-09-26)
 - [activities] With the treasure hunt chosen, its tableau (the Girl) covers the hunt chalkboard's label. (109, 2026-09-26)
 - [activities] At 390 px the Activity card's labels are 15 px; only its body text is held to 16. (109, 2026-09-26)
+- [entryway] S15 draws the pet backpack beige, while the Prop and the costume draw it teal. (105, 2026-09-26)
+- [entryway] S17 hangs the Girl's coat over the Game Room door, about 150 units right of hook 2, and it then appears on hook 2. (105, 2026-09-26)
+- [entryway] S18's last frame draws no parka, so the parka is missing for one frame before its Prop appears at 8.05 s. (105, 2026-09-26)
+- [entryway] The Boy sets the bag down against the Girl's legs, she stands in front of it during the duet, and she walks through its footprint to G2. (105, 2026-09-26)
