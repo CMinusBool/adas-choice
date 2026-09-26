@@ -53,3 +53,5 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [cinema] The film reel crosses the poster board's bottom rail by 8.9 units, and the projector beam crosses it by a sliver. (80, 2026-09-26)
 - [cinema] The outpainted Cinema backdrop has faint 1-px dark stubs on its y=900 seam near both lower corners, and a slight plank kink under the rug at x≈360 and x≈1060 (1744-px canvas). (91, 2026-09-26)
 - [cinema] The repainted sconce is about 12 × 25 cm, the bottom edge of the true-size range. (91, 2026-09-26)
+- [cinema] The romance shelf's top row of caps sits about 10 px low on its canvas, against the ~6 px target. (77, 2026-09-26)
+- [cinema] Each removed cap on the three caps-gone shelves leaves a dark hole with a faint tube-wall ring, and on the romance shelf the holes trim a sliver off the row-4 caps below. (77, 2026-09-26)
