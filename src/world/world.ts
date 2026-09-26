@@ -803,13 +803,25 @@ export function cinemaStep(world: World): CinemaStep {
 }
 
 /**
- * The Posters on the wall, in the order he pinned them.
+ * The Posters on the wall, in slot order, left to right.
  *
  * One entry per filled slot, so the list grows from none to three as the pin
- * Beats finish and the board paints exactly what is up.
+ * Beats finish and the board paints exactly what is up. 73: he pins right to
+ * left, so a wall part-way up holds slot 3, then slots 2 and 3; `posterSlot`
+ * says which slot each Poster hangs on.
  */
 export function pinnedPosters(world: World): readonly FilmId[] {
   return world.cinema.pinned;
+}
+
+/**
+ * 73: the bookshelf showing three caps gone, or `null` while all three are full.
+ *
+ * It is the shelf whose Posters are on the wall, from the moment his rummage in
+ * it ends (design 80 section 4); the page shows that shelf's caps-gone still.
+ */
+export function capsGoneShelf(world: World): CinemaShelf | null {
+  return world.cinema.capsGone;
 }
 
 /** The genre whose Posters are on the wall, or `null` while it is bare. */

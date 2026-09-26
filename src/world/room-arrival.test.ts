@@ -109,7 +109,7 @@ describe('a Room arrival', () => {
  */
 const MARKS: Readonly<Record<'games' | 'cinema' | 'activities', Readonly<Record<'boy' | 'girl', readonly [number, number, 'left' | 'right']>>>> = {
   games: { boy: [774, 682, 'left'], girl: [546, 686, 'right'] },
-  cinema: { boy: [660, 800, 'left'], girl: [320, 800, 'right'] },
+  cinema: { boy: [590, 624, 'left'], girl: [250, 624, 'right'] },
   activities: { boy: [602, 618, 'left'], girl: [500, 616, 'right'] },
 };
 
@@ -134,7 +134,8 @@ describe.each(ROOMS)('the arrival of the %s Room', room => {
     expect(roomDoorState(scripted, room)).toBe('closed');
     // The last stride lands inside another half second in every Room — 2.99 s
     // in the Game Room on its 1408 x 792 stage (ticket 89; 3.28 on 1600 x 900),
-    // 2.80 in the Activity Room (96), 3.60 in the Cinema Room,
+    // 2.80 in the Activity Room (96), 2.90 in the Cinema Room on its
+    // 1360 x 765 stage (92),
     // measured against ticket 07's walk and run speeds. The two of them stay
     // put once they are there; the cats are free to go somewhere else.
     const quiet = run(scripted, 0.55);

@@ -273,7 +273,7 @@ html.dialog-open { overflow: hidden; }
 .stage { --u: calc(100cqw / var(--stage-w)); }
 .stage[data-stage="entryway"] { --stage-w: 1184; --stage-h: 666; }
 .stage[data-stage="games"] { --stage-w: 1408; --stage-h: 792; }
-.stage[data-stage="cinema"] { --stage-w: 1600; --stage-h: 900; }
+.stage[data-stage="cinema"] { --stage-w: 1360; --stage-h: 765; }
 .stage[data-stage="activities"] { --stage-w: 1328; --stage-h: 747; }
 /* The Cast waits in here until the model puts an Actor in a Room, so a parked
    Actor needs no state of its own: the container is what hides it. */
@@ -298,7 +298,7 @@ html.dialog-open { overflow: hidden; }
    86: the Entryway is 1184 units across the same 1060 px, so its floor is 49.2 units: 51. */
 .stage[data-stage="entryway"] { --cat-pad: 51; }
 .stage[data-stage="games"] { --cat-pad: 81; }
-.stage[data-stage="cinema"] { --cat-pad: 70; }
+.stage[data-stage="cinema"] { --cat-pad: 60; }
 .stage[data-stage="activities"] { --cat-pad: 50; } /* 96: 1173 px across 1328 units */
 .actor.cat::before { content: ""; position: absolute; left: 50%; top: 100%; translate: -50% -50%; width: max(100%, calc(var(--u) * var(--cat-pad, 0))); height: calc(var(--u) * var(--cat-pad, 0)); }
 /* Being fussed over, until a petting Beat is drawn for one: she settles on to
@@ -383,15 +383,18 @@ html.dialog-open { overflow: hidden; }
    motionless poster, which is the Game Room's business. */
 :where([data-still]:not(img)) { background-image: var(--still); background-size: 100% 100%; background-repeat: no-repeat; }
 
-/* Every Cinema Prop sorts at one depth; the Room has no Prop the Cast walks
-   behind, so it needs no per-Prop key. */
-.stage-cinema .cinema-prop { z-index: 640; }
+/* Every Cinema Prop on the wall sorts at one depth, below every Actor: 92 took
+   it from 640 to 499, the wall's base on the 1360 x 765 stage (design 75's R6,
+   design 80 section 2.2). The floor furniture sorts on its own base below, so
+   the Boy walking behind the cabinet is drawn behind it. */
+.stage-cinema .cinema-prop { z-index: 499; }
 /* 63: a Prop drawn smaller than its design note's size says how much smaller in
    its own `--scale`, and inside it `--note-u` is the note's unit at that scale —
    so every number written inside a shelf or the board below stays the note's,
    and only the box in `index.html` is the scaled one. `--u` is still the stage
-   unit in there, as it is everywhere on the stage. S01's walls either side of
-   the screen are narrower than the note's shelves and board. */
+   unit in there, as it is everywhere on the stage. 73: the shelves are at true
+   size and carry no `--scale`, so their `--note-u` is the stage unit; the board
+   keeps `--scale: .871`, design 13's board at exactly true size (design 72). */
 .stage-cinema .cinema-shelf, .stage-cinema .cinema-board { --note-u: calc(var(--u) * var(--scale, 1)); }
 /* The stage swallows pointer events so the Cast never blocks a click; the
    Props the visitor can actually use take theirs back. */
@@ -423,7 +426,7 @@ html.dialog-open { overflow: hidden; }
    genre on their own, so any one of them surviving a small screen is enough —
    and since ticket 36 all three are painted into S02-S04, the horror shelf's
    4-degree lean included, so nothing here rotates it any more. */
-.cinema-shelf { z-index: 640; overflow: visible; transition: filter .2s; }
+.cinema-shelf { z-index: 499; overflow: visible; transition: filter .2s; }
 /* `--glow` is the rim light a shelf comes up in. It is the trim colour, except
    on the horror shelf, whose trim is nearly black: there it is the candle's
    sick green, which is that shelf's own colour in the design note's table. */
@@ -431,11 +434,16 @@ html.dialog-open { overflow: hidden; }
 .cinema-shelf[data-shelf="romance"] { --glow: #f5a3c5; }
 .cinema-shelf[data-shelf="horror"] { --glow: #8fd14f; }
 /* Each image is its shelf plus the ornament on its crown, so it is taller and
-   wider than the 120 x 380 button: it stands on the button's base, centred,
-   at the `--art-w` x `--art-h` stage units its own element declares. */
-.cinema-shelf .shelf-art { position: absolute; bottom: 0; left: calc(var(--note-u) * (120 - var(--art-w)) / 2); width: calc(var(--note-u) * var(--art-w)); height: calc(var(--note-u) * var(--art-h)); }
+   wider than the 80-wide button: it stands on the button's base, centred,
+   at the `--art-w` x `--art-h` stage units its own element declares. 73: the
+   caps-gone still is a second `.shelf-art` in the same box, over the full one,
+   shown by `src/dom/cinema-room.ts` taking its `hidden` away (design 80 §4).
+   The swap is instant, so it needs no motion opt-out. */
+.cinema-shelf .shelf-art { position: absolute; bottom: 0; left: calc(var(--note-u) * (80 - var(--art-w)) / 2); width: calc(var(--note-u) * var(--art-w)); height: calc(var(--note-u) * var(--art-h)); }
 /* P21: the brass plaque on each plinth, muted until the shelf is attended. */
-.cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--note-u) * 12); width: calc(var(--note-u) * 100); padding: calc(var(--note-u) * 2) 0; border-radius: calc(var(--note-u) * 4); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--note-u) * 20); line-height: 1.2; text-align: center; opacity: .78; transition: opacity .2s; }
+/* 73: design 72's P21 on the plinth, 64 x 20 units, 16 above the base, one
+   line of 14-unit type. */
+.cinema-shelf .shelf-plaque { position: absolute; left: 50%; translate: -50% 0; bottom: calc(var(--note-u) * 16); width: calc(var(--note-u) * 64); height: calc(var(--note-u) * 20); padding: 0; border-radius: calc(var(--note-u) * 3); background: #8a6a34; color: #f7ecd2; font-size: calc(var(--note-u) * 14); line-height: calc(var(--note-u) * 20); white-space: nowrap; text-align: center; opacity: .78; transition: opacity .2s; }
 .cinema-shelf:hover, .cinema-shelf:focus-visible, .cinema-shelf.is-attended { filter: drop-shadow(0 0 calc(var(--note-u) * 30) var(--glow)) brightness(1.08); outline: none; }
 .cinema-shelf:hover .shelf-plaque, .cinema-shelf:focus-visible .shelf-plaque, .cinema-shelf.is-attended .shelf-plaque { opacity: 1; }
 .cinema-shelf:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
@@ -455,7 +463,7 @@ html.dialog-open { overflow: hidden; }
    169 and 323. `--note-u` is the board's unit (the note's, at its `--scale`), so
    the three land on the same spot at every shell width, like every other Prop
    here. */
-.cinema-board .board-slots { position: absolute; left: calc(var(--note-u) * 3); top: calc(var(--note-u) * 38); display: flex; gap: calc(var(--note-u) * 22); }
+.cinema-board .board-slots { position: absolute; left: calc(var(--note-u) * 3); top: calc(var(--note-u) * 38); }
 /* 36: every Poster is its Film's own image (S17-S25): the framed Poster
    painted in the middle of a 600 x 800 canvas — cream stock, genre stripe and
    all — with its characters spilling out over the frame onto a transparent
@@ -476,8 +484,11 @@ html.dialog-open { overflow: hidden; }
   --art-w: calc(var(--art-h) * .75);
   --frame-width: calc(var(--art-w) * var(--frame-w));
   --frame-left: calc((var(--note-u) * var(--slot-w) - var(--frame-width)) / 2);
-  position: relative; flex: 0 0 auto; width: calc(var(--note-u) * var(--slot-w)); height: calc(var(--note-u) * var(--slot-h)); padding: 0; border: 0; background: none; overflow: visible; filter: drop-shadow(0 calc(var(--note-u) * 6) calc(var(--note-u) * 8) #00000066); cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1);
+  position: absolute; top: 0; left: calc(var(--note-u) * (var(--slot-x) - 81)); width: calc(var(--note-u) * var(--slot-w)); height: calc(var(--note-u) * var(--slot-h)); padding: 0; border: 0; background: none; overflow: visible; filter: drop-shadow(0 calc(var(--note-u) * 6) calc(var(--note-u) * 8) #00000066); cursor: pointer; animation: poster-unroll .5s cubic-bezier(.22, .75, .2, 1);
 }
+/* 73: he pins right to left, slot 3 first (design 72 section 3.4), so a wall
+   part-way up has its left slots bare: each Poster stands at its own slot, 154
+   note units apart (132 wide, 22 between), rather than flowing into the first. */
 /* Clipped to the frame at rest, and unclipped as the Poster grows (below), so
    what spills out emerges from behind the frame's edges rather than fading in. */
 .cinema-poster .poster-art { position: absolute; top: calc(var(--art-h) * var(--frame-y) * -1); left: calc(var(--frame-left) - var(--art-w) * var(--frame-x)); width: var(--art-w); height: var(--art-h); background: var(--still) 0 0 / 100% 100% no-repeat; clip-path: inset(calc(var(--frame-y) * 100%) calc((1 - var(--frame-x) - var(--frame-w)) * 100%) calc((1 - var(--frame-y) - var(--frame-h)) * 100%) calc(var(--frame-x) * 100%)); pointer-events: none; }
@@ -524,19 +535,24 @@ html.dialog-open { overflow: hidden; }
    across for the first slot, 154 more for each after it, and 148 down for all
    three. */
 .cinema-poster {
-  --grow: 1.6;
+  --grow: 1.394;
   --slot-y: 148;
   --at-x: calc(var(--x) + var(--scale) * var(--slot-x));
   --at-y: calc(var(--y) + var(--scale) * var(--slot-y));
-  --to-x: 511.5;
+  --to-x: 389;
   --to-y: var(--at-y);
   transition: scale .45s cubic-bezier(.22, .75, .2, 1), translate .45s cubic-bezier(.22, .75, .2, 1), filter .2s;
 }
 .cinema-poster[data-poster-slot="1"] { --slot-x: 81; }
 .cinema-poster[data-poster-slot="2"] { --slot-x: 235; }
 .cinema-poster[data-poster-slot="3"] { --slot-x: 389; }
-@container (max-width: 900px) { .cinema-poster { --grow: 2.2; --to-x: 363.5; --to-y: 450; } }
-@container (max-width: 620px) { .cinema-poster { --grow: 2.65; } }
+/* 73: design 80 section 3.1's two points on the re-laid wall: the middle between
+   the doorway (171) and the sheet (607), and at the narrow widths the middle of
+   the stage left of the sheet. `--grow` is 63's 1.6 / 2.2 / 2.65 of the slot at
+   the board's true-size x 0.871, so an open Poster spans x 297-481, y 154-427
+   wide and x 177-430, y 195-570 at 900 px: clear of the sheet and the doorway. */
+@container (max-width: 900px) { .cinema-poster { --grow: 1.916; --to-x: 303.5; --to-y: 382.5; } }
+@container (max-width: 620px) { .cinema-poster { --grow: 2.308; } }
 /* `--expanded-scale` is how many times its slot an open Poster is drawn:
    `--grow` of the note's size, on a board drawn at `--scale` of it. It travels
    in stage units, so its translate is in `--u`. */
@@ -560,7 +576,7 @@ html.dialog-open { overflow: hidden; }
   height: calc(var(--note-u) * var(--slot-h) / var(--expanded-scale));
 }
 /* The expanded Poster comes off the wall over the furniture and the Cast, which
-   all sort above the board's 640; the details card still sorts above it. */
+   all sort above the board's 499; the details card still sorts above it. */
 .stage-cinema .cinema-board:has(.cinema-poster.is-expanded) { z-index: 905; }
 .cinema-poster .poster-art { transition: clip-path .45s cubic-bezier(.22, .75, .2, 1); }
 .cinema-poster.is-expanded .poster-art { clip-path: inset(0); }
@@ -570,46 +586,59 @@ html.dialog-open { overflow: hidden; }
 .cinema-shelf.is-rummaging .shelf-art { animation: shelf-rummage .18s steps(2, end) infinite; }
 @keyframes shelf-rummage { from { translate: 0 0; } 50% { translate: calc(var(--note-u) * 1) calc(var(--note-u) * -1); } to { translate: 0 0; } }
 
-/* P12-P14: the beanbags and the reel cabinet the projector stands on. */
-.cinema-beanbag { z-index: 800; }
-.cinema-cabinet { z-index: 830; }
+/* P12-P14: the beanbags and the reel cabinet the projector stands on. 92: each
+   sorts on its own base on the 1360 x 765 stage (design 75's R6, design 80
+   section 2.2), so the Boy pinning at the board is drawn behind them. */
+.cinema-beanbag { z-index: 624; }
+.cinema-cabinet { z-index: 647; }
+/* 92: the two of them sat in their beanbags, S27 and S26's last frames, each
+   carrying its own beanbag: while `src/dom/seats.ts` names an Actor seated on the
+   stage's `data-seated`, the still shows and the sprite and the empty beanbag
+   under it are hidden, as the Game Room does with its poufs. */
+.stage-cinema .cinema-seated { z-index: 624; display: none; }
+.stage-cinema[data-seated~="girl"] .cinema-seated[data-seat="girl"],
+.stage-cinema[data-seated~="boy"] .cinema-seated[data-seat="boy"] { display: block; }
+.stage-cinema[data-seated~="girl"] .beanbag-girl,
+.stage-cinema[data-seated~="boy"] .beanbag-boy,
+.stage-cinema[data-seated~="girl"] .actor[data-actor="girl"],
+.stage-cinema[data-seated~="boy"] .actor[data-actor="boy"] { visibility: hidden; }
 
 /* 09: the Cinema Room's two Breakables, S12-S15 since ticket 36. Neither is
    clickable: the visitor cannot break either by hand. */
-.cinema-film-can { z-index: 831; }
-.cinema-film-can-broken { z-index: 871; }
-.cinema-lucky-cat { z-index: 640; }
-.cinema-lucky-cat-broken { z-index: 680; }
+.cinema-film-can { z-index: 648; }
+.cinema-film-can-broken { z-index: 697; }
+.cinema-lucky-cat { z-index: 499; }
+/* 73: design 80 section 2.2, 2 below its box's bottom (537). */
+.cinema-lucky-cat-broken { z-index: 539; }
 
 /* P15-P17: the projector, and its two affordances. S09 is the machine at rest;
-   S11, its spindles turning, lies over the spindle region only while the motor
-   or a Film is running, and steps through its four cells in 0.4 s; S10, the
-   reel, sits on the front spindle once one is loaded — which is when the gate
-   stops being disabled. All three read the state the projector's own two
-   buttons already carry, so nothing in `src/dom/` had to learn about them. */
-.cinema-projector { z-index: 831; }
-.stage-cinema .cinema-spindles { z-index: 832; display: none; background-size: 400% 100%; background-position: 0 0; }
-.stage-cinema:has(.projector-motor[aria-pressed="true"], .projector-gate[aria-pressed="true"]) .cinema-spindles { display: block; animation: cinema-spindles .4s steps(4, end) infinite; }
-@keyframes cinema-spindles { from { background-position: 0 0; } to { background-position: 133.333% 0; } }
-.stage-cinema .cinema-reel { z-index: 832; display: none; }
+   S10, the reel, sits on the front hub once one is loaded — which is when the
+   gate stops being disabled. It reads the state the projector's own two buttons
+   already carry, so nothing in `src/dom/` had to learn about it. 92: the S11
+   spindles overlay came off (ticket 71, folded in), and the group stands on the
+   cabinet at x 0.78, sorting just above it. */
+.cinema-projector { z-index: 648; }
+.stage-cinema .cinema-reel { z-index: 649; display: none; }
 .stage-cinema:has(.projector-gate[aria-disabled="false"]) .cinema-reel { display: block; }
-.motion-off .cinema-spindles { animation: none; }
-/* Both controls pad their hit area out to the 44 CSS px floor without moving
+/* Both controls pad their hit area out to the Cinema's 59-unit floor (44 CSS px
+   at 1440 x 900, design 75 section 0.6), and never under 44 px, without moving
    the painted Prop, which is smaller than a fingertip at every shell width. */
-.projector-gate::before, .projector-motor::before { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: max(100%, 44px); height: max(100%, 44px); }
+.projector-gate::before, .projector-motor::before { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: max(100%, calc(var(--u) * 59), 44px); height: max(100%, calc(var(--u) * 59), 44px); }
 /* 66: S09 draws the switch and the gate door 52 units apart, which is under 44 px on any stage
    narrower than 1354 px, so centred pads overlapped and the gate (832) swallowed the switch (640).
    Each pad now grows away from the other, and the two meet at x 496, halfway between them. */
-.projector-motor::before { left: auto; right: calc(var(--u) * -8); translate: 0 -50%; }
-.projector-gate::before { left: calc(var(--u) * -16); translate: 0 -50%; }
+.projector-motor::before { left: auto; right: calc(var(--u) * -9.36); translate: 0 -50%; }
+.projector-gate::before { left: calc(var(--u) * -9.36); translate: 0 -50%; }
+/* 92: at x 0.78 the switch's right edge is 420.64 and the gate's left 439.36, so
+   the two pads meet at x 430. */
 /* Over S09's side door, lower right since 66, cream, and dim: where a reel goes in. Ticket 20
    enables it, and until then it says so rather than pretending. */
-.stage-cinema button.projector-gate { z-index: 832; border-radius: calc(var(--u) * 6); border: calc(var(--u) * 4) dashed #efe6d680; background: #efe6d611; cursor: not-allowed; }
+.stage-cinema button.projector-gate { z-index: 649; border-radius: calc(var(--u) * 4.68); border: calc(var(--u) * 3.12) dashed #efe6d680; background: #efe6d611; cursor: not-allowed; }
 .projector-gate:focus-visible { outline: 3px solid var(--cream); outline-offset: 2px; }
 /* Low on the base plate, red, and a switch: the Room's Music Source. */
-.projector-motor { z-index: 833; display: grid; place-items: center; }
-.projector-motor .motor-cap { width: calc(var(--u) * 20); height: calc(var(--u) * 20); border-radius: 50%; background: radial-gradient(circle at 34% 30%, #f07a6e, #d9483b 60%, #8e2a21); transition: box-shadow .2s; }
-.projector-motor .motor-plate { position: absolute; right: calc(var(--u) * -18); bottom: calc(var(--u) * -2); color: #f0d18a; font-size: calc(var(--u) * 22); line-height: 1; }
+.projector-motor { z-index: 650; display: grid; place-items: center; }
+.projector-motor .motor-cap { width: calc(var(--u) * 15.6); height: calc(var(--u) * 15.6); border-radius: 50%; background: radial-gradient(circle at 34% 30%, #f07a6e, #d9483b 60%, #8e2a21); transition: box-shadow .2s; }
+.projector-motor .motor-plate { position: absolute; right: calc(var(--u) * -14.04); bottom: calc(var(--u) * -1.56); color: #f0d18a; font-size: calc(var(--u) * 17.16); line-height: 1; }
 .projector-motor:hover .motor-cap, .projector-motor[aria-pressed="true"] .motor-cap { box-shadow: 0 0 calc(var(--u) * 40) calc(var(--u) * 8) #d9483b99; }
 .projector-motor:focus-visible { outline: 3px solid #d9483b; outline-offset: 3px; border-radius: 50%; }
 
@@ -689,11 +718,16 @@ html.dialog-open { overflow: hidden; }
 /* P20: the beam, a cone from the lens up to the screen's bottom edge. The
    percentages are the note's aperture at stage (450, 660) and the lower
    corners of the sheet as measured off S01, (727, 464) and (1293, 464), read
-   inside this Prop's own box (445, 148, 848 x 517). */
-.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(12.32% 96.71%, 33.25% 61.1%, 100% 61.1%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
+   inside this Prop's own box (445, 148, 848 x 517).
+   92: on the 1360 x 765 stage the box is that one by R1 (387.1, 115.44,
+   661.44 x 403.26), the sheet's corners (607.06, 361.92) and (1048.54, 361.92)
+   with it, and the aperture the projector group's, (468.6, 483.4). */
+.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(12.32% 91.25%, 33.25% 61.1%, 100% 61.1%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
 
-/* §10: the screen sheet, once there is something on it. */
-.stage-cinema .cinema-film { z-index: 905; overflow: hidden; background: #0b070f; box-shadow: 0 0 calc(var(--u) * 90) calc(var(--u) * 20) #ffe6b02e; }
+/* §10: the screen sheet, once there is something on it. 92: everything drawn
+   on it is in `--sheet-u`, the stage unit at R1's 0.78, so the Bumper and the
+   title card keep their size against the sheet R1 moved. */
+.stage-cinema .cinema-film { --sheet-u: calc(var(--u) * .78); z-index: 905; overflow: hidden; background: #0b070f; box-shadow: 0 0 calc(var(--sheet-u) * 90) calc(var(--sheet-u) * 20) #ffe6b02e; }
 
 /* §10.2, the Bumper, second by second across its four seconds. Every part
    below runs one 4s animation and takes its moment out of it with keyframe
@@ -751,9 +785,9 @@ html.dialog-open { overflow: hidden; }
    is the large line and the other sits under it. */
 .bumper-wordmark { position: absolute; left: 8%; right: 8%; top: 48%; text-align: center; color: #4a3a2c; animation: bumper-mark-in 4s ease-out both; }
 @keyframes bumper-mark-in { 0%, 60% { opacity: 0; translate: 0 8%; } 76%, 100% { opacity: 1; translate: 0 0; } }
-.bumper-name { display: block; font-size: calc(var(--u) * 26); font-weight: 700; letter-spacing: .14em; line-height: 1.2; }
-.bumper-name-other { display: block; font-size: calc(var(--u) * 12); font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: #7a6350; }
-.bumper-presents { display: block; margin-top: calc(var(--u) * 8); font-size: calc(var(--u) * 14); letter-spacing: .24em; color: #6b5744; animation: bumper-presents-in 4s linear both; }
+.bumper-name { display: block; font-size: calc(var(--sheet-u) * 26); font-weight: 700; letter-spacing: .14em; line-height: 1.2; }
+.bumper-name-other { display: block; font-size: calc(var(--sheet-u) * 12); font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: #7a6350; }
+.bumper-presents { display: block; margin-top: calc(var(--sheet-u) * 8); font-size: calc(var(--sheet-u) * 14); letter-spacing: .24em; color: #6b5744; animation: bumper-presents-in 4s linear both; }
 @keyframes bumper-presents-in { 0%, 72% { opacity: 0; } 82%, 100% { opacity: 1; } }
 /* The iris: a hole in a field of black, closed at both ends of the four
    seconds. It opens behind the beanbags as they land and closes into the title
@@ -776,18 +810,18 @@ html.dialog-open { overflow: hidden; }
 /* §10.4: the title card, and then the slate. A black card in cream type with a
    soft vignette, a ±1-unit gate weave and a few dust specks — the last two are
    the projector, so they go under reduced motion and the reading does not. */
-.film-card { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; padding: 0 calc(var(--u) * 26); background: #0c0810; color: #EFE6D6; text-align: center; text-wrap: balance; animation: film-weave 1.1s steps(3, end) infinite; }
+.film-card { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; padding: 0 calc(var(--sheet-u) * 26); background: #0c0810; color: #EFE6D6; text-align: center; text-wrap: balance; animation: film-weave 1.1s steps(3, end) infinite; }
 .film-card::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, #0000 38%, #000000aa); pointer-events: none; }
-@keyframes film-weave { 0% { translate: 0 0; } 33% { translate: calc(var(--u) * 1) calc(var(--u) * -1); } 66% { translate: calc(var(--u) * -1) 0; } 100% { translate: 0 0; } }
+@keyframes film-weave { 0% { translate: 0 0; } 33% { translate: calc(var(--sheet-u) * 1) calc(var(--sheet-u) * -1); } 66% { translate: calc(var(--sheet-u) * -1) 0; } 100% { translate: 0 0; } }
 /* A few specks, not a lattice: three tilings whose periods share no factor,
    each started somewhere else, so the eye finds no grid in them. */
-.film-grain { position: absolute; inset: 0; background-image: radial-gradient(circle, #EFE6D6 0 calc(var(--u) * 1), #0000 calc(var(--u) * 1)), radial-gradient(circle, #EFE6D6 0 calc(var(--u) * 1), #0000 calc(var(--u) * 1)), radial-gradient(circle, #EFE6D6 0 calc(var(--u) * 1), #0000 calc(var(--u) * 1)); background-size: calc(var(--u) * 97) calc(var(--u) * 61), calc(var(--u) * 53) calc(var(--u) * 149), calc(var(--u) * 181) calc(var(--u) * 37); background-position: calc(var(--u) * 13) calc(var(--u) * 7), calc(var(--u) * 41) calc(var(--u) * 29), calc(var(--u) * 71) calc(var(--u) * 19); opacity: .22; animation: film-dust .28s steps(2, end) infinite; }
-@keyframes film-dust { from { background-position: calc(var(--u) * 13) calc(var(--u) * 7), calc(var(--u) * 41) calc(var(--u) * 29), calc(var(--u) * 71) calc(var(--u) * 19); } to { background-position: calc(var(--u) * 54) calc(var(--u) * 30), calc(var(--u) * 12) calc(var(--u) * 66), calc(var(--u) * 100) calc(var(--u) * 2); } }
-.film-title-main { position: relative; font-size: calc(var(--u) * 34); font-weight: 700; line-height: 1.15; }
-.film-title-other { position: relative; margin-top: calc(var(--u) * 5); font-size: calc(var(--u) * 17); color: #EFE6D6b3; }
-.film-year { position: relative; margin-top: calc(var(--u) * 7); font-size: calc(var(--u) * 15); letter-spacing: .2em; color: #EFE6D68c; }
+.film-grain { position: absolute; inset: 0; background-image: radial-gradient(circle, #EFE6D6 0 calc(var(--sheet-u) * 1), #0000 calc(var(--sheet-u) * 1)), radial-gradient(circle, #EFE6D6 0 calc(var(--sheet-u) * 1), #0000 calc(var(--sheet-u) * 1)), radial-gradient(circle, #EFE6D6 0 calc(var(--sheet-u) * 1), #0000 calc(var(--sheet-u) * 1)); background-size: calc(var(--sheet-u) * 97) calc(var(--sheet-u) * 61), calc(var(--sheet-u) * 53) calc(var(--sheet-u) * 149), calc(var(--sheet-u) * 181) calc(var(--sheet-u) * 37); background-position: calc(var(--sheet-u) * 13) calc(var(--sheet-u) * 7), calc(var(--sheet-u) * 41) calc(var(--sheet-u) * 29), calc(var(--sheet-u) * 71) calc(var(--sheet-u) * 19); opacity: .22; animation: film-dust .28s steps(2, end) infinite; }
+@keyframes film-dust { from { background-position: calc(var(--sheet-u) * 13) calc(var(--sheet-u) * 7), calc(var(--sheet-u) * 41) calc(var(--sheet-u) * 29), calc(var(--sheet-u) * 71) calc(var(--sheet-u) * 19); } to { background-position: calc(var(--sheet-u) * 54) calc(var(--sheet-u) * 30), calc(var(--sheet-u) * 12) calc(var(--sheet-u) * 66), calc(var(--sheet-u) * 100) calc(var(--sheet-u) * 2); } }
+.film-title-main { position: relative; font-size: calc(var(--sheet-u) * 34); font-weight: 700; line-height: 1.15; }
+.film-title-other { position: relative; margin-top: calc(var(--sheet-u) * 5); font-size: calc(var(--sheet-u) * 17); color: #EFE6D6b3; }
+.film-year { position: relative; margin-top: calc(var(--sheet-u) * 7); font-size: calc(var(--sheet-u) * 15); letter-spacing: .2em; color: #EFE6D68c; }
 /* ADR 0002: the whole Film is elsewhere, and the slate says where. */
-.film-slate-link { position: relative; z-index: 2; margin-top: calc(var(--u) * 14); min-height: 44px; display: inline-flex; align-items: center; padding: calc(var(--u) * 6) calc(var(--u) * 20); border-radius: calc(var(--u) * 8); background: #EFE6D6; color: #241c26; font-size: calc(var(--u) * 15); font-weight: 650; text-decoration: none; }
+.film-slate-link { position: relative; z-index: 2; margin-top: calc(var(--sheet-u) * 14); min-height: 44px; display: inline-flex; align-items: center; padding: calc(var(--sheet-u) * 6) calc(var(--sheet-u) * 20); border-radius: calc(var(--sheet-u) * 8); background: #EFE6D6; color: #241c26; font-size: calc(var(--sheet-u) * 15); font-weight: 650; text-decoration: none; }
 .film-slate-link:hover { filter: brightness(1.06); }
 .film-slate-link:focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
 
@@ -799,30 +833,30 @@ html.dialog-open { overflow: hidden; }
    reasoning — below a certain width the reading is what the Room is for. The
    link keeps its 44 px floor at every width, like both projector controls. */
 @container (max-width: 900px) {
-  .stage-cinema .cinema-film { left: 38.4%; top: 9.4%; width: 49.5%; height: 49.1%; }
-  .film-title-main { font-size: calc(var(--u) * 52); }
-  .film-title-other { font-size: calc(var(--u) * 26); }
-  .film-year { font-size: calc(var(--u) * 23); }
-  .film-slate-link { font-size: calc(var(--u) * 23); }
-  .bumper-name { font-size: calc(var(--u) * 40); }
-  .bumper-name-other { font-size: calc(var(--u) * 18); }
-  .bumper-presents { font-size: calc(var(--u) * 21); }
+  .stage-cinema .cinema-film { left: 38.14%; top: 8.65%; width: 45.45%; height: 45.11%; }
+  .film-title-main { font-size: calc(var(--sheet-u) * 52); }
+  .film-title-other { font-size: calc(var(--sheet-u) * 26); }
+  .film-year { font-size: calc(var(--sheet-u) * 23); }
+  .film-slate-link { font-size: calc(var(--sheet-u) * 23); }
+  .bumper-name { font-size: calc(var(--sheet-u) * 40); }
+  .bumper-name-other { font-size: calc(var(--sheet-u) * 18); }
+  .bumper-presents { font-size: calc(var(--sheet-u) * 21); }
 }
 @container (max-width: 620px) {
-  .stage-cinema .cinema-film { left: 29.5%; top: 1%; width: 67.2%; height: 66.7%; }
-  .film-title-main { font-size: calc(var(--u) * 74); }
-  .film-title-other { font-size: calc(var(--u) * 37); }
-  .film-year { font-size: calc(var(--u) * 32); }
-  .film-slate-link { font-size: calc(var(--u) * 32); }
-  .bumper-name { font-size: calc(var(--u) * 56); }
-  .bumper-name-other { font-size: calc(var(--u) * 26); }
-  .bumper-presents { font-size: calc(var(--u) * 29); }
+  .stage-cinema .cinema-film { left: 30.03%; top: .59%; width: 61.68%; height: 61.22%; }
+  .film-title-main { font-size: calc(var(--sheet-u) * 74); }
+  .film-title-other { font-size: calc(var(--sheet-u) * 37); }
+  .film-year { font-size: calc(var(--sheet-u) * 32); }
+  .film-slate-link { font-size: calc(var(--sheet-u) * 32); }
+  .bumper-name { font-size: calc(var(--sheet-u) * 56); }
+  .bumper-name-other { font-size: calc(var(--sheet-u) * 26); }
+  .bumper-presents { font-size: calc(var(--sheet-u) * 29); }
 }
 
 /* §5: the gate lever, once there is a reel to roll. It stops saying that the
    machine is empty and starts looking like a control. */
 .stage-cinema button.projector-gate[aria-disabled="false"] { border-style: solid; border-color: #EFE6D6cc; background: #efe6d622; cursor: pointer; }
-.stage-cinema button.projector-gate[aria-disabled="false"]:hover { background: #efe6d63d; box-shadow: 0 0 calc(var(--u) * 60) calc(var(--u) * 10) #efe6d644; }
+.stage-cinema button.projector-gate[aria-disabled="false"]:hover { background: #efe6d63d; box-shadow: 0 0 calc(var(--u) * 46.8) calc(var(--u) * 7.8) #efe6d644; }
 .stage-cinema button.projector-gate[aria-pressed="true"] { border-color: #ffd9a0; background: #ffd9a02e; }
 
 /* §10.3: the Bumper's reduced-motion form. The same four seconds and the same

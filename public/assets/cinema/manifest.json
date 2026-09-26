@@ -1,46 +1,60 @@
 {
   "schema": "cinema-manifest/1",
-  "note": "Provenance for the Cinema Room's delivered art (COOP-001 ticket 36). The raw generations live in the main checkout's .scratch/COOP-001-apartment/art/generated/32-cinema-room/ (gitignored) and travel here only as sha256s; each source.path is the kept attempt ticket 32's manifest names and its 2026-09-25 approval confirms (S02 attempt-v3-nocat, S22 and S24 attempt-v3-painted). Every file rebuilds byte for byte from that source with the builtBy line. Beats keep the design note's frame proportions at the source's own resolution (pxPerUnit), never upscaled past it. Since ticket 79 the three shelves and their three caps-gone stills come from ticket 77's closing run instead (77-cinema-shelf-wall/, each attempt-1, accepted 2026-09-26); each caps-gone entry names the shelf it is a variant of and the measured pixel diff between the two.",
+  "note": "Provenance for the Cinema Room's delivered art (COOP-001 ticket 36). The raw generations live in the main checkout's .scratch/COOP-001-apartment/art/generated/32-cinema-room/ (gitignored) and travel here only as sha256s; each source.path is the kept attempt ticket 32's manifest names and its 2026-09-25 approval confirms (S02 attempt-v3-nocat, S22 and S24 attempt-v3-painted). Every file rebuilds byte for byte from that source with the builtBy line. Beats keep the design note's frame proportions at the source's own resolution (pxPerUnit), never upscaled past it. Since ticket 79 the three shelves and their three caps-gone stills come from ticket 77's closing run instead (77-cinema-shelf-wall/, each attempt-1, accepted 2026-09-26); each caps-gone entry names the shelf it is a variant of and the measured pixel diff between the two. Since ticket 92 the Room stands on a 1360 x 765 stage (design 75 section 4.4): backdrop.png is ticket 91's outpaint (91-cinema-outpaint/s02-region-edit/attempt-1) and door-leaf.png ticket 90's leaf (90-cinema-door-leaf/S03-door-leaf/attempt-2), both accepted 2026-09-26; every other entry records the factor it is drawn at on that stage in \"stage92\"; spindles.png (S11) came off the stage with ticket 71's fold-in; the two seated stills are cut from S26's and S27's last frames, with no generation.",
   "identitySource": "art/characters/v2 — the version 2 Character Sheets, referenced by every Cast shot, never a generated asset",
   "assets": [
     {
       "file": "backdrop.png",
       "shot": "S01",
-      "name": "Empty room backdrop (regenerated: empty dark doorway at P4, no leaf, per 2026-09-20 ruling)",
-      "kept": "attempt-2-doorway",
+      "name": "Empty room backdrop, outpainted to the 1360 x 765 stage (40 units of wall left, 72 right, 63 of floor), its doorway repainted at D6 and its sconce at true size (ticket 91)",
+      "kept": "attempt-1",
       "frames": 1,
       "columns": 1,
-      "frame": "1600x900",
-      "stage": "1600x900",
+      "frame": "1744x981",
+      "stage": "1360x765",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s01-room/attempt-2-doorway/strip-raw.png",
-        "sha256": "bce2948db3f309b38dddd1c06cb56e072c0ea1ce1a886ba849f03f1ef9d67c19"
+        "path": ".scratch/COOP-001-apartment/art/generated/91-cinema-outpaint/s02-region-edit/attempt-1/strip-raw.png",
+        "sha256": "092ea018b53620148e95fd2e53fd628a97bab9a54f49bfd29f903067d8df7eb9"
       },
-      "sha256": "00792d4da7371fee4c4c75d54f95e543ac442ef98e97910e0ee212be8a414a0a",
-      "builtBy": "scripts/art/build-prop.mjs@1 --frame 1600x900 --fit contain --seat centre --key alpha",
-      "placed": "0, 0, 1600 x 900",
+      "sha256": "a604c179736106ecd6395e838c40cef770b8008152634b0394fe98d1c29f40bb",
+      "builtBy": "scripts/art/build-prop.mjs@1 --frame 1744x981 --fit fill --key alpha",
+      "placed": "0, 0, 1360 x 765 (1.2824 px per unit)",
       "motionPhase": null,
       "measured": {
         "doorway": {
           "rect": {
-            "x": 72,
+            "x": 38,
             "y": 149,
-            "width": 224,
+            "width": 180,
             "height": 446
           },
-          "by": "scripts/art/measure-rect.mjs --inside dark:48 --seed 185,380"
+          "units": {
+            "x": 29.6,
+            "y": 116.2,
+            "width": 140.4,
+            "height": 347.8
+          },
+          "against": "142 x 350 units: -1.1% across, -0.6% down (the one door, within 3%)",
+          "by": "scripts/art/measure-rect.mjs --inside dark:48 --seed 128,370"
         },
         "sheet": {
           "rect": {
-            "x": 727,
+            "x": 778,
             "y": 148,
             "width": 566,
             "height": 316
           },
-          "by": "scripts/art/measure-rect.mjs --inside light:120 --seed 1000,300"
-        },
-        "note": "Stage units equal pixels here (1600 x 900). The design note targeted the door at 40-170 x 270-640 and the sheet at 220-620 x 100-325; the delivered S01 has them where these say, and the markup follows the measurement."
-      }
+          "units": {
+            "x": 606.7,
+            "y": 115.4,
+            "width": 441.4,
+            "height": 246.4
+          },
+          "against": "ticket 36's sheet by design 75's R1, (607.06, 115.44, 441.48 x 246.48), which the Bumper and the title card are placed on",
+          "by": "scripts/art/measure-rect.mjs --inside light:120 --seed 1060,300"
+        }
+      },
+      "replaces": "ticket 36's attempt-2-doorway, 1600 x 900 (sha256 00792d4d...)"
     },
     {
       "file": "shelf-comedy.png",
@@ -60,7 +74,8 @@
       "content": "176 x 499 px (88 x 249.5 units), top at canvas y 261; base 5-175 px, centre 90 (canvas centre 90); transparent above",
       "placed": "unchanged by ticket 79: the button and its --art-w/--art-h box are the old ones, so the canvas is stretched into it until ticket 73 places the wall on the 1360 x 765 stage at design 80 section 3.1's art boxes",
       "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 180x760: pass (the seven sprite-sheet rules; index.html declares no Cycle here)",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "design 75's R1 until ticket 73 (--scale .7 -> .546): button 1061.8, 291.72, 65.52 x 207.48; sort 499"
     },
     {
       "file": "shelf-romance.png",
@@ -80,7 +95,8 @@
       "content": "156 x 535 px (78 x 267.5 units), top at canvas y 259; base 9-150 px, centre 79.5 (canvas centre 80); transparent above",
       "placed": "unchanged by ticket 79: the button and its --art-w/--art-h box are the old ones, so the canvas is stretched into it until ticket 73 places the wall on the 1360 x 765 stage at design 80 section 3.1's art boxes",
       "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 160x794: pass (the seven sprite-sheet rules; index.html declares no Cycle here)",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "design 75's R1 until ticket 73 (--scale .7 -> .546): button 1135.12, 291.72, 65.52 x 207.48; sort 499"
     },
     {
       "file": "shelf-horror.png",
@@ -100,7 +116,8 @@
       "content": "184 x 546 px (92 x 273 units), top at canvas y 280; base 26-179 px, centre 102.5 (canvas centre 94: 8.5 px right, because the talisman widens the box to the right); transparent above",
       "placed": "unchanged by ticket 79: the button and its --art-w/--art-h box are the old ones, so the canvas is stretched into it until ticket 73 places the wall on the 1360 x 765 stage at design 80 section 3.1's art boxes",
       "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 188x826: pass (the seven sprite-sheet rules; index.html declares no Cycle here)",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "design 75's R1 until ticket 73 (--scale .7 -> .546): button 1208.44, 291.72, 65.52 x 207.48; sort 499"
     },
     {
       "file": "shelf-comedy-caps-gone.png",
@@ -180,7 +197,8 @@
       "sha256": "1e5ae68af1db814ebcf4db594f4be7f97db6817bf33daeee5483cc0363a95ae0",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 940x640 --fit content --seat centre --key alpha",
       "placed": "310, 255, 399.5 x 272 (the note's 470 x 320 at --scale .85, ticket 63)",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "design 75's R1 until ticket 73 (x 0.78; --scale .85 -> .663): 281.8, 198.9, 311.61 x 212.16; sort 499"
     },
     {
       "file": "beanbag-girl.png",
@@ -197,7 +215,8 @@
       "sha256": "6e7af818e451e5eb80ea8d9872495c1b287b1af0a7cc4b15f2a410373d813a52",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 360x220 --fit content --seat bottom --key '#00FF00'",
       "placed": "230, 690, 180 x 110",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "x 1 (true size), re-spaced: 160, 514, 180 x 110; sort 624"
     },
     {
       "file": "beanbag-boy.png",
@@ -214,7 +233,8 @@
       "sha256": "1ba563b73176b2f38302547d9da27d050f1ad547ef2f8236952f100eed2d7e4c",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 360x220 --fit content --seat bottom --key alpha",
       "placed": "570, 690, 180 x 110",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "x 1 (true size), re-spaced: 500, 514, 180 x 110; sort 624"
     },
     {
       "file": "cabinet.png",
@@ -231,7 +251,8 @@
       "sha256": "1658487df0d77cad77bb4da01aa1eb9e75a1b475fcdd803c802e8515db673fa1",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 280x200 --fit content --seat bottom --key alpha",
       "placed": "430, 730, 140 x 100",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "x 1 (true size), re-spaced: 360, 547, 140 x 100; sort 647"
     },
     {
       "file": "projector.png",
@@ -249,7 +270,8 @@
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 240x260 --fit content --seat bottom --key alpha",
       "placed": "440, 600, 120 x 130",
       "note": "Re-dropped by ticket 66. The owner approved attempt-4 on 2026-09-25 (ticket 65, option a); ticket 32's manifest still names attempt-2-matte as kept, so this entry is the one exception to the note above. The machine is drawn mirrored against ticket 65's brief. Measured off this file in stage units: motor switch cap 467-474 x 703-711, gate door 512-531 x 685-710, lens mouth centre 549.5, 648, front spindle and rear spindle as ticket 65 reports them. Replaces attempt-2-matte (sha256 b4de3f7c..., built a6fa1801...).",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "x 0.78 about the group base centre (500, 730) -> (430, 547.4), on the cabinet: 383.2, 446, 93.6 x 101.4; sort 648"
     },
     {
       "file": "reel.png",
@@ -266,25 +288,8 @@
       "sha256": "94bc909d79a6e6a97177f6714e590fe8eeea3251e67502ab40480b4f3ec36593",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 120x120 --fit content --seat centre --key alpha",
       "placed": "475, 600, 60 x 60, shown once a reel is loaded",
-      "motionPhase": null
-    },
-    {
-      "file": "spindles.png",
-      "shot": "S11",
-      "name": "Spindles turning (Cycle)",
-      "kept": "attempt-v2-matte",
-      "frames": 4,
-      "columns": 4,
-      "frame": "180x120",
-      "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s11-spindles-cycle/attempt-v2-matte/strip-raw.png",
-        "sha256": "d54505e6efa35c016958470bd309ec47ec0cee546e0fc165171c783f608b3116"
-      },
-      "sha256": "133ce66e22fca1f07bcf0e9799017c116c0e5d7d6ba10988afd7da941ad362f4",
-      "builtBy": "scripts/art/build-prop.mjs@1 --frame 180x120 --frames 4 --columns 4 --fit content --seat bottom --key alpha",
-      "placed": "455, 600, 90 x 60, stepping while the motor or a Film runs",
-      "validated": "check-assets.mjs --beat --frames 4 --columns 4 --frame 180x120: pass",
-      "motionPhase": "not verified"
+      "motionPhase": null,
+      "stage92": "x 0.78, centred on the front hub (440.1, 455.3): 416.7, 431.9, 46.8 x 46.8; sort 649"
     },
     {
       "file": "film-can.png",
@@ -301,7 +306,8 @@
       "sha256": "de3376d868d81b2f3120b550cf89960c5b7fcfe1d9fc7a43d90962d0d85185e7",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 120x76 --fit content --seat bottom --key '#00FF00'",
       "placed": "470, 692, 60 x 38",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "x 1 (true size), on the cabinet top: 400, 509, 60 x 38; sort 648"
     },
     {
       "file": "film-can-broken.png",
@@ -318,7 +324,8 @@
       "sha256": "e2a34a2c4449dce46a93ed1ed1ed7b7d6f2c49b7091f5b7aaf67bdd53f0622b6",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 360x160 --fit content --seat bottom --key alpha",
       "placed": "290, 800, 180 x 80",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "x 1 (true size), its old offset from the cabinet's front-centre (-120, +50): 220, 617, 180 x 80; sort 697"
     },
     {
       "file": "lucky-cat.png",
@@ -335,7 +342,8 @@
       "sha256": "e5e3883d444cad3703524d1bcb3f74a961b2aea784661b2386d5878f1de33022",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 88x88 --fit content --seat bottom --key alpha",
       "placed": "1335, 573, 31 x 31 (ticket 63: with the comedy shelf, at its scale)",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "design 75's R1 until ticket 73: 1081.3, 446.94, 24.18 x 24.18; sort 499"
     },
     {
       "file": "lucky-cat-broken.png",
@@ -352,7 +360,8 @@
       "sha256": "cdb3ad71b3b47161f9fd150e14e362a47fe308a4e9c23a1aa3f51e6ec0e3d962",
       "builtBy": "scripts/art/build-prop.mjs@1 --frame 180x60 --fit content --seat bottom --key alpha",
       "placed": "1317, 647, 63 x 21 (ticket 63: with the comedy shelf, at its scale)",
-      "motionPhase": null
+      "motionPhase": null,
+      "stage92": "design 75's R1 until ticket 73: 1067.26, 504.66, 49.14 x 16.38; sort 530"
     },
     {
       "file": "scroll-bundle.png",
@@ -709,6 +718,34 @@
       "motionPhase": "not verified"
     },
     {
+      "file": "girl-beanbag-seated.png",
+      "shot": "S27, frame 8",
+      "name": "The Girl sat in the teal beanbag, a still of S27's last frame (design 13: \"already seated\")",
+      "variantOf": "girl-sits-beanbag.png",
+      "frame": "339x296",
+      "cutFrom": "girl-sits-beanbag.png (sha256 68fc54b3...), cell 8 at 1092,476-1456,952",
+      "builtBy": "scripts/art/crop-cell.mjs --region 1092,476,1456,952 + scripts/art/build-prop.mjs@1 --frame 339x296 --fit content --seat bottom --key alpha (scale 1)",
+      "sha256": "2fa9839bdf1d2ad2b70614e926f0ad7c5258034cb47f64429158e25d124da526",
+      "headMatch": "crown to chin 93 px against the standing Girl's 54.6 units (64 px of girl-walk-right.png's 320 px frame at data-height 273): 0.5871 units per px, x 0.822 of the Beat's own 1.4 px per unit (shrink-only)",
+      "placed": "150.49, 450.22, 199.03 x 173.78, its bottom-centre on CINEMA_MARKS.girlSeat (250, 624); sort 624",
+      "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 339x296: pass",
+      "motionPhase": null
+    },
+    {
+      "file": "boy-beanbag-seated.png",
+      "shot": "S26, frame 8",
+      "name": "The Boy sat in the coral beanbag, a still of S26's last frame (design 13: \"already seated\")",
+      "variantOf": "boy-sits-beanbag.png",
+      "frame": "343x282",
+      "cutFrom": "boy-sits-beanbag.png (sha256 234d5499...), cell 8 at 1092,476-1456,952",
+      "builtBy": "scripts/art/crop-cell.mjs --region 1092,476,1456,952 + scripts/art/build-prop.mjs@1 --frame 343x282 --fit content --seat bottom --key alpha (scale 1)",
+      "sha256": "3e531bf59c5e334de41989728e9a4f34f8a2235bf1567499cfe45bba1592c2a3",
+      "headMatch": "crown to chin 96 px against the standing Boy's 61.9 units (66 px of boy-walk-right.png's 320 px frame at data-height 300): 0.6445 units per px, x 0.902 of the Beat's own 1.4 px per unit (shrink-only)",
+      "placed": "479.46, 442.24, 221.07 x 181.76, its bottom-centre on CINEMA_MARKS.boySeat (590, 624); sort 624",
+      "validated": "check-assets.mjs --beat --frames 1 --columns 1 --frame 343x282: pass",
+      "motionPhase": null
+    },
+    {
       "file": "boy-rummages-shelf.png",
       "shot": "S28",
       "name": "Boy rummages a shelf (Beat)",
@@ -830,21 +867,22 @@
     },
     {
       "file": "door-leaf.png",
-      "shot": "S36",
-      "name": "Door leaf, shut and open (added 2026-09-20)",
-      "kept": "attempt-v2-matte-retry1",
+      "shot": "S03 (ticket 90)",
+      "name": "Door leaf, shut and open, regenerated at 142 x 350 (ticket 90)",
+      "kept": "attempt-2",
       "frames": 2,
       "columns": 2,
-      "frame": "390x892",
+      "frame": "282x692",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s36-door-leaf/attempt-v2-matte-retry1/strip-raw.png",
-        "sha256": "b965d56ec697f11e3eed75f5ca7d3681b9f57d7d94f38d838c1d08ca42ab7b1c"
+        "path": ".scratch/COOP-001-apartment/art/generated/90-cinema-door-leaf/S03-door-leaf/attempt-2/strip-raw.png",
+        "sha256": "cc735e4bf9e3920cde95e93810671e202075abb6e3bfa65dbbee1ab0031a7a8b"
       },
-      "sha256": "7dc96205cf419a884a4df5d92f6e0ac427cd2bfd620fa0896940d7b44d53c6b6",
-      "builtBy": "scripts/art/crop-cell.mjs (the strip's halves 0,0-768,1024 and 768,0-1536,1024) + scripts/art/build-prop.mjs@1 --frame 390x892 --fit content --seat bottom --key alpha, each + scripts/art/stack-cells.mjs",
-      "placed": "fills the measured doorway, 72, 149, 224 x 446 (cell 1 read, stretched 1.15x across)",
-      "validated": "check-assets.mjs --beat --frames 2 --columns 2 --frame 390x892: pass",
-      "motionPhase": null
+      "sha256": "dc859c311d8a8147b729a0a75fed1faefcfc1c322d6e5b4b5046b64f6837e03a",
+      "builtBy": "scripts/art/crop-cell.mjs (the strip's halves 0,0-570,1393 and 570,0-1129,1393) + scripts/art/build-prop.mjs@1 --frame 282x692 --fit content --seat bottom --key alpha, each (scale 0.4991 shut, 0.5007 open) + scripts/art/stack-cells.mjs",
+      "placed": "fills the measured doorway, 29.6, 116.2, 140.4 x 347.8; the shut leaf draws 138.4 x 345.8 units in it (-2.5% across, -1.2% down)",
+      "validated": "check-assets.mjs --beat --frames 2 --columns 2 --frame 282x692: pass",
+      "motionPhase": null,
+      "knownIssue": "a smeared blotch in the open cell's light band (both attempts); cell 2 ships unread"
     }
   ],
   "deferred": [
@@ -855,6 +893,15 @@
     {
       "shot": "S35",
       "reason": "optional seated idle; not generated (ticket 32 manifest: deferred)"
+    }
+  ],
+  "removed": [
+    {
+      "file": "spindles.png",
+      "shot": "S11",
+      "by": "Ticket 92 (2026-09-26), the Cinema on its 1360 x 765 stage",
+      "reason": "ticket 71, folded into 92: the overlay's hubs cannot meet the mirrored projector's (notes/screens/71-s11-over-s09.png); the reel S10 sits on the front hub instead",
+      "sha256": "133ce66e22fca1f07bcf0e9799017c116c0e5d7d6ba10988afd7da941ad362f4"
     }
   ]
 }

@@ -36,8 +36,8 @@ export { ACTOR_IDS, isWalkable, seededRandom } from './actors';
 export { actorView, actorsIn } from './world';
 
 // 17: the Cinema Room — its marks, its shelves, and who is sitting down.
-export type { CinemaShelf, CinemaSlice } from './cinema';
-export { CINEMA_MARKS, CINEMA_SHELVES } from './cinema';
+export type { CinemaShelf, CinemaSlice, PosterSlot } from './cinema';
+export { CINEMA_MARKS, CINEMA_SHELVES, posterSlot } from './cinema';
 export { attendedShelf, isSeated } from './world';
 // 16: the Activity Room — its three stations, and tonight's pick.
 export type { ActivitiesSlice, ActivityId } from './activities';
@@ -83,7 +83,7 @@ export { FALL_WINDOW_MS, LATE_CAT_MS } from './cats';
 export type { Film, FilmId, FilmPairing } from './films';
 export { filmById, filmsOn } from './films';
 export type { CinemaStep } from './cinema';
-export { cinemaStep, openShelf, pinnedPosters, rummagingShelf } from './world';
+export { capsGoneShelf, cinemaStep, openShelf, pinnedPosters, rummagingShelf } from './world';
 
 // 19: the Poster expansion, and the Film whose details it opens onto.
 export { expandedPoster, posterDetails } from './world';

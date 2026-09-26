@@ -567,7 +567,8 @@ export interface RoomArrivalSlice {
 const DOOR_MARKS: Record<RoomId, ArrivalMark> = {
   entryway: { at: ENTRYWAY_MARKS.T, facing: 'right' },
   games: { at: { x: 130, y: 583 }, facing: 'right' },
-  cinema: { at: { x: 150, y: 662 }, facing: 'right' },
+  // 92: design 75 §4.1, in front of D6's doorway on the 1360 x 765 stage.
+  cinema: { at: { x: 100, y: 516 }, facing: 'right' },
   // 96: design 75 §4.1, in front of the one door on the 1328 x 747 stage.
   activities: { at: { x: 166, y: 549 }, facing: 'right' },
 };

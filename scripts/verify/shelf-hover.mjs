@@ -61,8 +61,14 @@ const STILL_MS = 400;
 /** How often the page is read. */
 const POLL_MS = 50;
 
-/** How far left of a shelf's bay his feet may be and still be beside it. */
-const BESIDE_UNITS = 40;
+/**
+ * How far left of a shelf's bay his feet may be and still be beside it.
+ *
+ * 73: design 80 section 3.3 stands him 119 left of the middle cubby's centre,
+ * which is 79 short of an 80-wide shelf's left edge, and 86 short of the
+ * horror shelf's, which leans 7 left at his hand. 40 was 63's 18-unit gap.
+ */
+const BESIDE_UNITS = 90;
 
 /** How far the page may draw him from the model's mark, in stage units. */
 const MARK_UNITS = 4;
