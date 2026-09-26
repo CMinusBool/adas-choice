@@ -155,6 +155,14 @@ const M = ENTRYWAY_MARKS;
  * durations printed beside them, so the timing is a consequence of the geometry
  * rather than a second copy of it. The last two cues are the settled stances —
  * he turns to face her.
+ *
+ * 86: three `place` cues stand an Actor where its Beat's last frame leaves
+ * its feet — `B2`, `B3` with `G1b`, and `B4` — each fired while that Beat is
+ * still drawing them, so the sprite that takes over stands exactly where the
+ * figure did. A Beat moves its figure inside the frame (S15 alone ends 26
+ * units from where it starts), and the closing rule is that no hand-off moves
+ * the feet more than 6 units. No cue was re-timed: every walk on the smaller
+ * stage still ends before that Actor's next cue.
  */
 const CUES: readonly ArrivalCue[] = [
   { at: 0, kind: 'sfx', name: 'keys' },
@@ -165,10 +173,14 @@ const CUES: readonly ArrivalCue[] = [
   { at: 2.2, kind: 'send', actor: 'boy', mark: M.B1 },
   { at: 4, kind: 'sfx', name: 'door-close' },
   { at: 4.4, kind: 'sfx', name: 'backpack-down' },
+  { at: 4.6, kind: 'place', actor: 'boy', mark: M.B2, facing: 'right' },
   { at: 4.9, kind: 'sfx', name: 'coat' },
+  { at: 6.1, kind: 'place', actor: 'boy', mark: M.B3, facing: 'right' },
+  { at: 6.1, kind: 'place', actor: 'girl', mark: M.G1b, facing: 'right' },
   { at: 6.3, kind: 'send', actor: 'girl', mark: M.G2 },
   { at: 7.2, kind: 'sfx', name: 'coat' },
   { at: 7.4, kind: 'sfx', name: 'zip' },
+  { at: 8, kind: 'place', actor: 'boy', mark: M.B4, facing: 'right' },
   { at: 8.35, kind: 'send', actor: 'boy', mark: M.BS },
   { at: 8.5, kind: 'sfx', name: 'mica-meow' },
   { at: 9.35, kind: 'place', actor: 'mica', mark: M.EMica, facing: 'left' },
@@ -238,23 +250,32 @@ const shrunk = (from: Box, factor: number): Box => {
   return { x: from.x + (from.width - width) / 2, y: from.y + from.height - height, width, height };
 };
 
+// 86: the Entryway on its 1184 x 666 stage (design 75 §4.2). A Beat keeps the
+// size it was drawn at (1.5 px a unit); only its box moves. The Boy's four and
+// the duet are one chain, each placed so its first frame's feet stand where the
+// last one's left them (the marks in `entryway.ts`), and the chain is hung from
+// S18's seventh frame, the parka's collar on hook 1. S19 puts her first and
+// last frames' feet 4.6 units either side of `G2`, her hands towards the
+// backpack on the bench seat.
 const BEATS: readonly BeatCue[] = [
-  { id: 'S15', at: 3.65, seconds: 1, box: box(296, 320, 520, 700), frames: 8, columns: 4, fps: 8, hides: ['boy'] },
-  { id: 'S16', at: 4.8, seconds: 1.35, box: box(320, 364, 612, 700), frames: 8, columns: 4, fps: 6, hides: ['boy', 'girl'] },
-  { id: 'S17', at: 6.3, seconds: 0.75, box: box(330, 300, 540, 700), frames: 6, columns: 4, fps: 8, hides: ['boy'] },
-  { id: 'S18', at: 7.05, seconds: 1, box: box(330, 300, 570, 700), frames: 8, columns: 4, fps: 8, hides: ['boy'] },
+  { id: 'S15', at: 3.65, seconds: 1, box: box(226.4, 119.5, 450.4, 499.5), frames: 8, columns: 4, fps: 8, hides: ['boy'] },
+  { id: 'S16', at: 4.8, seconds: 1.35, box: box(235.7, 140.8, 527.7, 476.8), frames: 8, columns: 4, fps: 6, hides: ['boy', 'girl'] },
+  { id: 'S17', at: 6.3, seconds: 0.75, box: box(236, 62.8, 446, 462.8), frames: 6, columns: 4, fps: 8, hides: ['boy'] },
+  { id: 'S18', at: 7.05, seconds: 1, box: box(199, 60.8, 439, 460.8), frames: 8, columns: 4, fps: 8, hides: ['boy'] },
   // She goes down onto one knee and pulls the zip in frames 1-4, and frame 4 is
   // held for as long as the cats take; frames 5-8 stand her back up after Mira.
-  { id: 'S19', at: 7.1, seconds: 3.25, box: box(280, 400, 470, 744), frames: 4, columns: 4, fps: 8, hides: ['girl'] },
-  { id: 'S19', at: 10.35, seconds: 0.5, box: box(280, 400, 470, 744), frames: 4, columns: 4, fps: 8, hides: ['girl'], from: 4 },
+  { id: 'S19', at: 7.1, seconds: 3.25, box: box(202.5, 147, 392.5, 491), frames: 4, columns: 4, fps: 8, hides: ['girl'] },
+  { id: 'S19', at: 10.35, seconds: 0.5, box: box(202.5, 147, 392.5, 491), frames: 4, columns: 4, fps: 8, hides: ['girl'], from: 4 },
   // The cats are not Actors while their Beat is playing, so a Beat hides nobody.
   // 82: the cats at real size (design 75 §0.5) — each sheet is drawn at the old
   // cat height, so its box shrinks by the cat's own factor about its
   // bottom-centre: Míca and Mira × 0.635 (96 → 61), Luna × 0.629 (105 → 66).
+  // 86: the boxes they were cut for, moved to design 75 §4.2's bottom-centres
+  // (225,524), (286.5,574) and (366,633); ticket 100 matches them to the cats.
   // S23, Míca at the vase, has no cue yet; when it is wired it shrinks × 0.635.
-  { id: 'S20', at: 8.1, seconds: 1.25, box: shrunk(box(240, 430, 450, 730), CAT_BEAT_SCALE.mica), frames: 10, columns: 4, fps: 8, hides: [] },
-  { id: 'S21', at: 9.35, seconds: 1, box: shrunk(box(330, 430, 560, 790), CAT_BEAT_SCALE.mira), frames: 8, columns: 4, fps: 8, hides: [] },
-  { id: 'S22', at: 10.35, seconds: 1.5, box: shrunk(box(330, 424, 790, 860), CAT_BEAT_SCALE.luna), frames: 12, columns: 4, fps: 8, hides: [] },
+  { id: 'S20', at: 8.1, seconds: 1.25, box: shrunk(box(120, 224, 330, 524), CAT_BEAT_SCALE.mica), frames: 10, columns: 4, fps: 8, hides: [] },
+  { id: 'S21', at: 9.35, seconds: 1, box: shrunk(box(171.5, 214, 401.5, 574), CAT_BEAT_SCALE.mira), frames: 8, columns: 4, fps: 8, hides: [] },
+  { id: 'S22', at: 10.35, seconds: 1.5, box: shrunk(box(136, 197, 596, 633), CAT_BEAT_SCALE.luna), frames: 12, columns: 4, fps: 8, hides: [] },
 ];
 
 /** Until when each of the two of them is still in their coat (§5.2). */
