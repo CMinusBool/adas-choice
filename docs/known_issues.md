@@ -100,3 +100,5 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [cinema] The cabinet search and the reel threading are a 0.45 s stand, because S30 and S31 are declared but never played. (107, 2026-09-26)
 - [site] The closing probe (`notes/closing/probe/probe.mjs`) measures boxes only and does not see the Actors' step. (107, 2026-09-26)
 - [cinema] At rest a cat can stand half hidden behind the projector and the reel cabinet. (107, 2026-09-26)
+- [cinema] Choosing a Film always opens the Invitation dialog before it plays, even when invitations are off; then the dialog says "unavailable" and waits to be closed. (108, 2026-09-26)
+- [activities] The Activity Room has no Invitation button, so choosing an Activity sends nothing. (108, 2026-09-26)
