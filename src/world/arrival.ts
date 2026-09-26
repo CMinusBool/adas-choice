@@ -169,6 +169,12 @@ const M = ENTRYWAY_MARKS;
  * units from where it starts), and the closing rule is that no hand-off moves
  * the feet more than 6 units. No cue was re-timed: every walk on the smaller
  * stage still ends before that Actor's next cue.
+ *
+ * 105: and a fourth, `G2b` at 10.35 s, where S19's last frame stands her back
+ * up, fired at the moment its second half starts. Each Beat is now drawn at
+ * its Actor's height, so S19's figure travels 11 units between its first and
+ * last frames, too far for one mark to sit within 6 of both. The cue times
+ * are unchanged; 10.35 s was already one.
  */
 const CUES: readonly ArrivalCue[] = [
   { at: 0, kind: 'sfx', name: 'keys' },
@@ -192,6 +198,7 @@ const CUES: readonly ArrivalCue[] = [
   { at: 9.35, kind: 'place', actor: 'mica', mark: M.EMica, facing: 'left' },
   { at: 9.7, kind: 'sfx', name: 'mira-meow' },
   { at: 10.35, kind: 'place', actor: 'mira', mark: M.EMira, facing: 'right' },
+  { at: 10.35, kind: 'place', actor: 'girl', mark: M.G2b, facing: 'right' },
   { at: 10.85, kind: 'send', actor: 'girl', mark: M.GS },
   { at: 11.2, kind: 'sfx', name: 'luna-meow' },
   { at: 11.85, kind: 'place', actor: 'luna', mark: M.ELuna, facing: 'left' },
@@ -212,8 +219,10 @@ const PROP_TIMELINE = {
     [3.4, 'closing'],
     [4, 'closed'],
   ],
+  // 105: the moment S15's eighth frame, the first without the bag, comes up,
+  // so the bag is drawn by the Beat and then by the Prop, never by neither.
   backpack: [
-    [4.65, 'closed'],
+    [4.525, 'closed'],
     [7.8, 'open'],
   ],
   girlCoat: [[6.9, 'hung']],
@@ -279,23 +288,48 @@ const landing = (last: LastFrame, height: number, mark: Point): Box => {
   };
 };
 
-// 86: the Entryway on its 1184 x 666 stage (design 75 §4.2). A Beat keeps the
-// size it was drawn at (1.5 px a unit); only its box moves. The Boy's four and
-// the duet are one chain, each placed so its first frame's feet stand where the
-// last one's left them (the marks in `entryway.ts`), and the chain is hung from
-// S18's seventh frame, the parka's collar on hook 1. S19 puts her first and
-// last frames' feet 4.6 units either side of `G2`, her hands towards the
-// backpack on the bench seat.
+/**
+ * 105: a Beat's box at `perPx` stage units to one of its sheet's px, placed so
+ * that the feet one of its frames draws (`feet`, px in the cell: the middle of
+ * the lowest 12 px, and the bottom row) stand on `mark`.
+ */
+const standing = (cell: { readonly width: number; readonly height: number }, perPx: number, feet: Point, mark: Point): Box => ({
+  x: mark.x - feet.x * perPx,
+  y: mark.y - feet.y * perPx,
+  width: cell.width * perPx,
+  height: cell.height * perPx,
+});
+
+// 86: the Entryway on its 1184 x 666 stage (design 75 §4.2). The Boy's four
+// and the duet are one chain, each placed so its first frame's feet stand where
+// the last one's left them (the marks in `entryway.ts`), and the chain is hung
+// from S18's seventh frame, the parka's collar on hook 1.
+// 105: each Beat is drawn at the size that stands its figure at its Actor's
+// `data-height` in the frames that hand over, not at the 1.5 px a unit they
+// were all cut at, which drew the Boy 257-323 units tall and the Girl 232-299
+// (`scripts/check-entryway-handoffs.test.mjs` measures it off the sheets):
+// - S15: the mean of its first and last frames' 424 and 400 px, so he is
+//   309 and 291.
+// - S16: one scale for two figures drawn 484/471 px (him) and 449/440 (her),
+//   the one that leaves each within 2.3 %: 301/293 and 279/274.
+// - S17: its 384 and 386 px, so 299 and 301.
+// - S18: kept, 304 and 296 at 1.5 px a unit, so the chain still hangs from it.
+// - S19: her 348 and 353 px, so 271 and 275; she kneels in front of the
+//   backpack S15 sets on the floor, her fingertips on its top in frame 4.
+// Each is placed on the mark its hand-off frame's feet stand on; the Boy's
+// marks moved under 2 units and the Girl's duet marks under 8.
+/** S19's box, both halves: her first frame's feet on `G2`, and its last on `G2b`. */
+const KNEEL = standing({ width: 285, height: 516 }, 273 / 350.5, { x: 144, y: 509 }, M.G2);
 const BEATS: readonly BeatCue[] = [
-  { id: 'S15', at: 3.65, seconds: 1, box: box(226.4, 119.5, 450.4, 499.5), frames: 8, columns: 4, fps: 8, hides: ['boy'] },
-  { id: 'S16', at: 4.8, seconds: 1.35, box: box(235.7, 140.8, 527.7, 476.8), frames: 8, columns: 4, fps: 6, hides: ['boy', 'girl'] },
-  { id: 'S17', at: 6.3, seconds: 0.75, box: box(236, 62.8, 446, 462.8), frames: 6, columns: 4, fps: 8, hides: ['boy'] },
+  { id: 'S15', at: 3.65, seconds: 1, box: standing({ width: 336, height: 570 }, 300 / 412, { x: 162, y: 534 }, M.B2), frames: 8, columns: 4, fps: 8, hides: ['boy'] },
+  { id: 'S16', at: 4.8, seconds: 1.35, box: standing({ width: 438, height: 504 }, 0.6221, { x: 136.5, y: 483 }, M.B3), frames: 8, columns: 4, fps: 6, hides: ['boy', 'girl'] },
+  { id: 'S17', at: 6.3, seconds: 0.75, box: standing({ width: 315, height: 600 }, 300 / 385, { x: 136, y: 600 }, M.B3), frames: 6, columns: 4, fps: 8, hides: ['boy'] },
   { id: 'S18', at: 7.05, seconds: 1, box: box(199, 60.8, 439, 460.8), frames: 8, columns: 4, fps: 8, hides: ['boy'] },
   // She goes down onto one knee and pulls the zip in frames 1-4, and frame 4 is
   // held for as long as the cats take; frames 5-8 stand her back up after Mira.
   // 100: one 8-frame sheet in a 4 x 2 grid, played in those two halves.
-  { id: 'S19', at: 7.1, seconds: 3.25, box: box(202.5, 147, 392.5, 491), frames: 8, columns: 4, fps: 8, hides: ['girl'], plays: 4 },
-  { id: 'S19', at: 10.35, seconds: 0.5, box: box(202.5, 147, 392.5, 491), frames: 8, columns: 4, fps: 8, hides: ['girl'], from: 4 },
+  { id: 'S19', at: 7.1, seconds: 3.25, box: KNEEL, frames: 8, columns: 4, fps: 8, hides: ['girl'], plays: 4 },
+  { id: 'S19', at: 10.35, seconds: 0.5, box: KNEEL, frames: 8, columns: 4, fps: 8, hides: ['girl'], from: 4 },
   // The cats are not Actors while their Beat is playing, so a Beat hides nobody.
   // Each one ends on the moment its cat is placed on her mark, and hands over.
   // 100: the sheets draw the cats 1.7-3 x their Actors (82's shrink by the
@@ -304,7 +338,8 @@ const BEATS: readonly BeatCue[] = [
   // 481 px — and placed so that frame's feet are on `EMica`, `EMira`, `ELuna`.
   // That puts their first frames 294 / 238 / 345 units from the backpack's
   // mouth on the bench seat (about (336,279)): the frames climb 7-60 units at
-  // this size, and the mouth is 226-320 above the marks.
+  // this size, and the mouth is 226-320 above the marks. 105: S15 now leaves
+  // the backpack on the floor, its mouth at about (390,390); these are unchanged.
   // S23, Míca at the vase, has no cue yet; when it is wired it is sized the same way.
   { id: 'S20', at: 8.1, seconds: 1.25, box: landing({ cell: { width: 315, height: 450 }, top: 179, bottom: 419, feetX: 180.5 }, CAT_HEIGHTS.mica, M.EMica), frames: 10, columns: 4, fps: 8, hides: [] },
   { id: 'S21', at: 9.35, seconds: 1, box: landing({ cell: { width: 345, height: 540 }, top: 138, bottom: 477, feetX: 149 }, CAT_HEIGHTS.mira, M.EMira), frames: 8, columns: 4, fps: 8, hides: [] },

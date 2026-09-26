@@ -130,7 +130,7 @@ const MOTION_CAP_MS = 6000;
  * `WATCH` stops at the first movement it sees, which in the Entryway is the Girl
  * stepping off the threshold about 1.4 s into an 11.9 s arrival: the Boy is not
  * through the door until 2.2 s and the cats are not out of the backpack until 9.35 s
- * to 11.85 s, the coats go up at 6.9 s and 8.05 s, the backpack lands at 4.65 s. So
+ * to 11.85 s, the coats go up at 6.9 s and 8.05 s, the backpack lands at 4.525 s. So
  * the `actors` that `WATCH` reports is who had come in by the moment motion was
  * proved, and a screenshot taken straight after it is a frame from early in the
  * arrival. Ticket 33's verifier read that as "1 Actor, no coats, no backpack". The
