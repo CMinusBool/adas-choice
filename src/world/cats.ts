@@ -87,13 +87,19 @@ export const CAT_MARKS: Record<RoomId, readonly Point[]> = {
     { x: 960, y: 700 },
   ],
   // The Activity Room: the note's own three rest marks, the door a cat comes
-  // in through, and the floor between the stations.
+  // in through, and the floor between the stations. 96: on the 1328 x 747
+  // stage by design 75 §4.5, with two moved. §4.5's (307,601) is 150 units
+  // from the door's, under `CAT_CLEARANCE`, so the stool's mark steps out to
+  // (330,620); and its (581,573) stood right behind the Boy and the Girl's new
+  // marks, so the floor between the stations is in front of the hunt station
+  // instead, at (700,580), 192 from the rug's mark and low enough that a
+  // 61-unit cat stands clear of the chalkboard.
   activities: [
-    { x: 150, y: 662 },
-    { x: 370, y: 724 },
-    { x: 700, y: 690 },
-    { x: 1040, y: 820 },
-    { x: 1240, y: 700 },
+    { x: 166, y: 549 },
+    { x: 330, y: 620 },
+    { x: 700, y: 580 },
+    { x: 863, y: 681 },
+    { x: 1029, y: 581 },
   ],
 };
 
@@ -290,7 +296,13 @@ const BREAKABLES: Readonly<Record<BreakableId, Breakable>> = {
     id: 'activity-pencil-mug',
     owner: 'mira',
     room: 'activities',
-    mark: { x: 620, y: 690 },
+    // 96, design 75 R4: her mug Beat's box puts its paw frame on the mug on
+    // the table, and frame 1's feet then fall at x 477; she waits for it on
+    // the floor in front of the table, low enough to stand in front of the
+    // Girl rather than behind her. The Beat itself is not wired: its leap is
+    // 27 units against a table top 245 above this mark, so a hand-off to it
+    // either way would jump her feet far more than 6 units.
+    mark: { x: 477, y: 640 },
     knockMs: 1500,
     sfx: 'mug-smash',
   },

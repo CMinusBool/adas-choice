@@ -603,13 +603,15 @@
 
           Every Prop is placed in stage units — `--x`, `--y`, `--w`, `--h` are the design note's
           §4.1 boxes and `--z` its base line, which `styles.css` turns into percentages of the
-          1600 x 900 stage, which is why the boxes are here and not in TypeScript. Several boxes
+          Room's stage (1328 x 747 since ticket 96, design 75 §4.5 — the boxes and factors are in
+          `public/assets/activity-room/manifest.json`), which is why the boxes are here and not in TypeScript. Several boxes
           below are wider than their own single Prop's §4.1 entry: the shot list bakes a whole
           station's furniture into one group image (A-S02 table, A-S03 shelf, A-S04 desk, A-S08
           call corner, A-S09 boombox+crate), so the box is that group's full extent, not any one
           piece of it, and the sub-Props those groups used to draw separately are gone. The pencil
           mug, the wall map and the door leaf keep their own boxes and their own images; the mug's
-          two boxes are x 0.635 since ticket 82.
+          two boxes are x 0.635 since ticket 82, and since ticket 96 the intact one stands on the
+          table's top and sorts just in front of it.
         -->
         <a class="room-exit" href="#/entryway"><span class="exit-arrow" aria-hidden="true">←</span><span data-i18n="backToEntryway">回到玄關</span></a>
         <h1 class="room-title" id="activities-title" data-room-title tabindex="-1" data-i18n="activitiesTitle">活動室</h1>
@@ -622,54 +624,54 @@
                      rug, window and its dusk courtyard, pendant, and the bare door frame at L8.
                      The leaf is not drawn into it; it swings, so it is its own asset (A-S11)
                      layered on top. -->
-                <div class="prop a-backdrop" aria-hidden="true" data-still="assets/activity-room/backdrop.png" style="--x:0;--y:0;--w:1600;--h:900;--z:1"></div>
+                <div class="prop a-backdrop" aria-hidden="true" data-still="assets/activity-room/backdrop.png" style="--x:0;--y:0;--w:1328;--h:747;--z:1"></div>
                 <!-- L8: the door back to the Entryway. An ordinary hash link; routing is the browser's. -->
-                <a class="prop a-door" href="#/entryway" style="--x:60;--y:256;--w:180;--h:364;--z:620" aria-label="回到玄關" data-i18n-aria="backToEntryway">
+                <a class="prop a-door" href="#/entryway" style="--x:73;--y:139;--w:184;--h:375;--z:514" aria-label="回到玄關" data-i18n-aria="backToEntryway">
                   <span class="a-door-leaf" aria-hidden="true" data-still="assets/activity-room/door-leaf.png"></span>
                 </a>
                 <!-- L20, A-S05: the world map, on the wall and always behind the Cast. -->
-                <div class="prop a-map" aria-hidden="true" data-still="assets/activity-room/map.png" style="--x:1160;--y:120;--w:360;--h:272;--z:392"></div>
+                <div class="prop a-map" aria-hidden="true" data-still="assets/activity-room/map.png" style="--x:948;--y:45;--w:360;--h:272;--z:317"></div>
                 <!-- The Blind Portrait's station: L9-L12, A-S02. -->
                 <!-- 35: A-S02, one group image - table, leaning sketchpad, loose paper, clamp lamp. -->
-                <div class="prop a-table" aria-hidden="true" data-still="assets/activity-room/table.png" style="--x:320;--y:320;--w:380;--h:300;--z:620"></div>
+                <div class="prop a-table" aria-hidden="true" data-still="assets/activity-room/table.png" style="--x:290.3;--y:304.6;--w:266;--h:210;--z:515"></div>
                 <!-- L13, A-S06 / A-S07: Mira's Breakable. Ticket 09 owns the knock and the state;
                      both Props stand here so that ticket only has to flip which one is hidden.
                      82: both are x 0.635 of their old boxes, (630,400)-(680,472) and
                      (560,786)-(720,832), about their bottom-centres, the factor Mira's mug Beat
                      shrinks by (design 75 section 0.5); the factor is in the Room's manifest. -->
-                <div class="prop a-mug" data-still="assets/activity-room/mug-intact.png" data-breakable="activity-pencil-mug" data-breakable-state="intact" role="img" aria-label="一只裝滿鉛筆的馬克杯" data-i18n-aria="pencilMugIntact" style="--x:639.13;--y:426.28;--w:31.75;--h:45.72;--z:621"></div>
-                <div class="prop a-mug-broken" data-still="assets/activity-room/mug-broken.png" data-breakable="activity-pencil-mug" data-breakable-state="broken" role="img" aria-label="摔成兩半的馬克杯，鉛筆滾了一地" data-i18n-aria="pencilMugBroken" style="--x:589.2;--y:802.79;--w:101.6;--h:29.21;--z:832" hidden></div>
+                <div class="prop a-mug" data-still="assets/activity-room/mug-intact.png" data-breakable="activity-pencil-mug" data-breakable-state="intact" role="img" aria-label="一只裝滿鉛筆的馬克杯" data-i18n-aria="pencilMugIntact" style="--x:508.93;--y:349.28;--w:31.75;--h:45.72;--z:516"></div>
+                <div class="prop a-mug-broken" data-still="assets/activity-room/mug-broken.png" data-breakable="activity-pencil-mug" data-breakable-state="broken" role="img" aria-label="摔成兩半的馬克杯，鉛筆滾了一地" data-i18n-aria="pencilMugBroken" style="--x:480.4;--y:661.35;--w:101.6;--h:29.21;--z:691" hidden></div>
                 <!-- The Treasure Hunt's station: L14-L19, A-S03. -->
                 <!-- 35: A-S03, one group image - shelf, timer, basket of finds, boxes, album, stopwatch. -->
-                <div class="prop a-shelf" aria-hidden="true" data-still="assets/activity-room/shelf.png" style="--x:752;--y:296;--w:356;--h:324;--z:620"></div>
+                <div class="prop a-shelf" aria-hidden="true" data-still="assets/activity-room/shelf.png" style="--x:620.6;--y:239.2;--w:302.6;--h:275.4;--z:515"></div>
                 <!-- Take Me Somewhere's station: L21-L24, A-S04. -->
                 <!-- 35: A-S04, one group image - desk, globe, atlas, pin jar, postcard tin, desk lamp. -->
-                <div class="prop a-desk" aria-hidden="true" data-still="assets/activity-room/desk.png" style="--x:1180;--y:384;--w:380;--h:236;--z:620"></div>
+                <div class="prop a-desk" aria-hidden="true" data-still="assets/activity-room/desk.png" style="--x:966.1;--y:302.2;--w:342;--h:212.4;--z:515"></div>
                 <!-- C1-C3: the chalkboards. DOM text on a CSS slate, never drawn into the art. -->
-                <div class="prop a-chalkboard" data-chalkboard="draw" aria-hidden="true" style="--x:330;--y:570;--w:270;--h:48;--z:622"><span class="a-chalk" data-i18n="activityDrawName">盲畫大賽</span></div>
-                <div class="prop a-chalkboard" data-chalkboard="hunt" aria-hidden="true" style="--x:790;--y:570;--w:270;--h:48;--z:622"><span class="a-chalk" data-i18n="activityHuntName">三十秒尋寶</span></div>
-                <div class="prop a-chalkboard" data-chalkboard="map" aria-hidden="true" style="--x:1200;--y:570;--w:270;--h:48;--z:622"><span class="a-chalk" data-i18n="activityMapName">帶我去一個地方</span></div>
+                <div class="prop a-chalkboard" data-chalkboard="draw" aria-hidden="true" style="--x:251;--y:465;--w:270;--h:48;--z:517"><span class="a-chalk" data-i18n="activityDrawName">盲畫大賽</span></div>
+                <div class="prop a-chalkboard" data-chalkboard="hunt" aria-hidden="true" style="--x:633;--y:465;--w:270;--h:48;--z:517"><span class="a-chalk" data-i18n="activityHuntName">三十秒尋寶</span></div>
+                <div class="prop a-chalkboard" data-chalkboard="map" aria-hidden="true" style="--x:973;--y:465;--w:270;--h:48;--z:517"><span class="a-chalk" data-i18n="activityMapName">帶我去一個地方</span></div>
                 <!-- The three tableaux, A-S12-A-S14: a painted still replaces the Cast once an
                      activity is chosen. Art landed on ticket 35; the boxes are unchanged. -->
-                <div class="prop a-tableau" data-tableau="draw" aria-hidden="true" data-still="assets/activity-room/tableau-draw.png" style="--x:290;--y:520;--w:460;--h:260;--z:780" hidden></div>
-                <div class="prop a-tableau" data-tableau="hunt" aria-hidden="true" data-still="assets/activity-room/tableau-hunt.png" style="--x:710;--y:372;--w:440;--h:380;--z:752" hidden></div>
-                <div class="prop a-tableau" data-tableau="map" aria-hidden="true" data-still="assets/activity-room/tableau-map.png" style="--x:1130;--y:352;--w:420;--h:400;--z:752" hidden></div>
+                <div class="prop a-tableau" data-tableau="draw" aria-hidden="true" data-still="assets/activity-room/tableau-draw.png" style="--x:270.6;--y:465.4;--w:322;--h:182;--z:647" hidden></div>
+                <div class="prop a-tableau" data-tableau="hunt" aria-hidden="true" data-still="assets/activity-room/tableau-hunt.png" style="--x:587.54;--y:305.72;--w:368.72;--h:318.44;--z:624" hidden></div>
+                <div class="prop a-tableau" data-tableau="map" aria-hidden="true" data-still="assets/activity-room/tableau-map.png" style="--x:954.07;--y:322.96;--w:316.26;--h:301.2;--z:624" hidden></div>
                 <!-- L25, A-S08: the call corner. Scenery — the Room saying, without a word, that
                      all three of these are things you can do while apart. -->
                 <!-- 35: A-S08, one group image - the folding stool, the laptop, the tea. -->
-                <div class="prop a-call-corner" aria-hidden="true" data-still="assets/activity-room/call-corner.png" style="--x:150;--y:626;--w:184;--h:216;--z:842"></div>
+                <div class="prop a-call-corner" aria-hidden="true" data-still="assets/activity-room/call-corner.png" style="--x:159.46;--y:601.66;--w:82.8;--h:97.2;--z:699"></div>
                 <!-- The three stations (§5.1): one transparent button over each group and its
                      chalkboard. The painter owns their accessible names, because the chosen one
                      gains a suffix the `data-i18n-aria` sweep knows nothing about. -->
-                <button class="prop a-station" type="button" data-activity="draw" aria-haspopup="dialog" aria-controls="activity-card" aria-expanded="false" aria-label="盲畫大賽：點一下看怎麼玩" style="--x:300;--y:320;--w:410;--h:306;--z:630"></button>
-                <button class="prop a-station" type="button" data-activity="hunt" aria-haspopup="dialog" aria-controls="activity-card" aria-expanded="false" aria-label="三十秒尋寶：點一下看怎麼玩" style="--x:752;--y:296;--w:356;--h:330;--z:630"></button>
-                <button class="prop a-station" type="button" data-activity="map" aria-haspopup="dialog" aria-controls="activity-card" aria-expanded="false" aria-label="帶我去一個地方：點一下看怎麼玩" style="--x:1150;--y:110;--w:418;--h:516;--z:630"></button>
+                <button class="prop a-station" type="button" data-activity="draw" aria-haspopup="dialog" aria-controls="activity-card" aria-expanded="false" aria-label="盲畫大賽：點一下看怎麼玩" style="--x:241;--y:295;--w:325;--h:230;--z:525"></button>
+                <button class="prop a-station" type="button" data-activity="hunt" aria-haspopup="dialog" aria-controls="activity-card" aria-expanded="false" aria-label="三十秒尋寶：點一下看怎麼玩" style="--x:610;--y:230;--w:323;--h:295;--z:525"></button>
+                <button class="prop a-station" type="button" data-activity="map" aria-haspopup="dialog" aria-controls="activity-card" aria-expanded="false" aria-label="帶我去一個地方：點一下看怎麼玩" style="--x:956;--y:35;--w:362;--h:490;--z:525"></button>
                 <!-- L26, A-S09: the boombox on its crate — 06's Music Source for this Room,
                      replacing the placeholder row. `data-label-start` / `data-label-stop` give it
                      its own painted label instead of the generic one. -->
                 <!-- 35: A-S09, one off/on two-cell image behind the control; the crate is baked in. -->
-                <div class="prop a-boombox-art" aria-hidden="true" data-still="assets/activity-room/boombox.png" style="--x:1372;--y:660;--w:186;--h:186;--z:846"></div>
-                <button class="prop a-boombox" type="button" data-music-source="activities" data-label-start="boomboxStart" data-label-stop="boomboxStop" aria-pressed="false" style="--x:1360;--y:660;--w:210;--h:120;--z:847" hidden>
+                <div class="prop a-boombox-art" aria-hidden="true" data-still="assets/activity-room/boombox.png" style="--x:1146.2;--y:562.68;--w:139.5;--h:139.5;--z:702"></div>
+                <button class="prop a-boombox" type="button" data-music-source="activities" data-label-start="boomboxStart" data-label-stop="boomboxStop" aria-pressed="false" style="--x:1137.2;--y:562.68;--w:157.5;--h:90;--z:703" hidden>
                   <span class="sr-only" data-i18n="activityBoombox">角落的手提音響</span>
                   <span class="sr-only" data-music-source-label>音響還沒有音樂</span>
                   <span class="a-boombox-window"><span class="a-reel left" data-still="assets/activity-room/cassette-reel.png"></span><span class="a-reel right" data-still="assets/activity-room/cassette-reel.png"></span></span>

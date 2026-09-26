@@ -105,20 +105,22 @@ const WALKABLE: Record<RoomId, Polygon> = {
     { x: 100, y: 860 },
   ],
   // 16: the Activity Room, from `design/12-activity-room.md` §4.2 — a band
-  // below the floor line at y 620, with a bite out of its front edge for each
+  // below the floor line, with a bite out of its front edge for each
   // foreground Prop, so nobody stands inside the call corner's stool or the
   // boombox's crate. The rug is not cut out; it is something to walk on.
+  // 96: on the 1328 x 747 stage (design 75 §4.5), the bites at the stool's and
+  // the crate's true-size footprints.
   activities: [
-    { x: 100, y: 650 },
-    { x: 1540, y: 650 },
-    { x: 1540, y: 760 },
-    { x: 1365, y: 760 },
-    { x: 1365, y: 860 },
-    { x: 340, y: 860 },
-    { x: 340, y: 745 },
-    { x: 195, y: 745 },
-    { x: 195, y: 860 },
-    { x: 100, y: 860 },
+    { x: 83, y: 540 },
+    { x: 1278, y: 540 },
+    { x: 1278, y: 618 },
+    { x: 1150, y: 618 },
+    { x: 1150, y: 714 },
+    { x: 232, y: 714 },
+    { x: 232, y: 635 },
+    { x: 160, y: 635 },
+    { x: 160, y: 714 },
+    { x: 83, y: 714 },
   ],
 };
 
@@ -507,9 +509,16 @@ const HOMES: Partial<Record<RoomId, Partial<Record<ActorId, Home>>>> = {
   // walks in this Room: choosing an activity replaces both sprites with that
   // station's tableau, which is `.has-tableau` in `src/dom/activity-room.ts`
   // rather than anything the model has to know about.
+  // 96: design 75 §4.5's (720,618) and (632,616) still stood them in front of
+  // the hunt station's chalkboard, (633,465)-(903,513), which hid its label at
+  // rest. So they stand in the gap between the draw and hunt boards instead.
+  // At the boards' height (105-153 units up) the Boy's drawn figure reaches 28
+  // units either side of his feet and the Girl's 6 behind her and 39 ahead, so
+  // he ends at x 630, short of the hunt board, and she starts at 494, past the
+  // draw board's lettering; their faces, 35 and 51 units out, are 16 apart.
   activities: {
-    boy: { at: { x: 868, y: 744 }, facing: 'left' },
-    girl: { at: { x: 762, y: 742 }, facing: 'right' },
+    boy: { at: { x: 602, y: 618 }, facing: 'left' },
+    girl: { at: { x: 500, y: 616 }, facing: 'right' },
   },
 };
 

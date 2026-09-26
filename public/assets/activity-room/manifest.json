@@ -9,10 +9,15 @@
       "frames": 1,
       "columns": 1,
       "frame": "1600x900",
-      "stage": "1600x900",
+      "stage": "1328x747",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S01-backdrop/attempt-2/strip-raw.png",
-        "sha256": "5c51389919c189699cbb0060c96f826a85e504ef1f3f927c35b3ef164d30eb7e"
+        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S01-backdrop/attempt-2-edit/strip.png",
+        "sha256": "190dd285e686bc14e6ca7cc59366afbadd81d128a50e6b511810bff3bbc68fec",
+        "editOf": {
+          "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S01-backdrop/attempt-2/strip-raw.png",
+          "sha256": "5c51389919c189699cbb0060c96f826a85e504ef1f3f927c35b3ef164d30eb7e"
+        },
+        "edit": "scripts/art/edit-activity-room-backdrop.mjs (ticket 93)"
       },
       "generator": {
         "tool": "codex exec",
@@ -33,9 +38,12 @@
           "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
         }
       ],
-      "builtBy": "scripts/art/build-prop.mjs@1",
+      "builtBy": "scripts/art/build-prop.mjs@1 (--fit fill, 1600x900)",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(0,0)-(1328,747)",
+      "scale96": 0.83,
+      "doorway96": "painted opening measured on the built file: x 93.8-236.5, y 162-513 units, 142.8 x 351 (+0.6 % / +0.3 % of 142 x 350)"
     },
     {
       "file": "table.png",
@@ -68,7 +76,10 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(290.3,304.6)-(556.3,514.6)",
+      "scale96": 0.7,
+      "placed96": "design 75 R2: bottom-centre moved by R1 (x 0.83 onto the 1328 x 747 stage), size x 0.70; its top surface is y 386-402."
     },
     {
       "file": "shelf.png",
@@ -101,7 +112,10 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(620.6,239.2)-(923.2,514.6)",
+      "scale96": 0.85,
+      "placed96": "design 75 R2: bottom-centre moved by R1 (x 0.83 onto the 1328 x 747 stage), size x 0.85, today's art (T15 was cut); its top, 239, clears the painted lantern."
     },
     {
       "file": "desk.png",
@@ -134,7 +148,10 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(966.1,302.2)-(1308.1,514.6)",
+      "scale96": 0.9,
+      "placed96": "design 75 R2: bottom-centre moved by R1 (x 0.83 onto the 1328 x 747 stage), size x 0.90."
     },
     {
       "file": "map.png",
@@ -167,7 +184,10 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(948,45)-(1308,317)",
+      "scale96": 1,
+      "placed96": "design 75 §4.5: x 1, moved up and right to clear the desk's globe and the hunt station."
     },
     {
       "file": "mug-intact.png",
@@ -202,7 +222,10 @@
       "validatedAt": "2026-09-20",
       "motionPhase": null,
       "scale": 0.635,
-      "placed": "82: the cats at real size (design 75 §0.5, §8.1 T2). The file is unchanged; its box in index.html is (630,400)-(680,472) × 0.635 about its bottom-centre (655,472), so (639.13,426.28)-(670.88,472), the factor Mira's mug Beat takes so the two still meet. Ticket 96 places it on the table."
+      "placed": "82: the cats at real size (design 75 §0.5, §8.1 T2). The file is unchanged; its box in index.html is (630,400)-(680,472) × 0.635 about its bottom-centre (655,472), so (639.13,426.28)-(670.88,472), the factor Mira's mug Beat takes so the two still meet. Ticket 96 places it on the table.",
+      "box96": "(508.93,349.28)-(540.68,395)",
+      "scale96": 0.635,
+      "placed96": "design 75 R3: on the table's top, its base at y 395 (the middle of the top surface, 386-402), centred where the table's x 0.70 carries its old x; x 0.635 since ticket 82; sorts at 516, just in front of the table."
     },
     {
       "file": "mug-broken.png",
@@ -237,7 +260,10 @@
       "validatedAt": "2026-09-20",
       "motionPhase": null,
       "scale": 0.635,
-      "placed": "82: the file is unchanged; its box in index.html is (560,786)-(720,832) × 0.635 about its bottom-centre (640,832), so (589.2,802.79)-(690.8,832). Ticket 96 places it."
+      "placed": "82: the file is unchanged; its box in index.html is (560,786)-(720,832) × 0.635 about its bottom-centre (640,832), so (589.2,802.79)-(690.8,832). Ticket 96 places it.",
+      "box96": "(480.4,661.35)-(582,690.56)",
+      "scale96": 0.635,
+      "placed96": "design 75 R2: bottom-centre moved by R1 (x 0.83 onto the 1328 x 747 stage), size x 0.635 (ticket 82's factor)."
     },
     {
       "file": "call-corner.png",
@@ -270,7 +296,10 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(159.46,601.66)-(242.26,698.86)",
+      "scale96": 0.45,
+      "placed96": "design 75 R2: bottom-centre moved by R1 (x 0.83 onto the 1328 x 747 stage), size x 0.45."
     },
     {
       "file": "boombox.png",
@@ -303,7 +332,10 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(1146.2,562.68)-(1285.7,702.18)",
+      "scale96": 0.75,
+      "placed96": "design 75 R2: bottom-centre moved by R1 (x 0.83 onto the 1328 x 747 stage), size x 0.75; the button box is (1137.2,562.68)-(1294.7,652.68)."
     },
     {
       "file": "cassette-reel.png",
@@ -340,36 +372,32 @@
     },
     {
       "file": "door-leaf.png",
-      "shot": "A-S11-door-leaf",
+      "shot": "S11-prime (ticket 94)",
       "frames": 2,
       "columns": 2,
-      "frame": "304x700",
+      "frame": "284x700",
       "source": {
-        "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S11-door-leaf/attempt-1/strip-raw.png",
-        "sha256": "a50aefbc174371fd8131d7e5086549f33274f207dc35ba27715f6ba8f121f3dd"
+        "path": ".scratch/COOP-001-apartment/art/generated/94-activity-door-leaf/S11-door-leaf/attempt-1/strip-raw.png",
+        "sha256": "0595447933ae6e3f1b89753b56b468e5b5d68db056448e27ac11a50cc9125647"
       },
       "generator": {
         "tool": "codex exec",
-        "version": "codex-cli 0.154.0",
-        "note": "C2PA manifest model string not read; embargo (Codex 5-hour window at 21%) makes any extra codex-adjacent read unwelcome even though this would only inspect an existing file, not call the tool."
+        "version": "codex-cli 0.156.1",
+        "note": "ticket 94's kept attempt-1; model string not read (C2PA skipped), as its illustrator manifest records"
       },
       "references": [
         {
-          "path": "art/characters/v2/boy-character-sheet-v2.png",
-          "sha256": "e51d1a56fceaa5f0d4e05e6647d586f559eb7b4cd700871bd8fdacf8daaaf477"
-        },
-        {
-          "path": "art/characters/v2/girl-character-sheet-v2.png",
-          "sha256": "0530415f4616566fcb6daf7d5d9b11825e0444cd1fd79d702d6b5e56b6ca58be"
-        },
-        {
-          "path": "art/characters/v2/mira-character-sheet-v2.png",
-          "sha256": "2199d8f385072b26fb7ba305f21bf0ab138e63f0624879f327366f32db170443"
+          "path": ".scratch/COOP-001-apartment/art/generated/42-activity-room/A-S11-door-leaf/attempt-2/strip-raw.png",
+          "sha256": "0748e23a46aa34e4c901e8f9a21ff7d9a00e9f62b6e3801b067119361ca63387",
+          "role": "style reference (shipped S11)"
         }
       ],
-      "builtBy": "scripts/art/build-prop.mjs@1",
-      "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "builtBy": "scripts/art/build-activity-door-leaf.mjs",
+      "validatedAt": "2026-09-26",
+      "motionPhase": null,
+      "squeeze96": 0.9336,
+      "placed": "96: the kept attempt draws the shut leaf 548 x 1261 raw px, 152 x 350 units at the door's height (+7 %). Its largest shape per half is taken (the generator's fringe specks left out), the shut leaf is scaled x 0.5551 down and x 0.5182 across into its 284 x 700 cell - squeezed x 0.934 - so it is the one door edge to edge, 142 x 350 units. The open cell keeps that squeeze at x 0.5095 down (its near edge is drawn 113 raw px taller) and hangs on its hinge edge; styles.css does not read it. The leaf box is (95,162)-(237,513) in the link's (73,139)-(257,514), design 75 §4.1 D7.",
+      "box96": "(95,162)-(237,513)"
     },
     {
       "file": "tableau-draw.png",
@@ -402,7 +430,10 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(270.6,465.4)-(592.6,647.4)",
+      "scale96": 0.7,
+      "placed96": "about its bottom-centre (431.6,647.4). They sit cross-legged, so no standing height can be read; their heads are drawn 1.2 x the hunt tableau's (the Boy crown to chin 178 px against 146, his glasses 140 against 118; the Girl 158 against 135), so x 0.838 / 1.2 = 0.70 puts them at the scale of a 300-unit Boy and a 273-unit Girl."
     },
     {
       "file": "tableau-hunt.png",
@@ -435,7 +466,10 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(587.54,305.72)-(956.26,624.16)",
+      "scale96": 0.838,
+      "placed96": "about its bottom-centre (771.9,624.16). Measured on the file: the Boy is 716 px, 358 units in the old box, so 300.0 at x 0.838; the Girl, mid-stride, 663 px, 277.8 (+1.8 % of 273)."
     },
     {
       "file": "tableau-map.png",
@@ -468,7 +502,10 @@
       ],
       "builtBy": "scripts/art/build-prop.mjs@1",
       "validatedAt": "2026-09-20",
-      "motionPhase": null
+      "motionPhase": null,
+      "box96": "(954.07,322.96)-(1270.33,624.16)",
+      "scale96": 0.753,
+      "placed96": "about its bottom-centre (1112.2,624.16). Design 75 gave x 0.838 from the hunt tableau, but this file draws them 11 % bigger: the Boy is 797 px, 398.5 units, and the Girl 725 px, 362.5, so x 0.753 makes them 300.0 and 273.0."
     },
     {
       "file": "mira-mug-beat.png",
@@ -503,7 +540,10 @@
       "validatedAt": "2026-09-20",
       "motionPhase": "not verified",
       "scale": 0.635,
-      "placed": "82: the sheet is unchanged and not wired yet (no cue in the model, no layer in index.html). At Mira's real size (96 → 61 units) its 280-unit frame is drawn 177.8 units square. Placed by design 75 R4, so that the touching frame meets the thing: frame 5's own mug (body x 404-463 px, foot on row 367 of 560) sits on the intact Prop's mug (body x 14-77 of 100 px, foot on its box's bottom edge), which puts the box at (515.9,355.5)-(693.7,533.3) against today's Prop. Her feet in frame 1 then land at about (607,499), not on her mug mark (620,690): the sheet's crouch-to-table-top leap is 86 px (27 units at this scale) against a table top 218 units above the floor, so frames 1-4 need either the mark or the art to move when ticket 96 wires it."
+      "placed": "82: the sheet is unchanged and not wired yet (no cue in the model, no layer in index.html). At Mira's real size (96 → 61 units) its 280-unit frame is drawn 177.8 units square. Placed by design 75 R4, so that the touching frame meets the thing: frame 5's own mug (body x 404-463 px, foot on row 367 of 560) sits on the intact Prop's mug (body x 14-77 of 100 px, foot on its box's bottom edge), which puts the box at (515.9,355.5)-(693.7,533.3) against today's Prop. Her feet in frame 1 then land at about (607,499), not on her mug mark (620,690): the sheet's crouch-to-table-top leap is 86 px (27 units at this scale) against a table top 218 units above the floor, so frames 1-4 need either the mark or the art to move when ticket 96 wires it.",
+      "placed96": "96: the box moves with the Prop mug onto the table: frame 5's mug on the intact mug puts it at (385.7,278.5)-(563.5,456.3), and frame 1's feet at (476.5,422.6). Still not wired: the sheet's leap is 27 units against a table top 245 above the floor mark, so handing Mira over to it from her standing sprite, or back, would jump her feet far more than 6 units. Her mug mark is (477,640), frame 1's x on the floor in front of the table."
     }
-  ]
+  ],
+  "stage": "1328x747",
+  "stageNote": "96: the Room is on its 1328 x 747 stage (design 75 §2.1, §4.5). Each entry's `box96` is its box in index.html in stage units, (x0,y0)-(x1,y1), and `scale96` the factor its drawing is shown at against its 1600-unit box; anything left more than 10 % off its real size is in docs/known_issues.md."
 }

@@ -445,21 +445,32 @@ describe('the Cast in whichever Room the visitor is in', () => {
     expect(Math.abs(who(world, 'boy').at.x - who(world, 'girl').at.x)).toBeGreaterThan(105);
   });
 
-  it('stands the Boy and the Girl on the rug in the Activity Room', () => {
-    // H-Boy and H-Girl, §4.3: he is 2 units below her, so he sorts in front.
+  it('stands the Boy and the Girl on the rug in the Activity Room, clear of the hunt station’s chalkboard', () => {
+    // 96: he is 2 units below her, so he sorts in front, and the two of them
+    // stand in the gap between the draw and hunt boards on the 1328 x 747 stage.
     const world = walkInto(createWorld(plainArrival), 'activities');
-    expect(who(world, 'boy').at).toEqual({ x: 868, y: 744 });
+    expect(who(world, 'boy').at).toEqual({ x: 602, y: 618 });
     expect(who(world, 'boy').facing).toBe('left');
-    expect(who(world, 'girl').at).toEqual({ x: 762, y: 742 });
+    expect(who(world, 'girl').at).toEqual({ x: 500, y: 616 });
     expect(who(world, 'girl').facing).toBe('right');
     for (const id of ['boy', 'girl'] as const) {
       expect(who(world, id).moving).toBe(false);
       expect(isWalkable('activities', who(world, id).at)).toBe(true);
     }
-    // The note's own reading of those two marks: sprites spanning x 818-918 and
-    // x 710-815 do not overlap.
-    expect(who(world, 'boy').at.x - who(world, 'girl').at.x).toBeGreaterThan(105);
-    expect(who(world, 'boy').at.y).toBeGreaterThan(who(world, 'girl').at.y);
+    expect(who(world, 'boy').at.y - who(world, 'girl').at.y).toBe(2);
+    // The hunt board is (633,465)-(903,513), design 75 §4.5: 105-153 units above
+    // their feet. At that height each drawn figure reaches this far either side
+    // of its feet, measured on its standing sheet (public/assets/actors/
+    // *-walk-right.png at data-height 300 and 273): the Boy 28 units, the Girl
+    // 39 on her facing side. Neither may reach the board at rest.
+    const reach = { boy: 28, girl: 39 } as const;
+    for (const id of ['boy', 'girl'] as const) {
+      const { x } = who(world, id).at;
+      expect(x + reach[id] < 633 || x - reach[id] > 903, `${id} at x ${x}`).toBe(true);
+    }
+    // And they face each other without their heads meeting: his face reaches
+    // 35 units towards her, hers 51 towards him.
+    expect(who(world, 'boy').at.x - 35 - (who(world, 'girl').at.x + 51)).toBeGreaterThan(10);
   });
 
   it('puts the whole Cast in the Activity Room', () => {
@@ -498,9 +509,9 @@ describe('the Cast in whichever Room the visitor is in', () => {
 
   it('hands back a new Cast when somebody was standing off their mark', () => {
     const settled = createActors(seededRandom(7), 'activities');
-    const wandered = placeActor(settled, 'girl', 'activities', { x: 1100, y: 800 }, 'left');
+    const wandered = placeActor(settled, 'girl', 'activities', { x: 1100, y: 650 }, 'left');
     const gathered = gatherInto(wandered, 'activities');
     expect(gathered).not.toBe(wandered);
-    expect(gathered.actors.find(actor => actor.id === 'girl')?.at).toEqual({ x: 762, y: 742 });
+    expect(gathered.actors.find(actor => actor.id === 'girl')?.at).toEqual({ x: 500, y: 616 });
   });
 });

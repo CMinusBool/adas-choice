@@ -28,7 +28,7 @@ coats worn, backpack carried — cleared when the world is created, not when the
   one further off than the script is long is hurried to at a run. Move a Room's marks and its Cast
   changes gait rather than the Arrival changing length. The script does not place anybody at its
   end — a last stride finishes under its own steam, which is why the last one lands at 3.28 s in the
-  Game Room, 3.44 in the Activity Room and 3.60 in the Cinema Room — but being **cut short** does
+  Game Room, 2.80 in the Activity Room (ticket 96; 3.44 on its old stage) and 3.60 in the Cinema Room — but being **cut short** does
   place everybody, on the marks the Arrival took down when the Door opened.
   The Entryway's own 11.9s arrival is a different thing and is unchanged: it is the Cast coming in
   from outside, played once. The Doors are live all the way through it, so a Door taken at five

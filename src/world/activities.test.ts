@@ -1,49 +1,75 @@
 import { describe, expect, it } from 'vitest';
 
-import { advance, chosenActivity, createWorld, isWalkable, openActivity, type WorldInputs } from './index';
+import {
+  CAT_MARKS,
+  STAGES,
+  advance,
+  breakableById,
+  chosenActivity,
+  createWorld,
+  isWalkable,
+  openActivity,
+  type WorldInputs,
+} from './index';
 
 /** A visitor arriving with nothing stored, no reduced-motion request, no hash. */
 const plainArrival: WorldInputs = { hash: '', storedLanguage: null, reducedMotion: false };
 
 /**
- * The Activity Room's floor, from `design/12-activity-room.md` §4.2.
+ * The Activity Room's floor on its 1328 x 747 stage, design 75 §4.5 (ticket 96).
  *
- * A band from y 650 to y 860 with two bites out of its front edge, so an Actor
- * can never stand inside the call corner's stool or the boombox's crate. The
- * marks below are the design note's own (§4.3), which is what makes this a
- * check of the Room and not of the polygon code.
+ * A band from the floor line at y 540 to y 714 with two bites out of its front
+ * edge, so an Actor can never stand inside the call corner's stool or the
+ * boombox's crate at their true-size footprints. The marks are the design
+ * note's, on the new stage, which is what makes this a check of the Room and
+ * not of the polygon code.
  */
 describe('the Activity Room floor', () => {
-  it('holds every Actor mark the design note places in the Room', () => {
-    // H-Boy, H-Girl, T-hunt, M-mug, R-stool, R-rug, R-desk, D-door.
+  it('is the 1328 x 747 stage', () => {
+    expect(STAGES.activities).toEqual({ width: 1328, height: 747 });
+  });
+
+  it('holds every Actor mark the Room places', () => {
+    // H-Boy, H-Girl, T-hunt, M-mug, the five cat rest marks (the first is the door).
     for (const mark of [
-      { x: 868, y: 744 },
-      { x: 762, y: 742 },
-      { x: 930, y: 752 },
-      { x: 620, y: 690 },
-      { x: 370, y: 724 },
-      { x: 1040, y: 820 },
-      { x: 1240, y: 700 },
-      { x: 150, y: 662 },
+      { x: 602, y: 618 },
+      { x: 500, y: 616 },
+      { x: 772, y: 624 },
+      { x: 477, y: 640 },
+      ...CAT_MARKS.activities,
     ]) {
       expect(isWalkable('activities', mark)).toBe(true);
     }
+    expect(CAT_MARKS.activities).toEqual([
+      { x: 166, y: 549 },
+      { x: 330, y: 620 },
+      { x: 700, y: 580 },
+      { x: 863, y: 681 },
+      { x: 1029, y: 581 },
+    ]);
+  });
+
+  it('stands Mira for her mug under the frame her Beat leaps from', () => {
+    // Design 75 R4: the Beat's box puts its paw frame on the mug on the table, which puts
+    // frame 1's feet at x 477; she waits on the floor in front of the table below it, and in
+    // front of the Girl (y 616), who would otherwise hide her.
+    expect(breakableById('activity-pencil-mug').mark).toEqual({ x: 477, y: 640 });
   });
 
   it('keeps an Actor out of the call corner, and lets one pass in front of the door', () => {
-    expect(isWalkable('activities', { x: 250, y: 800 })).toBe(false);
-    expect(isWalkable('activities', { x: 150, y: 800 })).toBe(true);
-    expect(isWalkable('activities', { x: 250, y: 700 })).toBe(true);
+    expect(isWalkable('activities', { x: 200, y: 700 })).toBe(false);
+    expect(isWalkable('activities', { x: 120, y: 700 })).toBe(true);
+    expect(isWalkable('activities', { x: 200, y: 620 })).toBe(true);
   });
 
   it('keeps an Actor out of the boombox crate, and lets one stand behind it', () => {
-    expect(isWalkable('activities', { x: 1450, y: 800 })).toBe(false);
-    expect(isWalkable('activities', { x: 1450, y: 700 })).toBe(true);
+    expect(isWalkable('activities', { x: 1200, y: 680 })).toBe(false);
+    expect(isWalkable('activities', { x: 1200, y: 600 })).toBe(true);
   });
 
   it('stops at the floor line above and the front of the stage below', () => {
-    expect(isWalkable('activities', { x: 800, y: 600 })).toBe(false);
-    expect(isWalkable('activities', { x: 800, y: 880 })).toBe(false);
+    expect(isWalkable('activities', { x: 700, y: 530 })).toBe(false);
+    expect(isWalkable('activities', { x: 700, y: 730 })).toBe(false);
   });
 });
 
