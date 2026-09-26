@@ -27,8 +27,9 @@ coats worn, backpack carried — cleared when the world is created, not when the
   `src/world/actors.ts` decides per Actor: a mark a walk reaches inside the script is walked to, and
   one further off than the script is long is hurried to at a run. Move a Room's marks and its Cast
   changes gait rather than the Arrival changing length. The script does not place anybody at its
-  end — a last stride finishes under its own steam, which is why the last one lands at 3.28 s in the
-  Game Room, 2.80 in the Activity Room (ticket 96; 3.44 on its old stage) and 3.60 in the Cinema Room — but being **cut short** does
+  end — a last stride finishes under its own steam, which is why the last one lands at 2.99 s in the
+  Game Room (ticket 89), 2.80 in the Activity Room (ticket 96) and 2.90 in the Cinema Room
+  (ticket 92), each re-measured on its Room's own stage — but being **cut short** does
   place everybody, on the marks the Arrival took down when the Door opened.
   The Entryway's own 11.9s arrival is a different thing and is unchanged: it is the Cast coming in
   from outside, played once. The Doors are live all the way through it, so a Door taken at five
@@ -58,8 +59,8 @@ coats worn, backpack carried — cleared when the world is created, not when the
 - **Furnishing a Room.** A Prop is a box in stage units — `--x/--y/--w/--h`, turned into
   percentages of the stage by `left: calc(var(--x) / 16 * 1%)` and its three siblings — over a CSS
   placeholder surface, so dropping artwork in swaps the surface and keeps the box. A Prop drawn
-  smaller than its design note's size carries a fifth, `--scale` (ticket 63: the Cinema Room's
-  shelves at .7 and its board at .85): its box is still the scaled one in stage units, and inside
+  smaller than its design note's size carries a fifth, `--scale` (today only the Cinema Room's
+  board, at .871; ticket 73 set its shelves at true size, unscaled): its box is still the scaled one in stage units, and inside
   it `--note-u` is the note's unit at that scale, so every number written inside the Prop stays the
   note's. `--u` is the stage unit everywhere, those Props included (ticket 70). **An art drop
   swaps that surface by putting the file on the Prop's `data-still`, never by writing a `url()` into
@@ -80,7 +81,8 @@ coats worn, backpack carried — cleared when the world is created, not when the
   `.stage[data-stage="activities"] .prop` — but since ticket 50 the **arithmetic is written
   once**, in a four-part selector list, and each Room's own rule keeps only what it really
   differs on: the Entryway and the Activity Room sort on `--z`, the Cinema Room sorts every Prop
-  at a flat 640, the Game Room writes each key inline. A selector list gives each part its own
+  on its wall at a flat 499, the wall's base (ticket 92; it was 640 on the old stage) and its floor
+  furniture on each piece's own base, the Game Room writes each key inline. A selector list gives each part its own
   specificity, so folding them changed no cascade — checked by comparing the computed
   `position`/`left`/`top`/`width`/`height`/`z-index` of all 480 Prop boxes across four Rooms and
   four widths before and after. Renaming the four hooks to one is a separate, markup-wide job and

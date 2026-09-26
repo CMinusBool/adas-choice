@@ -24,7 +24,9 @@ npm run build
 ```
 
 `npm test` is `npm run typecheck`, then Vitest over `src/**/*.test.ts`, then `node --test` over the
-checkers in `scripts/` (`check-assets`, `check-styles`, and the three under `scripts/art/`). The
+checkers' tests in `scripts/` — six at its top (`check-assets`, `check-styles`, `check-stages`,
+`check-cinema-stage`, `check-game-room-stage`, `check-entryway-handoffs`) and nine under
+`scripts/art/`, the list in `package.json`'s `test` script. The
 typecheck runs first on purpose: a duplicate copy key (TS1117) and two `switch` cases sharing a `}`
 both landed during COOP-001 and were found by a later merge, because the fast loop was not
 typechecking. `npm run typecheck` alone is still the fastest inner-loop check; it is two passes —
