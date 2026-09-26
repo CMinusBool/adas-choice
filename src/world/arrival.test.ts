@@ -300,6 +300,22 @@ describe('the arrival and the rest of the apartment', () => {
     expect(settled.sfx).toEqual([]);
   });
 
+  /*
+   * 82: the cats at real size against the Boy (design 75 §0.5). Each cat-only
+   * Beat is its old box shrunk about its bottom-centre — S20 (240,430)-(450,730),
+   * S21 (330,430)-(560,790), S22 (330,424)-(790,860) — so its feet line and its
+   * middle stay where they were and only the figure gets smaller.
+   */
+  it.each([
+    ['S20', 8.5, { x: 278.325, y: 539.5, width: 133.35, height: 190.5 }],
+    ['S21', 9.8, { x: 371.975, y: 561.4, width: 146.05, height: 228.6 }],
+    ['S22', 11, { x: 415.33, y: 585.756, width: 289.34, height: 274.244 }],
+  ] as const)('draws the cats’ Beat %s at real size, shrunk about its bottom-centre', (id, seconds, expected) => {
+    const beat = arrivalView(arriving(seconds)).beats.find(playing => playing.id === id);
+    expect(beat, `${id} should be playing at ${seconds} s`).toBeDefined();
+    for (const side of ['x', 'y', 'width', 'height'] as const) expect(beat!.box[side]).toBeCloseTo(expected[side], 6);
+  });
+
   it('plays each sound once, in the order the script has them', () => {
     let world = advance(createWorld(plainArrival), { type: 'arrival-started' });
     const heard: string[] = [];
