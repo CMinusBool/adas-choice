@@ -1697,4 +1697,14 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
   #room-cinema > .room-title, #room-activities > .room-title { grid-column: 2; margin: 0; }
   #room-cinema > .room-lede, #room-activities > .room-lede { grid-column: 3; }
   #room-cinema .cinema-room, #room-activities .activity-room { margin-top: 1.1rem; }
+
+  /* 109: the Activity Room fills the screen. Its stage is sized by the height
+     the chrome leaves, and the chrome was leaving 22 px of it unused under the
+     Room and 35 px in the gaps around the title row. Those gaps close to .5rem
+     each, and the stage-height formula reserves exactly what is left: the
+     102 px header, the 65 px title row at its 3.4rem cap, three .5rem gaps,
+     and 4 px of spare - 12.25rem in all. At 1440 x 900 the stage goes from
+     1173 x 660 to 1252 x 704. */
+  #room-activities { padding: .5rem 0; }
+  #room-activities .activity-room { margin-top: .5rem; max-width: min(100%, calc((100dvh - 12.25rem) * 16 / 9)); }
 }

@@ -41,7 +41,7 @@ const ACTIVITIES = ['draw', 'hunt', 'map'];
 const BODY = '.activity-card-line, .activity-card-meta dd, .activity-card-steps li, .activity-card-extra:not([hidden]), .activity-card-why';
 const BODY_MIN_PX = 16;
 /** Ticket 109: "use the height the chrome leaves" — what may stay empty under the Room. */
-const SPARE_BELOW_PX = 24;
+const SPARE_BELOW_PX = 12;
 
 function fail(message) {
   console.error(`activity-card: ${message}`);
