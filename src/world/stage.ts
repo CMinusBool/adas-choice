@@ -26,17 +26,17 @@ export interface StageSize {
 /**
  * Every Room's stage, keyed by Room id (81, design 75 §2.1).
  *
- * Every Room still stands on the 1600 x 900 stage it has always had: this is
- * the expand step, and the Room tickets that put each Room at true size change
- * only its entry here. Two things outside the model repeat these numbers and
- * are held to them by `scripts/check-stages.test.mjs`: each stage's
- * `--stage-w` / `--stage-h` in `styles.css`, which is what turns units into
- * percentages there, and each Room's backdrop — its box in `index.html` and the
+ * A Room stands on the 1600 x 900 stage it has always had until its Room ticket
+ * puts it at true size and changes only its entry here: the Game Room's S01 is
+ * scaled × 0.88 whole, so its stage is 1408 x 792 (ticket 89). Two things
+ * outside the model repeat these numbers and are held to them by
+ * `scripts/check-stages.test.mjs`: each stage's `--stage-w` / `--stage-h` in
+ * `styles.css`, which is what turns units into percentages there, and each Room's backdrop — its box in `index.html` and the
  * `stage` its manifest entry is stretched to.
  */
 export const STAGES: Readonly<Record<RoomId, StageSize>> = {
   entryway: { width: 1600, height: 900 },
-  games: { width: 1600, height: 900 },
+  games: { width: 1408, height: 792 },
   cinema: { width: 1600, height: 900 },
   activities: { width: 1600, height: 900 },
 };

@@ -158,7 +158,9 @@
              cards in an oak wall unit, and with that unit went the overhang,
              the ledge, the empty bays and the wide/narrow deck housing — the
              stage is exactly 1600 x 900 units at every width and nothing hangs
-             off it (design note 11 §3.4).
+             off it (design note 11 §3.4). Since ticket 89 the stage is
+             1408 x 792 units, the size S01 takes scaled × 0.88 whole so its
+             doorway is the one door (design 75 §2, §4.3).
 
              A Portal is a button, not a link: 46 makes it expand over the
              stage, with the game's copy in a panel beside it and the Invitation
@@ -169,9 +171,11 @@
              dots, the boombox and the door — so every decorative child carries
              `aria-hidden` instead, and `pointer-events` comes back on.
 
-             Boxes are design note 11 §4.1's, in stage units (1600 x 900, origin
-             top-left, x right, y down); `z-index` is each Prop's sort key from
-             §3.3, which is how Props interleave with the Cast's `round(y)`.
+             Boxes are design 75 §4.3's, in stage units (1408 x 792, origin
+             top-left, x right, y down): the painted wall × 0.88, every Prop at
+             true size by the factor `public/assets/game-room/manifest.json`
+             records. `z-index` is each Prop's sort key, its base y, which is how
+             Props interleave with the Cast's `round(y)`.
              Every Prop below is a CSS placeholder standing in its exact box:
              the artwork is ticket 34's, and a URL with no file behind it would
              fail the build and stall the loading screen. -->
@@ -187,13 +191,13 @@
             <!-- 34: S01, the empty Room — wall, skirting, floor, the rug G5 and
                  the cat bed G20 in one opaque image, and the doorway G6 painted
                  empty for the leaf below to fill. -->
-            <div class="stage-backdrop" data-box aria-hidden="true" data-still="assets/game-room/backdrop.png" style="--x:0;--y:0;--w:1600;--h:900;z-index:0"></div>
+            <div class="stage-backdrop" data-box aria-hidden="true" data-still="assets/game-room/backdrop.png" style="--x:0;--y:0;--w:1408;--h:792;z-index:0"></div>
             <!-- G1: the cornice, an ordinary band inside the stage now that
                  there is no wall unit bolted above it. -->
-            <div class="prop prop-cornice" data-box aria-hidden="true" style="--x:0;--y:0;--w:1600;--h:40;z-index:1"></div>
-            <!-- G8, G8a, G8b: the three Portals. 300 x 480 units, a 5:8 tall
-                 ellipse, gaps of 110, clear of the door, the cornice, the
-                 sideboard and the lamp by 10 to 25 units.
+            <div class="prop prop-cornice" data-box aria-hidden="true" style="--x:0;--y:0;--w:1408;--h:35.2;z-index:1"></div>
+            <!-- G8, G8a, G8b: the three Portals. 264 x 422.4 units, a 5:8 tall
+                 ellipse, gaps of 96.8, the left one 11 units clear of the door's
+                 casing; the sideboard stands in front of the middle one's foot.
 
                  Each carries its game's Scene on the same
                  `data-animated` / `data-still` / `data-sheet` contract as the
@@ -203,7 +207,7 @@
                  The game's name and store URL live on the button because the
                  card that used to carry them is gone; 46's panel and the
                  Invitation dialog behind it both read them from here. -->
-              <button class="portal" type="button" data-box data-game="tango" data-title="Operation: Tango" data-steam="https://store.steampowered.com/app/1335790/Operation_Tango/" aria-haspopup="dialog" aria-controls="portal-expanded" aria-expanded="false" aria-label="打開 Operation: Tango 的傳送門" data-i18n-aria="tangoPortal" style="--x:265;--y:50;--w:300;--h:480;z-index:381">
+              <button class="portal" type="button" data-box data-game="tango" data-title="Operation: Tango" data-steam="https://store.steampowered.com/app/1335790/Operation_Tango/" aria-haspopup="dialog" aria-controls="portal-expanded" aria-expanded="false" aria-label="打開 Operation: Tango 的傳送門" data-i18n-aria="tangoPortal" style="--x:233.2;--y:44;--w:264;--h:422.4;z-index:381">
                 <span class="portal-world">
                   <span class="scene-frame">
                     <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/operation-tango.webp"><img class="game-art" src="assets/operation-tango.gif" data-animated="assets/operation-tango.gif" data-still="assets/operation-tango.webp" width="360" height="576" alt="夜裡的行動室，戴眼鏡的棕髮男生在筆電前駭進系統，黑髮女生在他身後破解一面發光的保安面板。" data-i18n-alt="tangoAlt" fetchpriority="high"></picture>
@@ -213,7 +217,7 @@
                 <span class="portal-rim" aria-hidden="true"></span>
                 <span class="particle-field" aria-hidden="true"></span>
               </button>
-              <button class="portal" type="button" data-box data-game="lovers" data-title="Lovers in a Dangerous Spacetime" data-steam="https://store.steampowered.com/app/252110/Lovers_in_a_Dangerous_Spacetime/" aria-haspopup="dialog" aria-controls="portal-expanded" aria-expanded="false" aria-label="打開 Lovers in a Dangerous Spacetime 的傳送門" data-i18n-aria="loversPortal" style="--x:675;--y:50;--w:300;--h:480;z-index:381">
+              <button class="portal" type="button" data-box data-game="lovers" data-title="Lovers in a Dangerous Spacetime" data-steam="https://store.steampowered.com/app/252110/Lovers_in_a_Dangerous_Spacetime/" aria-haspopup="dialog" aria-controls="portal-expanded" aria-expanded="false" aria-label="打開 Lovers in a Dangerous Spacetime 的傳送門" data-i18n-aria="loversPortal" style="--x:594;--y:44;--w:264;--h:422.4;z-index:381">
                 <span class="portal-world">
                   <span class="scene-frame">
                     <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/lovers-in-a-dangerous-spacetime.webp"><img class="game-art" src="assets/lovers-in-a-dangerous-spacetime.gif" data-animated="assets/lovers-in-a-dangerous-spacetime.gif" data-still="assets/lovers-in-a-dangerous-spacetime.webp" width="360" height="576" alt="粉紅色的圓形太空船裡，黑髮女生在上層轉動船舵，戴眼鏡的棕髮男生在下層操作護盾，窗外是星空和一顆行星。" data-i18n-alt="loversAlt"></picture>
@@ -223,7 +227,7 @@
                 <span class="portal-rim" aria-hidden="true"></span>
                 <span class="particle-field" aria-hidden="true"></span>
               </button>
-              <button class="portal" type="button" data-box data-game="heavenly" data-title="Heavenly Bodies" data-steam="https://store.steampowered.com/app/1138850/Heavenly_Bodies/" aria-haspopup="dialog" aria-controls="portal-expanded" aria-expanded="false" aria-label="打開 Heavenly Bodies 的傳送門" data-i18n-aria="heavenlyPortal" style="--x:1085;--y:50;--w:300;--h:480;z-index:381">
+              <button class="portal" type="button" data-box data-game="heavenly" data-title="Heavenly Bodies" data-steam="https://store.steampowered.com/app/1138850/Heavenly_Bodies/" aria-haspopup="dialog" aria-controls="portal-expanded" aria-expanded="false" aria-label="打開 Heavenly Bodies 的傳送門" data-i18n-aria="heavenlyPortal" style="--x:954.8;--y:44;--w:264;--h:422.4;z-index:381">
                 <span class="portal-world">
                   <span class="scene-frame">
                     <picture><source media="(prefers-reduced-motion: reduce)" srcset="assets/heavenly-bodies.webp"><img class="game-art" src="assets/heavenly-bodies.gif" data-animated="assets/heavenly-bodies.gif" data-still="assets/heavenly-bodies.webp" width="360" height="576" alt="太空站的走道裡，戴眼鏡的棕髮男生和黑髮女生一上一下漂浮著，中間的圓窗外是地球，兩人笑得很開心。" data-i18n-alt="heavenlyAlt" loading="lazy"></picture>
@@ -237,47 +241,51 @@
                  and these three dots say there are three. They are the pointer
                  and keyboard path — arrow keys step either way — and each one's
                  name is its game's, a proper noun in both languages. -->
-            <div class="portal-dots" data-box role="group" aria-label="選擇牆上要開哪一個傳送門" data-i18n-aria="portalChooser" style="--x:680;--y:550;--w:240;--h:40;z-index:642">
+            <div class="portal-dots" data-box role="group" aria-label="選擇牆上要開哪一個傳送門" data-i18n-aria="portalChooser" style="--x:598.4;--y:484;--w:211.2;--h:35.2;z-index:642">
               <button class="portal-dot" type="button" data-game="tango" aria-label="Operation: Tango" aria-current="true"></button>
               <button class="portal-dot" type="button" data-game="lovers" aria-label="Lovers in a Dangerous Spacetime" aria-current="false"></button>
               <button class="portal-dot" type="button" data-game="heavenly" aria-label="Heavenly Bodies" aria-current="false"></button>
             </div>
             <!-- G10: the pink LED under the sideboard's lip, moved down from
-                 the ledge that went with the wall unit. Always on. -->
-            <div class="prop prop-led" data-box aria-hidden="true" style="--x:320;--y:600;--w:1040;--h:5;z-index:600"></div>
-            <div class="prop prop-sideboard" data-box aria-hidden="true" data-still="assets/game-room/sideboard.png" style="--x:300;--y:468;--w:1080;--h:172;z-index:640"></div>
-            <div class="prop prop-lamp" data-box aria-hidden="true" data-still="assets/game-room/floor-lamp.png" style="--x:1390;--y:246;--w:110;--h:394;z-index:640"></div>
+                 the ledge that went with the wall unit. Always on. 89: the
+                 sideboard's 400 units now, not the wall's length. -->
+            <div class="prop prop-led" data-box aria-hidden="true" style="--x:536;--y:531;--w:380;--h:4;z-index:563"></div>
+            <div class="prop prop-sideboard" data-box aria-hidden="true" data-still="assets/game-room/sideboard.png" style="--x:526;--y:432;--w:400;--h:131;z-index:563"></div>
+            <div class="prop prop-lamp" data-box aria-hidden="true" data-still="assets/game-room/floor-lamp.png" style="--x:1230;--y:169;--w:110;--h:394;z-index:563"></div>
             <!-- G17, G18: the empty poufs, still CSS (S11 and S12 are optional
                  and were not generated). Each shows only while its seated still
-                 below does not: that is while its Actor is walking to it. -->
-            <div class="prop prop-pouf prop-pouf-girl" data-box aria-hidden="true" style="--x:535;--y:722;--w:170;--h:58;z-index:780"></div>
-            <div class="prop prop-pouf prop-pouf-boy" data-box aria-hidden="true" style="--x:795;--y:717;--w:170;--h:58;z-index:775"></div>
+                 below does not: that is while its Actor is walking to it. 89:
+                 each box is the pouf painted under its still. -->
+            <div class="prop prop-pouf prop-pouf-girl" data-box aria-hidden="true" style="--x:469;--y:606;--w:153;--h:80;z-index:686"></div>
+            <div class="prop prop-pouf prop-pouf-boy" data-box aria-hidden="true" style="--x:694;--y:613;--w:161;--h:69;z-index:682"></div>
             <!-- 34: S09 and S10, the two of them sat on their poufs with a
-                 controller each, anchored on the pouf's base centre — (620, 780)
-                 and (880, 775), their seated marks. `src/dom/seats.ts` shows one
+                 controller each, anchored on the pouf's base centre — since
+                 ticket 89 (546, 686) and (774, 682), their seated marks, at
+                 × 0.73. `src/dom/seats.ts` shows one
                  in place of its Actor's standing sprite while the model says
                  that Actor is seated. -->
-            <div class="prop prop-seated" data-box data-seat="girl" aria-hidden="true" data-still="assets/game-room/girl-pouf.png" style="--x:500;--y:520;--w:240;--h:260;z-index:780"></div>
-            <div class="prop prop-seated" data-box data-seat="boy" aria-hidden="true" data-still="assets/game-room/boy-pouf.png" style="--x:750;--y:495;--w:260;--h:280;z-index:775"></div>
+            <div class="prop prop-seated" data-box data-seat="girl" aria-hidden="true" data-still="assets/game-room/girl-pouf.png" style="--x:458.4;--y:496.2;--w:175.2;--h:189.8;z-index:686"></div>
+            <div class="prop prop-seated" data-box data-seat="boy" aria-hidden="true" data-still="assets/game-room/boy-pouf.png" style="--x:679.1;--y:477.6;--w:189.8;--h:204.4;z-index:682"></div>
             <!-- Luna's snow globe, and the only Breakable in this Room (§5.2).
                  Ticket 09 owns the knock: it swaps `data-breakable-state` and
                  plays the SFX. The visitor cannot break it by clicking. -->
-            <div class="prop prop-globe" data-box role="img" data-breakable="snow-globe" data-breakable-state="intact" aria-label="一顆雪花球" data-i18n-aria="globeIntact" data-still="assets/game-room/snow-globe.png" style="--x:1240;--y:476;--w:60;--h:64;z-index:641"></div>
-            <div class="prop prop-globe-broken" data-box role="img" data-breakable="snow-globe" data-breakable-state="broken" aria-label="被貓推下去的雪花球，玻璃碎了，水也灑在地板上" data-i18n-aria="globeBroken" data-still="assets/game-room/snow-globe-broken.png" style="--x:1210;--y:646;--w:120;--h:46;z-index:692" hidden></div>
+            <div class="prop prop-globe" data-box role="img" data-breakable="snow-globe" data-breakable-state="intact" aria-label="一顆雪花球" data-i18n-aria="globeIntact" data-still="assets/game-room/snow-globe.png" style="--x:874.1;--y:441.1;--w:31.8;--h:33.9;z-index:564"></div>
+            <div class="prop prop-globe-broken" data-box role="img" data-breakable="snow-globe" data-breakable-state="broken" aria-label="被貓推下去的雪花球，玻璃碎了，水也灑在地板上" data-i18n-aria="globeBroken" data-still="assets/game-room/snow-globe-broken.png" style="--x:858.2;--y:563.6;--w:63.6;--h:24.4;z-index:588" hidden></div>
             <!-- 06: audio — this Room's Music Source is the boombox itself. -->
-            <button class="prop prop-boombox" type="button" data-box data-music-source="games" aria-pressed="false" data-label-start="gamesBoomboxStart" data-label-stop="gamesBoomboxStop" data-still="assets/game-room/boombox.png" style="--x:340;--y:450;--w:160;--h:90;z-index:641" hidden>
+            <button class="prop prop-boombox" type="button" data-box data-music-source="games" aria-pressed="false" data-label-start="gamesBoomboxStart" data-label-stop="gamesBoomboxStop" data-still="assets/game-room/boombox.png" style="--x:329.8;--y:496.4;--w:118.4;--h:66.6;z-index:563" hidden>
               <span class="sr-only"><span data-i18n="gamesBoombox">遊戲室的手提音響</span> <span data-music-source-label>卡帶還沒到，先安靜著</span></span>
               <span class="spindle" aria-hidden="true"></span><span class="spindle" aria-hidden="true"></span>
             </button>
-            <div class="prop prop-table" data-box aria-hidden="true" data-still="assets/game-room/low-table.png" style="--x:560;--y:790;--w:440;--h:100;z-index:890"></div>
+            <div class="prop prop-table" data-box aria-hidden="true" data-still="assets/game-room/low-table.png" style="--x:549;--y:720.5;--w:275;--h:62.5;z-index:783"></div>
             <!-- Last in the stage, so the tab order is the three Portals, the
                  dots, the boombox, then the door (§5.5). The text `.room-exit`
                  above leads out too.
                  34: the link is S01's painted casing and the leaf S17 fills its
                  painted opening, both as measured off the delivered backdrop
                  (G6: "the build measures the delivered backdrop's door
-                 rectangle"), in place of the note's (60,290)-(240,640). -->
-            <a class="prop prop-door" data-box href="#/entryway" aria-label="回到玄關" data-i18n-aria="backToEntryway" style="--x:45;--y:114;--w:241;--h:425;z-index:640"><span class="door-leaf" aria-hidden="true" data-still="assets/game-room/door-leaf.png"></span></a>
+                 rectangle"). 89: ticket 87's narrowed doorway, the casing
+                 (39,100)-(222,473) and the opening 141 x 352. -->
+            <a class="prop prop-door" data-box href="#/entryway" aria-label="回到玄關" data-i18n-aria="backToEntryway" style="--x:39;--y:100;--w:183;--h:373;z-index:471"><span class="door-leaf" aria-hidden="true" data-still="assets/game-room/door-leaf.png"></span></a>
           </div>
         </div>
         <!-- 47: the wall moved, said once. The dots say it to the eye and

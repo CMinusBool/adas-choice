@@ -75,19 +75,25 @@ const MAX_STEP_MS = 100;
  */
 const WALKABLE: Record<RoomId, Polygon> = {
   entryway: ENTRYWAY_WALKABLE,
-  // The Game Room's floor: a band across the front, with one notch cut from its
-  // bottom edge for the low table's footprint, so a cat never walks into the
-  // foreground Prop that would hide it. The poufs are deliberately not cut out —
-  // depth there is the y-sort, which is the cue we want.
+  // The Game Room's floor (design 75 §4.3, ticket 89, on its 1408 x 792 stage):
+  // a band across the front, with a bump up onto Luna's cat bed and one notch
+  // cut from its bottom edge for the low table's footprint, so a cat never
+  // walks into the foreground Prop that would hide it. The poufs are
+  // deliberately not cut out — depth there is the y-sort, which is the cue we
+  // want.
   games: [
-    { x: 140, y: 660 },
-    { x: 1460, y: 660 },
-    { x: 1460, y: 860 },
-    { x: 1000, y: 860 },
-    { x: 1000, y: 800 },
-    { x: 560, y: 800 },
-    { x: 560, y: 860 },
-    { x: 140, y: 860 },
+    { x: 123, y: 581 },
+    { x: 960, y: 581 },
+    { x: 960, y: 500 },
+    { x: 1076, y: 500 },
+    { x: 1076, y: 581 },
+    { x: 1285, y: 581 },
+    { x: 1285, y: 757 },
+    { x: 795, y: 757 },
+    { x: 795, y: 731 },
+    { x: 578, y: 731 },
+    { x: 578, y: 757 },
+    { x: 123, y: 757 },
   ],
   // 17: the Cinema Room's real floor. A band from the door to the board with
   // one notch cut out of its front edge for the reel cabinet's footprint, so
@@ -496,10 +502,12 @@ const HOMES: Partial<Record<RoomId, Partial<Record<ActorId, Home>>>> = {
   // their poufs, which is what the seated stills S09 and S10 draw. Ticket 43's
   // interim standing marks beside the poufs (§4.3.1) went when the stills
   // landed: a seated mark is where `src/dom/seats.ts` swaps the standing sprite
-  // for the still, and the still carries its pouf.
+  // for the still, and the still carries its pouf. 89: the marks moved with the
+  // Room onto its 1408 x 792 stage (design 75 §4.3), and each still's box is
+  // placed with its bottom-centre on them.
   games: {
-    boy: { at: { x: 880, y: 775 }, facing: 'left', seated: true },
-    girl: { at: { x: 620, y: 780 }, facing: 'right', seated: true },
+    boy: { at: { x: 774, y: 682 }, facing: 'left', seated: true },
+    girl: { at: { x: 546, y: 686 }, facing: 'right', seated: true },
   },
   // 43: the Activity Room, `design/12-activity-room.md` §4.3 — H-Boy and
   // H-Girl, the two of them standing on the rug and turned towards each other.
