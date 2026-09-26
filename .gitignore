@@ -25,3 +25,5 @@ test-results/
 # `scripts/check_tickets_test.py` writes `scripts/__pycache__/` on every run, and
 # a hook test run from anywhere else writes one beside itself.
 __pycache__/
+# Personal scratch notes, kept off the public repo.
+my_notes.txt

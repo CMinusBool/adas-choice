@@ -4,6 +4,7 @@
   "main": "src/index.mjs",
   "compatibility_date": "2026-09-01",
   "workers_dev": true,
+  "preview_urls": false,
   "observability": { "enabled": false },
   "vars": { "ALLOWED_ORIGINS": "https://cminusbool.github.io" },
   "ratelimits": [

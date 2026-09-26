@@ -10,7 +10,7 @@
 // `art/characters/v3/` stays the only source any of it came from.
 //
 // The shot list that replaces these lives beside the effort's notes; the
-// contract they are cut to is in CLAUDE.md under "Cycle assets travel as a set".
+// contract they are cut to is in docs/agents/scene-and-cycle-assets.md under "Cycle assets travel as a set".
 //
 // Needs the Character Sheets, which are deliberately not in the repository:
 //
@@ -340,7 +340,7 @@ writeFileSync(
     {
       kind: 'placeholder',
       warning:
-        'These are not Cycles. Each file is one neutral standing frame cut mechanically out of a Character Sheet turnaround, shipped so that the Actor system could be built and seen before any animation frames exist. Replace every one of them with generated artwork; the shot list for that is in the effort notes and the contract is in CLAUDE.md.',
+        'These are not Cycles. Each file is one neutral standing frame cut mechanically out of a Character Sheet turnaround, shipped so that the Actor system could be built and seen before any animation frames exist. Replace every one of them with generated artwork; the shot list for that is in the effort notes and the contract is in docs/agents/scene-and-cycle-assets.md.',
       madeBy: 'scripts/make-actor-placeholders.mjs',
       madeOn: new Date().toISOString().slice(0, 10),
       identitySource: 'art/characters/v3 — the version 3 Character Sheets, never a generated asset',

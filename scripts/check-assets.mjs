@@ -3,8 +3,8 @@
 // A generator cannot be trusted to hit the Cycle contract, and a human looking
 // at a strip cannot see that a figure is three pixels off the floor. So "done"
 // for an Actor asset is this script passing, plus the owner's taste gate on how
-// it looks — neither alone. The contract itself is in CLAUDE.md under
-// "Cycle assets travel as a set too"; every rule below is one sentence of it.
+// it looks — neither alone. The contract itself is in docs/agents/scene-and-cycle-assets.md
+// under "Cycle assets travel as a set too"; every rule below is one sentence of it.
 //
 //   node scripts/check-assets.mjs                     # every sheet index.html declares
 //   node scripts/check-assets.mjs <path> ...          # named sheets
@@ -85,7 +85,7 @@ export const TOLERANCES = {
  * grid, the colour type, binary alpha, no colour under transparent pixels, no
  * empty declared frame, no bleed into a neighbour, no content in a spare cell.
  * So `--beat` drops exactly these four and keeps the other seven. The Cycle
- * contract is not relaxed by their existing; see CLAUDE.md.
+ * contract is not relaxed by their existing; see docs/agents/scene-and-cycle-assets.md.
  */
 export const CYCLE_ONLY_RULES = Object.freeze(['feet', 'centre', 'height-variance', 'drift']);
 
