@@ -135,6 +135,80 @@ describe('an Actor crossing a Room', () => {
   });
 });
 
+// 107: every sheet the Cast ships is one standing frame, so a Cycle has no
+// stride of its own to play. The gait is the model's: the figure rises off its
+// feet and rocks about them once a step, in time with the ground it covers.
+describe('an Actor’s gait', () => {
+  /** Every frame of one walk, from sending to standing, as the page would paint it. */
+  function frames(goal: Point, cycle: 'walk' | 'run' = 'walk', world = createWorld(plainArrival)): ActorView[] {
+    let next = advance(world, { type: 'actor-sent', actor: 'boy', goal, cycle });
+    const seen = [boy(next)];
+    while (boy(next).moving) {
+      next = run(next, 16);
+      seen.push(boy(next));
+    }
+    return seen;
+  }
+
+  /** The footfalls in a walk: the frames where the lift comes back down to the floor. */
+  function footfalls(walk: readonly ActorView[]): number {
+    let count = 0;
+    for (let at = 1; at < walk.length - 1; at += 1) {
+      const [before, here, after] = [walk[at - 1].gait.lift, walk[at].gait.lift, walk[at + 1].gait.lift];
+      if (here <= before && here < after) count += 1;
+    }
+    // The last frame is a footfall too: the one he stops on.
+    return count + 1;
+  }
+
+  it('stands flat while it stands still', () => {
+    expect(boy(createWorld(plainArrival)).gait).toEqual({ lift: 0, lean: 0 });
+  });
+
+  it('rises off its feet and comes back down to them on every step of a walk', () => {
+    const walk = frames({ x: 1000, y: 560 });
+    const lifts = walk.filter(view => view.moving).map(view => view.gait.lift);
+    expect(Math.max(...lifts)).toBeGreaterThan(0);
+    // Down to the floor between steps, not a hover that only wobbles.
+    expect(footfalls(walk)).toBeGreaterThan(2);
+  });
+
+  it('rocks one way on one step and the other way on the next', () => {
+    const leans = frames({ x: 1000, y: 560 }).map(view => view.gait.lean);
+    expect(Math.max(...leans)).toBeGreaterThan(1);
+    expect(Math.min(...leans)).toBeLessThan(-1);
+  });
+
+  it('takes a walker’s steps, and fewer longer ones at a run', () => {
+    // From the hall's middle to its right end: a long, straight walk.
+    const start = boy(createWorld(plainArrival)).at;
+    const goal = { x: 1000, y: 560 };
+    const span = Math.hypot(goal.x - start.x, goal.y - start.y);
+    const walked = footfalls(frames(goal));
+    expect(span / walked).toBeGreaterThan(70);
+    expect(span / walked).toBeLessThan(130);
+    expect(footfalls(frames(goal, 'run'))).toBeLessThan(walked);
+  });
+
+  it('lands flat on the frame it stops, however far it went', () => {
+    for (const goal of [{ x: 1000, y: 560 }, { x: 640, y: 600 }, { x: 610, y: 590 }, { x: 300, y: 610 }]) {
+      const walk = frames(goal);
+      expect(walk[walk.length - 1].gait).toEqual({ lift: 0, lean: 0 });
+    }
+  });
+
+  it('never lifts the Boy’s 300 units by more than the 6 a hand-off may move his feet', () => {
+    const lifts = [...frames({ x: 1000, y: 560 }), ...frames({ x: 1000, y: 560 }, 'run')].map(view => view.gait.lift);
+    expect(Math.max(...lifts) * 300).toBeLessThanOrEqual(6);
+  });
+
+  it('keeps both feet down when the apartment may not move', () => {
+    const still = createWorld({ ...plainArrival, reducedMotion: true });
+    const sent = advance(still, { type: 'actor-sent', actor: 'boy', goal: { x: 1000, y: 560 } });
+    expect(boy(sent).gait).toEqual({ lift: 0, lean: 0 });
+  });
+});
+
 describe('staying on the floor', () => {
   /** A point somewhere in a Room's walkable area, by rejection sampling. */
   function somewhereWalkable(room: RoomId, random: () => number): Point {
