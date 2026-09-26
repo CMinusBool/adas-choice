@@ -87,3 +87,5 @@ Small errors the apartment ships with. One line each: where, what, how it shows.
 - [entryway] When a cat knocks the vase over, the cat is not visible: S23 is not wired, so the vase falls with no cat beside it. (100, 2026-09-26)
 - [site] No real Invitation can be sent from `vite preview`: Turnstile refuses localhost (110200) and the Worker accepts only the https Pages origin, so the owner's one real send happens on the published site. (104, 2026-09-26)
 - [site] Headless Chromium on the Pages hostname gets Turnstile's interactive checkbox, so no automated check receives a real token. (104, 2026-09-26)
+- [cinema] While a Film plays, the beam crosses the right third of the Poster board and the seated Boy's head. (106, 2026-09-26)
+- [cinema] The open Cinema door leaf is the shut cell swung flat, 52 units wide, not ticket 90's drawn open cell. (106, 2026-09-26)
