@@ -100,9 +100,16 @@ const PIN_MS = 1000;
  * music, and §10.3 keeps both at their full length under reduced motion with
  * only the performance inside them simplified. That difference is the whole
  * reason `filmUntil` exists beside `beatUntil` below.
+ *
+ * 107: the design note gave the first two 1800 and 1400, for S30 and S31 to
+ * play in. Neither Beat is played on the page, so those 3.2 s were the Boy
+ * standing at the cabinet with the visitor waiting on the studio logo. They
+ * are now one short hold between them — a reach into the cabinet, a reel onto
+ * the hub — under the half second the Room may stand still for, and the
+ * Bumper lands about 0.6 s after "watch this one tonight".
  */
-const SEARCH_MS = 1800;
-const LOAD_MS = 1400;
+const SEARCH_MS = 200;
+const LOAD_MS = 250;
 const BUMPER_MS = 4000;
 const TITLE_MS = 3000;
 
