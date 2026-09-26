@@ -7,6 +7,7 @@ import { mountCats } from './dom/cats'; // 08: the cats
 import { mountCinemaRoom } from './dom/cinema-room'; // 17: the Cinema Room
 import { mountEntryway, readStoredArrival } from './dom/entryway'; // 14: the Entryway
 import { mountGameRoom } from './dom/game-room'; // 15, 45: the Game Room
+import { mountInvitation } from './dom/invitation'; // 108: the Invitation, from the Game Room and the Cinema
 import { mountLanguage, readStoredLanguage } from './dom/language';
 // 05: loading
 import { mountLoading } from './dom/loading';
@@ -54,7 +55,9 @@ const mounts: Mount[] = [
   // 05: loading — first in the list, so that on the paint where the apartment
   // opens the shell is out of `inert` before the Room router moves focus into it.
   mountLoading,
-  mountLanguage, mountMotion, mountRooms, mountGameRoom,
+  mountLanguage, mountMotion, mountRooms,
+  mountInvitation, // 108: before the two Rooms that open it
+  mountGameRoom,
   mountCinemaRoom, // 17: the Cinema Room's bookshelves
   mountActivityRoom, // 16: the Activity Room
   mountSound, // 06: audio

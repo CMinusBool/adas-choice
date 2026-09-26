@@ -10,6 +10,7 @@ import {
   type PortalId,
   type World,
 } from '../world';
+import { openInvitation } from './invitation';
 import { prefersReducedMotion } from './motion';
 import { WIDE_LAYOUT, byId, type Dispatch, type Painter } from './painter';
 
@@ -129,10 +130,12 @@ const PANELS: Record<PortalId, PanelCopy> = {
  * non-modal card does not need. The expanded world is not a fourth player: it
  * mirrors the open Portal's, so one sprite sheet drives both and the ellipse
  * the visitor opened keeps playing the frames it was on.
+ *
+ * 108: the dialog, the Turnstile load and the invite `fetch` moved, unchanged,
+ * into `src/dom/invitation.ts`, which the Cinema opens too.
  */
 export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   let world = initial;
-  const root = document.documentElement;
   const scene = byId('games-scene');
   const stage = document.querySelector<HTMLElement>('[data-stage="games"]')!;
   const portals = [...stage.querySelectorAll<HTMLButtonElement>('.portal')];
@@ -148,14 +151,6 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   const expandedImage = expanded.querySelector<HTMLImageElement>('.game-art')!;
   const expandedSprite = expanded.querySelector<HTMLElement>('.scene-sprite')!;
   const steamLink = byId<HTMLAnchorElement>('portal-steam');
-  const inviteForm = byId<HTMLFormElement>('invite-form');
-  const consent = byId<HTMLInputElement>('invite-consent');
-  const sendButton = byId<HTMLButtonElement>('send-invite');
-  const status = byId('invite-status');
-  const widgetSlot = byId('turnstile-widget');
-  const challengeNote = byId('turnstile-unavailable');
-  const config: AdaConfig = window.ADA_CONFIG ?? { inviteEndpoint: '', turnstileSiteKey: '' };
-  const notificationsReady = /^https:\/\/[a-z0-9.-]+\.workers\.dev\/invite$/.test(config.inviteEndpoint || '') && /^[A-Za-z0-9_-]{10,100}$/.test(config.turnstileSiteKey || '');
   const wideLayout = matchMedia(WIDE_LAYOUT);
   // Hover and focus are one answer to the model, so the page keeps both and
   // reports whichever is live: focus wins, because a visitor tabbing through
@@ -169,19 +164,6 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   let lastTick = 0;
   let lastEmission = 0;
   let emitFrom = 0;
-  let dialogGame: PortalId | null = null;
-  let dialogRun = 0;
-  let sending = false;
-  let sent = false;
-  let submissionId = '';
-  let turnstileToken = '';
-  let turnstileWidget: string | null = null;
-  let turnstileLoad: Promise<Turnstile> | null = null;
-  let statusKey: CopyKey | '' = '';
-  // 101: the status line is saying why the last send failed. The fresh token
-  // `reset()` brings back leaves it standing; only the next send, a withdrawn
-  // consent or a closed dialog takes it down.
-  let sendFailed = false;
   const players: ScenePlayer[] = portals.map(portal => ({
     game: portal.dataset.game as PortalId,
     portal,
@@ -496,116 +478,23 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
   wideLayout.addEventListener('change', () => paintWall(true));
   document.addEventListener('visibilitychange', () => { clearParticles(); lastTick = 0; syncPlayers(); });
 
-  function setStatus(key: CopyKey | '', error = false) {
-    statusKey = key;
-    status.textContent = key ? copy[world.language][key] : '';
-    status.dataset.state = error ? 'error' : 'ok';
-  }
-
-  function updateSendButton() {
-    sendButton.disabled = !notificationsReady || !consent.checked || !turnstileToken || sending || sent;
-    byId('send-label').textContent = copy[world.language][sending ? 'sending' : 'invite'];
-  }
-
+  /**
+   * 108: the Invitation is `src/dom/invitation.ts`'s now, shared with the Cinema;
+   * this Room only says which game, and holds its Scenes still while the dialog
+   * is up. 21: a game's name is a proper noun, the same in both languages, and no
+   * dictionary types it. 45: the card that used to carry it is gone, so the
+   * Portal does — along with the store URL the card's `href` used to be.
+   */
   function openGame(portal: HTMLElement) {
-    dialogRun++;
-    dialogGame = portal.dataset.game as PortalId;
-    submissionId = crypto.randomUUID();
-    sending = false;
-    sent = false;
-    consent.checked = false;
-    consent.disabled = !notificationsReady;
-    byId<HTMLInputElement>('invite-website').value = '';
-    // 21: a game's name is a proper noun, the same in both languages, and no
-    // dictionary types it. 45: the card that used to carry it is gone, so the
-    // Portal does — along with the store URL the card's `href` used to be.
-    byId('dialog-game').textContent = portal.dataset.title!;
-    byId<HTMLImageElement>('dialog-poster').src = portal.querySelector<HTMLImageElement>('.game-art')!.dataset.still!;
-    byId<HTMLAnchorElement>('dialog-steam').href = portal.dataset.steam!;
-    removeChallenge();
-    setStatus(notificationsReady ? '' : 'unavailable');
-    updateSendButton();
-    dialog.showModal();
-    root.classList.add('dialog-open');
+    void openInvitation({
+      kind: 'game',
+      game: portal.dataset.game as PortalId,
+      title: portal.dataset.title!,
+      poster: portal.querySelector<HTMLImageElement>('.game-art')!.dataset.still!,
+      link: portal.dataset.steam!,
+    }).then(syncPlayers);
     clearParticles();
     syncPlayers();
-  }
-
-  function loadTurnstile() {
-    if (window.turnstile) return Promise.resolve(window.turnstile);
-    if (turnstileLoad) return turnstileLoad;
-    turnstileLoad = new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-      script.async = true;
-      script.onload = () => window.turnstile ? resolve(window.turnstile) : reject(new Error('Unavailable'));
-      script.onerror = () => { script.remove(); turnstileLoad = null; reject(new Error('Unavailable')); };
-      document.head.append(script);
-    });
-    return turnstileLoad;
-  }
-
-  function removeChallenge() {
-    if (turnstileWidget !== null && window.turnstile) window.turnstile.remove(turnstileWidget);
-    turnstileWidget = null;
-    turnstileToken = '';
-    widgetSlot.hidden = false;
-    challengeNote.hidden = true;
-  }
-
-  /**
-   * 104: the Turnstile error codes that mean the widget cannot run on this page at
-   * all, whatever the visitor does: a site key or hostname the widget's dashboard
-   * refuses (110100, 110110, and 110200 — what `localhost` gets from a widget that
-   * lists only the published host), a bad parameter or a failed start (100xxx to
-   * 106xxx, 110420, 110430), a browser it does not support (110500, 110510), a clock
-   * or cache problem (200010, 200100), or its iframe failing to load (200500).
-   * Cloudflare paints each one as a bare "Unable to connect to website" box and keeps
-   * retrying. The rest — a timeout (11060x, 11062x) or a challenge that did not pass
-   * (300xxx, 600xxx) — the widget recovers from by itself, so it stays.
-   */
-  const cannotRunHere = (code: string) => /^(10[0-6]\d{3}|110(100|110|200|420|430|500|510)|200(010|100|500))$/.test(code);
-
-  /** 104: take the widget down and say so in the dialog's own words, in both languages. */
-  function challengeUnavailable() {
-    removeChallenge();
-    widgetSlot.hidden = true;
-    challengeNote.hidden = false;
-    setStatus('');
-    updateSendButton();
-  }
-
-  async function prepareChallenge() {
-    removeChallenge();
-    updateSendButton();
-    sendFailed = false;
-    if (!consent.checked || !notificationsReady || !dialog.open) {
-      // 101: withdrawing consent takes a failure message down with it.
-      if (!consent.checked && status.dataset.state === 'error') setStatus('');
-      return;
-    }
-    const run = dialogRun;
-    setStatus('checking');
-    try {
-      const api = await loadTurnstile();
-      if (run !== dialogRun || !consent.checked || !dialog.open) return;
-      turnstileWidget = api.render('#turnstile-widget', {
-        sitekey: config.turnstileSiteKey, action: 'play-invite', theme: 'dark', size: 'flexible', language: world.language === 'en' ? 'en' : 'zh-tw',
-        // 101: a managed widget re-solves by itself a second or two after a
-        // failed send's `reset()`; that token re-enables send and leaves the
-        // failure message alone.
-        callback: token => { if (run === dialogRun && consent.checked) { turnstileToken = token; if (!sendFailed) setStatus(''); updateSendButton(); } },
-        'expired-callback': () => { turnstileToken = ''; updateSendButton(); setStatus('verifyError', true); },
-        'error-callback': code => {
-          if (run !== dialogRun) return;
-          // 104: returning true tells Turnstile the error is handled, so it does not
-          // log it; the widget comes down once the callback has returned, so
-          // Turnstile is not left posting to an iframe that is already gone.
-          if (cannotRunHere(String(code))) { setTimeout(() => { if (run === dialogRun) challengeUnavailable(); }); return true; }
-          turnstileToken = ''; updateSendButton(); setStatus('verifyError', true);
-        }
-      });
-    } catch { if (run === dialogRun) challengeUnavailable(); }
   }
 
   // 46: the panel's first action. The Invitation itself is untouched — same
@@ -645,57 +534,6 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     if (event.shiftKey ? at !== 0 : at !== last) return;
     event.preventDefault();
     stops[event.shiftKey ? last : 0].focus();
-  });
-
-  consent.addEventListener('change', prepareChallenge);
-  byId('dialog-close').addEventListener('click', () => dialog.close());
-  dialog.addEventListener('click', event => {
-    if (event.target !== dialog) return;
-    const rect = dialog.getBoundingClientRect();
-    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
-  });
-  dialog.addEventListener('close', () => {
-    dialogRun++;
-    removeChallenge();
-    // 101: a closed dialog takes its failure message with it.
-    sendFailed = false;
-    if (status.dataset.state === 'error') setStatus('');
-    root.classList.remove('dialog-open');
-    syncPlayers();
-  });
-
-  inviteForm.addEventListener('submit', async event => {
-    event.preventDefault();
-    if (sendButton.disabled || !dialogGame || !consent.checked || !turnstileToken) return;
-    const run = dialogRun;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
-    sending = true;
-    updateSendButton();
-    sendFailed = false;
-    setStatus('sending');
-    try {
-      const response = await fetch(config.inviteEndpoint, {
-        method: 'POST', mode: 'cors', credentials: 'omit', cache: 'no-store', signal: controller.signal,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ game: dialogGame, action: 'play-together', consent: true, requestId: submissionId, turnstileToken, website: byId<HTMLInputElement>('invite-website').value })
-      });
-      const result = await response.json() as { ok?: boolean };
-      if (run !== dialogRun) return;
-      if (!response.ok || result.ok !== true) {
-        setStatus(response.status === 429 ? 'rateLimited' : response.status === 403 ? 'verifyError' : 'sendError', true);
-        sendFailed = true;
-        turnstileToken = '';
-        if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
-      } else { sent = true; setStatus('sent'); removeChallenge(); }
-    } catch {
-      if (run === dialogRun) {
-        setStatus('sendError', true);
-        sendFailed = true;
-        turnstileToken = '';
-        if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
-      }
-    } finally { clearTimeout(timeout); if (run === dialogRun) { sending = false; updateSendButton(); } }
   });
 
   let paintedLanguage: Language | null = null;
@@ -845,10 +683,6 @@ export const mountGameRoom = (dispatch: Dispatch, initial: World): Painter => {
     world = next;
     if (paintedLanguage !== world.language) {
       paintedLanguage = world.language;
-      // The dialog's own two painter-owned strings; everything else on the
-      // page is swept by `src/dom/language.ts` off its `data-i18n` hook.
-      setStatus(statusKey, status.dataset.state === 'error');
-      updateSendButton();
       // 47: the wall's last move was announced in the language it happened in.
       // Saying it again in the new one announces a move nobody made.
       announcement.textContent = '';

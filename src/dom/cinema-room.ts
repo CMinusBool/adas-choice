@@ -19,6 +19,7 @@ import {
   type Language,
   type World,
 } from '../world';
+import { openInvitation } from './invitation';
 import type { Dispatch, Painter } from './painter';
 import { playSfx, setFilmAudio } from './sound';
 
@@ -245,11 +246,18 @@ export const mountCinemaRoom = (dispatch: Dispatch): Painter => {
   detailsPart('.details-choose')?.addEventListener('click', () => {
     // The card is only ever showing one Film, and it is the one being chosen.
     if (!paintedDetails) return;
-    dispatch({ type: 'cinema-film-chosen', film: paintedDetails.id, now: performance.now() });
-    // The button the visitor just pressed closes with the card, so focus has
-    // to be put somewhere on purpose rather than dropped on the document. The
-    // gate lever is where it belongs: it is the control this choice hands them.
-    gate?.focus();
+    const chosen = paintedDetails.id;
+    // 108: the choice offers the Invitation first, the Game Room's own dialog,
+    // with this Film in it. The Film rolls once the dialog closes, sent or not,
+    // so the Bumper is never playing behind it.
+    const poster = document.querySelector<HTMLElement>(`[data-poster-art="${chosen}"]`)?.dataset.still ?? '';
+    void openInvitation({ kind: 'film', film: chosen, poster }).then(() => {
+      dispatch({ type: 'cinema-film-chosen', film: chosen, now: performance.now() });
+      // The button the visitor pressed closed with the card, so focus has to
+      // be put somewhere on purpose rather than dropped on the document. The
+      // gate lever is where it belongs: it is the control this choice hands them.
+      gate?.focus();
+    });
   });
 
   // The lever is a real `<button>` throughout rather than a disabled one, so it
