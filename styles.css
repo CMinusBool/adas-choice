@@ -1579,4 +1579,16 @@ html[lang="en"] .a-chalk { font-size: calc(18 * var(--u)); }
   #room-entryway { padding: 1.1rem 0 1rem; }
   #room-entryway .entryway-stage { margin-top: 1rem; }
   #room-entryway .stage-caption { max-width: 72ch; margin-top: .8rem; }
+
+  /* The Cinema and the Activity Room: the way back, the title and the lede
+     stood in a stack of three that pushed the stage down to y 365. They are
+     one row now, in their reading order - way back, title, lede - and the
+     stage starts under the title's line. Every other child of the Room keeps
+     the full width, one to a row, exactly as it stacked before. */
+  #room-cinema, #room-activities { display: grid; grid-template-columns: auto auto minmax(0, 1fr); column-gap: 2rem; align-items: center; padding: 1.1rem 0 1rem; }
+  #room-cinema > *, #room-activities > * { grid-column: 1 / -1; }
+  #room-cinema > .room-exit, #room-activities > .room-exit { grid-column: 1; margin-top: 0; }
+  #room-cinema > .room-title, #room-activities > .room-title { grid-column: 2; margin: 0; }
+  #room-cinema > .room-lede, #room-activities > .room-lede { grid-column: 3; }
+  #room-cinema .cinema-room, #room-activities .activity-room { margin-top: 1.1rem; }
 }
