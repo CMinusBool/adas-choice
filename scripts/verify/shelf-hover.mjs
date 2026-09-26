@@ -127,11 +127,12 @@ const SETTLED = () => {
  *
  * His position is his feet, the bottom-centre of his box, as `src/dom/actors.ts`
  * draws it; the shelf is its `[data-shelf]` button. `null` feet is a Boy who
- * never came onto the Cinema stage.
+ * never came onto the Cinema stage. `stageWidth` is the Cinema's width in units,
+ * `STAGES.cinema.width`, handed in from the model because the page cannot import it.
  */
-const WAIT_FOR_BOY = async ({ shelf, stillMs, capMs, pollMs }) => {
+const WAIT_FOR_BOY = async ({ shelf, stillMs, capMs, pollMs, stageWidth }) => {
   const stage = document.querySelector('[data-stage="cinema"]');
-  const units = () => 1600 / stage.getBoundingClientRect().width;
+  const units = () => stageWidth / stage.getBoundingClientRect().width;
   const feet = () => {
     const boy = stage.querySelector('[data-actor="boy"]');
     if (!boy || boy.classList.contains('is-acted')) return null;
@@ -174,7 +175,7 @@ function beside(reading) {
 
 const onMark = (feet, mark) => Boolean(feet) && Math.abs(feet.x - mark.x) <= MARK_UNITS && Math.abs(feet.y - mark.y) <= MARK_UNITS;
 
-async function hover(browser, baseUrl, { shelf, reduced, early, walk }) {
+async function hover(browser, baseUrl, { shelf, reduced, early, walk, stageWidth }) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: reduced ? 'reduce' : 'no-preference' });
   const page = await context.newPage();
   const consoleErrors = [];
@@ -186,10 +187,10 @@ async function hover(browser, baseUrl, { shelf, reduced, early, walk }) {
   const capMs = reduced ? 1_000 : walk.ms + SLACK_MS + (early ? 8_000 : 0);
   if (!early) {
     // Let the entrance play out and him sit down, read off the page, not a clock.
-    await page.evaluate(WAIT_FOR_BOY, { shelf, stillMs: STILL_MS, capMs: 15_000, pollMs: POLL_MS });
+    await page.evaluate(WAIT_FOR_BOY, { shelf, stillMs: STILL_MS, capMs: 15_000, pollMs: POLL_MS, stageWidth });
   }
   await target.hover();
-  const reading = await page.evaluate(WAIT_FOR_BOY, { shelf, stillMs: STILL_MS, capMs, pollMs: POLL_MS });
+  const reading = await page.evaluate(WAIT_FOR_BOY, { shelf, stillMs: STILL_MS, capMs, pollMs: POLL_MS, stageWidth });
   await context.close();
   return { shelf, reduced, early, ...reading, consoleErrors };
 }
@@ -212,7 +213,7 @@ async function main() {
     for (const shelf of model.CINEMA_SHELVES) {
       const walk = walks[shelf];
       for (const pass of [{ reduced: false, early: false }, { reduced: false, early: true }, { reduced: true, early: false }]) {
-        readings.push({ ...(await hover(browser, server.baseUrl, { shelf, walk, ...pass })), modelWalkMs: walk.ms, mark: walk.mark });
+        readings.push({ ...(await hover(browser, server.baseUrl, { shelf, walk, stageWidth: model.STAGES.cinema.width, ...pass })), modelWalkMs: walk.ms, mark: walk.mark });
       }
     }
   } finally {

@@ -87,7 +87,8 @@ describe('every Room is drawn on the stage the model gives it', () => {
       const { width, height } = STAGES[room];
       const { dir } = backdropOf(room);
       const manifest = JSON.parse(read(`public/assets/${dir}/manifest.json`));
-      const entry = manifest.assets.find(asset => asset.file === 'backdrop.png');
+      // A manifest names its files either beside it or from `public/assets/`.
+      const entry = manifest.assets.find(asset => asset.file === 'backdrop.png' || asset.file === `${dir}/backdrop.png`);
       assert.ok(entry, `public/assets/${dir}/manifest.json has no backdrop.png`);
       assert.equal(entry.stage, `${width}x${height}`, `the ${room} backdrop's stage`);
     }

@@ -11,6 +11,7 @@
       "frames": 1,
       "columns": 1,
       "frame": "1600x900",
+      "stage": "1600x900",
       "source": {
         "path": ".scratch/COOP-001-apartment/art/generated/32-cinema-room/s01-room/attempt-2-doorway/strip-raw.png",
         "sha256": "bce2948db3f309b38dddd1c06cb56e072c0ea1ce1a886ba849f03f1ef9d67c19"
