@@ -9,6 +9,7 @@ import {
   advance,
   apartmentNeedsClock,
   attendedShelf,
+  capsGoneShelf,
   cinemaNeedsClock,
   cinemaStep,
   createWorld,
@@ -23,6 +24,7 @@ import {
   openShelf,
   pinnedPosters,
   posterDetails,
+  posterSlot,
   rollingFilm,
   rummagingShelf,
   type ActorId,
@@ -367,16 +369,20 @@ describe('choosing a bookshelf', () => {
     expect(choose('comedy', elsewhere)).toBe(elsewhere);
   });
 
-  it('pins the shelf’s three Posters, one at a time, in pin order', () => {
+  it('pins the shelf’s three Posters, one at a time, slot 3 first and slot 1 last', () => {
     // Every step the Room passes through, in the order it passed through them,
-    // with the wall photographed at each one.
+    // with the wall photographed at each one and the Boy's feet at each pin.
     const seen: { step: string; pinned: readonly string[] }[] = [];
+    const pinningAt: { x: number; y: number }[] = [];
     let world = choose('comedy');
     for (let frame = 0; frame < 1400 && !(cinemaStep(world) === 'seated' && frame > 0); frame += 1) {
       const step = cinemaStep(world);
       const pinned = pinnedPosters(world);
       const last = seen[seen.length - 1];
-      if (!last || last.step !== step || last.pinned.length !== pinned.length) seen.push({ step, pinned });
+      if (!last || last.step !== step || last.pinned.length !== pinned.length) {
+        seen.push({ step, pinned });
+        if (step === 'pinning') pinningAt.push(who(world, 'boy').at);
+      }
       clock += 16;
       world = advance(world, { type: 'actor-tick', now: clock });
     }
@@ -394,7 +400,17 @@ describe('choosing a bookshelf', () => {
     ]);
     // One Poster at a time, never two appearing together.
     expect(seen.map(moment => moment.pinned.length)).toEqual([0, 0, 0, 0, 1, 1, 2, 2, 3]);
-    expect(pinnedPosters(world)).toEqual(filmsOn('comedy'));
+    // Design 72 section 3.4: right to left, the shelf's third Film first.
+    const [first, second, third] = filmsOn('comedy');
+    expect(seen.filter(moment => moment.step === 'carrying').map(moment => moment.pinned)).toEqual([
+      [],
+      [third],
+      [second, third],
+    ]);
+    // Standing at slot 3's mark for the first pin, slot 1's for the last.
+    const [slot1, slot2, slot3] = CINEMA_MARKS.boardSlots;
+    expect(pinningAt).toEqual([slot3, slot2, slot1]);
+    expect(pinnedPosters(world)).toEqual([first, second, third]);
     expect(openShelf(world)).toBe('comedy');
   });
 
@@ -448,12 +464,13 @@ describe('choosing a bookshelf', () => {
 
   it('abandons a half-pinned wall for the shelf chosen instead', () => {
     const half = runUntil(choose('comedy'), world => pinnedPosters(world).length === 2, 40000);
-    expect(pinnedPosters(half)).toEqual(filmsOn('comedy').slice(0, 2));
+    // Slots 3 and 2 are up, and slot 1 is still bare.
+    expect(pinnedPosters(half)).toEqual(filmsOn('comedy').slice(1));
 
     const switched = choose('horror', half);
     expect(cinemaStep(switched)).toBe('walking-to-shelf');
     // The wall is not cleared until he reaches in, so the two are still up.
-    expect(pinnedPosters(switched)).toEqual(filmsOn('comedy').slice(0, 2));
+    expect(pinnedPosters(switched)).toEqual(filmsOn('comedy').slice(1));
 
     const done = runUntil(switched, world => cinemaStep(world) === 'seated', 40000);
     expect(pinnedPosters(done)).toEqual(filmsOn('horror'));
@@ -479,6 +496,104 @@ describe('choosing a bookshelf', () => {
     const horror = runUntil(choose('horror', comedy), world => cinemaStep(world) === 'seated', 40000);
     expect(pinnedPosters(horror)).toEqual(filmsOn('horror'));
     expect(openShelf(horror)).toBe('horror');
+  });
+
+  it('hangs each Poster on its own slot: the shelf’s first Film on slot 1, its third on slot 3', () => {
+    for (const shelf of CINEMA_SHELVES) {
+      expect(filmsOn(shelf).map(film => posterSlot(film))).toEqual([1, 2, 3]);
+    }
+  });
+});
+
+// 73: design 80 section 4. A shelf is full, or it shows three caps gone where
+// the Boy took the three tubes out; the one showing them is the shelf whose
+// Posters are on the wall, and it changes as a rummage ends.
+describe('a bookshelf with three caps gone', () => {
+  function choose(shelf: CinemaShelf, world = inTheCinema()): World {
+    return advance(world, { type: 'cinema-shelf-chosen', shelf, now: clock });
+  }
+  const done = (world: World) => runUntil(world, next => cinemaStep(next) === 'seated', 40000);
+
+  it('finds every shelf full in a fresh Cinema', () => {
+    expect(capsGoneShelf(inTheCinema())).toBe(null);
+    expect(capsGoneShelf(createWorld(plainArrival))).toBe(null);
+  });
+
+  it('keeps the shelf full while he rummages, and takes its three caps as the rummage ends', () => {
+    const rummaging = runUntil(choose('comedy'), world => cinemaStep(world) === 'rummaging');
+    expect(capsGoneShelf(rummaging)).toBe(null);
+
+    const carrying = runUntil(rummaging, world => cinemaStep(world) !== 'rummaging', 40000);
+    expect(cinemaStep(carrying)).toBe('carrying');
+    expect(capsGoneShelf(carrying)).toBe('comedy');
+  });
+
+  it('shows the caps gone on the shelf whose Posters are on the wall, and on no other', () => {
+    const wall = done(choose('romance'));
+    expect(openShelf(wall)).toBe('romance');
+    expect(capsGoneShelf(wall)).toBe('romance');
+  });
+
+  it('fills the first shelf again only when the next shelf’s rummage ends', () => {
+    const comedy = done(choose('comedy'));
+    const walking = choose('horror', comedy);
+    expect(capsGoneShelf(walking)).toBe('comedy');
+
+    // The wall has cleared as he reaches in, and comedy keeps its holes.
+    const rummaging = runUntil(walking, world => cinemaStep(world) === 'rummaging', 40000);
+    expect(pinnedPosters(rummaging)).toEqual([]);
+    expect(capsGoneShelf(rummaging)).toBe('comedy');
+
+    const carrying = runUntil(rummaging, world => cinemaStep(world) === 'carrying', 40000);
+    expect(capsGoneShelf(carrying)).toBe('horror');
+    expect(capsGoneShelf(done(carrying))).toBe('horror');
+  });
+
+  it('keeps a shelf chosen twice running with its caps gone throughout', () => {
+    let world = choose('comedy', done(choose('comedy')));
+    const seen = new Set<CinemaShelf | null>();
+    while (cinemaStep(world) !== 'seated') {
+      seen.add(capsGoneShelf(world));
+      clock += 16;
+      world = advance(world, { type: 'actor-tick', now: clock });
+    }
+    expect([...seen]).toEqual(['comedy']);
+  });
+
+  it('leaves the shelf alone when its rummage is cut short by another choice', () => {
+    const comedy = done(choose('comedy'));
+    const rummaging = runUntil(choose('romance', comedy), world => cinemaStep(world) === 'rummaging', 40000);
+    const switched = choose('horror', rummaging);
+    expect(capsGoneShelf(switched)).toBe('comedy');
+    expect(capsGoneShelf(done(switched))).toBe('horror');
+  });
+
+  it('takes the caps at once when the apartment may not move', () => {
+    const still = inTheCinema(createWorld({ ...plainArrival, reducedMotion: true }));
+    expect(capsGoneShelf(choose('horror', still))).toBe('horror');
+  });
+
+  it('shows the errand’s shelf with its caps gone after the visitor walks out mid-errand', () => {
+    const walking = choose('romance', done(choose('comedy')));
+    const left = advance(walking, { type: 'hash-changed', hash: '#/entryway' });
+    expect(capsGoneShelf(left)).toBe('romance');
+    expect(capsGoneShelf(inTheCinema(left))).toBe('romance');
+  });
+
+  it('is not changed by a Poster opening, a Film rolling or a visit elsewhere', () => {
+    const wall = done(choose('horror'));
+    const [film] = filmsOn('horror');
+    const looked = advance(wall, { type: 'cinema-poster-attended', film, now: clock });
+    expect(capsGoneShelf(looked)).toBe('horror');
+    const rolling = runUntil(
+      advance(looked, { type: 'cinema-film-chosen', film, now: clock }),
+      world => rollingFilm(world) !== null,
+      40000,
+    );
+    expect(rollingFilm(rolling)?.id).toBe(film);
+    expect(capsGoneShelf(rolling)).toBe('horror');
+    const back = inTheCinema(advance(rolling, { type: 'hash-changed', hash: '#/games' }));
+    expect(capsGoneShelf(back)).toBe('horror');
   });
 });
 
