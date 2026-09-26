@@ -20,6 +20,16 @@
  *   returning to the Room left rather than to the junk.
  * - **sound** — while `SOUNDS` is empty, `#sound-toggle` is hidden and never reached by
  *   Tab, in either language.
+ * - **cats** (ticket 103) — at 1440 x 900 (mouse) and 390 x 844 (touch), on all four
+ *   routes and in both languages, once the Room's Arrival has ended: the element at every
+ *   cat's feet point is that cat's button (her `::before` pad hit-tests as the button),
+ *   and a click or tap there pets her. Another cat or a control over her is waited out,
+ *   since the cats roam; anything else over her — an Actor's `.cycle` layer, a Prop that
+ *   takes no input, a control that says it is off — fails the reading.
+ * - **pointers** (ticket 103) — the same Rooms and widths: nothing on a stage takes a
+ *   pointer unless it is a control or inside one, and every control showing in the Room
+ *   (Portal, door, shelf, Poster, Activity, switch, link) takes the pointer at its centre.
+ *   The Cinema is read again with a shelf chosen, so its Posters are showing.
  *
  * **No request leaves the machine.** Every request that is not to the page's own origin
  * is intercepted: the Worker's `*.workers.dev` endpoint and its CORS preflight are
@@ -33,7 +43,7 @@
  * ## Usage
  *
  *   node scripts/verify/controls.mjs --base-url http://localhost:4273/
- *   node scripts/verify/controls.mjs --launch preview [--port N] [--only slate,invitation,hash,sound]
+ *   node scripts/verify/controls.mjs --launch preview [--port N] [--only slate,invitation,hash,sound,cats,pointers]
  */
 
 import path from 'node:path';
@@ -43,7 +53,7 @@ import { fileURLToPath } from 'node:url';
 import { loadPlaywright, startServer } from './room-shots.mjs';
 
 const ROOMS = ['entryway', 'games', 'cinema', 'activities'];
-const CHECKS = ['slate', 'invitation', 'hash', 'sound'];
+const CHECKS = ['slate', 'invitation', 'hash', 'sound', 'cats', 'pointers'];
 
 /** The failure strings, copied from `src/copy.ts` so the check does not share the page's source. */
 const STATUS = {
@@ -394,6 +404,228 @@ async function checkSound(browser, baseUrl, network) {
   return readings;
 }
 
+// ------------------------------------------------------------------ cats and pointers
+
+/**
+ * Ticket 103: the two layouts the verifier reads, a mouse on the desktop and a finger on
+ * the phone. Motion stays on: the Arrival plays and the cats roam, as a visitor sees them.
+ */
+const POINTER_LAYOUTS = [
+  { name: 'desktop', viewport: { width: 1440, height: 900 }, pointer: 'mouse' },
+  { name: 'narrow', viewport: { width: 390, height: 844 }, pointer: 'touch', hasTouch: true, isMobile: true },
+];
+
+/**
+ * How long after the loading screen lifts each Room's Arrival has certainly ended: the
+ * Entryway's 11.9 s entrance, and the ~3 s Arrival whose last stride lands by 3.60 s.
+ */
+const ARRIVAL_OVER_MS = { entryway: 12_900, games: 4_600, cinema: 4_600, activities: 4_600 };
+
+/** Tries per cat, and the wait between them, while another cat or a control stands over her. */
+const CAT_TRIES = 12;
+const CAT_RETRY_MS = 600;
+
+/**
+ * What takes a pointer by right: a control. Everything else on a stage — an Actor's
+ * `.cycle` layer, a Prop that takes no input, a control that says it is off — must let
+ * the pointer through. Kept here rather than read from the page's source. A `role="group"`
+ * is the narrow Game Room's Portal chooser, which takes a sideways swipe across its dots
+ * (ticket 47's `touch-action: pan-y`), so it is input too.
+ */
+const CONTROL = 'a[href], button, input, select, textarea, summary, label, [role="button"], [role="group"], [tabindex]:not([tabindex="-1"])';
+
+async function openAfterArrival(browser, baseUrl, network, layout, room) {
+  const context = await sealedContext(
+    browser,
+    baseUrl,
+    { viewport: layout.viewport, hasTouch: layout.hasTouch ?? false, isMobile: layout.isMobile ?? false },
+    network,
+  );
+  const consoleErrors = [];
+  const page = await context.newPage();
+  await openRoom(page, baseUrl, room, consoleErrors);
+  await page.waitForTimeout(ARRIVAL_OVER_MS[room]);
+  return { context, page, consoleErrors };
+}
+
+/**
+ * Scroll one cat into view (a narrow Room pans) and read what is under her feet point —
+ * the bottom centre of her sprite, which her hit pad is centred on. The scroll is instant:
+ * `html` scrolls smoothly, and a point read mid-scroll is not where the tap lands.
+ */
+function readFeet({ room, actor, control }) {
+  const stage = document.querySelector(`.stage[data-stage="${room}"]`);
+  const cat = stage.querySelector(`.actor.cat[data-actor="${actor}"]`);
+  const name = element => {
+    if (!element) return null;
+    const classes = typeof element.className === 'string' && element.className ? `.${element.className.trim().split(/\s+/).join('.')}` : '';
+    return `${element.tagName.toLowerCase()}${element.dataset.actor ? `[${element.dataset.actor}]` : ''}${classes}`;
+  };
+  if (!cat || getComputedStyle(cat).display === 'none') return { kind: 'absent' };
+  cat.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
+  const box = cat.getBoundingClientRect();
+  const x = box.left + box.width / 2;
+  const y = box.bottom - 1;
+  const hit = document.elementFromPoint(x, y);
+  let kind;
+  if (!hit || !stage.contains(hit)) kind = 'outside';
+  else if (hit === cat || cat.contains(hit)) kind = 'self';
+  else if (hit.closest('.actor.cat')) kind = 'cat';
+  else if (hit.closest(control) && !hit.closest(control).matches('[aria-disabled="true"]')) kind = 'control';
+  else kind = 'non-control';
+  const owner = hit?.closest('.actor');
+  return { kind, x: Math.round(x), y: Math.round(y), hit: `${name(hit)}${owner && owner !== hit ? ` in ${name(owner)}` : ''}` };
+}
+
+/** Wait until no cat in the Room is being fussed over, so the next tap is a fresh petting. */
+async function settleCats(page, room) {
+  await page.waitForFunction(
+    room => ![...document.querySelectorAll(`.stage[data-stage="${room}"] .actor.cat`)].some(cat => cat.matches('.is-petted, .is-fussed')),
+    room,
+    { timeout: 10_000 },
+  );
+}
+
+/**
+ * One cat: read her feet point until it is hers (another cat or a control standing over
+ * her is waited out — they walk on), then tap there and see her petted. A non-control
+ * over her feet fails the reading however it ends: that is the layering this guards.
+ */
+async function petAtFeet(page, layout, room, actor) {
+  const readings = [];
+  for (let attempt = 0; attempt < CAT_TRIES; attempt += 1) {
+    const reading = await page.evaluate(readFeet, { room, actor, control: CONTROL });
+    readings.push(reading);
+    if (reading.kind === 'self') {
+      if (layout.pointer === 'touch') await page.touchscreen.tap(reading.x, reading.y);
+      else await page.mouse.click(reading.x, reading.y);
+      const petted = await page
+        .waitForFunction(
+          ({ room, actor }) => document.querySelector(`.stage[data-stage="${room}"] .actor.cat[data-actor="${actor}"]`).matches('.is-petted, .is-fussed'),
+          { room, actor },
+          { timeout: 2_000 },
+        )
+        .then(() => true, () => false);
+      const coveredBy = readings.filter(r => r.kind === 'non-control').map(r => r.hit);
+      return { actor, first: readings[0], at: reading, attempts: readings.length, petted, coveredBy, ok: petted && coveredBy.length === 0 };
+    }
+    await page.waitForTimeout(CAT_RETRY_MS);
+  }
+  const coveredBy = readings.filter(r => r.kind === 'non-control').map(r => r.hit);
+  return { actor, first: readings[0], last: readings.at(-1), attempts: readings.length, petted: false, coveredBy, ok: false };
+}
+
+/** Every cat's feet point is hers, and a tap there pets her — four Rooms, two widths, both languages. */
+async function checkCats(browser, baseUrl, network) {
+  const readings = [];
+  for (const layout of POINTER_LAYOUTS) {
+    for (const room of ROOMS) {
+      let opened = null;
+      try {
+        opened = await openAfterArrival(browser, baseUrl, network, layout, room);
+        const { page, consoleErrors } = opened;
+        for (const language of ['zh-Hant', 'en']) {
+          if (language === 'en') {
+            await settleCats(page, room);
+            await toEnglish(page);
+          }
+          const cats = [];
+          for (const actor of ['mica', 'mira', 'luna']) cats.push(await petAtFeet(page, layout, room, actor));
+          readings.push({ layout: layout.name, room, language, cats, consoleErrors: [...consoleErrors], ok: cats.every(cat => cat.ok) && consoleErrors.length === 0 });
+        }
+      } catch (error) {
+        readings.push({ layout: layout.name, room, error: error.message, ok: false });
+      } finally {
+        await opened?.context.close();
+      }
+    }
+  }
+  return readings;
+}
+
+/**
+ * The other side of the same rule. Everything in the Room that takes a pointer is a
+ * control, or inside one — the stage itself aside, which lies under everything on it —
+ * and every control that is showing takes the pointer at its own centre.
+ */
+function auditRoom({ room, control }) {
+  const section = document.getElementById(`room-${room}`);
+  const stage = section.querySelector('.stage');
+  const name = element => {
+    const classes = typeof element.className === 'string' && element.className ? `.${element.className.trim().split(/\s+/).join('.')}` : '';
+    return `${element.tagName.toLowerCase()}${classes}`;
+  };
+  const showing = element => {
+    const style = getComputedStyle(element);
+    const box = element.getBoundingClientRect();
+    return style.display !== 'none' && style.visibility !== 'hidden' && box.width > 0 && box.height > 0 && !element.closest('[hidden]');
+  };
+  const nonControls = [];
+  for (const element of stage.querySelectorAll('*')) {
+    if (getComputedStyle(element).pointerEvents === 'none' || !showing(element)) continue;
+    const owner = element.closest(control);
+    if (owner && !owner.matches('[aria-disabled="true"]')) continue;
+    nonControls.push(name(element));
+  }
+  const controls = [...section.querySelectorAll(control)].filter(element => showing(element) && !element.matches('[aria-disabled="true"]'));
+  controls.forEach((element, index) => element.setAttribute('data-audit', String(index)));
+  return { nonControls, controls: controls.map((element, index) => ({ index, name: `${name(element)}${element.dataset.shelf ? `[${element.dataset.shelf}]` : ''}` })) };
+}
+
+/** The element at one audited control's centre, after scrolling it into view. */
+function hitControl(index) {
+  const element = document.querySelector(`[data-audit="${index}"]`);
+  element.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
+  const box = element.getBoundingClientRect();
+  const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+  const classes = hit && typeof hit.className === 'string' && hit.className ? `.${hit.className.trim().split(/\s+/).join('.')}` : '';
+  return { own: Boolean(hit) && (hit === element || element.contains(hit)), byCat: Boolean(hit?.closest('.actor.cat')), hit: hit ? `${hit.tagName.toLowerCase()}${classes}` : null };
+}
+
+async function auditControls(page, room) {
+  const audit = await page.evaluate(auditRoom, { room, control: CONTROL });
+  const missed = [];
+  for (const { index, name } of audit.controls) {
+    let reading = await page.evaluate(hitControl, index);
+    // A cat roaming across a control's centre is passing, not covering: wait her out.
+    for (let attempt = 0; !reading.own && reading.byCat && attempt < 6; attempt += 1) {
+      await page.waitForTimeout(CAT_RETRY_MS);
+      reading = await page.evaluate(hitControl, index);
+    }
+    if (!reading.own) missed.push({ control: name, hit: reading.hit });
+  }
+  return { nonControls: audit.nonControls, controls: audit.controls.length, missed };
+}
+
+async function checkPointers(browser, baseUrl, network) {
+  const readings = [];
+  for (const layout of POINTER_LAYOUTS) {
+    for (const room of ROOMS) {
+      let opened = null;
+      try {
+        opened = await openAfterArrival(browser, baseUrl, network, layout, room);
+        const { page, consoleErrors } = opened;
+        const passes = [{ state: 'at rest', ...(await auditControls(page, room)) }];
+        if (room === 'cinema') {
+          // The Posters only show once a shelf is chosen.
+          await page.evaluate(() => document.querySelector('button.cinema-shelf').scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' }));
+          await page.click('button.cinema-shelf');
+          await page.locator('button.cinema-poster').first().waitFor({ state: 'visible', timeout: 30_000 });
+          await page.waitForTimeout(800);
+          passes.push({ state: 'shelf chosen', ...(await auditControls(page, room)) });
+        }
+        const ok = passes.every(pass => pass.nonControls.length === 0 && pass.missed.length === 0) && consoleErrors.length === 0;
+        readings.push({ layout: layout.name, room, passes, consoleErrors: [...consoleErrors], ok });
+      } catch (error) {
+        readings.push({ layout: layout.name, room, error: error.message, ok: false });
+      } finally {
+        await opened?.context.close();
+      }
+    }
+  }
+  return readings;
+}
+
 // ------------------------------------------------------------------ main
 
 async function main() {
@@ -409,7 +641,7 @@ async function main() {
   let browser = null;
   try {
     browser = await playwright.chromium.launch({ headless: true });
-    const run = { slate: checkSlate, invitation: checkInvitation, hash: checkHash, sound: checkSound };
+    const run = { slate: checkSlate, invitation: checkInvitation, hash: checkHash, sound: checkSound, cats: checkCats, pointers: checkPointers };
     for (const check of options.only) results[check] = await run[check](browser, server.baseUrl, network);
   } finally {
     if (browser) await browser.close();
