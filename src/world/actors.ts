@@ -227,6 +227,61 @@ export interface ActorView {
    * for this Actor paints that still in place of the standing sprite.
    */
   readonly seated: boolean;
+  // 107: the Boy moves visibly
+  /** Where the Actor is in its stride. Flat whenever it is not walking. */
+  readonly gait: Gait;
+}
+
+// 107: the Boy moves visibly
+/**
+ * An Actor's body over its feet, one step at a time.
+ *
+ * Every sheet the Cast ships is one standing frame (`public/assets/actors/
+ * manifest.json`), so a Cycle has no stride of its own to play and an Actor
+ * that only translated would glide. The gait is the step the frames cannot
+ * draw: once a step the figure rises off its feet and comes back down to them,
+ * and it rocks about them one way on one step and the other way on the next.
+ * The feet point never moves for it — it is the figure over the feet — so a
+ * hand-off to a Beat or a seated still is measured exactly as before.
+ */
+export interface Gait {
+  /** How far the figure is lifted off its feet, as a share of its own height: 0 at every footfall. */
+  readonly lift: number;
+  /** How far it rocks about its feet, in degrees, the sign changing with every step. */
+  readonly lean: number;
+}
+
+const FLAT: Gait = { lift: 0, lean: 0 };
+
+/**
+ * How each kind of Actor steps, per way of moving.
+ *
+ * `length` is a step in stage units: a 300-unit Boy walking at 190 units a
+ * second takes two steps a second, and runs in longer, quicker ones. `lift`
+ * and `lean` are each step's highest point. The two people are held under the
+ * hand-off rule's 6 units of lift on the Boy's 300, so a walk that is cut off
+ * mid-step moves his figure no further than a Beat may move his feet; the cats
+ * trot flat-backed, lifting a little and never rocking.
+ */
+const STRIDES: Record<'person' | 'cat', Record<'walk' | 'run', { length: number; lift: number; lean: number }>> = {
+  person: { walk: { length: 95, lift: 0.015, lean: 2 }, run: { length: 160, lift: 0.019, lean: 1.5 } },
+  cat: { walk: { length: 40, lift: 0.03, lean: 0 }, run: { length: 70, lift: 0.04, lean: 0 } },
+};
+
+/**
+ * The gait of an Actor `walked` units into a route `distance` long.
+ *
+ * The route is cut into a whole number of steps, each as close to the Actor's
+ * own step as that allows, so the last footfall is the frame it arrives on and
+ * it stops flat rather than dropping out of the air.
+ */
+function gaitOf(actor: ActorState, walked: number): Gait {
+  if (actor.route.length === 0 || actor.distance <= 0) return FLAT;
+  const kind = (CAT_IDS as readonly string[]).includes(actor.id) ? 'cat' : 'person';
+  const stride = STRIDES[kind][actor.cycle === 'run' ? 'run' : 'walk'];
+  const steps = Math.max(1, Math.round(actor.distance / stride.length));
+  const swing = Math.sin(Math.PI * (Math.min(walked, actor.distance) / actor.distance) * steps);
+  return { lift: stride.lift * Math.abs(swing), lean: stride.lean * swing };
 }
 
 function view(actor: ActorState): ActorView {
@@ -240,6 +295,7 @@ function view(actor: ActorState): ActorView {
     moving: actor.route.length > 0,
     progress: actor.distance > 0 ? Math.min(1, Math.max(0, 1 - remaining / actor.distance)) : 1,
     seated: isSeated(actor),
+    gait: gaitOf(actor, actor.distance - remaining),
   };
 }
 
