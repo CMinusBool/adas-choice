@@ -158,4 +158,6 @@ hitting the floor.
 
 **Invitation**:
 The message the visitor sends by choosing "I want to play this with u~", delivered by the
-Cloudflare Worker. The page never handles the recipient address.
+Cloudflare Worker. The page never handles the recipient address. The Cinema's "watch this one
+tonight" offers the same Invitation for a Film, named by its title in the visitor's language and
+its year; the Film rolls once the dialog closes, sent or not.

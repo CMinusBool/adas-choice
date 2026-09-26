@@ -184,6 +184,8 @@ html.dialog-open { overflow: hidden; }
 .dialog-close:hover { color: var(--pink); background: #ffffff08; }
 .dialog-art { position: relative; width: 112px; margin: .2rem auto 1.1rem; }
 .dialog-art img { display: block; width: 112px; height: 112px; border-radius: 25px; border: 1px solid #b9719a; transform: rotate(-4deg); }
+/* 108: a Film's Poster is portrait; it fills the square rather than squashing into it. */
+.choice-dialog[data-invitation="film"] .dialog-art img { object-fit: cover; }
 .dialog-art > span { position: absolute; right: -12px; bottom: -7px; display: grid; place-items: center; width: 38px; height: 38px; background: var(--pink); color: #321727; border: 4px solid #241c26; border-radius: 50%; font-size: 1.5rem; }
 .dialog-eyebrow { margin: 0 0 .35rem; text-align: center; color: var(--pink); font-size: .75rem; letter-spacing: .13em; }
 .dialog-title { min-height: 0; margin: 0; text-align: center; font-size: 1.8rem; line-height: 1.35; }

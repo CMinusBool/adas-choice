@@ -22,6 +22,12 @@
  *   none of Cloudflare's error box; the send button stays off, and withdrawing consent
  *   takes the note down. A stub failing with `300010` (a challenge that did not pass,
  *   which the widget retries by itself) keeps the widget and says "try again" instead.
+ * - **film** (ticket 108) — "Watch this one tonight" opens the same Invitation dialog with
+ *   the Film named, title in the visitor's language and year, in both languages; a send
+ *   reaches the mocked Worker with the Film's id, title and year; the Bumper does not play
+ *   while the dialog is open, and does once it is closed, sent or dismissed. Four runs: the
+ *   keyboard (Tab into the card, Enter, Space, Enter, Escape) and a mouse at 1440 x 900, and
+ *   a tap at 390 x 844 that dismisses and one that sends; two with motion on, two off.
  * - **hash** — `location.hash = '#/not-a-room'` from every Room ends at `#/entryway`
  *   with the Entryway's title focused, the rewrite adding no history entry, and Back
  *   returning to the Room left rather than to the junk.
@@ -50,7 +56,7 @@
  * ## Usage
  *
  *   node scripts/verify/controls.mjs --base-url http://localhost:4273/
- *   node scripts/verify/controls.mjs --launch preview [--port N] [--only slate,invitation,challenge,hash,sound,cats,pointers]
+ *   node scripts/verify/controls.mjs --launch preview [--port N] [--only slate,invitation,challenge,film,hash,sound,cats,pointers]
  */
 
 import path from 'node:path';
@@ -60,7 +66,7 @@ import { fileURLToPath } from 'node:url';
 import { loadPlaywright, startServer } from './room-shots.mjs';
 
 const ROOMS = ['entryway', 'games', 'cinema', 'activities'];
-const CHECKS = ['slate', 'invitation', 'challenge', 'hash', 'sound', 'cats', 'pointers'];
+const CHECKS = ['slate', 'invitation', 'challenge', 'film', 'hash', 'sound', 'cats', 'pointers'];
 
 /** The failure strings, copied from `src/copy.ts` so the check does not share the page's source. */
 const STATUS = {
@@ -90,6 +96,38 @@ const CHALLENGE_NOTE = {
   'zh-Hant': '安全驗證無法在這個網址載入，所以暫時無法從這裡寄送邀請。還是可以先去 Steam 看看。',
   en: 'The security check can’t load at this address, so the invitation can’t be sent from here. You can still check the game on Steam.',
 };
+
+/** The comedy shelf's three Films, copied from `src/world/films.ts` like `STATUS`. */
+const COMEDY = {
+  'knives-out': { title: { 'zh-Hant': '鋒迴路轉', en: 'Knives Out' }, year: 2019 },
+  'kung-fu-hustle': { title: { 'zh-Hant': '功夫', en: 'Kung Fu Hustle' }, year: 2004 },
+  'eat-drink-man-woman': { title: { 'zh-Hant': '飲食男女', en: 'Eat Drink Man Woman' }, year: 1994 },
+};
+
+/** What the dialog says when it is a Film being chosen, copied from `src/copy.ts` like `STATUS`. */
+const FILM_DIALOG = {
+  'zh-Hant': {
+    title: '今晚一起看電影，好嗎？',
+    consent: '我同意將這部電影的選擇、IP 位址、大約所在國家，以及基本裝置／瀏覽器資訊寄給網站主人。',
+    invite: '想跟你一起看這部～',
+    link: '在 Apple TV 找到它',
+    sent: '邀請已送出，今晚一起看 ♡',
+  },
+  en: {
+    title: 'A movie night, maybe?',
+    consent: 'I agree to share this film choice, my IP address, approximate country, and basic device/browser details with the page owner by email.',
+    invite: 'I want to watch this with u~',
+    link: 'Find it on Apple TV',
+    sent: 'Invitation sent. Here’s to movie night ♡',
+  },
+};
+
+const FILM_RUNS = [
+  { language: 'zh-Hant', layout: 'desktop', input: 'keyboard', send: true, motion: false },
+  { language: 'en', layout: 'desktop', input: 'mouse', send: true, motion: true },
+  { language: 'zh-Hant', layout: 'narrow', input: 'tap', send: false, motion: true },
+  { language: 'en', layout: 'narrow', input: 'tap', send: true, motion: false },
+];
 
 const CHALLENGE_FAILURES = [
   { cause: '110200', note: true },
@@ -207,7 +245,9 @@ async function sealedContext(browser, baseUrl, contextOptions, network) {
       };
       if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
       const answer = network.answer;
-      network.workerRequests.push({ method: request.method(), url: url.href, answer });
+      let body = null;
+      try { body = request.postDataJSON(); } catch { body = request.postData(); }
+      network.workerRequests.push({ method: request.method(), url: url.href, answer, body });
       if (answer === 'network') return route.abort('failed');
       const ok = answer === 200;
       return route.fulfill({
@@ -248,6 +288,9 @@ async function raiseSlate(page) {
   const choose = page.locator('#poster-details .details-choose');
   await choose.waitFor({ state: 'visible', timeout: 10_000 });
   await choose.click();
+  // 108: the choice offers the Invitation first; the Film rolls once it is dismissed.
+  await page.waitForFunction(() => document.getElementById('game-dialog').open, null, { timeout: 5_000 });
+  await page.keyboard.press('Escape');
   const link = page.locator('.film-slate-link');
   await link.waitFor({ state: 'visible', timeout: 30_000 });
   // The card fades in; read the link once it has stopped moving.
@@ -440,6 +483,143 @@ async function checkChallenge(browser, baseUrl, network) {
       } catch (error) {
         readings.push({ language, cause: failure.cause, error: error.message, ok: false });
       }
+    }
+  }
+  return readings;
+}
+
+// ------------------------------------------------------------------ film
+
+/** The Invitation dialog, and whether the Film has started rolling behind it. */
+const READ_FILM_DIALOG = () => {
+  const text = selector => document.querySelector(selector)?.textContent ?? null;
+  const film = document.querySelector('.cinema-film');
+  const link = document.getElementById('dialog-steam');
+  let linkHost = null;
+  try { linkHost = new URL(link.href).hostname; } catch { linkHost = null; }
+  return {
+    open: document.getElementById('game-dialog').open,
+    named: text('#dialog-game'),
+    title: text('#dialog-title'),
+    consent: text('#invite-consent + span'),
+    invite: text('#send-label'),
+    link: text('#dialog-steam > span'),
+    linkHost,
+    filmRolling: Boolean(film && !film.hidden),
+  };
+};
+
+/** From the Bumper's first unhidden frame on, `window.__bumperSeen` is true. */
+const WATCH_FOR_BUMPER = () => {
+  window.__bumperSeen = false;
+  const film = document.querySelector('.cinema-film');
+  const bumper = film?.querySelector('.bumper');
+  const look = () => { if (film && bumper && !film.hidden && !bumper.hidden) window.__bumperSeen = true; };
+  if (film) new MutationObserver(look).observe(film, { attributes: true, subtree: true, attributeFilter: ['hidden'] });
+  look();
+};
+
+async function chooseFilmOnce(browser, baseUrl, network, run) {
+  const layout = POINTER_LAYOUTS.find(candidate => candidate.name === run.layout);
+  const context = await sealedContext(
+    browser,
+    baseUrl,
+    {
+      viewport: layout.viewport, hasTouch: layout.hasTouch ?? false, isMobile: layout.isMobile ?? false,
+      reducedMotion: run.motion ? 'no-preference' : 'reduce',
+    },
+    network,
+  );
+  await context.addInitScript(turnstileStub, RESOLVE_AFTER_RESET_MS);
+  const consoleErrors = [];
+  try {
+    const page = await context.newPage();
+    await openRoom(page, baseUrl, 'cinema', consoleErrors);
+    if (run.language === 'en') await toEnglish(page);
+    const press = async locator => {
+      if (run.input === 'tap') await locator.tap({ timeout: 10_000 });
+      else if (run.input === 'mouse') await locator.click({ timeout: 10_000 });
+      else {
+        await locator.focus();
+        await page.keyboard.press('Enter');
+      }
+    };
+    // With motion on, the Room's Arrival is let run out first, as `pointers` does.
+    if (run.motion) await page.waitForTimeout(ARRIVAL_OVER_MS.cinema);
+    await press(page.locator('button.cinema-shelf[data-shelf="comedy"]'));
+    const poster = page.locator('button.cinema-poster').first();
+    await poster.waitFor({ state: 'visible', timeout: 45_000 });
+    const film = await poster.getAttribute('data-film');
+    const choose = page.locator('#poster-details .details-choose');
+    if (run.input === 'keyboard') {
+      // Focus opens the Poster, and Tab hands on into the card's first action.
+      await poster.focus();
+      await choose.waitFor({ state: 'visible', timeout: 10_000 });
+      await page.keyboard.press('Tab');
+      if (!(await choose.evaluate(element => document.activeElement === element))) throw new Error('Tab from the open Poster did not reach "watch this one tonight"');
+      await page.keyboard.press('Enter');
+    } else {
+      await press(poster);
+      await choose.waitFor({ state: 'visible', timeout: 10_000 });
+      await press(choose);
+    }
+    await page.waitForFunction(() => document.getElementById('game-dialog').open, null, { timeout: 5_000 });
+    const opened = await page.evaluate(READ_FILM_DIALOG);
+    const before = network.workerRequests.length;
+    let status = null;
+    if (run.send) {
+      const consent = page.locator('#invite-consent');
+      if (run.input === 'keyboard') {
+        await consent.focus();
+        await page.keyboard.press('Space');
+      } else if (run.input === 'tap') await consent.tap();
+      else await consent.click();
+      await page.waitForFunction(() => !document.getElementById('send-invite').disabled, null, { timeout: 5_000 });
+      network.answer = 200;
+      await press(page.locator('#send-invite'));
+      await page
+        .waitForFunction(wanted => document.getElementById('invite-status').textContent === wanted, FILM_DIALOG[run.language].sent, { timeout: 10_000 })
+        .catch(() => {});
+      status = await page.evaluate(() => document.getElementById('invite-status').textContent);
+    }
+    const sent = network.workerRequests.slice(before).map(request => request.body);
+    const whileOpen = await page.evaluate(READ_FILM_DIALOG);
+    await page.evaluate(WATCH_FOR_BUMPER);
+    if (run.input === 'keyboard') await page.keyboard.press('Escape');
+    else await press(page.locator('#dialog-close'));
+    await page.waitForFunction(() => window.__bumperSeen, null, { timeout: 15_000 }).catch(() => {});
+    const after = await page.evaluate(() => ({
+      dialogOpen: document.getElementById('game-dialog').open,
+      bumperSeen: window.__bumperSeen,
+      focusOnGate: document.activeElement?.matches('[data-projector-gate]') ?? false,
+    }));
+    return { film, opened, status, sent, whileOpen, ...after, consoleErrors };
+  } finally {
+    await context.close();
+  }
+}
+
+async function checkFilm(browser, baseUrl, network) {
+  const readings = [];
+  for (const run of FILM_RUNS) {
+    try {
+      const shown = await chooseFilmOnce(browser, baseUrl, network, run);
+      const facts = COMEDY[shown.film];
+      const words = FILM_DIALOG[run.language];
+      const named = facts ? `${facts.title[run.language]} (${facts.year})` : null;
+      const dialogRight = shown.opened.open && shown.opened.named === named && shown.opened.title === words.title
+        && shown.opened.consent === words.consent && shown.opened.invite === words.invite && shown.opened.link === words.link
+        && shown.opened.linkHost === 'tv.apple.com';
+      const body = shown.sent[0];
+      const sendRight = run.send
+        ? shown.status === words.sent && shown.sent.length === 1 && body?.film === shown.film && body?.title === facts?.title[run.language]
+          && body?.year === facts?.year && body?.action === 'watch-together' && body?.consent === true && !('game' in (body ?? {}))
+        : shown.sent.length === 0;
+      const bumperAfter = !shown.opened.filmRolling && !shown.whileOpen.filmRolling && !shown.dialogOpen && shown.bumperSeen;
+      const ok = dialogRight && sendRight && bumperAfter && (run.input !== 'keyboard' || shown.focusOnGate) && shown.consoleErrors.length === 0;
+      readings.push({ ...run, wanted: { named, ...words }, ...shown, dialogRight, sendRight, bumperAfter, ok });
+    } catch (error) {
+      readings.push({ ...run, error: error.message, ok: false });
     }
   }
   return readings;
@@ -750,7 +930,7 @@ async function main() {
   let browser = null;
   try {
     browser = await playwright.chromium.launch({ headless: true });
-    const run = { slate: checkSlate, invitation: checkInvitation, challenge: checkChallenge, hash: checkHash, sound: checkSound, cats: checkCats, pointers: checkPointers };
+    const run = { slate: checkSlate, invitation: checkInvitation, challenge: checkChallenge, film: checkFilm, hash: checkHash, sound: checkSound, cats: checkCats, pointers: checkPointers };
     for (const check of options.only) results[check] = await run[check](browser, server.baseUrl, network);
   } finally {
     if (browser) await browser.close();

@@ -1,9 +1,22 @@
 const GAMES = Object.freeze({ tango: 'Operation: Tango', lovers: 'Lovers in a Dangerous Spacetime', heavenly: 'Heavenly Bodies' });
-const ACTION = 'play-together';
+// The nine Films the Cinema recommends, as `src/world/films.ts` names them; a test holds the two tables together.
+export const FILMS = Object.freeze({
+  'knives-out': { title: { 'zh-Hant': '鋒迴路轉', en: 'Knives Out' }, year: 2019 },
+  'kung-fu-hustle': { title: { 'zh-Hant': '功夫', en: 'Kung Fu Hustle' }, year: 2004 },
+  'eat-drink-man-woman': { title: { 'zh-Hant': '飲食男女', en: 'Eat Drink Man Woman' }, year: 1994 },
+  'crazy-rich-asians': { title: { 'zh-Hant': '瘋狂亞洲富豪', en: 'Crazy Rich Asians' }, year: 2018 },
+  'about-time': { title: { 'zh-Hant': '真愛每一天', en: 'About Time' }, year: 2013 },
+  'in-the-mood-for-love': { title: { 'zh-Hant': '花樣年華', en: 'In the Mood for Love' }, year: 2000 },
+  'mr-vampire': { title: { 'zh-Hant': '殭屍先生', en: 'Mr. Vampire' }, year: 1985 },
+  'get-out': { title: { 'zh-Hant': '逃出絕命鎮', en: 'Get Out' }, year: 2017 },
+  'detention': { title: { 'zh-Hant': '返校', en: 'Detention' }, year: 2019 }
+});
+const PLAY = 'play-together';
+const WATCH = 'watch-together';
 const MAX_BODY = 4096;
 const DAY = 86400000;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const FIELDS = new Set(['game', 'action', 'consent', 'requestId', 'turnstileToken', 'website']);
+const FIELDS = new Set(['game', 'film', 'title', 'year', 'action', 'consent', 'requestId', 'turnstileToken', 'website']);
 
 class HttpError extends Error {
   constructor(status, code) { super(code); this.status = status; this.code = code; }
@@ -59,10 +72,35 @@ async function readBody(request) {
 
 function validBody(body) {
   return body && !Array.isArray(body) && typeof body === 'object' && Object.keys(body).every(key => FIELDS.has(key)) &&
-    typeof body.game === 'string' && Object.hasOwn(GAMES, body.game) && body.action === ACTION && body.consent === true &&
-    typeof body.requestId === 'string' && UUID.test(body.requestId) &&
+    body.consent === true && typeof body.requestId === 'string' && UUID.test(body.requestId) &&
     typeof body.turnstileToken === 'string' && body.turnstileToken.length > 0 && body.turnstileToken.length <= 2048 &&
     (body.website === undefined || body.website === '');
+}
+
+/**
+ * What the visitor chose, or null: a game by its id, or a Film by its id and the title and
+ * year the visitor saw. The title is only taken when it is that Film's own, and the language
+ * it matched is what the email names the Film in.
+ */
+function choiceOf(body) {
+  if (body.film === undefined && body.title === undefined && body.year === undefined) {
+    return typeof body.game === 'string' && Object.hasOwn(GAMES, body.game) && body.action === PLAY ? { game: body.game } : null;
+  }
+  if (body.game !== undefined || body.action !== WATCH || typeof body.film !== 'string' || !Object.hasOwn(FILMS, body.film)) return null;
+  const film = FILMS[body.film];
+  const language = Object.keys(film.title).find(key => film.title[key] === body.title);
+  return language && body.year === film.year ? { film: body.film, language } : null;
+}
+
+/** The subject and opening lines of the email for a choice, out of the Worker's own tables; null for anything else. */
+function describe(choice) {
+  if (choice.film === undefined) {
+    if (!Object.hasOwn(GAMES, choice.game || '')) return null;
+    return { subject: GAMES[choice.game], opening: ['Someone chose: I want to play this with u~', 'Game: ' + GAMES[choice.game]] };
+  }
+  if (choice.game !== undefined || !Object.hasOwn(FILMS, choice.film) || !Object.hasOwn(FILMS[choice.film].title, choice.language || '')) return null;
+  const name = FILMS[choice.film].title[choice.language] + ' (' + FILMS[choice.film].year + ')';
+  return { subject: name, opening: ['Someone chose: I want to watch this with u~', 'Film: ' + name] };
 }
 
 async function hmac(secret, input) {
@@ -104,7 +142,8 @@ export async function handleInvite(request, env) {
     const ipHash = await hmac(env.FINGERPRINT_SECRET, 'limit:' + ip);
     if (!(await env.REQUEST_LIMITER.limit({ key: ipHash })).success) throw new HttpError(429, 'rate_limited');
     const body = await readBody(request);
-    if (!validBody(body)) throw new HttpError(400, 'invalid_request');
+    const choice = validBody(body) ? choiceOf(body) : null;
+    if (!choice) throw new HttpError(400, 'invalid_request');
 
     const verification = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(8000),
@@ -120,7 +159,7 @@ export async function handleInvite(request, env) {
     const gate = env.DELIVERY_GATE.getByName('invitations');
     const receipt = await gate.fetch(new Request('https://delivery.internal/send', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requestId: body.requestId, game: body.game, ipHash, fingerprint, ip, country, ...details })
+      body: JSON.stringify({ requestId: body.requestId, ...choice, ipHash, fingerprint, ip, country, ...details })
     }));
     // Do not return recipient details, upstream errors, visitor data, or provider IDs.
     return json(receipt.status, receipt.status === 429 ? 'rate_limited' : receipt.status === 409 ? 'try_later' : 'unavailable', origin);
@@ -135,7 +174,8 @@ export class DeliveryGate {
 
   async fetch(request) {
     const input = await request.json();
-    if (!UUID.test(input.requestId || '') || !Object.hasOwn(GAMES, input.game) || !/^[a-f0-9]{64}$/.test(input.ipHash || '') || !/^[a-f0-9]{24}$/.test(input.fingerprint || '')) return json(400, 'invalid_request');
+    const named = describe(input);
+    if (!UUID.test(input.requestId || '') || !named || !/^[a-f0-9]{64}$/.test(input.ipHash || '') || !/^[a-f0-9]{24}$/.test(input.fingerprint || '')) return json(400, 'invalid_request');
     const now = Date.now();
     const day = new Date(now).toISOString().slice(0, 10);
     const requestKey = 'request:' + input.requestId;
@@ -144,14 +184,14 @@ export class DeliveryGate {
     const reservation = await this.ctx.storage.transaction(async tx => {
       const prior = await tx.get(requestKey);
       if (prior && prior.expires > now) {
-        if (prior.game !== input.game || prior.ipHash !== input.ipHash || prior.fingerprint !== input.fingerprint) return { status: 409 };
+        if (prior.game !== input.game || prior.film !== input.film || prior.ipHash !== input.ipHash || prior.fingerprint !== input.fingerprint) return { status: 409 };
         if (prior.state === 'sent') return { status: 200 };
         if (prior.state === 'pending' && now - prior.attemptAt < 30000) return { status: 409 };
       }
       const perIP = await tx.get(ipKey) || { count: 0, expires: now + DAY };
       const global = await tx.get(globalKey) || { count: 0, lastAttemptAt: 0, expires: now + 2 * DAY };
       if (perIP.count >= 5 || global.count >= 30 || now - global.lastAttemptAt < 1000) return { status: 429 };
-      const record = { game: input.game, ipHash: input.ipHash, fingerprint: input.fingerprint, state: 'pending', attemptAt: now, requestedAt: prior?.requestedAt || new Date(now).toISOString(), expires: now + DAY };
+      const record = { game: input.game, film: input.film, ipHash: input.ipHash, fingerprint: input.fingerprint, state: 'pending', attemptAt: now, requestedAt: prior?.requestedAt || new Date(now).toISOString(), expires: now + DAY };
       await tx.put(ipKey, { ...perIP, count: perIP.count + 1 });
       await tx.put(globalKey, { ...global, count: global.count + 1, lastAttemptAt: now });
       await tx.put(requestKey, record);
@@ -167,9 +207,9 @@ export class DeliveryGate {
         headers: { 'Authorization': 'Bearer ' + this.env.RESEND_API_KEY, 'Content-Type': 'application/json', 'Idempotency-Key': 'ada-invite-' + input.requestId },
         body: JSON.stringify({
           from: this.env.NOTIFY_FROM, to: [this.env.NOTIFY_TO],
-          subject: "Ada's choice: " + GAMES[input.game],
+          subject: "Ada's choice: " + named.subject,
           text: [
-            'Someone chose: I want to play this with u~', 'Game: ' + GAMES[input.game], '',
+            ...named.opening, '',
             'Sent: ' + record.requestedAt, 'Country (approximate): ' + input.country, 'IP address: ' + input.ip,
             'Device: ' + input.device, 'Operating system: ' + input.os, 'Browser: ' + input.browser,
             'Request fingerprint: ' + input.fingerprint, '',
