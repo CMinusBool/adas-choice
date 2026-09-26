@@ -422,6 +422,16 @@ html.dialog-open { overflow: hidden; }
 .cinema-door .door-leaf { position: absolute; inset: 0; background-size: 200% 100%; background-position: 0 0; background-repeat: no-repeat; }
 .cinema-door:hover, .cinema-door:focus-visible { box-shadow: 0 0 calc(var(--u) * 90) #ffca8066; outline: none; }
 .cinema-door:focus-visible .door-leaf { outline: 3px solid var(--pink); outline-offset: 2px; }
+/* 106: the Cinema's leaf swings on its hinge edge with no perspective. The shared
+   `perspective(600px)` at the foot of the file is in page pixels, so on this 142-unit
+   leaf the swinging edge stood 19% taller than the doorway at 1440 x 900 and 6% at
+   390, over the lintel and into the floor. Swung flat, the open leaf keeps the
+   doorway's height and its hinge on the opening's left edge at every width. */
+.stage-cinema[data-door] .cinema-door .door-leaf { transform-origin: left center; }
+.stage-cinema[data-door="closing"] .cinema-door .door-leaf,
+.stage-cinema[data-door="closed"] .cinema-door .door-leaf { transform: rotateY(0deg); }
+.stage-cinema[data-door="opening"] .cinema-door .door-leaf,
+.stage-cinema[data-door="open"] .cinema-door .door-leaf { transform: rotateY(-68deg); }
 
 /* P7-P9: the three shelves. Colour, crown silhouette and ornament each say the
    genre on their own, so any one of them surviving a small screen is enough —
@@ -723,7 +733,11 @@ html.dialog-open { overflow: hidden; }
    92: on the 1360 x 765 stage the box is that one by R1 (387.1, 115.44,
    661.44 x 403.26), the sheet's corners (607.06, 361.92) and (1048.54, 361.92)
    with it, and the aperture the projector group's, (468.6, 483.4). */
-.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(12.32% 91.25%, 33.25% 61.1%, 100% 61.1%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
+/* 106: lens glass, sheet top-left, bottom-left, bottom-right, lens glass: the cone
+   index.html's comment on `.cinema-beam` spells out in stage units. Its three
+   vertices at the old box ran to the sheet's bottom edge only, a sliver aimed at the
+   right-hand wall. */
+.stage-cinema .cinema-beam { z-index: 901; pointer-events: none; clip-path: polygon(0% 97.55%, 24.43% 0%, 24.43% 65.86%, 100% 65.86%, 0.86% 100%); background: linear-gradient(to top, #ffe6b03d, #ffe6b00f); }
 
 /* §10: the screen sheet, once there is something on it. 92: everything drawn
    on it is in `--sheet-u`, the stage unit at R1's 0.78, so the Bumper and the

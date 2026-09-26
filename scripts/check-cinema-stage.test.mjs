@@ -18,9 +18,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
+import { decodePng } from './png.mjs';
 import { loadWorldModel } from './world-model.mjs';
 
 const indexHtml = readFileSync(fileURLToPath(new URL('../index.html', import.meta.url)), 'utf8');
+const stylesCss = readFileSync(fileURLToPath(new URL('../styles.css', import.meta.url)), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 
 /** The Cinema Room's stage, from its opening tag to the Beats nobody plays yet. */
 const stage = (() => {
@@ -323,5 +325,88 @@ describe('the Cinema Room at true size', () => {
       const mark = model.CINEMA_MARKS[`${tag.seat}Seat`];
       assert.ok(Math.hypot(at.x - mark.x, at.y - mark.y) <= 6, `${tag.seat}'s still stands ${at.x}, ${at.y} against ${mark.x}, ${mark.y}`);
     }
+  });
+});
+
+describe('the Cinema door and the beam, as the visitor sees them (ticket 106)', () => {
+  /**
+   * The empty doorway painted in ticket 91's backdrop, S01: its four edges found at
+   * the half-way crossing between wall and opening along 90 rows and 35 columns of
+   * `public/assets/cinema/backdrop.png`, in stage units (1744 / 1360 px a unit).
+   */
+  const OPENING = { left: 29.89, top: 116.25, right: 170.23, bottom: 462.39 };
+
+  /** A declaration's value in `styles.css`, found by its rule's exact selector. */
+  const declaration = (selector, property) => {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const body = new RegExp(`(?:^|[}\\s,])${escaped}\\s*\\{([^}]*)\\}`, 'm').exec(stylesCss)?.[1];
+    if (!body) throw new Error(`styles.css has no "${selector}" rule`);
+    const value = new RegExp(`(?:^|;)\\s*${property}\\s*:\\s*([^;]+)`).exec(body)?.[1]?.trim();
+    if (!value) throw new Error(`"${selector}" sets no ${property}`);
+    return value;
+  };
+
+  test('covers the painted opening edge to edge with the shut leaf’s drawn pixels', () => {
+    // `.cinema-door .door-leaf` fills the link's box and shows the sheet's first cell
+    // across it (`background-size: 200% 100%`), so a cell pixel is box / cell units.
+    const door = propBox('cinema-door');
+    const sheet = decodePng(readFileSync(fileURLToPath(new URL('../public/assets/cinema/door-leaf.png', import.meta.url))));
+    const cellW = sheet.width / 2;
+    let left = cellW, top = sheet.height, right = 0, bottom = 0;
+    for (let y = 0; y < sheet.height; y += 1) {
+      for (let x = 0; x < cellW; x += 1) {
+        if (sheet.data[(y * sheet.width + x) * 4 + 3] === 0) continue;
+        left = Math.min(left, x); right = Math.max(right, x + 1);
+        top = Math.min(top, y); bottom = Math.max(bottom, y + 1);
+      }
+    }
+    const drawn = {
+      left: door.x + (left / cellW) * door.w,
+      right: door.x + (right / cellW) * door.w,
+      top: door.y + (top / sheet.height) * door.h,
+      bottom: door.y + (bottom / sheet.height) * door.h,
+    };
+    // Edge to edge: no sliver of the dark opening beside the leaf, no leaf on the wall.
+    for (const edge of ['left', 'top', 'right', 'bottom']) near(drawn[edge], OPENING[edge], 0.5, `the shut leaf’s ${edge} edge`);
+    near(door.w, 142, 142 * 0.03, 'the door box’s width');
+    near(door.h, 350, 350 * 0.03, 'the door box’s height');
+  });
+
+  test('swings the open leaf on the doorway’s hinge edge and inside its height, at every page width', () => {
+    const transform = declaration('.stage-cinema[data-door="open"] .cinema-door .door-leaf', 'transform');
+    assert.match(declaration('.stage-cinema[data-door] .cinema-door .door-leaf', 'transform-origin'), /^left\b/, 'the leaf hinges on its left edge');
+    // A perspective written in px grows the swinging edge with the page: 19% taller
+    // than the doorway at 1440 x 900 under perspective(600px), 6% at 390.
+    assert.doesNotMatch(transform, /perspective\([^)]*px/, 'a px perspective sizes the open leaf by the page width');
+    const angle = Number(/rotateY\((-?[\d.]+)deg\)/.exec(transform)?.[1]);
+    assert.ok(angle <= -60 && angle >= -80, `the open leaf stands ${angle}deg open`);
+    const units = /perspective\(calc\(var\(--u\)\s*\*\s*([\d.]+)\)\)/.exec(transform)?.[1];
+    const door = propBox('cinema-door');
+    const grow = units ? Number(units) / (Number(units) - door.w * Math.sin((-angle * Math.PI) / 180)) : 1;
+    near(door.h * grow, 350, 350 * 0.03, 'the open leaf’s swinging edge');
+  });
+
+  test('throws the beam from the lens, and its far edge meets the sheet’s corners', () => {
+    const box = propBox('cinema-beam');
+    const polygon = declaration('.stage-cinema .cinema-beam', 'clip-path');
+    const points = [...polygon.matchAll(/(-?[\d.]+)%\s+(-?[\d.]+)%/g)].map(([, x, y]) => ({
+      x: box.x + (Number(x) / 100) * box.w,
+      y: box.y + (Number(y) / 100) * box.h,
+    }));
+    // The lens mouth: ticket 66's (549.5, 648) on the projector, through ticket 92's
+    // x 0.78 map about the group's base centre. The glass is about 12 x 16 units.
+    const lens = { x: 430 + (549.5 - 500) * R1, y: 547.4 + (648 - 730) * R1 };
+    const onLens = points.filter(point => Math.hypot((point.x - lens.x) / 6, (point.y - lens.y) / 8) <= 1);
+    assert.ok(onLens.length >= 1, `no vertex of the beam is on the lens at ${lens.x}, ${lens.y}`);
+    const corners = {
+      'top-left': { x: screen.x, y: screen.y },
+      'bottom-left': { x: screen.x, y: screen.y + screen.h },
+      'bottom-right': { x: screen.x + screen.w, y: screen.y + screen.h },
+    };
+    for (const [name, corner] of Object.entries(corners)) {
+      assert.ok(points.some(point => Math.hypot(point.x - corner.x, point.y - corner.y) <= 0.5), `the beam misses the sheet’s ${name} corner, ${corner.x}, ${corner.y}`);
+    }
+    // Every vertex is the lens or a corner: the cone lights nothing past the sheet.
+    assert.equal(points.length, onLens.length + 3, `the beam has ${points.length} vertices`);
   });
 });
