@@ -21,8 +21,13 @@ import re
 import sys
 from pathlib import Path
 
-TICKET_NAME = re.compile(r"^(\d{2})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
-TITLE = re.compile(r"^# (\d{2}): \S.*$")
+# A ticket number is two digits from 01 to 99, then three from 100 to 999 with no
+# leading zero, so every number has exactly one spelling. Order numbers with
+# `ticket_order`, never as strings: "100" < "22".
+NUMBER = r"(?:\d{2}|[1-9]\d{2})"
+NUMBER_RULE = "two digits (01-99) or three (100-999)"
+TICKET_NAME = re.compile(rf"^({NUMBER})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
+TITLE = re.compile(rf"^# ({NUMBER}): \S.*$")
 HEADER = re.compile(r"^([A-Z][A-Za-z ]*): *(.*)$")
 BLOCKED_NONE = "None (can start immediately)"
 
@@ -52,6 +57,12 @@ REVIEW_KINDS = {"design", "content", "art"}
 BRANCH_KINDS = {"code"}
 # Kinds whose `Deliverable:` is relative to the repo root, not the effort directory.
 REPO_ROOT_KINDS = {"asset-code"}
+
+
+def ticket_order(name: str) -> tuple[int, str]:
+    """Sort key for a ticket number or a filename: numeric, so 22 comes before 100."""
+    digits = re.match(r"\d+", name)
+    return (int(digits.group()) if digits else -1, name)
 
 
 class Ticket:
@@ -151,7 +162,7 @@ def parse_headers(lines: list[str], where: str, errors: list[str]) -> dict[str, 
 def check_ticket(path: Path, errors: list[str]) -> Ticket | None:
     name_match = TICKET_NAME.match(path.name)
     if not name_match:
-        errors.append(f"{path.name}: filename must be `NN-<lower-kebab-slug>.md`, NN two digits")
+        errors.append(f"{path.name}: filename must be `NN-<lower-kebab-slug>.md`, NN {NUMBER_RULE}")
         return None
     number = name_match.group(1)
     if number == "00":
@@ -224,9 +235,10 @@ def check_ticket(path: Path, errors: list[str]) -> Ticket | None:
     blocked = ticket.headers.get("Blocked by")
     if blocked is not None and blocked != BLOCKED_NONE:
         for part in (piece.strip() for piece in blocked.split(",")):
-            if not re.fullmatch(r"\d{2}", part):
+            if not re.fullmatch(NUMBER, part):
                 errors.append(
-                    f"{where}: `Blocked by:` takes {BLOCKED_NONE!r} or two-digit ticket numbers, got {part!r}"
+                    f"{where}: `Blocked by:` takes {BLOCKED_NONE!r} or ticket numbers, "
+                    f"{NUMBER_RULE}, got {part!r}"
                 )
             elif part == number:
                 errors.append(f"{where}: a ticket cannot block itself")
@@ -272,7 +284,7 @@ def check_edges(tickets: dict[str, Ticket], errors: list[str]) -> None:
     colour = {number: WHITE for number in tickets}
     reported: set[frozenset[str]] = set()
 
-    for start in sorted(tickets):
+    for start in sorted(tickets, key=ticket_order):
         if colour[start] != WHITE:
             continue
         stack: list[tuple[str, list[str]]] = [(start, [start])]
@@ -319,7 +331,10 @@ def main(argv: list[str]) -> int:
     check_spec(spec_dir / "spec.md", errors)
 
     tickets: dict[str, Ticket] = {}
-    files = sorted(path for path in issues_dir.iterdir() if path.is_file() and path.suffix == ".md")
+    files = sorted(
+        (path for path in issues_dir.iterdir() if path.is_file() and path.suffix == ".md"),
+        key=lambda path: ticket_order(path.name),
+    )
     if not files:
         print(f"{issues_dir}: no ticket files", file=sys.stderr)
         return 1
@@ -345,8 +360,8 @@ def main(argv: list[str]) -> int:
 
     print(f"{spec_dir}  ({len(tickets)} tickets)")
     width = max(len(ticket.path.stem) for ticket in tickets.values())
-    for number in sorted(tickets):
-        ticket = tickets[number]
+    ordered = [tickets[number] for number in sorted(tickets, key=ticket_order)]
+    for ticket in ordered:
         blockers = ", ".join(ticket.blocked_by) if ticket.blocked_by else "-"
         print(
             f"  {ticket.path.stem:<{width}}  {ticket.status:<11}  "
@@ -355,13 +370,13 @@ def main(argv: list[str]) -> int:
         )
 
     frontier = [
-        number
-        for number, ticket in sorted(tickets.items())
+        ticket.number
+        for ticket in ordered
         if ticket.status == "ready"
         and "ready-for-agent" in ticket.labels
         and all(tickets[blocker].status == "done" for blocker in ticket.blocked_by)
     ]
-    awaiting = [number for number, ticket in sorted(tickets.items()) if ticket.status == "review"]
+    awaiting = [ticket.number for ticket in ordered if ticket.status == "review"]
 
     if awaiting:
         print("awaiting review: " + ", ".join(awaiting))

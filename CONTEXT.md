@@ -19,10 +19,10 @@ apartment's hub, but it is a real place with furniture, not a menu overlaid on o
 _Avoid_: main menu, lobby, hub, home
 
 **Stage**:
-A Room's logical canvas: 1600 x 900 units, origin top-left, x right, y down, held by
-`<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS. Walkable areas,
-Props, doors and Actor positions are all written in stage units, so the same numbers mean the
-same place at every screen width. Every Room has exactly one.
+A Room's logical 16:9 canvas, origin top-left, x right, y down, its size set per Room in `STAGES`,
+held by `<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS. Walkable
+areas, Props, doors and Actor positions are all written in that Room's stage units, so the same
+numbers mean the same place at every screen width. Every Room has exactly one.
 _Avoid_: canvas, viewport, board, pixels
 
 **Scene**:
@@ -90,10 +90,8 @@ ringed tail with a dark tip. Adult, small, thin.
 **Luna**:
 The black cat — solid black, short fine coat, a short tail about half the length of the other
 two's, and green-yellow eyes where theirs are pale. Adult, the largest of the three and the
-softest built, and the only cat who stands taller than 66 stage units to the shoulder: she is 72.
-She is an Actor as of 2026-09-20 — `ActorId`, `.cycle` layers and validated placeholder frames —
-and rides in the pet backpack with the other two. She roams, meows and can be petted like the
-other two, and the Game Room's snow globe is her Breakable.
+softest built. She rides in the pet backpack with the other two, roams, meows and can be petted
+like them, and the Game Room's snow globe is her Breakable.
 
 **Character Sheet**:
 The frozen reference artwork and written description that fixes a Cast member's identity.

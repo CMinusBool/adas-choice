@@ -14,7 +14,8 @@ global contract's opt-in section for repos whose tasks originate upstream.
   `/implement-parallel` resolves `.scratch/<KEY>-*/`.
 - The spec is `.scratch/<KEY>-<slug>/spec.md`.
 - Implementation tickets are one file per ticket at `.scratch/<KEY>-<slug>/issues/<NN>-<slug>.md`,
-  numbered from `01`, never a single combined tickets file.
+  numbered from `01` — two digits to `99`, three from `100`, compared as numbers — never a single
+  combined tickets file.
 - Side files sit beside them in the effort directory: `notes/` (scout notes), `research/`,
   `design/`, `art/` and `briefs/`.
 - Comments and conversation history append to the bottom of a ticket under a `## Comments` heading;
@@ -37,6 +38,15 @@ python scripts/check_tickets.py .scratch/<KEY>-<slug>
 Write the tickets with the personal `/to-tickets` skill, never with `/mattpocock-skills:to-tickets`
 bare: the plugin's template writes bold inline fields the validator rejects, and it knows nothing
 about `Kind:`, `Profile:` or `Deliverable:`.
+
+## Closing mode
+
+An effort directory that holds `CLOSING.md` is closing. That file is read after the check script and
+before any fan-out; it names the tickets that may still run, who accepts each kind of deliverable, the
+attempt cap for a generation, and what goes to `docs/known_issues.md` instead of a ticket. It overrides
+`/implement-parallel` steps 4 to 8 and the agents' Report sections where it says so, for that effort
+only. `docs/known_issues.md` is committed, one line per issue, and a line leaves it only in the commit
+that fixes it.
 
 ## When a skill says "publish to the issue tracker"
 

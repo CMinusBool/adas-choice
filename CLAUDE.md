@@ -103,19 +103,21 @@ history. Read a doc when its trigger applies to your ticket, in full, before edi
   `scripts/art/build-cycle.mjs`, checked by `scripts/check-assets.mjs`). Before touching
   `public/assets/`, `scripts/art/`, `check-assets.mjs` or any `data-sheet` / `data-still` /
   `data-animated` attribute, read `docs/agents/scene-and-cycle-assets.md` in full.
-- **An Actor exists only where `index.html` declares its `.cycle` layers**; what ships is
-  one-frame placeholders, animation is parked, and generated art lives in the main checkout,
-  never a worktree. Read `docs/agents/scene-and-cycle-assets.md` in full before any `art` or
-  `asset-code` ticket, and before adding or replacing an Actor, a Cycle or a Scene.
+- **An Actor exists only where `index.html` declares its `.cycle` layers**, and each ships one
+  standing frame per facing; the world model does the travelling. Generated art lives in the main
+  checkout under the effort directory. Read `docs/agents/scene-and-cycle-assets.md` in full before
+  any `art` or `asset-code` ticket.
 - **The Cast follows the visitor, and every Room plays a ~3s Arrival** any input ends; a Door
   needs a separate transparent leaf over a backdrop drawn with an empty doorway. Before editing
   `src/world/actors.ts`, `src/world/arrival.ts`, `src/dom/arrival.ts` or `src/dom/actors.ts`,
   read `docs/agents/cast-and-stages.md` in full.
-- **Every Room has a stage**: a 16:9 canvas of 1600 x 900 units, origin top-left; place Props,
-  doors and Actors in stage units, never pixels. **The Boy is the ruler**: 180 cm = 300 units,
-  everything is at true size against him, and every door in the apartment is one size. An art drop swaps a Prop's surface through its
-  `data-still`, never a `url()` in `styles.css`. Before touching stage markup, Prop CSS, `HOMES`
-  or `src/dom/artwork.ts`, read `docs/agents/cast-and-stages.md` in full.
+- **Every Room has its own stage**: a 16:9 canvas whose size is its entry in `STAGES`
+  (`src/world/stage.ts`), origin top-left; place Props, doors and Actors in that Room's stage units,
+  never pixels. The Boy is 300 units tall and **every door in the apartment is 142 x 350 units**,
+  box and painted doorway; a drop checks the doors to ±3% and records every other scale factor in
+  the Room's manifest. An art drop swaps a Prop's surface through its `data-still`, never a `url()`
+  in `styles.css`. Before touching stage markup, Prop CSS, `HOMES` or `src/dom/artwork.ts`, read
+  `docs/agents/cast-and-stages.md` in full.
 - **Relative paths only** — the site has to work from a repository subpath, which is why Vite's
   `base` is `'./'`. Never introduce a root-absolute URL that survives the build.
 - **No framework.** Rooms are absolutely-positioned DOM sprites driven by `requestAnimationFrame`.
@@ -163,6 +165,14 @@ Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/
 When a skill says "publish to the issue tracker", write a file under `.scratch/<KEY>-<slug>/`.
 When it says "fetch the ticket", read the file. Do not look for an upstream tracker: there is none,
 and the skills that read one do not apply here.
+
+### Closing mode
+
+An effort whose directory holds `CLOSING.md` is closing. That file names the tickets that may still
+run, who accepts each kind of deliverable, and what goes to `docs/known_issues.md` instead of a
+ticket; it overrides `/implement-parallel` steps 4 to 8 and the agents' Report sections where it says
+so, for that effort only. Small errors the branch ships with are one bullet each in
+`docs/known_issues.md`, committed.
 
 ## Environment
 

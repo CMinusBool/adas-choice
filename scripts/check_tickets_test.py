@@ -274,5 +274,70 @@ class FrontierAndReviewLines(EffortCase):
         self.assertIn("frontier is empty", out)
 
 
+class ThreeDigitNumbers(EffortCase):
+    """Two digits from 01 to 99, three from 100, and every comparison is numeric."""
+
+    def test_a_three_digit_ticket_is_accepted(self):
+        out = self.assertPasses([ticket("100", "foo")])
+        self.assertIn("100-foo", out)
+        self.assertIn("frontier: 100", out)
+
+    def test_blocked_by_takes_two_and_three_digit_numbers(self):
+        out = self.assertPasses(
+            [
+                ticket("99", "last-of-two", status="done"),
+                ticket("100", "first-of-three", status="done"),
+                ticket("101", "after-both", blocked_by="99, 100"),
+            ]
+        )
+        self.assertRegex(out, r"101-after-both\s.*blocked by 99, 100")
+        self.assertIn("frontier: 101", out)
+
+    def test_listing_frontier_and_review_line_order_22_before_100(self):
+        out = self.assertPasses(
+            [
+                ticket("100", "later-note", status="review", kind="design", deliverable="design/100.md"),
+                ticket("22", "earlier-note", status="review", kind="design", deliverable="design/22.md"),
+                ticket("101", "later-build"),
+                ticket("23", "earlier-build"),
+            ]
+        )
+        self.assertLess(out.index("22-earlier-note"), out.index("100-later-note"))
+        self.assertLess(out.index("23-earlier-build"), out.index("100-later-note"))
+        self.assertIn("awaiting review: 22, 100", out)
+        self.assertIn("frontier: 23, 101", out)
+
+    def test_problems_are_reported_in_numeric_order(self):
+        err = self.assertFails(
+            [ticket("100", "later", status="approved"), ticket("22", "earlier", status="approved")],
+            "`Status: approved` is not one of",
+        )
+        self.assertLess(err.index("22-earlier"), err.index("100-later"))
+
+    def test_a_cycle_is_reported_from_its_lowest_number(self):
+        self.assertFails(
+            [ticket("100", "later", blocked_by="22"), ticket("22", "earlier", blocked_by="100")],
+            "blocking cycle: 22 -> 100 -> 22",
+        )
+
+    def test_other_widths_and_leading_zeros_are_still_rejected(self):
+        for number in ("7", "1000", "007", "099"):
+            with self.subTest(number=number):
+                self.assertFails(
+                    [ticket(number, "x")], f"{number}-x.md: filename must be `NN-<lower-kebab-slug>.md`"
+                )
+
+    def test_numbering_still_starts_at_01(self):
+        self.assertFails([ticket("00", "x")], "00-x.md: tickets are numbered from 01")
+
+    def test_blocked_by_rejects_other_widths_and_leading_zeros(self):
+        for part in ("7", "1000", "099"):
+            with self.subTest(part=part):
+                self.assertFails(
+                    [ticket("01", "a"), ticket("02", "b", blocked_by=part)],
+                    f"`Blocked by:` takes {check_tickets.BLOCKED_NONE!r} or ",
+                )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -35,29 +35,26 @@ coats worn, backpack carried — cleared when the world is created, not when the
   seconds finishes it **in the Entryway, before the Cast is gathered into the Room being walked
   into** — finishing it afterwards put all five of them back in the hall they had just left and
   handed the new Room a set of marks nobody was standing on, which is a Room with no Cast in it
-  (ticket 51). Because a Door has to open, **a door leaf must be a separate
-  transparent asset and every Room backdrop must be drawn with an empty doorway** — a leaf painted
-  into the backdrop at a fixed angle cannot be one anybody opens. **That is the contract every art
-  ticket is written to, and it is not what is on disk yet**: today the leaves are CSS placeholders
-  that swing, and the backdrops are the CSS placeholders tickets 15 to 17 shipped, which still
-  carry their doorways painted in. Nothing is wrong with the code — `src/dom/arrival.ts` already
-  swings a leaf through `data-door`, so an art drop replaces a surface and keeps the behaviour.
-  The rule stands as written for every delivery; the **shipped** state is placeholders, and the
-  art lane (tickets 31, 32, 41, 42) is where it stops being one.
-- **Every Room has a stage**: a 16:9 logical canvas of 1600 x 900 units, origin top-left, x right,
-  y down, held by `<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS.
-  Walkable areas, Props, doors and Actor positions are all written in those units, so the same
-  numbers mean the same place at every screen width, and the DOM only ever turns them into
-  percentages of the stage. An Actor's position is its feet — the bottom-centre of its sprite —
-  and depth is a y-sort. Furnish a Room by placing things on its stage in stage units; never in
-  pixels.
-- **The Boy is the ruler** (owner, 2026-09-25). He is 180 cm and 300 units to the crown, so
-  **1 cm = 1.667 units**, and everything in the apartment is at true size against him: doors,
-  shelves, furniture, posters, Props, and the features painted into every backdrop. **Every door
-  in the whole apartment is one size**: the Entryway's front door, its three Room doors, and each
-  Room's way back, both the box on the stage and the doorway painted behind it. A design note gives
-  every size in centimetres beside the units. New art is drawn to those sizes, and a drop checks
-  them. Where art that has already shipped is off, the fix is a ticket, not a `--scale`.
+  (ticket 51). Because a Door has to open, **a door leaf is a separate transparent two-cell asset
+  (shut, open) and every Room backdrop is drawn with an empty doorway**; `src/dom/arrival.ts` swings
+  the leaf through `data-door`, so an art drop replaces a surface and keeps the behaviour.
+- **Every Room has its own stage**: a 16:9 logical canvas, origin top-left, x right, y down, whose
+  size is its entry in `STAGES` (`src/world/stage.ts`), held by
+  `<div class="stage" data-stage="<room>">` and scaled to the Room's width in CSS. A Room's size is
+  set in four places in one commit — its `STAGES` entry, its `.stage[data-stage=…]` line in
+  `styles.css`, its backdrop Prop's `--w/--h` in `index.html`, and `"stage"` in its backdrop
+  manifest — and `scripts/check-stages.test.mjs` names any left behind. Walkable areas, Props, doors
+  and Actor positions are written in that Room's units, so the same numbers mean the same place at
+  every screen width. An Actor's position is its feet — the bottom-centre of its sprite — and depth
+  is a y-sort. Furnish a Room in stage units; never in pixels.
+- **The one door.** The Boy stands 300 units (180 cm, so 1 cm = 1.667 units) and **every door in the
+  apartment is 142 × 350 units** — the Entryway's front door, its three Room doors and each Room's
+  way back, the box on the stage and the doorway painted behind it, within ±3%. A Room's backdrop is
+  scaled whole so its painted doorway meets that size, and the Room's stage takes the size that
+  scale gives it (design 75 §2). Everything else keeps the proportions it was drawn with: a drop
+  scales it about its bottom-centre to the factor its design note gives, records the factor in the
+  Room's manifest, and lists in `docs/known_issues.md` anything that ends more than 10% from its
+  real-world size.
 - **Furnishing a Room.** A Prop is a box in stage units — `--x/--y/--w/--h`, turned into
   percentages of the stage by `left: calc(var(--x) / 16 * 1%)` and its three siblings — over a CSS
   placeholder surface, so dropping artwork in swaps the surface and keeps the box. A Prop drawn
@@ -66,11 +63,8 @@ coats worn, backpack carried — cleared when the world is created, not when the
   it `--note-u` is the note's unit at that scale, so every number written inside the Prop stays the
   note's. `--u` is the stage unit everywhere, those Props included (ticket 70). **An art drop
   swaps that surface by putting the file on the Prop's `data-still`, never by writing a `url()` into
-  `styles.css`** — the attribute is what preloads it and what gets it checked in `dist/`. Ticket 35
-  furnished the Activity Room the other way round and the Room fell straight out of the loading
-  gate; ticket 53 put it back, and `assert-built-page.mjs` went from resolving 21 local references
-  to 35 — the fourteen it could not see were the ones hidden in the stylesheet. `src/dom/artwork.ts`
-  turns `data-still` into a `--still` custom property and one zero-specificity
+  `styles.css`** — the attribute is what preloads it and what gets it checked in `dist/`.
+  `src/dom/artwork.ts` turns `data-still` into a `--still` custom property and one zero-specificity
   `:where([data-still]:not(img))` rule paints it, resolving against `document.baseURI` because a
   relative `url()` in a custom property resolves where the `var()` is **substituted**, not where it
   is declared. Its `--z` is its
