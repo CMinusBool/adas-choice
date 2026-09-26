@@ -1,55 +1,79 @@
 # Ada's choice
 
-A pink-and-charcoal co-op game page with three personalised animated scenes. Traditional Chinese is the default; the header switches every description and control to English and remembers the choice when browser storage is available.
+A hand-made page that recommends things to do together — co-op games, films and activities —
+drawn as a small illustrated apartment of four Rooms the visitor walks through:
 
-## Open locally
+| Room | Route | What is in it |
+| --- | --- | --- |
+| Entryway | `#/entryway` | The front door the Cast comes in through, and a Door to each of the other three Rooms |
+| Game Room | `#/games` | Three Portals, one per co-op game, each opening onto its animated Scene and the game's details |
+| Cinema | `#/cinema` | Shelves of Film Posters; choosing a Film runs the projector's Bumper before it rolls |
+| Activity Room | `#/activities` | Three Activities to do over a video call; one is chosen for tonight and can be put back |
 
-Run `npm ci` once, then `npm run dev` and open the address it prints. `npm run build` writes the deployable page to `dist/`, which `npm run preview` serves. No account or API key is needed. Artwork works offline; Steam links need internet access.
+The Cast lives there: the Boy, the Girl and three cats, Míca, Mira and Luna. They follow the
+visitor from Room to Room and play a short Arrival on every entry, which any click, tap or key
+ends. The cats can be petted, and they knock a few things over, which stay broken.
+`CONTEXT.md` defines every capitalised word here.
 
-## Interactions
+Traditional Chinese is the default; the header switches every string to English and back. Motion
+follows `prefers-reduced-motion`, and the header's motion button turns it on or off either way.
+Doors are ordinary links, so the browser's back button walks back through the Rooms.
 
-- Ada's heart gently pulses on hover or keyboard focus.
-- On a desktop mouse or trackpad, hovering a game expands its panel horizontally. The other two panels narrow, slowly turn gray, and pause on their current animation frames. Their detailed copy fades away while titles, player counts, setup, and Steam links remain.
-- Operation: Tango releases digital bits, chips, geometric shapes, and streaks.
-- Lovers in a Dangerous Spacetime releases hearts, cannon shots, stars, and shield rings.
-- Heavenly Bodies releases wrenches, nuts, stars, and orbital rings.
-- Clicking a whole card opens a cute two-choice dialog: **Checkout on Steam** and **I want to play this with u~**. Number bubbles have been removed. Keyboard focus still expands desktop cards; Enter or Space opens the dialog.
-- On mobile and narrow windows, cards stack at full width. The game occupying the most visible screen space animates and emits particles from its visible edges as you scroll. Touch devices need no hover. Controls are at least 44 pixels tall; safe-area padding accommodates the screen edges.
-- The motion button pauses/resumes the scenes. System reduced-motion preferences are respected; explicit playback remains available. Offscreen scenes and background tabs stop animating.
-- JavaScript is required. Running without it is no longer a supported mode; see `docs/adr/0001-built-single-page-apartment.md`.
+The artwork is original fan art, not gameplay footage or official artwork; the games and films are
+real, and their details are factual.
 
-## Files
+## Run it
 
-| File | Purpose |
+CI uses Node 24. Run `npm ci` once, then `npm run dev` and open the address it
+prints. The page needs a server: it does not open from `file://`, and it needs JavaScript
+(`docs/adr/0001-built-single-page-apartment.md`). `npm run build` writes the deployable page to
+`dist/`, which `npm run preview` serves.
+
+## Test it
+
+The three health commands, in this order — CI runs the same three:
+
+```bash
+npm test                            # typecheck, Vitest over src/**/*.test.ts, then the script checkers
+node --test worker/test/*.test.mjs  # the invitation Worker (its own package under worker/)
+npm run build                       # typecheck, bundle, then check the built page in dist/
+```
+
+`node scripts/check-assets.mjs` checks every sprite sheet the page declares against its contract;
+`npm run build` runs it as a report.
+
+## Where things live
+
+| Path | What it holds |
 | --- | --- |
-| `index.html` | First-paint Traditional Chinese content, Steam links, the only Vite entry |
-| `styles.css` | Pink theme, expanding panels, and responsive layout |
-| `src/main.ts` | English/Traditional Chinese copy, frame playback, particles, controls |
-| `src/world/` | Pure decision-making modules, no DOM; the only tested seam |
-| `public/site-config.js` | Public notification URL and public Turnstile site key only |
-| `public/assets/*-sprite.webp` | Updated 4×3 animation sheets; 12 frames each |
-| `public/assets/*.gif` | Updated looping GIF fallbacks |
-| `public/assets/*.webp` without `-sprite` | Still posters |
-| `public/assets/favicon.svg` | Pink heart icon |
-| `animation-prompts.json` | Exact built-in image-generation edit prompts |
-| `recommendations.md` | Original recommendation notes and sources |
-| `scripts/assert-built-page.mjs` | Post-build check on `dist/`, run by `npm run build` |
-| `worker/` | Protected email endpoint, deployment configuration and security tests |
-| `SECURITY.md` | Data collection, secret handling and abuse limits |
+| `index.html` | The first-paint markup, in Traditional Chinese: the four Rooms, their stages and Props, the Cast |
+| `styles.css` | All styling; Props are placed in stage units and turned into percentages here |
+| `src/main.ts` | The composition root: builds the world once and mounts the painters |
+| `src/dom/` | One painter per slice of the world (Rooms, Cast, cats, language, motion, loading, the Invitation, …) |
+| `src/copy.ts` | Both copy dictionaries, Traditional Chinese and English, typed against each other |
+| `src/world/` | The world model: pure TypeScript, no DOM, and the only tested seam |
+| `public/` | Copied to the output root as is: `assets/` (every image the page shows), `.nojekyll`, `site-config.js` |
+| `public/site-config.js` | Public values only: the Worker's endpoint and the Turnstile site key |
+| `worker/` | The Cloudflare Worker behind the Invitation, with its own `package.json` and tests |
+| `scripts/` | The checkers `npm test` and `npm run build` run, the art pipeline (`scripts/art/`) and the browser verifiers (`scripts/verify/`) |
+| `docs/adr/` | The architecture decisions; `CONTEXT.md` is the vocabulary |
+| `.github/workflows/pages.yml` | Tests, builds and publishes `dist/` to GitHub Pages on every push to `main` |
 
-Scene frames are 360×576 — a 5:8 portrait, twelve of them in a 4×3 sheet, ordered left to right then top to bottom, with a 4.1-second loop. They fit the Game Room's elliptical Portals; see `docs/adr/0004-the-game-room-is-portals.md`. The three Scenes currently on disk are still the square 480×480 set that preceded them, and stay that way until the art lane delivers. The boy follows the original Lovers scene's face, hair, glasses, and slimmer body. The girl blends the original Lovers and Heavenly Bodies designs. The artwork is original fan art, not gameplay footage or official game artwork.
+Every path on the page is relative, so it works from a repository subpath.
 
-## Editing
+## The Invitation
 
-Edit both language dictionaries in `src/copy.ts`; keep the Traditional Chinese first-paint content in `index.html` in sync. Update colours and spacing in `styles.css`. To replace a scene, update its GIF, poster, and sprite sheet together.
+The Invitation is live. A Portal's "I want to play this with u~" in the Game Room, and "Watch this
+one tonight" on a Film in the Cinema, open a dialog that sends a short message through a
+Cloudflare Worker, only after explicit consent and a Cloudflare Turnstile check. The recipient's
+address and every private key live only in the Worker's secrets; the page never sees them.
 
-## GitHub Pages
+A real Invitation can be sent only from the published Pages site: the Turnstile widget allows
+only the `cminusbool.github.io` hostname, and the Worker accepts only that HTTPS origin, so from
+`npm run dev` or `npm run preview` the dialog opens but the check fails. Setup and deployment are
+in `worker/README.md`; data handling and abuse limits are in `SECURITY.md`.
 
-The `main` branch uses `.github/workflows/pages.yml` to test, build, and publish only `dist/` through GitHub Pages. Official actions are pinned to verified commit hashes. All paths are relative, so repository subpaths work without edits. The legacy private Sites metadata is not needed by GitHub Pages and is not included in the public page artifact.
+## Known issues
 
-For a static distribution, run `npm ci` then `npm run build`. Vite bundles `index.html`, `styles.css` and `src/` into `dist/` and copies `public/` to its root; `scripts/assert-built-page.mjs` then checks the built page.
-
-## Email notifications
-
-The invitation button sends only after explicit consent and a successful bot check. The recipient email and private keys belong exclusively in Cloudflare Worker secrets. Empty `public/site-config.js` values intentionally disable sending; they must be filled with the real deployed endpoint and public site key after setup. See `worker/README.md` for activation and `SECURITY.md` for safeguards. GitHub Pages alone cannot send email or protect server credentials.
-
+The small errors this version ships with are listed, one line each, in
+[`docs/known_issues.md`](docs/known_issues.md).
